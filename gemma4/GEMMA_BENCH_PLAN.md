@@ -148,3 +148,63 @@ by step ~8. OOM-scout attempts are ~15 min each. Estimated total for P0–P3 wit
 and one re-tune loop: 1.5–2 cluster-days of intermittent 4x4x4 occupancy. Capacity check
 (`kubectl get nodes -l cloud.google.com/gke-tpu-topology=4x4x4`) before every submit —
 NAP creates/deletes pools.
+
+## 11. External reference baseline — decode-light regime (team docs, recorded 2026-08-17)
+
+The "Meta metaface Reproduction — gemma-4-2B GRPO GB200 Sweep (DECODE-LIGHT
+RECALIBRATION, TPU-matched)" doc establishes the apples-to-apples TPU baseline
+the GB200 sweep is calibrated against. Recorded here as the reference point our
+R-ladder numbers will be read next to.
+
+### TPU performance & bottlenecks (decode-light)
+
+An **infrastructure-floor** test: 1,024 completions of only ~10–12 tokens each —
+it measures dispatch overhead, not silicon.
+
+| Metric | Value |
+|---|---|
+| Warm step time | **~94 s floor, ~109 s median** (TPU v7x 64-chip) |
+| Throughput | **~235 tokens/s** |
+| Bottleneck | heavily infrastructure-bound; rollout phase **~78% idle/dispatch-bound** (single-controller Pathways) |
+| vs GB200 (64 GPU) | TPU slightly faster per step (GB200: 122.8 s); both within ~1.1–1.3× |
+
+### TPU baseline configuration
+
+| Knob | Value |
+|---|---|
+| Hardware | TPU v7x 64-chip |
+| Stack | MaxText/Pathways single-controller |
+| Run id / config | diff D113768355, `kavosh_mixed_prod_gemma4_2b_letter_16k8k.yml` |
+| Global batch | 128 prompts × 8 generations = 1,024 completions |
+| Sampling | temperature 0.7, top_k −1 |
+| Learning rate | 5e-6 |
+| KL penalty (β) | 0 |
+| Prompt cap | 16,384 tokens (GB200: 512 — timing-neutral, actual prompts short) |
+| Dataset | ads-CTR "letter" (GB200 ran NuminaMath-CoT) |
+| Short completions via | natural early-EOS (GB200: hard truncation cap) |
+| GB200 delta | pd frozen at 2 (OOM guard); TRL/vLLM colocate + FSDP stack; logging cadence unmatched/unknown |
+
+### How this relates to OUR runs
+
+- Different regime by design: our smoke/R-ladder generates up to 4,096-token
+  completions on OpenMathInstruct-2 — compute-heavy decode, not the
+  infrastructure floor. Numbers are NOT directly comparable to the 94 s/109 s
+  baseline; the shared reference point is the GB200 convention (batch, bf16,
+  pd/tmbs memory guard — our Fix #21 mirrors GB200's pd=2 freeze).
+- The 78%-idle rollout finding predicts that at short completions Pathways
+  dispatch dominates — worth re-checking with `enable_tunix_perf_metrics`
+  timings if we ever run a decode-light rung.
+
+### Related upstream work — Gemma-4 small multimodal enablement (design summary)
+
+MaxText design review for Gemma-4 E2B **multimodal (image) training**: PR #4790
+(core E2B feature: clipped vision projections, padded-patch masking,
+placeholder substitution, causal image spans; verified CPU+TPU) atop revised
+PR #4807 (vision standardization: disabled for E2B/E4B, retained as
+non-trainable for 26B/31B). Sequence packing stays fail-closed; params-only
+ckpt loading (drops 69 vision leaves), export-to-serving, and E4B image-span
+attention divergence are deferred follow-ups. "Preserving the HF model
+contract" = strict semantic equivalence to HF Transformers v5.9.0 gemma-4
+(validated at KL divergence 4.29e-5). Relevant to us: our RL path is
+text-only, but this work touches the same gemma4 model files and checkpoint
+contract our weight mapping is built against.
