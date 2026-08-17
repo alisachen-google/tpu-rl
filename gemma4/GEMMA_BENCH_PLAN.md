@@ -208,3 +208,62 @@ contract" = strict semantic equivalence to HF Transformers v5.9.0 gemma-4
 (validated at KL divergence 4.29e-5). Relevant to us: our RL path is
 text-only, but this work touches the same gemma4 model files and checkpoint
 contract our weight mapping is built against.
+
+## 12. Teammate Pathways-config review — what we adopt (2026-08-18)
+
+Reviewed the teammate's validated 64-chip gemma-4-2B GRPO Pathways JobSet
+(redacted render shared 2026-08-17). Verdict per item:
+
+### Adopted now
+- **27 tpu7x rollout-perf XLA flags on the pathways-proxy** (SparseCore
+  collective offload for all-gather/all-reduce/reduce-scatter, latency-hiding
+  layer scheduler, async all-gather, `scoped_vmem_limit_kib=122880`,
+  `dvfs_p_state=7`, bf16 NATIVE_EMISSION). Source: maxtext
+  `run_qwen3_30b_rl.sh` XLA_FLAGS. Key insight: under Pathways, **XLA compiles
+  on the proxy**, so flags belong on the proxy container, not the jax-tpu
+  client (explains why our earlier chart's client-side XLA flags were inert
+  and were removed). Implemented: `pathways.proxyXlaFlags` list rendered into
+  proxy args, carried by `values-4x4x4.yaml` only — the 2x2x1 smoke stays
+  flag-free (validated baseline unchanged). Benchmark protocol: R-ladder rungs
+  SHOULD run once flagless and once with flags to isolate their contribution.
+
+### Noted as risk (their war story, directly relevant to us)
+- **Proxy XLA flags do NOT reach the vLLM `capture_model()` decode-kernel
+  compile on the tpu_inference worker plane** (separate libtpu init). They hit
+  the default ~63.94 MiB VMEM cap and a ~1.8 MiB overflow in the decode
+  RaggedPagedAttention kernel (`bkv_16384_4096`) and patched the kernel
+  in-image (their `GRR_RPA_VMEM_PATCH` hook). Our exposure: same RPA kernel
+  family serves decode on BOTH of our sampler routes; our max_target 8192 <
+  their 16k prompt cap, so we may stay under the cap — but if 4x4x4 rollout
+  warmup dies in RPA VMEM, this is the known cause. Their open question (a
+  supported way to pass VMEM/block-size flags to the worker-plane compile) is
+  ours too — worth asking the Pathways team jointly.
+
+### Worth trying later (not adopted yet)
+- **`pathways/server:latest` + `proxy_server:latest`, imagePullPolicy Always**:
+  they run gemma4 GRPO on CURRENT Pathways images — evidence the jax-0.11
+  version wall (PATHWAYS_BLOCK.md) may have moved. A cheap probe: T2/T6 on
+  latest tags + maxtext HEAD without our jax-0.10.2 rollback. If it passes,
+  the rollback pins and cherry-pick maintenance burden go away.
+- **Their `GRR_CD_LOGPROBS_PATCH`** (in-image patch of tpu_inference
+  `runner/{decode_loop,tpu_runner}.py`): patches the decode path around
+  logprobs — possibly their answer to the same prompt-logprobs/multimodal
+  constraints we hit (Fix #18). ASK: what exactly it changes; it may be a
+  cleaner native-route unlock than the architecture override.
+- **Dedicated `cpu-pathways-np` nodepool** for heads: would structurally
+  prevent our Fix #22 cross-tenant port collision. Cluster-admin ask.
+- Worker-job resiliency at 16 hosts: `backoffLimit: 48`, restartPolicy
+  OnFailure, exclusive-topology annotations, MEGASCALE_* env — adopt when we
+  move to the real 4x4x4 pool (our chart is single-host-smoke-shaped today).
+- Their sizing reference: proxy 16 CPU/100G, rm 8/32G, head 16/200G — our
+  post-Fix-#22 trims are in the same family; head 200G is the notable delta
+  (their decode-light data pipeline is heavier).
+
+### Explicitly NOT copied
+- `hostPath /tmp` shared-tmp (we use emptyDir — Fix #7 exists because hostPath
+  leaked worker state across pods on reused nodes in OUR cluster).
+- `restartStrategy: Recreate` (our cluster's JobSet CRD rejects it — Fix #2).
+- `train_micro_batch_size=32` — safe only in THEIR decode-light regime (short
+  effective seq); at our 8192-token budget tmbs>2 is proven-OOM (Fix #21).
+- `rollout_data_parallelism=8 rollout_tensor_parallelism=8` — tuned for their
+  64-chip decode-light rollout; our R-ladder sweeps this independently.
