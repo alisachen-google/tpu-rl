@@ -2,7 +2,7 @@
 
 Everything needed to launch, monitor, and tear down a gemma4-e2b RL run on
 `bodaborg-tpu7x-nap` (project `cloud-tpu-shared-capacity`), as validated during
-the 2026-08-17 bring-up. Companion docs: `RUNBOOK.md` (Fix Catalog #1–21),
+the 2026-08-17 bring-up. Companion docs: `RUNBOOK.md` (Fix Catalog #1–22),
 `GEMMA_BENCH_PLAN.md` (benchmark ladder), `PATHWAYS_BLOCK.md` (jax-version
 background).
 
@@ -12,10 +12,10 @@ background).
 
 | Piece | Value |
 |---|---|
-| Image | `gcr.io/supercomputer-testing/maxtext-rl-ironwood:head-612fcd2e-gemma4` @ `sha256:8d9193…` (= head-612fcd2e + gemma4 vLLM weight mapping, commit `c2c9fbea5`) |
+| Image | `gcr.io/supercomputer-testing/maxtext-rl-ironwood:head-612fcd2e-gemma4c` @ `sha256:d188e5…` (= head-612fcd2e + gemma4 vLLM weight mapping v3 incl. qkv/gate_up fusion + adapter plumbing, fork commit `840ffd361`) |
 | Checkpoint (Pathways-compatible RAW TensorStore, 541 arrays) | `gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items` |
 | Chart | `~/tpu_rl/ironwood/recipe-tpu7x/` (values.yaml already points at the image) |
-| Launcher | `~/tpu_rl/ironwood/smoke/t6_gemma_launcher.sh` |
+| Launcher | `~/tpu_rl/ironwood/smoke/gemma4_e2b_smoke_maxtext_route.sh` |
 | kube context | `gke_cloud-tpu-shared-capacity_us-central1_bodaborg-tpu7x-nap` — **always pass `--context` / `--kube-context` explicitly** (a background process on the dev VM flips the default context to the GPU cluster) |
 
 ```bash
@@ -39,12 +39,12 @@ kubectl --context=$CTX get pods | grep -E "pathways|worker"
 RUN=t6g$(date +%H%M)     # any fresh name; never reuse one (Fix #14)
 helm --kube-context=$CTX install $RUN recipe-tpu7x/ \
   -f recipe-tpu7x/values.yaml \
-  --set-file workload_launcher=smoke/t6_gemma_launcher.sh \
+  --set-file workload_launcher=smoke/gemma4_e2b_smoke_maxtext_route.sh \
   --set-file workload_config=recipe-tpu7x/config.yml
 ```
 
 The launcher's train command (the part that matters — full file in
-`smoke/t6_gemma_launcher.sh`):
+`smoke/gemma4_e2b_smoke_maxtext_route.sh`):
 
 ```bash
 python3 -m maxtext.trainers.post_train.rl.train_rl "${MAXTEXT_CONFIG_PATH}" \
@@ -120,8 +120,8 @@ until [ -z "$(kubectl --context=$CTX get pods --no-headers | grep $RUN)" ]; do s
 
 ## 5. Real job run at 4x4x4 (benchmark ladder, GEMMA_BENCH_PLAN.md)
 
-`smoke/t6_gemma_launcher.sh` is the SMOKE (2 steps, batch 8, 2x2x1). The real
-run uses **`gemma4_r0_launcher_4x4x4.sh`** (top level, not under smoke/):
+`smoke/gemma4_e2b_smoke_maxtext_route.sh` is the SMOKE (2 steps, batch 8, 2x2x1). The real
+run uses **`gemma4_e2b_benchmark_4x4x4_maxtext_route.sh`** (top level, not under smoke/):
 identical gemma4-specific settings, benchmark shape `num_batches=30
 batch_size=256 rollout_micro_batch_size=256 train_micro_batch_size=1
 checkpoint_period=10`, plus the 4x4x4 chart overlay
@@ -133,7 +133,7 @@ separate pathways scratch).
 RUN=gemma4-r0-$(date +%m%d-%H%M)
 helm --kube-context=$CTX install $RUN recipe-tpu7x/ \
   -f recipe-tpu7x/values.yaml -f recipe-tpu7x/values-4x4x4.yaml \
-  --set-file workload_launcher=gemma4_r0_launcher_4x4x4.sh \
+  --set-file workload_launcher=gemma4_e2b_benchmark_4x4x4_maxtext_route.sh \
   --set-file workload_config=recipe-tpu7x/config.yml
 ```
 
