@@ -162,4 +162,6 @@ sudo -n docker --config /mnt/disks/scratch/docker-root-cfg push gcr.io/supercomp
 | t6g5/t6g6 | all rollouts `MAX_CONTEXT_LIMIT_REACHED`, no EOS | non-agentic GRPO + gemma templates (Fix #19); decoded prompt proved agentic path leaks raw dicts |
 | t6g7 | `'hf_name' not in …` | drop `hf_name` (Fix #20) |
 | t6g9 | trainer OOM: 130.13 G temporaries vs 94.74 G HBM | `train_micro_batch_size=1` (Fix #21) |
+| **t6gn8** | **NATIVE ROUTE PASS** (2026-08-18 00:02 UTC): exit 0, 0 unmapped source keys, 2/2 steps, ckpts @ 1+2, EOS-terminating completions — validates weight_mapping/gemma4.py end-to-end (image `head-612fcd2e-gemma4c`: per-layer entries, live-tree destinations, qkv+gate_up fusion via preprocess_src_state, ÷√hidden embedding hook) | native `Gemma4ForCausalLM` sampler |
+| t6gn6/t6gn7 | native-route iterations: v1 wildcard keys never matched unscanned state → random sampler weights → gibberish; v2 fixed keys/destinations but missed that ALL layers use fused qkv_proj (65 unmapped) | diagnosis via transfer logs + live-tree analysis |
 | **t6g10** | **PASS** (2026-08-17 20:13 UTC): "RL Training Completed Successfully!", exit 0, 0 restarts, 2/2 steps, checkpoints saved at steps 1+2 (`runs/t6g10/checkpoints/actor/`), 39/39 completions math-verified per batch, ~44 min wall incl. compile at 2x2x1 | full config above = the validated gemma4-e2b recipe |
