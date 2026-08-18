@@ -137,3 +137,34 @@ and is the pending comparator for `g4r1`, not a numerator for these ratios.)
 5. dp32×tp4 vs dp16×tp8 (aysu evidence favors tp=4 for 1-KV-head gemma)
 6. tmbs=2 trainer scout (halves the 131 s segment's 256 grad-acc microsteps if it fits)
 7. Zero-weight-reward skip; XLA flag ablation
+
+## Validity audit of the champion run (performed post-hoc, 2026-08-18)
+
+Prompted by "the perf seems too good." Verdict: **valid**. Key evidence, in
+strength order:
+
+1. **The model learned during the run** — `rewards/train/match_format_exactly`
+   rises 0.041 → 0.100 (100% match rate) by step 6, with grad norms
+   287 → 336 → 24 → 8 → 3 → 1 → ~0 as the policy converges. A rising reward
+   curve transitively verifies every link: coherent generations, correct
+   logprobs, real gradients, and a weight push landing in the sampler every
+   step. Garbage or stale weights cannot produce a monotone learning curve.
+2. Invariants behaviorally confirmed: effective `rl.num_generations=8` /
+   `rl.grpo_beta=0.0` (two alarming top-level config echoes — `num_generations:
+   2`, `grpo_beta: 0.08` — are unused legacy fields; `actor/train/kl=0.0` on
+   every step proves β=0 in effect). `completions/mean_length` → 64.0 matches
+   LENDIST independently.
+3. `loss=0.000000` is expected for on-policy GRPO (group-normalized advantages
+   ⇒ E[loss]≈0), not an anomaly; gradients are nonzero.
+4. Timer honesty: `async_scheduling=False`, and LENDIST reads host-side token
+   arrays inside the measured window — generation demonstrably completed
+   within the reported 8.8 s.
+5. Physical plausibility: 7.5k tok/s over 64 chips ≈ 117 tok/s/chip for a 2B
+   model — still overhead-bound, far below memory-bandwidth limits; the
+   references were simply more overhead-bound (78% dispatch-idle, their own
+   profiling).
+
+Caveat recorded: gradients ≈0 after step ~7 (format task solved) — compute per
+step is unchanged, so timing validity holds, but the decode-light benchmark
+measures system throughput, not sustained learning (equally true of the GB200
+spec it mirrors).
