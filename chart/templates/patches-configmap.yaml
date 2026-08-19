@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: "{{ .Release.Name }}-patches"
-  namespace: default
+  namespace: {{ .Values.namespace | default "default" }}
 data:
 {{- range $path, $_ := .Files.Glob "patches/*" }}
   {{ base $path }}: |-

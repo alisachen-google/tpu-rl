@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: "{{ .Release.Name }}-launcher"
-  namespace: default
+  namespace: {{ .Values.namespace | default "default" }}
 data:
   launch-workload.sh: |-
 {{ .Values.workload_launcher | indent 4 }}
