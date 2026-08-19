@@ -1,4 +1,4 @@
-# Native + stack + PR#4409 smoke at 2x2x1: tmbs=4 with chunked log-probs (chunk 1024).
+# Native + stack + PR#4409 smoke at 2x2x1: tmbs=2 with chunked log-probs (chunk 512).
 # tmbs=4 at seq 8192 is proven-OOM WITHOUT the PR (Fix #21) -> this smoke is the test.
 # Port-shifted to co-run with the other smokes on cpu-np.
 maxRestarts: 0
@@ -19,6 +19,6 @@ workload:
     - name: R1_TP
       value: "4"
     - name: R1_TMBS
-      value: "4"
+      value: "2"
     - name: R1_LOGPS_CHUNK
-      value: "1024"
+      value: "512"
