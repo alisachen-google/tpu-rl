@@ -1,0 +1,24 @@
+# Native + stack + PR#4409 smoke at 2x2x1: tmbs=4 with chunked log-probs (chunk 1024).
+# tmbs=4 at seq 8192 is proven-OOM WITHOUT the PR (Fix #21) -> this smoke is the test.
+# Port-shifted to co-run with the other smokes on cpu-np.
+maxRestarts: 0
+pathways:
+  proxyPort: 29020
+  rmPort: 29021
+  workerPort: 29025
+workload:
+  envs:
+    - name: ARTIFACT_DIR
+      value: gs://ubench-logs/alisachen-tpu7x/runs
+    - name: SKIP_JAX_PRECOMPILE
+      value: "1"
+    - name: R1_STEPS
+      value: "2"
+    - name: R1_BATCH
+      value: "8"
+    - name: R1_TP
+      value: "4"
+    - name: R1_TMBS
+      value: "4"
+    - name: R1_LOGPS_CHUNK
+      value: "1024"

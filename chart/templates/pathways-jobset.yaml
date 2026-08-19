@@ -199,7 +199,7 @@ spec:
               configMap:
                 name: "{{.Release.Name}}-patches"
                 items:
-                {{- range $path, $_ := .Files.Glob "patches/*.py" }}
+                {{- range $path, $_ := .Files.Glob "patches/*" }}
                 - key: {{ base $path }}
                   path: {{ base $path | trimSuffix ".py" }}
                 {{- end }}

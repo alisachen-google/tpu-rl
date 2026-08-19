@@ -33,10 +33,12 @@ def fail(msg):
 
 
 def main():
-  spec = importlib.util.find_spec("maxtext.trainers.post_train.rl.train_rl")
-  if spec is None or not spec.origin:
-    fail("cannot locate maxtext.trainers.post_train.rl.train_rl")
-  path = spec.origin
+  spec = importlib.util.find_spec("maxtext")  # top-level: does not import the package
+  if spec is None or not spec.submodule_search_locations:
+    fail("cannot locate maxtext package")
+  path = os.path.join(list(spec.submodule_search_locations)[0], "trainers", "post_train", "rl", "train_rl.py")
+  if not os.path.exists(path):
+    fail(f"{path} missing")
   src = open(path).read()
   if MARK in src:
     print("ENGINE-KWARGS PATCH: already patched")
