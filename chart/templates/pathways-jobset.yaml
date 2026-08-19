@@ -27,7 +27,7 @@ spec:
   failurePolicy:
     # restartStrategy: Recreate not supported by this cluster's JobSet CRD
     # (older controller than the v6e cluster); leoch convention:
-    maxRestarts: 0
+    maxRestarts: {{ .Values.maxRestarts | default 0 }}
   startupPolicy:
     startupPolicyOrder: InOrder
   successPolicy:
@@ -98,7 +98,7 @@ spec:
               - name: PATHWAYS_HEAD
                 value: "{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}"
               - name: JAX_BACKEND_TARGET
-                value: grpc://{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:29000
+                value: grpc://{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:{{ .Values.pathways.proxyPort | default 29000 }}
               - name: JOB_IDENTIFIER
                 value: "{{ .Release.Name }}"
               {{- range .Values.workload.envs }}
@@ -106,12 +106,7 @@ spec:
                 value: {{ .value | quote }}
               {{- end }}
               resources:
-                requests:
-                  cpu: "28"
-                  memory: 130G
-                limits:
-                  cpu: "44"
-                  memory: 170G
+{{ toYaml (.Values.workload.headResources | default (dict "requests" (dict "cpu" "28" "memory" "130G") "limits" (dict "cpu" "44" "memory" "170G"))) | indent 16 }}
               securityContext:
                 privileged: true
 
@@ -120,6 +115,10 @@ spec:
                 mountPath: /workload/launcher
               - name: shared-tmp
                 mountPath: /tmp
+              {{- if .Values.patches.enabled }}
+              - name: workload-patches
+                mountPath: /workload/patches
+              {{- end }}
               {{- if .Values.workload.configFile }}
               - name: workload-configuration
                 mountPath: {{ .Values.workload.configPath | default "/workload/configs" }}
@@ -142,7 +141,7 @@ spec:
               {{- toYaml . | nindent 14 }}
               {{- end }}
               args:
-              - --server_port=29001
+              - --server_port={{ .Values.pathways.rmPort | default 29001 }}
               - --node_type=resource_manager
               - --gcs_scratch_location={{ .Values.pathways.gcsLocation }}/{{ $jobuuid }}
               - --instance_count={{ .Values.pathways.numSlices | default 1 }}
@@ -170,8 +169,8 @@ spec:
               {{- toYaml . | nindent 14 }}
               {{- end }}
               args:
-              - --server_port=29000
-              - --resource_manager_address={{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:29001
+              - --server_port={{ .Values.pathways.proxyPort | default 29000 }}
+              - --resource_manager_address={{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:{{ .Values.pathways.rmPort | default 29001 }}
               - --gcs_scratch_location={{ .Values.pathways.gcsLocation }}/{{ $jobuuid }}
               {{- range .Values.pathways.proxyXlaFlags }}
               - {{ . | quote }}
@@ -195,6 +194,16 @@ spec:
             - name: workload-launcher
               configMap:
                 name: "{{.Release.Name}}-launcher"
+            {{- if .Values.patches.enabled }}
+            - name: workload-patches
+              configMap:
+                name: "{{.Release.Name}}-patches"
+                items:
+                {{- range $path, $_ := .Files.Glob "patches/*.py" }}
+                - key: {{ base $path }}
+                  path: {{ base $path | trimSuffix ".py" }}
+                {{- end }}
+            {{- end }}
             {{- if .Values.workload.configFile }}
             - name: workload-configuration
               configMap:
@@ -274,8 +283,8 @@ spec:
               {{- toYaml . | nindent 14 }}
               {{- end }}
               args:
-              - --server_port=29005
-              - --resource_manager_address={{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:29001
+              - --server_port={{ .Values.pathways.workerPort | default 29005 }}
+              - --resource_manager_address={{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:{{ .Values.pathways.rmPort | default 29001 }}
               - --gcs_scratch_location={{ .Values.pathways.gcsLocation }}/{{ $jobuuid }}
               - --enable_metrics_collection=true
               - --xla_tpu_use_enhanced_launch_barrier=true
@@ -283,9 +292,9 @@ spec:
               {{- toYaml . | nindent 14 }}
               {{- end }}
               ports:
-              - containerPort: 29005
+              - containerPort: {{ .Values.pathways.workerPort | default 29005 }}
                 protocol: TCP
-              - containerPort: 29006
+              - containerPort: {{ add (.Values.pathways.workerPort | default 29005) 1 }}
                 protocol: TCP
               - containerPort: 8471
                 protocol: TCP

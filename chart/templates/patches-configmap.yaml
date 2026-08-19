@@ -1,0 +1,12 @@
+{{- if .Values.patches.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}-patches"
+  namespace: default
+data:
+{{- range $path, $_ := .Files.Glob "patches/*.py" }}
+  {{ base $path }}: |-
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}
+{{- end }}

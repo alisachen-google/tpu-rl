@@ -1,0 +1,10 @@
+{{- if .Values.workload.configFile }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}-config"
+  namespace: default
+data:
+  workload-configuration: |-
+{{ .Values.workload_config | indent 4 }}
+{{- end }}

@@ -1,0 +1,75 @@
+# Base values — 2x2x1 smoke shape. Overlay values-4x4x4.yaml (+ values-dl.yaml for the
+# tianyu stack XLA flags) for the 64-chip benchmark. Reconstructed 2026-08-19 from
+# gs://alisachen/tpu_rl/ironwood/alisachen-gemma4-r0.yaml (validated render) + RUNBOOK
+# Fix Catalog. Every non-obvious value carries its Fix number.
+cluster_name: bodaborg-tpu7x-nap
+cloud_region: us-central1
+
+# Fix #17: LocalQueues churn; `default` was the surviving queue on 2026-08-17. Verify with
+# `kubectl get localqueues` (needs user creds) before each campaign. Empty string = no queue label.
+queue: default
+# Fix #3: priority classes churn; `medium` pinned. Empty string = none.
+kueue_priority_class: medium
+k8s_service_account: ""
+
+# JobSet failurePolicy.maxRestarts (Fix #2: restartStrategy unsupported on this CRD).
+maxRestarts: 0
+
+targetTopology: 2x2x1
+targetNodeSelector:
+  cloud.google.com/gke-tpu-accelerator: tpu7x
+acceleratorResourceKey: google.com/tpu
+acceleratorResourceValue: 4
+
+workload:
+  # head-612fcd2e (maxtext HEAD 612fcd2e + tpu-inference fork be9cdf04, jax 0.10.2/libtpu 0.0.43)
+  # + gemma4 vLLM weight mapping v3 (maxtext fork commit 840ffd361) + upstream tpu-inference
+  # PRs #3395/#3401/#1904 (activation-gated; the tianyu stack activates them).
+  image: gcr.io/supercomputer-testing/maxtext-rl-ironwood:head-612fcd2e-gemma4c-perf
+  tpus: 4
+  chipsPerNode: 4
+  configFile: workload-config.yaml
+  configPath: /workload/configs
+  # NOTE: helm replaces (does not merge) this array from overlays — any overlay that sets
+  # workload.envs MUST repeat ARTIFACT_DIR (perf-report "wiped ARTIFACT_DIR" incident).
+  envs:
+    - name: ARTIFACT_DIR
+      value: gs://ubench-logs/alisachen-tpu7x/runs
+    - name: SKIP_JAX_PRECOMPILE
+      value: "1"
+  headResources:
+    requests: {cpu: "28", memory: 130G}
+    limits: {cpu: "44", memory: 170G}
+
+pathways:
+  numSlices: 1
+  instanceType: tpu7x:2x2x1
+  nodepool: cpu-np
+  serverImage: us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260730-jax_0.10.2
+  proxyServerImage: us-docker.pkg.dev/cloud-tpu-v2-images/pathways/proxy_server:20260730-jax_0.10.2
+  # Fix #6: per-render UUID suffix appended by the template.
+  gcsLocation: gs://ubench-logs/alisachen-tpu7x/pathways-2x2x1
+  # hostNetwork fixed ports (Fix #12/#22: collide with any other pathways head on the same
+  # cpu-np node). Shift these if a foreign head is co-resident.
+  proxyPort: 29000
+  rmPort: 29001
+  workerPort: 29005
+  proxyXlaFlags: []
+  proxyExtraArgs: []
+  serverExtraArgs: []
+  workerExtraArgs: []
+  extraEnv:
+    resourceManager: []
+    proxy: []
+    server: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+# Runtime patches (tianyu-rl-14 stack) mounted at /workload/patches/<name> (no .py — the
+# launcher runs `python3 /workload/patches/$P`). Set to false to launch flag-free.
+patches:
+  enabled: true
+
+# Filled by --set-file at render time.
+workload_launcher: ""
+workload_config: ""

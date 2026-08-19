@@ -1,0 +1,15 @@
+# g4r1 smoke at 2x2x1: same launcher as the 4x4x4 run, shrunk via env (2 steps, batch 8).
+# helm replaces workload.envs wholesale — ARTIFACT_DIR must be repeated here.
+maxRestarts: 0
+workload:
+  envs:
+    - name: ARTIFACT_DIR
+      value: gs://ubench-logs/alisachen-tpu7x/runs
+    - name: SKIP_JAX_PRECOMPILE
+      value: "1"
+    - name: R1_STEPS
+      value: "2"
+    - name: R1_BATCH
+      value: "8"
+    - name: R1_TP
+      value: "8"

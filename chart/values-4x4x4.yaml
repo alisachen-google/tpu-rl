@@ -2,11 +2,12 @@
 # Usage: helm install <run> recipe-tpu7x/ -f recipe-tpu7x/values.yaml -f recipe-tpu7x/values-4x4x4.yaml ...
 # Requires the admin-provisioned multi-host tpu7x pool (RUNBOOK Fix #13 — NAP only
 # auto-provisions single-host 2x2x1).
+targetTopology: 4x4x4
 workload:
   tpus: 64
+pathways:
   instanceType: tpu7x:4x4x4
   gcsLocation: gs://ubench-logs/alisachen-tpu7x/pathways-4x4x4
-pathways:
   # tpu7x rollout-perf XLA flags for the Pathways proxy (XLA compiles rollout/
   # train programs there). Sourced from maxtext run_qwen3_30b_rl.sh XLA_FLAGS,
   # via teammate's validated 64-chip gemma-4-2B GRPO jobset. NOTE: these do NOT

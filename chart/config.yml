@@ -1,0 +1,3 @@
+# Minimal workload config; the launcher passes every knob on the command line
+# (MAXTEXT_CONFIG_PATH is resolved inside the launcher to maxtext/configs/post_train/rl.yml).
+base_config: "maxtext/configs/post_train/rl.yml"
