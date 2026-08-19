@@ -48,3 +48,7 @@ Known trap: do NOT enable the tunix profiler together with PHASED_PROFILING_DIR 
 - 11:15Z: g4r1n-08191021 admitted/evicted 4× by cohort reclamation (ubench-regression-tests) within
   minutes each time → withdrawn to stop churning the shared queue. BLOCKED ON QUOTA. Relaunch:
   `RUN=g4r1n-$(date +%m%d%H%M); helm template $RUN chart -f chart/values.yaml -f chart/values-4x4x4.yaml -f chart/values-dl.yaml -f chart/values-r1n-4x4x4.yaml --set kueue_priority_class=high --set-file workload_launcher=gemma4/gemma4_e2b_r1_native_launcher.sh --set-file workload_config=chart/config.yml > renders/$RUN.yaml && ~/bin/kb apply -f renders/$RUN.yaml`
+- PR #4409 rung VALIDATED at 2x2x1 (g4n13s1205, 12:39Z): native + stack + patch_pr4409 + patch_tunix_chunked_logps,
+  tmbs=2 / chunk 512 → 2/2 steps, exit 0, rewards identical to tmbs=1 control (0.0198/0.0594, 0.023/0.055),
+  warm actor_train 8.45 s vs 8.49 s (fixed-cost dominated at 64 seqs). tmbs=4/chunk1024 OOM (113G>94.7G).
+  4x4x4 launch: values-r1np-4x4x4.yaml + gemma4_e2b_r1_native_pr_launcher.sh (same quota blocker).

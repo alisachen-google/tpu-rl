@@ -1,0 +1,13 @@
+# g4r1np: native route + tianyu stack + maxtext PR#4409 (chunked actor log-probs, tunix port) at 4x4x4.
+# tmbs=2 / chunk 512 validated at 2x2x1 (g4n13s1205: 2/2 steps, rewards identical to tmbs=1 control);
+# tmbs=4 / chunk 1024 OOMs (113G HLO temporaries > 94.7G). Use with values.yaml + values-4x4x4.yaml + values-dl.yaml
+# and gemma4/gemma4_e2b_r1_native_pr_launcher.sh.
+workload:
+  envs:
+    - {name: ARTIFACT_DIR, value: gs://ubench-logs/alisachen-tpu7x/runs}
+    - {name: SKIP_JAX_PRECOMPILE, value: "1"}
+    - {name: R1_STEPS, value: "30"}
+    - {name: R1_BATCH, value: "256"}
+    - {name: R1_TMBS, value: "2"}
+    - {name: R1_LOGPS_CHUNK, value: "512"}
+    - {name: R1_TP, value: "4"}
