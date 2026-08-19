@@ -163,8 +163,34 @@ def main():
       else:
         logits = jnp.pad(logits, ((0, 0), (1, 0), (0, 0)), constant_values=0.0)
 ''', "common segment pad")
-  # insert helper right before compute_per_token_logps definition
-  c = rep(c, "\ndef compute_per_token_logps(\n", CHUNK_FN + "\ndef compute_per_token_logps(\n", "common helper insert")
+  # insert helper BEFORE the jit decorator of compute_per_token_logps, and make
+  # chunk_size a static arg (python control flow on it inside the jitted fn).
+  DECO = '''@partial(
+    jax.jit,
+    static_argnames=(
+        "pad_id",
+        "eos_id",
+        "stop_gradient",
+        "return_logits",
+        "temperature",
+    ),
+)
+def compute_per_token_logps(
+'''
+  DECO_NEW = '''@partial(
+    jax.jit,
+    static_argnames=(
+        "pad_id",
+        "eos_id",
+        "stop_gradient",
+        "return_logits",
+        "temperature",
+        "chunk_size",
+    ),
+)
+def compute_per_token_logps(
+'''
+  c = rep(c, DECO, CHUNK_FN + DECO_NEW, "common helper insert + static chunk_size")
 
   # ---- rl_cluster.py ----
   r = src["cluster"]
