@@ -18,7 +18,7 @@ export PYTHONPATH=/app/src:/deps/src:${PYTHONPATH:-}   # patch_engine_kwargs loc
 # Native sampler TP degree for the gemma4 weight-mapping fusion (interleaved per-shard layout of
 # tpu_inference's fused qkv/gate_up kernels). MUST equal rollout_tensor_parallelism (R1_TP).
 export GEMMA4_NATIVE_TP="${R1_TP:-8}"
-for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_phasetime patch_sharded_sampling patch_gemma4_tp_fusion patch_pr4409 patch_engine_kwargs; do
+for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_phasetime patch_sharded_sampling patch_gemma4_tp_fusion patch_tunix_chunked_logps patch_pr4409 patch_engine_kwargs; do
   if [ -f /workload/patches/$P ]; then
     python3 /workload/patches/$P
   fi

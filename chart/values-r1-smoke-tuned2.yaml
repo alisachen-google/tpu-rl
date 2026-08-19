@@ -1,0 +1,23 @@
+# Native-route smoke WITH aysu rollout tuning, port-shifted so it can co-run with the
+# untuned smoke on the same cpu-np head node (Fix #12/#22 — hostNetwork ports must not clash).
+maxRestarts: 0
+pathways:
+  proxyPort: 29070
+  rmPort: 29071
+  workerPort: 29075
+workload:
+  envs:
+    - name: ARTIFACT_DIR
+      value: gs://ubench-logs/alisachen-tpu7x/runs
+    - name: SKIP_JAX_PRECOMPILE
+      value: "1"
+    - name: R1_STEPS
+      value: "2"
+    - name: R1_BATCH
+      value: "8"
+    - name: R1_TP
+      value: "4"
+    - name: USE_BATCHED_RPA_KERNEL
+      value: "1"
+    - name: RL_VLLM_ENGINE_KWARGS
+      value: '{"block_size": 256}'

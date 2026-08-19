@@ -1,0 +1,11 @@
+# g4r1n: native route + tianyu stack at 4x4x4, decode-heavy math workload, 30 steps.
+# Use together with values.yaml + values-4x4x4.yaml + values-dl.yaml (XLA proxy flags, maxRestarts 5).
+# helm replaces workload.envs wholesale — ARTIFACT_DIR must be repeated here.
+workload:
+  envs:
+    - {name: ARTIFACT_DIR, value: gs://ubench-logs/alisachen-tpu7x/runs}
+    - {name: SKIP_JAX_PRECOMPILE, value: "1"}
+    - {name: R1_STEPS, value: "30"}
+    - {name: R1_BATCH, value: "256"}
+    - {name: R1_TMBS, value: "1"}
+    - {name: R1_TP, value: "8"}
