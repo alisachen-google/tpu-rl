@@ -68,6 +68,19 @@ def main():
     fail("neither `patch` nor `git` available in the image")
   if MARK not in open(rl_yml).read():
     fail("re-verify failed (rl.yml lacks new knob)")
+  # Follow-up fix for trees whose decoder is a native NNXDecoder (no `rngs` kwarg on
+  # apply_output_head): only forward rngs when the signature accepts it. The PR's static-key
+  # trick targets the ToNNX-wrapped Linen decoder; on NNXDecoder it raised
+  # TypeError: apply_output_head() got an unexpected keyword argument 'rngs' (run g4n9s).
+  models_py = os.path.join(root, "models", "models.py")
+  ms = open(models_py).read()
+  old_line = '    extra = {"rngs": rngs} if rngs is not None else {}\n'
+  new_line = ('    extra = {"rngs": rngs} if (rngs is not None and "rngs" in __import__("inspect")'
+              '.signature(self.decoder.apply_output_head).parameters) else {}\n')
+  if old_line in ms:
+    open(models_py, "w").write(ms.replace(old_line, new_line, 1))
+  elif new_line not in ms:
+    fail("models.py rngs-forwarding anchor not found after apply")
   print(f"PR4409 PATCH: APPLIED -> {root}")
 
 
