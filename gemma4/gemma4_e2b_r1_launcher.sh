@@ -14,7 +14,8 @@ MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
 
 # --- g4r1: decode-heavy math workload + full tianyu-rl-14 stack (5 patches, CD-64, sharded logprobs, async off) ---
 # --- runtime patches (self-verifying, fail-open) ---
-for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_phasetime patch_sharded_sampling; do
+export PYTHONPATH=/app/src:/deps/src:${PYTHONPATH:-}   # patch_engine_kwargs locates maxtext via importlib
+for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_phasetime patch_sharded_sampling patch_engine_kwargs; do
   if [ -f /workload/patches/$P ]; then
     python3 /workload/patches/$P
   fi
@@ -22,7 +23,14 @@ done
 
 export JAX_PLATFORMS="proxy,cpu"
 export CONTINUE_DECODE_EOS_CHECK_INTERVAL=0
-if [ -n "${R1_RPA:-}" ]; then export RPA_V3_DECODE_BLOCK_SIZES="$R1_RPA"; fi   # e.g. 1,8704,1,2176 (g4p3-validated)
+if [ -n "${R1_RPA:-}" ]; then export RPA_V3_DECODE_BLOCK_SIZES="$R1_RPA"; fi
+# aysu rollout-side tuning (ubench aysu-ubench-8terxbx7, gemma4-e2b serving on tpu7x):
+#   USE_BATCHED_RPA_KERNEL=1 (experimental batched RPA kernel; env read by tpu_inference)
+#   RL_VLLM_ENGINE_KWARGS='{"block_size": 256}' (forwarded by patch_engine_kwargs; kv_cache_dtype fp8 = optional non-bf16 rung)
+# Both are opt-in via the chart envs so control runs stay flag-free.
+export VLLM_ENGINE_READY_TIMEOUT_S="${VLLM_ENGINE_READY_TIMEOUT_S:-60000}"
+[ -n "${USE_BATCHED_RPA_KERNEL:-}" ] && echo "TUNING: USE_BATCHED_RPA_KERNEL=$USE_BATCHED_RPA_KERNEL"
+[ -n "${RL_VLLM_ENGINE_KWARGS:-}" ] && echo "TUNING: RL_VLLM_ENGINE_KWARGS=$RL_VLLM_ENGINE_KWARGS"   # e.g. 1,8704,1,2176 (g4p3-validated)
 export PHASED_PROFILING_DIR="${ARTIFACT_DIR}/${JOB_IDENTIFIER}/phased_profile"
 export JAX_COMPILATION_CACHE_DIR="gs://ubench-logs/alisachen-tpu7x/compilation_cache/gemma4-e2b-r1"            # newer tpu_inference stages on cpu backend
 export VLLM_ENABLE_V1_MULTIPROCESSING=0     # required under Pathways
