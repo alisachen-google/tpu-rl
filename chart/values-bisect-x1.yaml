@@ -1,0 +1,10 @@
+maxRestarts: 0
+pathways: {proxyPort: 29030, rmPort: 29031, workerPort: 29035}
+workload:
+  envs:
+    - {name: ARTIFACT_DIR, value: gs://ubench-logs/alisachen-tpu7x/runs}
+    - {name: SKIP_JAX_PRECOMPILE, value: "1"}
+    - {name: R1_STEPS, value: "2"}
+    - {name: R1_BATCH, value: "8"}
+    - {name: R1_TP, value: "4"}
+    - {name: SHARDED_SAMPLING, value: "0"}
