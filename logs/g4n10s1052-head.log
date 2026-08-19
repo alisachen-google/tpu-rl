@@ -1,0 +1,1306 @@
+Pathways Helm Start: Wed Aug 19 10:52:16 UTC 2026
+Executing payload from /workload/launcher/launch-workload.sh...
+VLLM-SAMPLER PATCH: APPLIED
+CD-PROPER PATCH: APPLIED
+LENDIST PATCH: APPLIED
+PHASETIME2 PATCH: APPLIED
+SHARDED-SAMPLING PATCH: APPLIED
+GEMMA4-TP-FUSION PATCH: APPLIED (tp=4) -> /deps/src/maxtext/integration/tunix/weight_mapping/gemma4.py
+TUNIX-CHUNKED-LOGPS PATCH: APPLIED -> /usr/local/lib/python3.12/site-packages/tunix
+PR4409 PATCH: APPLIED -> /deps/src/maxtext
+ENGINE-KWARGS PATCH: APPLIED (RL_VLLM_ENGINE_KWARGS={}) -> /deps/src/maxtext/trainers/post_train/rl/train_rl.py
+MAXTEXT_CONFIG_PATH not found at maxtext/configs/post_train/rl.yml, falling back to src/maxtext/configs/post_train/rl.yml
+MaxText config overrides from command line:
+  g4r1-native-pr decode-heavy run; args as in command below. base_output_directory=gs://ubench-logs/alisachen-tpu7x/runs
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+2026-08-19 10:52:45.075415: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 10:52:45.075764: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 10:52:45.123609: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 10:52:50.308164: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 10:52:50.309077: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING 08-19 10:52:55 [tpu_platform.py:402] Pin memory is not supported on TPU.
+INFO 08-19 10:52:59 [importing.py:53] Triton is installed but 0 active driver(s) found (expected 1). Disabling Triton to prevent runtime errors.
+INFO 08-19 10:52:59 [importing.py:88] Triton not installed or not compatible; certain GPU-related functions will not be available.
+INFO 08-19 10:53:01 [__init__.py:43] Running vLLM on TPU via Pathways proxy.
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+INFO 08-19 10:53:01 [__init__.py:53] Module pathwaysutils is imported.
+INFO 08-19 10:53:01 [__init__.py:59] Eagerly resolving vLLM current_platform for Pathways.
+INFO 08-19 10:53:01 [__init__.py:65] vLLM platform resolved to: TpuPlatform
+WARNING 08-19 10:53:01 [interface.py:368] Failed to import from vllm._C: ModuleNotFoundError("No module named 'vllm._C'")
+WARNING 08-19 10:53:01 [interface.py:368] Failed to import from vllm._C: ModuleNotFoundError("No module named 'vllm._C'")
+WARNING 08-19 10:53:01 [interface.py:368] Failed to import from vllm._C: ModuleNotFoundError("No module named 'vllm._C'")
+WARNING 08-19 10:53:01 [interface.py:368] Failed to import from vllm._C: ModuleNotFoundError("No module named 'vllm._C'")
+INFO 08-19 10:53:02 [__init__.py:112] Registered model loader `<class 'tpu_inference.models.jax.utils.weight_utils.JaxDummyModelLoader'>` with load format `jax_dummy`
+INFO 08-19 10:53:02 [__init__.py:31] Registering MaxTextForCausalLM model with tpu_inference and vllm.
+INFO 08-19 10:53:02 [model_loader.py:855] Registered JAX model MaxTextForCausalLM with tpu_inference and vLLM registries.
+INFO 08-19 10:53:02 [__init__.py:40] Successfully registered MaxTextForCausalLM model.
+2026-08-19 10:53:04.956458: E external/local_xla/xla/stream_executor/cuda/cuda_platform.cc:51] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: UNKNOWN ERROR (303)
+I0819 10:53:04.956644 136937940970368 max_utils.py:830] System Information: Jax Version: 0.10.2
+I0819 10:53:04.956735 136937940970368 max_utils.py:831] System Information: Jaxlib Version: 0.10.2
+I0819 10:53:04.976313      21 registry.cc:82] Attempting to create IFRT proxy client with transport name grpc to address 'g4n10s1052-pathways-head-0-0.g4n10s1052:29080' and with global client flags xla::ifrt::proxy::GlobalClientFlags{grpc_max_ongoing_host_buffer_stores=0,grpc_max_ongoing_host_buffer_lookups=0,grpc_large_transfer_optimization_threshold_bytes=9223372036854775807,crash_on_disconnect=false}
+I0819 10:53:04.976354      21 grpc_client.cc:171] Connecting to IFRT proxy server (grpc version '1.78.0') at g4n10s1052-pathways-head-0-0.g4n10s1052:29080, attempt #0...
+I0819 10:53:04.976364      21 grpc_credentials.cc:52] Using ALTS client credentials for gRPC.
+I0819 10:53:04.977538      21 grpc_client_session.cc:264]   Established channel.
+I0819 10:53:04.977556      21 grpc_client_session.cc:269]   Created stub.
+I0819 10:53:04.987883      21 grpc_client.cc:142] Sending InitRequest and waiting for response (attempt 0).
+I0819 10:53:05.020317      21 grpc_credentials.cc:52] Using ALTS client credentials for gRPC.
+I0819 10:53:05.020416      21 grpc_client_session.cc:264]   Established channel.
+I0819 10:53:05.020431      21 grpc_client_session.cc:269]   Created stub.
+I0819 10:53:05.020599      21 grpc_client.cc:176] Connected to IFRT proxy server on attempt #0.
+I0819 10:53:05.029928      21 pjrt_client.cc:579] PjRt-IFRT device count: total=1, addressable=1
+I0819 10:53:05.029954      21 pjrt_client.cc:583] Addressable PjRt-IFRT device: CpuDevice(id=0)
+I0819 10:53:05.030100 136937940970368 max_utils.py:832] System Information: Jax Backend: Pathways
+cl/956357083
+W0819 10:53:05.145375 136937940970368 pyconfig.py:268] Ignoring multimodal field 'rope_theta_for_vit' because use_multimodal is False.
+W0819 10:53:05.145637 136937940970368 pyconfig.py:268] Ignoring multimodal field 'num_channels_for_vit' because use_multimodal is False.
+W0819 10:53:05.145782 136937940970368 pyconfig.py:268] Ignoring multimodal field 'patch_size_for_vit' because use_multimodal is False.
+W0819 10:53:05.145918 136937940970368 pyconfig.py:268] Ignoring multimodal field 'conv_stride_for_vit' because use_multimodal is False.
+W0819 10:53:05.146058 136937940970368 pyconfig.py:268] Ignoring multimodal field 'hidden_size_for_vit' because use_multimodal is False.
+W0819 10:53:05.146191 136937940970368 pyconfig.py:268] Ignoring multimodal field 'intermediate_size_for_vit' because use_multimodal is False.
+W0819 10:53:05.146333 136937940970368 pyconfig.py:268] Ignoring multimodal field 'num_hidden_layers_for_vit' because use_multimodal is False.
+W0819 10:53:05.146465 136937940970368 pyconfig.py:268] Ignoring multimodal field 'num_attention_heads_for_vit' because use_multimodal is False.
+W0819 10:53:05.146597 136937940970368 pyconfig.py:268] Ignoring multimodal field 'vision_output_length' because use_multimodal is False.
+W0819 10:53:05.146727 136937940970368 pyconfig.py:268] Ignoring multimodal field 'num_position_embeddings_for_vit' because use_multimodal is False.
+I0819 10:53:05.146790 136937940970368 max_utils.py:245] Skipping jax distributed system due to skip_jax_distributed_system=True flag.
+/usr/local/lib/python3.12/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+  PydanticSerializationUnexpectedValue(Expected `enum` - serialized value may not be as expected [field_name='shard_mode', input_value='auto', input_type=str])
+  return self.__pydantic_serializer__.to_python(
+I0819 10:53:05.148316 136937940970368 pyconfig.py:585] Config param act_quantization_calibration_method: absmax
+I0819 10:53:05.148390 136937940970368 pyconfig.py:585] Config param activations_in_float32: False
+I0819 10:53:05.148422 136937940970368 pyconfig.py:585] Config param adam_b1: 0.9
+I0819 10:53:05.148452 136937940970368 pyconfig.py:585] Config param adam_b2: 0.99
+I0819 10:53:05.148478 136937940970368 pyconfig.py:585] Config param adam_eps: 1e-08
+I0819 10:53:05.148510 136937940970368 pyconfig.py:585] Config param adam_eps_root: 0.0
+I0819 10:53:05.148535 136937940970368 pyconfig.py:585] Config param adam_weight_decay: 0.1
+I0819 10:53:05.148559 136937940970368 pyconfig.py:585] Config param adamw_mask: []
+I0819 10:53:05.148582 136937940970368 pyconfig.py:585] Config param add_bos: True
+I0819 10:53:05.148606 136937940970368 pyconfig.py:585] Config param add_eos: True
+I0819 10:53:05.148629 136937940970368 pyconfig.py:585] Config param allow_split_physical_axes: True
+I0819 10:53:05.148653 136937940970368 pyconfig.py:585] Config param ar_cache_axis_order: 1,2,0,3
+I0819 10:53:05.148676 136937940970368 pyconfig.py:585] Config param async_checkpointing: False
+I0819 10:53:05.148701 136937940970368 pyconfig.py:585] Config param async_scheduling: False
+I0819 10:53:05.148724 136937940970368 pyconfig.py:585] Config param attention: dot_product
+I0819 10:53:05.148746 136937940970368 pyconfig.py:585] Config param attention_bias: False
+I0819 10:53:05.148770 136937940970368 pyconfig.py:585] Config param attention_for_vit: dot_product
+I0819 10:53:05.148793 136937940970368 pyconfig.py:585] Config param attention_out: RematLocation.REMAT
+I0819 10:53:05.148823 136937940970368 pyconfig.py:585] Config param attention_output_dim: -1
+I0819 10:53:05.148847 136937940970368 pyconfig.py:585] Config param attention_sink: False
+I0819 10:53:05.148870 136937940970368 pyconfig.py:585] Config param attention_type: global
+I0819 10:53:05.148892 136937940970368 pyconfig.py:585] Config param attn_logits_soft_cap: None
+I0819 10:53:05.148916 136937940970368 pyconfig.py:585] Config param audio_path: 
+I0819 10:53:05.148940 136937940970368 pyconfig.py:585] Config param audio_placeholder: <|audio|>
+I0819 10:53:05.148964 136937940970368 pyconfig.py:585] Config param autoregressive_decode_assert: 
+I0819 10:53:05.148989 136937940970368 pyconfig.py:585] Config param base_config: None
+I0819 10:53:05.149020 136937940970368 pyconfig.py:585] Config param base_emb_dim: 1536
+I0819 10:53:05.149043 136937940970368 pyconfig.py:585] Config param base_mlp_dim: 6144
+I0819 10:53:05.149066 136937940970368 pyconfig.py:585] Config param base_moe_mlp_dim: -1
+I0819 10:53:05.149088 136937940970368 pyconfig.py:585] Config param base_num_decoder_layers: 35
+I0819 10:53:05.149110 136937940970368 pyconfig.py:585] Config param base_num_kv_heads: 1
+I0819 10:53:05.149132 136937940970368 pyconfig.py:585] Config param base_num_query_heads: 8
+I0819 10:53:05.149155 136937940970368 pyconfig.py:585] Config param base_output_directory: gs://ubench-logs/alisachen-tpu7x/runs
+I0819 10:53:05.149177 136937940970368 pyconfig.py:585] Config param batch_size: 8
+I0819 10:53:05.149199 136937940970368 pyconfig.py:585] Config param batch_split_factor: 1
+I0819 10:53:05.149221 136937940970368 pyconfig.py:585] Config param beta_fast: 32
+I0819 10:53:05.149242 136937940970368 pyconfig.py:585] Config param beta_slow: 1
+I0819 10:53:05.149263 136937940970368 pyconfig.py:585] Config param bwd_quantization_calibration_method: absmax
+I0819 10:53:05.149319 136937940970368 pyconfig.py:585] Config param capacity_factor: -1.0
+I0819 10:53:05.149348 136937940970368 pyconfig.py:585] Config param cast_logits_to_fp32: True
+I0819 10:53:05.149372 136937940970368 pyconfig.py:585] Config param chat_template: 
+I0819 10:53:05.149395 136937940970368 pyconfig.py:585] Config param chat_template_path: maxtext/examples/chat_templates/gemma-3-27b-chat_template.json
+I0819 10:53:05.149417 136937940970368 pyconfig.py:585] Config param check_vma: False
+I0819 10:53:05.149440 136937940970368 pyconfig.py:585] Config param checkpoint_conversion_fn: None
+I0819 10:53:05.149463 136937940970368 pyconfig.py:585] Config param checkpoint_is_quantized: False
+I0819 10:53:05.149485 136937940970368 pyconfig.py:585] Config param checkpoint_period: 10
+I0819 10:53:05.149507 136937940970368 pyconfig.py:585] Config param checkpoint_storage_concurrent_gb: 96
+I0819 10:53:05.149528 136937940970368 pyconfig.py:585] Config param checkpoint_storage_target_data_file_size_bytes: 2147483648
+I0819 10:53:05.149550 136937940970368 pyconfig.py:585] Config param checkpoint_storage_use_ocdbt: False
+I0819 10:53:05.149571 136937940970368 pyconfig.py:585] Config param checkpoint_storage_use_zarr3: False
+I0819 10:53:05.149593 136937940970368 pyconfig.py:585] Config param checkpoint_todelete_full_path: None
+I0819 10:53:05.149614 136937940970368 pyconfig.py:585] Config param checkpoint_todelete_subdir: None
+I0819 10:53:05.149636 136937940970368 pyconfig.py:585] Config param chips_per_vm: 4
+I0819 10:53:05.149658 136937940970368 pyconfig.py:585] Config param chunk_attn_window_size: 0
+I0819 10:53:05.149679 136937940970368 pyconfig.py:585] Config param cluster: {'trainer_devices_fraction': 0.5, 'sampler_devices_fraction': 0.5, 'chips_per_vm': 4, 'use_pathways': True, 'num_trainer_slices': -1, 'num_samplers_slices': -1, 'rollout_data_parallelism': -1, 'rollout_tensor_parallelism': 4, 'rollout_expert_parallelism': 1, 'inference_replicas': 1, 'inference_devices_per_replica': 4, 'inference_rollouts': 1, 'use_pathways_reshard': True}
+I0819 10:53:05.149712 136937940970368 pyconfig.py:585] Config param colocated_python_checkpointing: False
+I0819 10:53:05.149734 136937940970368 pyconfig.py:585] Config param compile_xla_flags: 
+I0819 10:53:05.149756 136937940970368 pyconfig.py:585] Config param compute_axis_order: 0,1,2,3
+I0819 10:53:05.149777 136937940970368 pyconfig.py:585] Config param constant_bound_config: []
+I0819 10:53:05.149798 136937940970368 pyconfig.py:585] Config param context: RematLocation.REMAT
+I0819 10:53:05.149828 136937940970368 pyconfig.py:585] Config param context_parallel_load_balance: True
+I0819 10:53:05.149851 136937940970368 pyconfig.py:585] Config param context_parallel_reorder_strategy: ReorderStrategy.AUTO
+I0819 10:53:05.149888 136937940970368 pyconfig.py:585] Config param context_parallel_strategy: all_gather
+I0819 10:53:05.149925 136937940970368 pyconfig.py:585] Config param context_sharding: context
+I0819 10:53:05.149954 136937940970368 pyconfig.py:585] Config param convert_checkpoint_if_possible: True
+I0819 10:53:05.149977 136937940970368 pyconfig.py:585] Config param custom_mesh: 
+I0819 10:53:05.149999 136937940970368 pyconfig.py:585] Config param custom_mesh_and_rule: CustomRule.DEFAULT
+I0819 10:53:05.150030 136937940970368 pyconfig.py:585] Config param custom_mesh_and_rule_for_eval: CustomRule.DEFAULT
+I0819 10:53:05.150053 136937940970368 pyconfig.py:585] Config param data_sharding: ()
+I0819 10:53:05.150075 136937940970368 pyconfig.py:585] Config param data_shuffle_seed: 42
+I0819 10:53:05.150097 136937940970368 pyconfig.py:585] Config param data_template_path: maxtext/examples/chat_templates/openmathinstruct2_rl.json
+I0819 10:53:05.150119 136937940970368 pyconfig.py:585] Config param dataset: {'dataset_name': 'nvidia/OpenMathInstruct-2', 'eval_dataset_name': 'openai/gsm8k', 'train_split': 'train_1M', 'eval_split': 'test', 'hf_subset': 'main', 'hf_train_files': 'hf://datasets/nvidia/OpenMathInstruct-2/data/train_1M-*.parquet', 'hf_eval_files': None, 'data_shuffle_seed': 42, 'batch_size': 8, 'num_batches': 2, 'num_test_batches': 0, 'eval_batch_size': -1, 'test_batch_start_index': 0, 'train_fraction': 1.0, 'train_micro_batch_size': 4, 'rollout_micro_batch_size': 8, 'rl_compute_logps_chunk_size': 1024, 'rl_offload_to_cpu': False, 'dataset_processor_path': ''}
+I0819 10:53:05.150154 136937940970368 pyconfig.py:585] Config param dataset_name: nvidia/OpenMathInstruct-2
+I0819 10:53:05.150176 136937940970368 pyconfig.py:585] Config param dataset_processor_path: 
+I0819 10:53:05.150197 136937940970368 pyconfig.py:585] Config param dcn_autoregressive_parallelism: 1
+I0819 10:53:05.150219 136937940970368 pyconfig.py:585] Config param dcn_context_autoregressive_parallelism: 1
+I0819 10:53:05.150240 136937940970368 pyconfig.py:585] Config param dcn_context_parallelism: 1
+I0819 10:53:05.150262 136937940970368 pyconfig.py:585] Config param dcn_data_parallelism: -1
+I0819 10:53:05.150293 136937940970368 pyconfig.py:585] Config param dcn_diloco_parallelism: 1
+I0819 10:53:05.150330 136937940970368 pyconfig.py:585] Config param dcn_expert_parallelism: 1
+I0819 10:53:05.150354 136937940970368 pyconfig.py:585] Config param dcn_fsdp_parallelism: 1
+I0819 10:53:05.150376 136937940970368 pyconfig.py:585] Config param dcn_fsdp_transpose_parallelism: 1
+I0819 10:53:05.150398 136937940970368 pyconfig.py:585] Config param dcn_pipeline_parallelism: 1
+I0819 10:53:05.150419 136937940970368 pyconfig.py:585] Config param dcn_sequence_parallelism: 1
+I0819 10:53:05.150440 136937940970368 pyconfig.py:585] Config param dcn_tensor_parallelism: 1
+I0819 10:53:05.150462 136937940970368 pyconfig.py:585] Config param dcn_tensor_sequence_parallelism: 1
+I0819 10:53:05.150483 136937940970368 pyconfig.py:585] Config param debug: False
+I0819 10:53:05.150504 136937940970368 pyconfig.py:585] Config param debug_converter: False
+I0819 10:53:05.150526 136937940970368 pyconfig.py:585] Config param debug_sharding: False
+I0819 10:53:05.150548 136937940970368 pyconfig.py:585] Config param decode_sampling_nucleus_p: 0.95
+I0819 10:53:05.150571 136937940970368 pyconfig.py:585] Config param decode_sampling_strategy: SamplingStrategy.GREEDY
+I0819 10:53:05.150596 136937940970368 pyconfig.py:585] Config param decode_sampling_temperature: 0.8
+I0819 10:53:05.150620 136937940970368 pyconfig.py:585] Config param decode_sampling_top_k: 50
+I0819 10:53:05.150643 136937940970368 pyconfig.py:585] Config param decoder_block: DecoderBlockType.GEMMA4_SMALL
+I0819 10:53:05.150671 136937940970368 pyconfig.py:585] Config param decoder_layer_input: RematLocation.OFFLOAD
+I0819 10:53:05.150697 136937940970368 pyconfig.py:585] Config param dense_fsdp_use_two_stage_all_gather: False
+I0819 10:53:05.150719 136937940970368 pyconfig.py:585] Config param dense_init_scale: 1.0
+I0819 10:53:05.150741 136937940970368 pyconfig.py:585] Config param dropout_rate: 0.0
+I0819 10:53:05.150763 136937940970368 pyconfig.py:585] Config param dtype: bfloat16
+I0819 10:53:05.150806 136937940970368 pyconfig.py:585] Config param dtype_mm: float32
+I0819 10:53:05.150830 136937940970368 pyconfig.py:585] Config param enable_autocheckpoint: False
+I0819 10:53:05.150852 136937940970368 pyconfig.py:585] Config param enable_checkpointing: True
+I0819 10:53:05.150873 136937940970368 pyconfig.py:585] Config param enable_continuous_checkpointing: False
+I0819 10:53:05.150895 136937940970368 pyconfig.py:585] Config param enable_dp_attention: False
+I0819 10:53:05.150916 136937940970368 pyconfig.py:585] Config param enable_dropout: True
+I0819 10:53:05.150937 136937940970368 pyconfig.py:585] Config param enable_expert_parallel: False
+I0819 10:53:05.150959 136937940970368 pyconfig.py:585] Config param enable_jax_profiler: False
+I0819 10:53:05.150982 136937940970368 pyconfig.py:585] Config param enable_llm_inference_pool: False
+I0819 10:53:05.151004 136937940970368 pyconfig.py:585] Config param enable_model_warmup: False
+I0819 10:53:05.151031 136937940970368 pyconfig.py:585] Config param enable_nnx: True
+I0819 10:53:05.151052 136937940970368 pyconfig.py:585] Config param enable_orbax_v1: False
+I0819 10:53:05.151073 136937940970368 pyconfig.py:585] Config param enable_padding_causal_mask: True
+I0819 10:53:05.151094 136937940970368 pyconfig.py:585] Config param enable_single_controller: False
+I0819 10:53:05.151116 136937940970368 pyconfig.py:585] Config param enable_single_replica_ckpt_restoring: False
+I0819 10:53:05.151137 136937940970368 pyconfig.py:585] Config param enable_tpu_profiling_options: False
+I0819 10:53:05.151158 136937940970368 pyconfig.py:585] Config param enable_tunix_perf_metrics: True
+I0819 10:53:05.151179 136937940970368 pyconfig.py:585] Config param engram: RematLocation.REMAT
+I0819 10:53:05.151202 136937940970368 pyconfig.py:585] Config param engram_head_dim: 1280
+I0819 10:53:05.151223 136937940970368 pyconfig.py:585] Config param engram_kernel_size: 4
+I0819 10:53:05.151245 136937940970368 pyconfig.py:585] Config param engram_layers: []
+I0819 10:53:05.151266 136937940970368 pyconfig.py:585] Config param engram_max_ngram_size: 3
+I0819 10:53:05.151298 136937940970368 pyconfig.py:585] Config param engram_num_heads: 8
+I0819 10:53:05.151321 136937940970368 pyconfig.py:585] Config param engram_seed: 0
+I0819 10:53:05.151344 136937940970368 pyconfig.py:585] Config param engram_vocab_bases: []
+I0819 10:53:05.151366 136937940970368 pyconfig.py:585] Config param epsilon_high: None
+I0819 10:53:05.151388 136937940970368 pyconfig.py:585] Config param eval_batch_size: -1
+I0819 10:53:05.151411 136937940970368 pyconfig.py:585] Config param eval_corr_lst: False
+I0819 10:53:05.151433 136937940970368 pyconfig.py:585] Config param eval_dataset_name: openai/gsm8k
+I0819 10:53:05.151454 136937940970368 pyconfig.py:585] Config param eval_interval: 10
+I0819 10:53:05.151476 136937940970368 pyconfig.py:585] Config param eval_make_lst: False
+I0819 10:53:05.151498 136937940970368 pyconfig.py:585] Config param eval_mode: pass
+I0819 10:53:05.151520 136937940970368 pyconfig.py:585] Config param eval_sampling_strategy: greedy
+I0819 10:53:05.151541 136937940970368 pyconfig.py:585] Config param eval_split: test
+I0819 10:53:05.151563 136937940970368 pyconfig.py:585] Config param evaluation: {'eval_sampling_strategy': 'greedy', 'generation_configs': {'greedy': {'eval_temperature': 0.01, 'eval_top_k': 1, 'eval_top_p': 1.0}, 'standard': {'eval_temperature': 0.7, 'eval_top_k': 50, 'eval_top_p': 0.95}, 'liberal': {'eval_temperature': 0.85, 'eval_top_k': 2000, 'eval_top_p': 1.0}}, 'num_eval_passes': 1, 'eval_corr_lst': False, 'eval_make_lst': False, 'eval_mode': 'pass'}
+I0819 10:53:05.151598 136937940970368 pyconfig.py:585] Config param final_logits_soft_cap: 30.0
+I0819 10:53:05.151621 136937940970368 pyconfig.py:585] Config param first_num_dense_layers: 0
+I0819 10:53:05.151643 136937940970368 pyconfig.py:585] Config param first_num_hash_layers: 0
+I0819 10:53:05.151665 136937940970368 pyconfig.py:585] Config param float32_gate_logits: False
+I0819 10:53:05.151687 136937940970368 pyconfig.py:585] Config param float32_logits: False
+I0819 10:53:05.151708 136937940970368 pyconfig.py:585] Config param float32_qk_product: False
+I0819 10:53:05.151730 136937940970368 pyconfig.py:585] Config param float32_weight_sum: True
+I0819 10:53:05.151751 136937940970368 pyconfig.py:585] Config param force_q_layout: False
+I0819 10:53:05.151772 136937940970368 pyconfig.py:585] Config param force_unroll: False
+I0819 10:53:05.151794 136937940970368 pyconfig.py:585] Config param freeze_audio_encoder_params: True
+I0819 10:53:05.151816 136937940970368 pyconfig.py:585] Config param freeze_vision_encoder_params: True
+I0819 10:53:05.151838 136937940970368 pyconfig.py:585] Config param fuse_expert_scales: False
+I0819 10:53:05.151859 136937940970368 pyconfig.py:585] Config param fused_mlp: False
+I0819 10:53:05.151880 136937940970368 pyconfig.py:585] Config param fused_qkv: False
+I0819 10:53:05.151900 136937940970368 pyconfig.py:585] Config param gcs_debug_path: 
+I0819 10:53:05.151921 136937940970368 pyconfig.py:585] Config param generation_configs: {'greedy': {'eval_temperature': 0.01, 'eval_top_k': 1, 'eval_top_p': 1.0}, 'standard': {'eval_temperature': 0.7, 'eval_top_k': 50, 'eval_top_p': 0.95}, 'liberal': {'eval_temperature': 0.85, 'eval_top_k': 2000, 'eval_top_p': 1.0}}
+I0819 10:53:05.151950 136937940970368 pyconfig.py:585] Config param global_head_dim: 512
+I0819 10:53:05.151971 136937940970368 pyconfig.py:585] Config param global_num_kv_heads: 0
+I0819 10:53:05.151992 136937940970368 pyconfig.py:585] Config param global_parameter_scale: 1
+I0819 10:53:05.152018 136937940970368 pyconfig.py:585] Config param global_rope_max_timescale: 1000000
+I0819 10:53:05.152040 136937940970368 pyconfig.py:585] Config param global_rope_proportion: 0.25
+I0819 10:53:05.152062 136937940970368 pyconfig.py:585] Config param grad_dtype: float32
+I0819 10:53:05.152112 136937940970368 pyconfig.py:585] Config param gradient_accumulation_steps: 1
+I0819 10:53:05.152136 136937940970368 pyconfig.py:585] Config param gradient_clipping_threshold: 1.0
+I0819 10:53:05.152159 136937940970368 pyconfig.py:585] Config param grpo_beta: 0.08
+I0819 10:53:05.152182 136937940970368 pyconfig.py:585] Config param grpo_epsilon: 0.2
+I0819 10:53:05.152202 136937940970368 pyconfig.py:585] Config param hardware: tpu
+I0819 10:53:05.152221 136937940970368 pyconfig.py:585] Config param hbm_utilization_vllm: 0.6
+I0819 10:53:05.152243 136937940970368 pyconfig.py:585] Config param head_dim: 256
+I0819 10:53:05.152265 136937940970368 pyconfig.py:585] Config param hf_eval_files: None
+I0819 10:53:05.152295 136937940970368 pyconfig.py:585] Config param hf_lora_adapter_path: 
+I0819 10:53:05.152318 136937940970368 pyconfig.py:585] Config param hf_subset: main
+I0819 10:53:05.152340 136937940970368 pyconfig.py:585] Config param hf_train_files: hf://datasets/nvidia/OpenMathInstruct-2/data/train_1M-*.parquet
+I0819 10:53:05.152363 136937940970368 pyconfig.py:585] Config param hidden_size_per_layer_input: 256
+I0819 10:53:05.152384 136937940970368 pyconfig.py:585] Config param hide_profiler_step_metric: False
+I0819 10:53:05.152405 136937940970368 pyconfig.py:585] Config param ici_autoregressive_parallelism: 1
+I0819 10:53:05.152426 136937940970368 pyconfig.py:585] Config param ici_context_autoregressive_parallelism: 1
+I0819 10:53:05.152447 136937940970368 pyconfig.py:585] Config param ici_context_parallelism: 1
+I0819 10:53:05.152467 136937940970368 pyconfig.py:585] Config param ici_data_parallelism: 1
+I0819 10:53:05.152488 136937940970368 pyconfig.py:585] Config param ici_diloco_parallelism: 1
+I0819 10:53:05.152509 136937940970368 pyconfig.py:585] Config param ici_expert_parallelism: 1
+I0819 10:53:05.152531 136937940970368 pyconfig.py:585] Config param ici_fsdp_parallelism: -1
+I0819 10:53:05.152552 136937940970368 pyconfig.py:585] Config param ici_fsdp_transpose_parallelism: 1
+I0819 10:53:05.152573 136937940970368 pyconfig.py:585] Config param ici_pipeline_parallelism: 1
+I0819 10:53:05.152594 136937940970368 pyconfig.py:585] Config param ici_sequence_parallelism: 1
+I0819 10:53:05.152616 136937940970368 pyconfig.py:585] Config param ici_tensor_parallelism: 1
+I0819 10:53:05.152653 136937940970368 pyconfig.py:585] Config param ici_tensor_sequence_parallelism: 1
+I0819 10:53:05.152675 136937940970368 pyconfig.py:585] Config param image_path: 
+I0819 10:53:05.152697 136937940970368 pyconfig.py:585] Config param image_placeholder: <|image|>
+I0819 10:53:05.152718 136937940970368 pyconfig.py:585] Config param image_size_for_vit: [672, 960]
+I0819 10:53:05.152742 136937940970368 pyconfig.py:585] Config param inference_devices_per_replica: 4
+I0819 10:53:05.152763 136937940970368 pyconfig.py:585] Config param inference_replicas: 1
+I0819 10:53:05.152785 136937940970368 pyconfig.py:585] Config param inference_rollouts: 1
+I0819 10:53:05.152806 136937940970368 pyconfig.py:585] Config param inhomogeneous_layer_cycle_interval: 1
+I0819 10:53:05.152827 136937940970368 pyconfig.py:585] Config param init_weights_seed: 0
+I0819 10:53:05.152848 136937940970368 pyconfig.py:585] Config param input_data_sharding_logical_axes: ['activation_embed_and_logits_batch', 'activation_norm_length']
+I0819 10:53:05.152871 136937940970368 pyconfig.py:585] Config param interleave_moe_layer_step: 1
+I0819 10:53:05.152893 136937940970368 pyconfig.py:585] Config param internal_compile: False
+I0819 10:53:05.152914 136937940970368 pyconfig.py:585] Config param internal_compile_num_devices: -1
+I0819 10:53:05.152935 136937940970368 pyconfig.py:585] Config param jax_cache_dir: /root/jax_cache
+I0819 10:53:05.152956 136937940970368 pyconfig.py:585] Config param jax_debug_log_modules: 
+I0819 10:53:05.152978 136937940970368 pyconfig.py:585] Config param jax_distributed_initialization_timeout: 300
+I0819 10:53:05.153001 136937940970368 pyconfig.py:585] Config param jax_profiler_port: 9999
+I0819 10:53:05.153029 136937940970368 pyconfig.py:585] Config param key_proj: RematLocation.OFFLOAD
+I0819 10:53:05.153052 136937940970368 pyconfig.py:585] Config param kv_cache_buffer: 256
+I0819 10:53:05.153074 136937940970368 pyconfig.py:585] Config param kv_proj: RematLocation.REMAT
+I0819 10:53:05.153097 136937940970368 pyconfig.py:585] Config param kv_quant_axis: KvQuantAxis.HEADS_AND_DKV
+I0819 10:53:05.153121 136937940970368 pyconfig.py:585] Config param kv_quant_dtype: int8
+I0819 10:53:05.153143 136937940970368 pyconfig.py:585] Config param kv_wa_proj: RematLocation.REMAT
+I0819 10:53:05.153165 136937940970368 pyconfig.py:585] Config param learning_rate: 1e-06
+I0819 10:53:05.153192 136937940970368 pyconfig.py:585] Config param learning_rate_final_fraction: 0.1
+I0819 10:53:05.153215 136937940970368 pyconfig.py:585] Config param learning_rate_schedule_steps: 2
+I0819 10:53:05.153237 136937940970368 pyconfig.py:585] Config param load_balance_loss_weight: 0.0
+I0819 10:53:05.153260 136937940970368 pyconfig.py:585] Config param load_checkpoint_only_once: False
+I0819 10:53:05.153290 136937940970368 pyconfig.py:585] Config param load_from_prefill_dir: False
+I0819 10:53:05.153313 136937940970368 pyconfig.py:585] Config param load_full_state_path: 
+I0819 10:53:05.153335 136937940970368 pyconfig.py:585] Config param load_parameters_path: gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items
+I0819 10:53:05.153357 136937940970368 pyconfig.py:585] Config param local_rope_max_timescale: 10000
+I0819 10:53:05.153378 136937940970368 pyconfig.py:585] Config param local_rope_proportion: 1.0
+I0819 10:53:05.153400 136937940970368 pyconfig.py:585] Config param log_config: True
+I0819 10:53:05.153421 136937940970368 pyconfig.py:585] Config param log_period: 1
+I0819 10:53:05.153444 136937940970368 pyconfig.py:585] Config param logical_axis_rules: (('circular_repeats', ()), ('activation_embed_and_logits_batch', ('data', 'stage', 'fsdp', 'fsdp_transpose', 'expert')), ('activation_embed_and_logits_batch_sequence', ('data', 'stage', 'fsdp', 'fsdp_transpose', 'context', 'expert')), ('activation_vocab', ('tensor', 'tensor_sequence')), ('activation_vocab', ('tensor',)), ('activation_vocab', 'tensor_sequence'), ('vocab', ('tensor', 'tensor_sequence', 'autoregressive')), ('embed_vocab', ('fsdp', 'fsdp_transpose', 'context', 'expert')), ('activation_batch_attn', ('data', 'fsdp', 'fsdp_transpose', 'expert')), ('activation_heads', ('tensor', 'tensor_sequence', 'autoregressive')), ('activation_kv_heads', ('tensor', 'tensor_sequence')), ('activation_length_attn', ('context',)), ('activation_q_length', ('context',)), ('activation_kv_length', ()), ('activation_embed_attn', ('tensor',)), ('activation_kv', ('tensor', 'tensor_sequence')), ('activation_kv_batch', ('data', 'fsdp', 'fsdp_transpose', 'expert')), ('activation_kv_head_dim', ('tensor', 'tensor_sequence')), ('heads', ('tensor', 'tensor_sequence', 'autoregressive')), ('q_heads', ('tensor', 'tensor_sequence', 'autoregressive')), ('kv_heads', ('tensor', 'tensor_sequence', 'autoregressive')), ('qkv', ()), ('kv', ()), ('kv_head_dim', ()), ('q_lora', ('fsdp', 'fsdp_transpose', 'context', 'expert')), ('q_lora', ('fsdp', 'context', 'expert')), ('q_lora_up_proj', ()), ('kv_lora', ('fsdp', 'fsdp_transpose', 'context', 'expert')), ('kv_lora', ('fsdp', 'context', 'expert')), ('kv_lora_up_proj', ()), ('activation_batch_moe', ('data', 'fsdp', 'fsdp_transpose', 'expert')), ('activation_length_moe', ('context',)), ('activation_norm_length_moe', ('tensor_sequence', 'context')), ('activation_embed_moe', ('tensor',)), ('activation_mlp_moe', ('tensor', 'tensor_sequence')), ('activation_exp', ('expert',)), ('exp', 'expert'), ('mlp_moe', ('fsdp_transpose', 'tensor', 'tensor_sequence', 'autoregressive')), ('embed_moe', ('fsdp', 'fsdp_transpose', 'context')), ('embed_moe', ('fsdp', 'context')), ('activation_mlp', ('tensor', 'tensor_sequence')), ('activation_batch', ('data', 'fsdp', 'fsdp_transpose', 'expert')), ('activation_length', ('context',)), ('activation_norm_length', ('tensor_sequence', 'context')), ('activation_embed', ('tensor',)), ('activation_stage', 'stage'), ('mlp', ('fsdp_transpose', 'tensor', 'tensor_sequence', 'autoregressive')), ('gdn_head', ('fsdp_transpose', 'tensor', 'tensor_sequence', 'autoregressive')), ('embed', ('fsdp', 'fsdp_transpose', 'context', 'expert')), ('embed', ('fsdp', 'context', 'expert')), ('norm', ('tensor',)), ('layers', 'stage'), ('diloco', 'diloco'), ('engram_dim', ('tensor',)), ('dense_layers', ()), ('moe_layers', ()), ('mhc', ()))
+I0819 10:53:05.153533 136937940970368 pyconfig.py:585] Config param logical_axis_rules_for_eval: []
+I0819 10:53:05.153557 136937940970368 pyconfig.py:585] Config param logits_dot_in_fp32: False
+I0819 10:53:05.153578 136937940970368 pyconfig.py:585] Config param logits_via_embedding: True
+I0819 10:53:05.153600 136937940970368 pyconfig.py:585] Config param lora_input_adapters_path: 
+I0819 10:53:05.153621 136937940970368 pyconfig.py:585] Config param loss_agg_mode: sequence-mean-token-mean
+I0819 10:53:05.153643 136937940970368 pyconfig.py:585] Config param loss_algo: grpo
+I0819 10:53:05.153665 136937940970368 pyconfig.py:585] Config param lr_schedule_type: LearningRateScheduleType.COSINE
+I0819 10:53:05.153691 136937940970368 pyconfig.py:585] Config param math_verify_num_procs: 32
+I0819 10:53:05.153713 136937940970368 pyconfig.py:585] Config param math_verify_timeout: 120
+I0819 10:53:05.153735 136937940970368 pyconfig.py:585] Config param matmul_precision: MatmulPrecision.DEFAULT
+I0819 10:53:05.153759 136937940970368 pyconfig.py:585] Config param max_checkify: False
+I0819 10:53:05.153782 136937940970368 pyconfig.py:585] Config param max_concurrency: 256
+I0819 10:53:05.153804 136937940970368 pyconfig.py:585] Config param max_num_batched_tokens: 8448
+I0819 10:53:05.153825 136937940970368 pyconfig.py:585] Config param max_num_checkpoints_to_keep: 10
+I0819 10:53:05.153848 136937940970368 pyconfig.py:585] Config param max_num_images_per_example: -1
+I0819 10:53:05.153869 136937940970368 pyconfig.py:585] Config param max_num_seqs: 256
+I0819 10:53:05.153891 136937940970368 pyconfig.py:585] Config param max_position_embeddings: 163840
+I0819 10:53:05.153912 136937940970368 pyconfig.py:585] Config param max_prefill_predict_length: 4096
+I0819 10:53:05.153935 136937940970368 pyconfig.py:585] Config param max_target_length: 8192
+I0819 10:53:05.153957 136937940970368 pyconfig.py:585] Config param megablox: True
+I0819 10:53:05.153979 136937940970368 pyconfig.py:585] Config param merge_gating_gmm: False
+I0819 10:53:05.154001 136937940970368 pyconfig.py:585] Config param mesh_axes: ['data', 'stage', 'fsdp', 'fsdp_transpose', 'sequence', 'context', 'context_autoregressive', 'tensor', 'tensor_sequence', 'expert', 'autoregressive']
+I0819 10:53:05.154033 136937940970368 pyconfig.py:585] Config param mla_kv: RematLocation.REMAT
+I0819 10:53:05.154056 136937940970368 pyconfig.py:585] Config param mla_q: RematLocation.REMAT
+I0819 10:53:05.154079 136937940970368 pyconfig.py:585] Config param mla_qk_head_chunk_size: 0
+I0819 10:53:05.154100 136937940970368 pyconfig.py:585] Config param mlp_activations: ['gelu', 'linear']
+I0819 10:53:05.154123 136937940970368 pyconfig.py:585] Config param mlp_activations_limit: -1.0
+I0819 10:53:05.154149 136937940970368 pyconfig.py:585] Config param mlp_bias: False
+I0819 10:53:05.154174 136937940970368 pyconfig.py:585] Config param mlpwi: RematLocation.REMAT
+I0819 10:53:05.154196 136937940970368 pyconfig.py:585] Config param mlpwi_0: RematLocation.REMAT
+I0819 10:53:05.154218 136937940970368 pyconfig.py:585] Config param mlpwi_1: RematLocation.REMAT
+I0819 10:53:05.154241 136937940970368 pyconfig.py:585] Config param mlpwo: RematLocation.REMAT
+I0819 10:53:05.154263 136937940970368 pyconfig.py:585] Config param moba: False
+I0819 10:53:05.154293 136937940970368 pyconfig.py:585] Config param moba_chunk_size: 1024
+I0819 10:53:05.154316 136937940970368 pyconfig.py:585] Config param moba_topk: 8
+I0819 10:53:05.154338 136937940970368 pyconfig.py:585] Config param model_call_mode: 
+I0819 10:53:05.154360 136937940970368 pyconfig.py:585] Config param model_name: gemma4-e2b
+I0819 10:53:05.154382 136937940970368 pyconfig.py:585] Config param moe_chunk_barrier: False
+I0819 10:53:05.154404 136937940970368 pyconfig.py:585] Config param moe_dispatch_no_expert_sharding: False
+I0819 10:53:05.154425 136937940970368 pyconfig.py:585] Config param moe_expert_input_dim: -1
+I0819 10:53:05.154448 136937940970368 pyconfig.py:585] Config param moe_fsdp_use_two_stage_all_gather: False
+I0819 10:53:05.154470 136937940970368 pyconfig.py:585] Config param moe_mlpwi_0: RematLocation.REMAT
+I0819 10:53:05.154492 136937940970368 pyconfig.py:585] Config param moe_mlpwi_1: RematLocation.REMAT
+I0819 10:53:05.154514 136937940970368 pyconfig.py:585] Config param moe_mlpwo: RematLocation.REMAT
+I0819 10:53:05.154536 136937940970368 pyconfig.py:585] Config param mrope_section: [24, 20, 20]
+I0819 10:53:05.154559 136937940970368 pyconfig.py:585] Config param mscale: 1.0
+I0819 10:53:05.154581 136937940970368 pyconfig.py:585] Config param mu_dtype: bfloat16
+I0819 10:53:05.154612 136937940970368 pyconfig.py:585] Config param multi_sampling: False
+I0819 10:53:05.154635 136937940970368 pyconfig.py:585] Config param n_routing_groups: -1
+I0819 10:53:05.154657 136937940970368 pyconfig.py:585] Config param nope_layer_interval: -1
+I0819 10:53:05.154678 136937940970368 pyconfig.py:585] Config param norm_topk_prob: False
+I0819 10:53:05.154700 136937940970368 pyconfig.py:585] Config param normalization_layer_epsilon: 1e-06
+I0819 10:53:05.154723 136937940970368 pyconfig.py:585] Config param normalize_embedding_logits: True
+I0819 10:53:05.154745 136937940970368 pyconfig.py:585] Config param num_batches: 2
+I0819 10:53:05.154767 136937940970368 pyconfig.py:585] Config param num_epoch: 1
+I0819 10:53:05.154788 136937940970368 pyconfig.py:585] Config param num_eval_passes: 1
+I0819 10:53:05.154810 136937940970368 pyconfig.py:585] Config param num_experts: 1
+I0819 10:53:05.154831 136937940970368 pyconfig.py:585] Config param num_experts_per_tok: 1
+I0819 10:53:05.154856 136937940970368 pyconfig.py:585] Config param num_generations: 2
+I0819 10:53:05.154878 136937940970368 pyconfig.py:585] Config param num_iterations: 1
+I0819 10:53:05.154900 136937940970368 pyconfig.py:585] Config param num_kv_shared_layers: 20
+I0819 10:53:05.154922 136937940970368 pyconfig.py:585] Config param num_moe_emb_chunks: 0
+I0819 10:53:05.154943 136937940970368 pyconfig.py:585] Config param num_moe_token_chunks: 1
+I0819 10:53:05.154964 136937940970368 pyconfig.py:585] Config param num_samplers_slices: -1
+I0819 10:53:05.154985 136937940970368 pyconfig.py:585] Config param num_slices: 1
+I0819 10:53:05.155007 136937940970368 pyconfig.py:585] Config param num_test_batches: 0
+I0819 10:53:05.155033 136937940970368 pyconfig.py:585] Config param num_trainer_slices: -1
+I0819 10:53:05.155054 136937940970368 pyconfig.py:585] Config param num_vocab_tiling: 1
+I0819 10:53:05.155076 136937940970368 pyconfig.py:585] Config param off_policy_steps: 0
+I0819 10:53:05.155097 136937940970368 pyconfig.py:585] Config param opt_type: OptimizerType.ADAMW
+I0819 10:53:05.155121 136937940970368 pyconfig.py:585] Config param optimize_mesh_for_tpu_v6e: False
+I0819 10:53:05.155142 136937940970368 pyconfig.py:585] Config param optimizer_memory_host_offload: False
+I0819 10:53:05.155163 136937940970368 pyconfig.py:585] Config param original_max_position_embeddings: 4096
+I0819 10:53:05.155184 136937940970368 pyconfig.py:585] Config param out_proj: RematLocation.REMAT
+I0819 10:53:05.155206 136937940970368 pyconfig.py:585] Config param override_logical_axis_rules: False
+I0819 10:53:05.155227 136937940970368 pyconfig.py:585] Config param override_model_config: False
+I0819 10:53:05.155249 136937940970368 pyconfig.py:585] Config param padded_base_moe_mlp_dim: None
+I0819 10:53:05.155270 136937940970368 pyconfig.py:585] Config param param_scan_axis: 1
+I0819 10:53:05.155299 136937940970368 pyconfig.py:585] Config param parameter_memory_host_offload: False
+I0819 10:53:05.155321 136937940970368 pyconfig.py:585] Config param penalty_incorrect_answer: 0.0
+I0819 10:53:05.155343 136937940970368 pyconfig.py:585] Config param penalty_incorrect_format: 0.0
+I0819 10:53:05.155366 136937940970368 pyconfig.py:585] Config param posemb_type_for_vit: learn
+I0819 10:53:05.155387 136937940970368 pyconfig.py:585] Config param position_id_per_seconds: 25
+I0819 10:53:05.155409 136937940970368 pyconfig.py:585] Config param prefill_cache_axis_order: 1,2,0,3
+I0819 10:53:05.155431 136937940970368 pyconfig.py:585] Config param prefill_cache_dir: 
+I0819 10:53:05.155452 136937940970368 pyconfig.py:585] Config param prefill_chunk_size: 256
+I0819 10:53:05.155472 136937940970368 pyconfig.py:585] Config param prefuse_moe_weights: False
+I0819 10:53:05.155493 136937940970368 pyconfig.py:585] Config param profile_cleanly: True
+I0819 10:53:05.155514 136937940970368 pyconfig.py:585] Config param profile_periodically_period: -1
+I0819 10:53:05.155535 136937940970368 pyconfig.py:585] Config param profile_power_events: False
+I0819 10:53:05.155556 136937940970368 pyconfig.py:585] Config param profiler: ProfilerType.NONE
+I0819 10:53:05.155580 136937940970368 pyconfig.py:585] Config param profiler_steps: 5
+I0819 10:53:05.155603 136937940970368 pyconfig.py:585] Config param prompt: I love to
+I0819 10:53:05.155625 136937940970368 pyconfig.py:585] Config param pure_nnx: True
+I0819 10:53:05.155646 136937940970368 pyconfig.py:585] Config param pure_nnx_decoder: True
+I0819 10:53:05.155668 136937940970368 pyconfig.py:585] Config param qk_clip_threshold: 100.0
+I0819 10:53:05.155689 136937940970368 pyconfig.py:585] Config param qk_norm_with_scale: True
+I0819 10:53:05.155711 136937940970368 pyconfig.py:585] Config param qkv_proj: RematLocation.REMAT
+I0819 10:53:05.155733 136937940970368 pyconfig.py:585] Config param quant_cfg_path: 
+I0819 10:53:05.155754 136937940970368 pyconfig.py:585] Config param quantization: QuantizationType.NONE
+I0819 10:53:05.155776 136937940970368 pyconfig.py:585] Config param quantization_local_shard_count: -1
+I0819 10:53:05.155798 136937940970368 pyconfig.py:585] Config param quantize_kvcache: False
+I0819 10:53:05.155819 136937940970368 pyconfig.py:585] Config param query_proj: RematLocation.OFFLOAD
+I0819 10:53:05.155842 136937940970368 pyconfig.py:585] Config param query_wa_proj: RematLocation.REMAT
+I0819 10:53:05.155864 136937940970368 pyconfig.py:585] Config param ragged_block_size: 256
+I0819 10:53:05.155886 136937940970368 pyconfig.py:585] Config param ragged_buffer_factor: -1.0
+I0819 10:53:05.155908 136937940970368 pyconfig.py:585] Config param ragged_gather_cost_estimate_bytes_accessed: -1
+I0819 10:53:05.155929 136937940970368 pyconfig.py:585] Config param ragged_gather_cost_estimate_flops: -1
+I0819 10:53:05.155951 136937940970368 pyconfig.py:585] Config param ragged_gather_fallback: False
+I0819 10:53:05.155973 136937940970368 pyconfig.py:585] Config param ragged_gather_reduce_cost_estimate_bytes_accessed: -1
+I0819 10:53:05.155995 136937940970368 pyconfig.py:585] Config param ragged_gather_reduce_cost_estimate_flops: -1
+I0819 10:53:05.156020 136937940970368 pyconfig.py:585] Config param ragged_gather_reduce_fallback: False
+I0819 10:53:05.156042 136937940970368 pyconfig.py:585] Config param ragged_sort_use_single_sparsecore: False
+I0819 10:53:05.156064 136937940970368 pyconfig.py:585] Config param reasoning_end_token: </reasoning>
+I0819 10:53:05.156086 136937940970368 pyconfig.py:585] Config param reasoning_start_token: <reasoning>
+I0819 10:53:05.156108 136937940970368 pyconfig.py:585] Config param remat_policy: custom
+I0819 10:53:05.156129 136937940970368 pyconfig.py:585] Config param remat_policy_for_vit: minimal
+I0819 10:53:05.156151 136937940970368 pyconfig.py:585] Config param remove_size_one_mesh_axis_from_type: True
+I0819 10:53:05.156172 136937940970368 pyconfig.py:585] Config param replicate_quant_scale: False
+I0819 10:53:05.156194 136937940970368 pyconfig.py:585] Config param reshape_q: False
+I0819 10:53:05.156216 136937940970368 pyconfig.py:585] Config param reshard_chunk_size: None
+I0819 10:53:05.156237 136937940970368 pyconfig.py:585] Config param return_log_prob: False
+I0819 10:53:05.156259 136937940970368 pyconfig.py:585] Config param reward: {'reward_exact_answer': 1.0, 'reward_exact_format_match': 0.1, 'reward_white_space_format_match': 1.0, 'reward_partial_format_match': 0.0, 'reward_ratio_guess_to_answer_high': 0.0, 'reward_ratio_guess_to_answer_low': 0.0, 'penalty_incorrect_format': 0.0, 'penalty_incorrect_answer': 0.0, 'math_verify_timeout': 120, 'math_verify_num_procs': 32, 'reward_functions_path': '', 'reward_functions': ''}
+I0819 10:53:05.156297 136937940970368 pyconfig.py:585] Config param reward_exact_answer: 1.0
+I0819 10:53:05.156321 136937940970368 pyconfig.py:585] Config param reward_exact_format_match: 0.1
+I0819 10:53:05.156344 136937940970368 pyconfig.py:585] Config param reward_functions: 
+I0819 10:53:05.156366 136937940970368 pyconfig.py:585] Config param reward_functions_path: 
+I0819 10:53:05.156388 136937940970368 pyconfig.py:585] Config param reward_partial_format_match: 0.0
+I0819 10:53:05.156410 136937940970368 pyconfig.py:585] Config param reward_ratio_guess_to_answer_high: 0.0
+I0819 10:53:05.156432 136937940970368 pyconfig.py:585] Config param reward_ratio_guess_to_answer_low: 0.0
+I0819 10:53:05.156453 136937940970368 pyconfig.py:585] Config param reward_white_space_format_match: 1.0
+I0819 10:53:05.156475 136937940970368 pyconfig.py:585] Config param rl: {'num_generations': 8, 'num_iterations': 1, 'grpo_beta': 0.0, 'grpo_epsilon': 0.2, 'loss_algo': 'grpo', 'loss_agg_mode': 'sequence-mean-token-mean', 'use_agentic_rollout': False, 'max_concurrency': 256, 'off_policy_steps': 0, 'system_prompt': '', 'epsilon_high': 0.28, 'reshard_chunk_size': None}
+I0819 10:53:05.156503 136937940970368 pyconfig.py:585] Config param rl_compute_logps_chunk_size: 1024
+I0819 10:53:05.156525 136937940970368 pyconfig.py:585] Config param rl_offload_to_cpu: False
+I0819 10:53:05.156547 136937940970368 pyconfig.py:585] Config param rollout_data_parallelism: -1
+I0819 10:53:05.156569 136937940970368 pyconfig.py:585] Config param rollout_expert_parallelism: 1
+I0819 10:53:05.156591 136937940970368 pyconfig.py:585] Config param rollout_micro_batch_size: 8
+I0819 10:53:05.156612 136937940970368 pyconfig.py:585] Config param rollout_tensor_parallelism: 4
+I0819 10:53:05.156633 136937940970368 pyconfig.py:585] Config param rope_attention_scaling: False
+I0819 10:53:05.156655 136937940970368 pyconfig.py:585] Config param rope_factor: 40
+I0819 10:53:05.156676 136937940970368 pyconfig.py:585] Config param rope_interleave: True
+I0819 10:53:05.156697 136937940970368 pyconfig.py:585] Config param rope_linear_scaling_factor: 1.0
+I0819 10:53:05.156719 136937940970368 pyconfig.py:585] Config param rope_max_timescale: 1000000
+I0819 10:53:05.156740 136937940970368 pyconfig.py:585] Config param rope_min_timescale: 1
+I0819 10:53:05.156762 136937940970368 pyconfig.py:585] Config param rope_truncate: True
+I0819 10:53:05.156784 136937940970368 pyconfig.py:585] Config param rope_type: RopeType.DEFAULT
+I0819 10:53:05.156808 136937940970368 pyconfig.py:585] Config param rope_use_scale: True
+I0819 10:53:05.156830 136937940970368 pyconfig.py:585] Config param routed_bias: False
+I0819 10:53:05.156852 136937940970368 pyconfig.py:585] Config param routed_bias_update_rate: 0.0
+I0819 10:53:05.156873 136937940970368 pyconfig.py:585] Config param routed_scaling_factor: 1.0
+I0819 10:53:05.156895 136937940970368 pyconfig.py:585] Config param routed_score_func: 
+I0819 10:53:05.156917 136937940970368 pyconfig.py:585] Config param run_name: g4n10s1052
+I0819 10:53:05.156938 136937940970368 pyconfig.py:585] Config param sampler_devices_fraction: 0.5
+I0819 10:53:05.156960 136937940970368 pyconfig.py:585] Config param save_checkpoint_on_completion: True
+I0819 10:53:05.156981 136937940970368 pyconfig.py:585] Config param save_quantized_params_path: 
+I0819 10:53:05.157003 136937940970368 pyconfig.py:585] Config param scan_layers: False
+I0819 10:53:05.157029 136937940970368 pyconfig.py:585] Config param shard_exp_on_fsdp: False
+I0819 10:53:05.157051 136937940970368 pyconfig.py:585] Config param shard_mode: ShardMode.AUTO
+I0819 10:53:05.157076 136937940970368 pyconfig.py:585] Config param shard_optimizer_over_data: False
+I0819 10:53:05.157097 136937940970368 pyconfig.py:585] Config param sharding_strategy: None
+I0819 10:53:05.157119 136937940970368 pyconfig.py:585] Config param sharding_tolerance: 0.02
+I0819 10:53:05.157141 136937940970368 pyconfig.py:585] Config param shardy: True
+I0819 10:53:05.157162 136937940970368 pyconfig.py:585] Config param share_kv_projections: False
+I0819 10:53:05.157184 136937940970368 pyconfig.py:585] Config param shared_experts: 0
+I0819 10:53:05.157206 136937940970368 pyconfig.py:585] Config param skip_first_n_steps_for_profiler: 1
+I0819 10:53:05.157226 136937940970368 pyconfig.py:585] Config param skip_jax_distributed_system: True
+I0819 10:53:05.157248 136937940970368 pyconfig.py:585] Config param skip_step_interval: 128
+I0819 10:53:05.157269 136937940970368 pyconfig.py:585] Config param skip_step_on_spikes: False
+I0819 10:53:05.157297 136937940970368 pyconfig.py:585] Config param skip_step_scaling_factor: 6.0
+I0819 10:53:05.157320 136937940970368 pyconfig.py:585] Config param sliding_window_size: 512
+I0819 10:53:05.157342 136937940970368 pyconfig.py:585] Config param solution_end_token: </answer>
+I0819 10:53:05.157363 136937940970368 pyconfig.py:585] Config param solution_start_token: <answer>
+I0819 10:53:05.157385 136937940970368 pyconfig.py:585] Config param source_checkpoint_layout: orbax
+I0819 10:53:05.157406 136937940970368 pyconfig.py:585] Config param sparse_matmul: True
+I0819 10:53:05.157428 136937940970368 pyconfig.py:585] Config param special_tokens: {'reasoning_start_token': '<reasoning>', 'reasoning_end_token': '</reasoning>', 'solution_start_token': '<answer>', 'solution_end_token': '</answer>'}
+I0819 10:53:05.157452 136937940970368 pyconfig.py:585] Config param stack_prefill_result_cache: False
+I0819 10:53:05.157473 136937940970368 pyconfig.py:585] Config param stop_strings: None
+I0819 10:53:05.157495 136937940970368 pyconfig.py:585] Config param subslice_shape: 
+I0819 10:53:05.157516 136937940970368 pyconfig.py:585] Config param swap_space_vllm_gb: 2
+I0819 10:53:05.157537 136937940970368 pyconfig.py:585] Config param system_prompt: 
+I0819 10:53:05.157558 136937940970368 pyconfig.py:585] Config param temperature_tuning: False
+I0819 10:53:05.157579 136937940970368 pyconfig.py:585] Config param test_batch_start_index: 0
+I0819 10:53:05.157600 136937940970368 pyconfig.py:585] Config param tokenize_eval_data: True
+I0819 10:53:05.157622 136937940970368 pyconfig.py:585] Config param tokenize_train_data: True
+I0819 10:53:05.157643 136937940970368 pyconfig.py:585] Config param tokenizer_path: google/gemma-4-E2B-it
+I0819 10:53:05.157664 136937940970368 pyconfig.py:585] Config param tokenizer_type: TokenizerType.SENTENCEPIECE
+I0819 10:53:05.157688 136937940970368 pyconfig.py:585] Config param topk_routing_group: -1
+I0819 10:53:05.157711 136937940970368 pyconfig.py:585] Config param tpu_num_chips_to_profile_per_task: 1
+I0819 10:53:05.157734 136937940970368 pyconfig.py:585] Config param tpu_num_sparse_core_tiles_to_trace: 1
+I0819 10:53:05.157755 136937940970368 pyconfig.py:585] Config param tpu_num_sparse_cores_to_trace: 2
+I0819 10:53:05.157776 136937940970368 pyconfig.py:585] Config param train_fraction: 1.0
+I0819 10:53:05.157798 136937940970368 pyconfig.py:585] Config param train_micro_batch_size: 4
+I0819 10:53:05.157819 136937940970368 pyconfig.py:585] Config param train_split: train_1M
+I0819 10:53:05.157840 136937940970368 pyconfig.py:585] Config param trainable_parameters_mask: []
+I0819 10:53:05.157861 136937940970368 pyconfig.py:585] Config param trainable_position_size: -1
+I0819 10:53:05.157883 136937940970368 pyconfig.py:585] Config param trainer_devices_fraction: 0.5
+I0819 10:53:05.157904 136937940970368 pyconfig.py:585] Config param upload_all_profiler_results: False
+I0819 10:53:05.157928 136937940970368 pyconfig.py:585] Config param use_2d_fsdp_sharding: False
+I0819 10:53:05.157952 136937940970368 pyconfig.py:585] Config param use_agentic_rollout: False
+I0819 10:53:05.157974 136937940970368 pyconfig.py:585] Config param use_audio: False
+I0819 10:53:05.157995 136937940970368 pyconfig.py:585] Config param use_audio_in_video: False
+I0819 10:53:05.158020 136937940970368 pyconfig.py:585] Config param use_batch_split_schedule: False
+I0819 10:53:05.158042 136937940970368 pyconfig.py:585] Config param use_chat_template: False
+I0819 10:53:05.158063 136937940970368 pyconfig.py:585] Config param use_chunked_prefill: False
+I0819 10:53:05.158088 136937940970368 pyconfig.py:585] Config param use_custom_sort_vjp: True
+I0819 10:53:05.158110 136937940970368 pyconfig.py:585] Config param use_double_wide_mlp: True
+I0819 10:53:05.158132 136937940970368 pyconfig.py:585] Config param use_gather_mosaic_kernel: False
+I0819 10:53:05.158154 136937940970368 pyconfig.py:585] Config param use_gmm_v2: False
+I0819 10:53:05.158175 136937940970368 pyconfig.py:585] Config param use_iota_embed: False
+I0819 10:53:05.158196 136937940970368 pyconfig.py:585] Config param use_jax_splash: False
+I0819 10:53:05.158218 136937940970368 pyconfig.py:585] Config param use_manual_quantization: False
+I0819 10:53:05.158239 136937940970368 pyconfig.py:585] Config param use_mrope: False
+I0819 10:53:05.158260 136937940970368 pyconfig.py:585] Config param use_multimodal: False
+I0819 10:53:05.158281 136937940970368 pyconfig.py:585] Config param use_pathways: True
+I0819 10:53:05.158310 136937940970368 pyconfig.py:585] Config param use_pathways_reshard: True
+I0819 10:53:05.158331 136937940970368 pyconfig.py:585] Config param use_post_attn_norm: True
+I0819 10:53:05.158352 136937940970368 pyconfig.py:585] Config param use_post_ffw_norm: True
+I0819 10:53:05.158373 136937940970368 pyconfig.py:585] Config param use_qk_clip: False
+I0819 10:53:05.158395 136937940970368 pyconfig.py:585] Config param use_qk_norm: False
+I0819 10:53:05.158416 136937940970368 pyconfig.py:585] Config param use_qwix_quantization: False
+I0819 10:53:05.158438 136937940970368 pyconfig.py:585] Config param use_ragged_attention: False
+I0819 10:53:05.158459 136937940970368 pyconfig.py:585] Config param use_ragged_sort: False
+I0819 10:53:05.158481 136937940970368 pyconfig.py:585] Config param use_random_routing: False
+I0819 10:53:05.158502 136937940970368 pyconfig.py:585] Config param use_ring_of_experts: False
+I0819 10:53:05.158524 136937940970368 pyconfig.py:585] Config param use_standalone_converter: False
+I0819 10:53:05.158546 136937940970368 pyconfig.py:585] Config param use_te_comm_gemm_overlap: False
+I0819 10:53:05.158567 136937940970368 pyconfig.py:585] Config param use_tokamax_gmm: False
+I0819 10:53:05.158589 136937940970368 pyconfig.py:585] Config param use_tokamax_splash: False
+I0819 10:53:05.158611 136937940970368 pyconfig.py:585] Config param use_truncation: True
+I0819 10:53:05.158632 136937940970368 pyconfig.py:585] Config param use_tunix_gradient_accumulation: False
+I0819 10:53:05.158653 136937940970368 pyconfig.py:585] Config param use_untrainable_positional_embedding: False
+I0819 10:53:05.158674 136937940970368 pyconfig.py:585] Config param v_norm_with_scale: False
+I0819 10:53:05.158695 136937940970368 pyconfig.py:585] Config param value_proj: RematLocation.OFFLOAD
+I0819 10:53:05.158717 136937940970368 pyconfig.py:585] Config param video_max_grid_h: None
+I0819 10:53:05.158739 136937940970368 pyconfig.py:585] Config param video_max_grid_t: None
+I0819 10:53:05.158761 136937940970368 pyconfig.py:585] Config param video_max_grid_w: None
+I0819 10:53:05.158782 136937940970368 pyconfig.py:585] Config param video_path: 
+I0819 10:53:05.158803 136937940970368 pyconfig.py:585] Config param video_placeholder: <|video|>
+I0819 10:53:05.158824 136937940970368 pyconfig.py:585] Config param vision_encoder_block: VisionEncoderBlockType.GEMMA4
+I0819 10:53:05.158848 136937940970368 pyconfig.py:585] Config param vllm: {'kv_cache_buffer': 256, 'hbm_utilization_vllm': 0.6, 'swap_space_vllm_gb': 2, 'enable_dp_attention': False, 'enable_expert_parallel': False, 'async_scheduling': False, 'max_num_batched_tokens': 8448, 'max_num_seqs': 256, 'stop_strings': None, 'vllm_additional_config': {'enable_continue_decode': True, 'max_decode_steps': 64}, 'vllm_hf_overrides': {'architectures': ['Gemma4ForCausalLM']}, 'vllm_hf_config_path': '', 'use_standalone_converter': False, 'vllm_load_format': 'dummy', 'debug_converter': False, 'gcs_debug_path': ''}
+I0819 10:53:05.158883 136937940970368 pyconfig.py:585] Config param vllm_additional_config: {'enable_continue_decode': True, 'max_decode_steps': 64}
+I0819 10:53:05.158906 136937940970368 pyconfig.py:585] Config param vllm_hf_config_path: 
+I0819 10:53:05.158927 136937940970368 pyconfig.py:585] Config param vllm_hf_overrides: {'architectures': ['Gemma4ForCausalLM']}
+I0819 10:53:05.158950 136937940970368 pyconfig.py:585] Config param vllm_load_format: dummy
+I0819 10:53:05.158972 136937940970368 pyconfig.py:585] Config param vocab_size: 262144
+I0819 10:53:05.158993 136937940970368 pyconfig.py:585] Config param vocab_size_per_layer_input: 262144
+I0819 10:53:05.159018 136937940970368 pyconfig.py:585] Config param warmup_steps_fraction: 0.1
+I0819 10:53:05.159040 136937940970368 pyconfig.py:585] Config param weight_dtype: bfloat16
+I0819 10:53:05.159069 136937940970368 pyconfig.py:585] Config param weight_quantization_calibration_method: absmax
+I0819 10:53:05.159093 136937940970368 pyconfig.py:585] Config param weight_sparsity_m: None
+I0819 10:53:05.159116 136937940970368 pyconfig.py:585] Config param weight_sparsity_n: None
+I0819 10:53:05.159137 136937940970368 pyconfig.py:585] Config param weight_sparsity_start_step: 50
+I0819 10:53:05.159159 136937940970368 pyconfig.py:585] Config param weight_sparsity_update_step: 10
+I0819 10:53:05.159181 136937940970368 pyconfig.py:585] Config param wi_tile_dlhs_batch_seq: 512
+I0819 10:53:05.159203 136937940970368 pyconfig.py:585] Config param wi_tile_dlhs_embed_dim: 1024
+I0819 10:53:05.159226 136937940970368 pyconfig.py:585] Config param wi_tile_dlhs_mlp_dim: 1024
+I0819 10:53:05.159248 136937940970368 pyconfig.py:585] Config param wi_tile_drhs_batch_seq: 512
+I0819 10:53:05.159269 136937940970368 pyconfig.py:585] Config param wi_tile_drhs_embed_dim: 1024
+I0819 10:53:05.159302 136937940970368 pyconfig.py:585] Config param wi_tile_drhs_mlp_dim: 1024
+I0819 10:53:05.159324 136937940970368 pyconfig.py:585] Config param wi_tile_fwd_batch_seq: 512
+I0819 10:53:05.159347 136937940970368 pyconfig.py:585] Config param wi_tile_fwd_embed_dim: 1024
+I0819 10:53:05.159368 136937940970368 pyconfig.py:585] Config param wi_tile_fwd_mlp_dim: 1024
+I0819 10:53:05.159389 136937940970368 pyconfig.py:585] Config param wo_tile_dlhs_batch_seq: 512
+I0819 10:53:05.159411 136937940970368 pyconfig.py:585] Config param wo_tile_dlhs_embed_dim: 1024
+I0819 10:53:05.159433 136937940970368 pyconfig.py:585] Config param wo_tile_dlhs_mlp_dim: 1024
+I0819 10:53:05.159454 136937940970368 pyconfig.py:585] Config param wo_tile_drhs_batch_seq: 512
+I0819 10:53:05.159476 136937940970368 pyconfig.py:585] Config param wo_tile_drhs_embed_dim: 1024
+I0819 10:53:05.159497 136937940970368 pyconfig.py:585] Config param wo_tile_drhs_mlp_dim: 1024
+I0819 10:53:05.159519 136937940970368 pyconfig.py:585] Config param wo_tile_fwd_batch_seq: 512
+I0819 10:53:05.159540 136937940970368 pyconfig.py:585] Config param wo_tile_fwd_embed_dim: 1024
+I0819 10:53:05.159561 136937940970368 pyconfig.py:585] Config param wo_tile_fwd_mlp_dim: 1024
+I0819 10:53:05.159583 136937940970368 pyconfig.py:585] Config param wsd_decay_steps_fraction: 0.1
+I0819 10:53:05.159605 136937940970368 pyconfig.py:585] Config param wsd_decay_style: WsdDecayStyle.LINEAR
+I0819 10:53:05.159631 136937940970368 pyconfig.py:585] Config param xprof_e2e_enable_fw_power_level_event: False
+I0819 10:53:05.159653 136937940970368 pyconfig.py:585] Config param xprof_e2e_enable_fw_thermal_event: False
+I0819 10:53:05.159675 136937940970368 pyconfig.py:585] Config param xprof_e2e_enable_fw_throttle_event: False
+I0819 10:53:05.159697 136937940970368 pyconfig.py:585] Config param xprof_tpu_power_trace_level: 0
+I0819 10:53:05.159722 136937940970368 pyconfig.py:585] Config param z_loss_multiplier: 0.0
+I0819 10:53:05.159866 136937940970368 model_creation_utils.py:672] Running on a single slice
+I0819 10:53:05.159909 136937940970368 model_creation_utils.py:679] 2 VMs detected, allocating trainer and sampler devices, and using Pathways.
+I0819 10:53:05.159945 136937940970368 model_creation_utils.py:686] Using first 4 devices as Trainer devices
+I0819 10:53:05.159973 136937940970368 model_creation_utils.py:688] Using last 4 devices as Sampler devices
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+W0819 10:53:05.806647 136937940970368 _http.py:951] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+I0819 10:53:09.285560 136937940970368 model_creation_utils.py:763] Creating reference model and also meshes for reference and rollout
+I0819 10:53:09.285809 136937940970368 abstract_checkpointer.py:35] orbax-checkpoint version: 0.12.1
+I0819 10:53:09.285895 136937940970368 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I0819 10:53:09.286030 136937940970368 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7c874bd4c680>, enable_pinned_host_transfer=False, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I0819 10:53:09.286186 136937940970368 async_checkpointer.py:192] [process=0][thread=MainThread] Using barrier_sync_fn: <function get_barrier_sync_fn.<locals>.<lambda> at 0x7c874487c680> timeout: 1200 secs and primary_host=0 for async checkpoint writes
+I0819 10:53:09.487856 136937940970368 checkpoint.py:228] Read Metadata={'item_handlers': 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler', 'metrics': {}, 'performance_metrics': {}, 'init_timestamp_nsecs': 1786666802483086798, 'commit_timestamp_nsecs': 1786666853633818660, 'custom_metadata': {}} from gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items/_CHECKPOINT_METADATA
+I0819 10:53:09.632550     392 google_auth_provider.cc:181] Running on GCE, using service account 390987599272-compute@developer.gserviceaccount.com
+I0819 10:53:10.288223 136937940970368 maxtext_utils.py:2243] Num_devices: 4, shape (1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1)
+I0819 10:53:15.212245 136937940970368 maxtext_utils.py:2243] Num_devices: 4, shape (1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1)
+I0819 10:53:54.762781 136937940970368 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I0819 10:53:54.762984 136937940970368 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=False, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7c874bd4c680>, enable_pinned_host_transfer=False, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I0819 10:53:55.904975 136937940970368 event_tracking.py:76] [process=0] [sync] Started load checkpoint @ gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items.
+I0819 10:53:56.012049 136937940970368 checkpointer.py:309] Restoring checkpoint from gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items.
+I0819 10:53:56.012295 136937940970368 event_tracking.py:172] [process=0] [sync] Finished blocking load in 0.11 seconds. Continuing load @ gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items.
+I0819 10:53:56.655128 136937940970368 array_metadata_store.py:248] [process=0][thread=MainThread] No metadata found for process_index=0, checkpoint_dir=gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items. If the checkpoint does not contain jax.Array then it is expected. If checkpoint contains jax.Array then it should lead to an error eventually; if no error is raised then it is a bug.
+W0819 10:54:16.997182 136937940970368 transform_utils.py:230] The transformations API will eventually be replaced by an upgraded design. The current API will not be removed until this point, but it will no longer be actively worked on.
+I0819 10:54:17.004478 136937940970368 event_tracking.py:185] [process=0] [sync] Finished load in 21.10 seconds @ gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items
+I0819 10:54:17.067587 136937940970368 maxtext_utils.py:2243] Num_devices: 4, shape (1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1)
+I0819 10:54:17.067797 136937940970368 model_creation_utils.py:789] Creating policy model with same config as reference model on trainer mesh
+I0819 10:54:17.067969 136937940970368 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I0819 10:54:17.068097 136937940970368 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7c874bd4c680>, enable_pinned_host_transfer=False, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I0819 10:54:17.068281 136937940970368 async_checkpointer.py:192] [process=0][thread=MainThread] Using barrier_sync_fn: <function get_barrier_sync_fn.<locals>.<lambda> at 0x7c8744577c40> timeout: 1200 secs and primary_host=0 for async checkpoint writes
+I0819 10:54:18.031123 136937940970368 maxtext_utils.py:2243] Num_devices: 4, shape (1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1)
+I0819 10:54:23.803293 136937940970368 maxtext_utils.py:2243] Num_devices: 4, shape (1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1)
+I0819 10:54:30.086111 136937940970368 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I0819 10:54:30.086300 136937940970368 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=False, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7c874bd4c680>, enable_pinned_host_transfer=False, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I0819 10:54:31.050901 136937940970368 event_tracking.py:76] [process=0] [sync] Started load checkpoint @ gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items.
+I0819 10:54:31.143344 136937940970368 checkpointer.py:309] Restoring checkpoint from gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items.
+I0819 10:54:31.143583 136937940970368 event_tracking.py:172] [process=0] [sync] Finished blocking load in 0.09 seconds. Continuing load @ gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items.
+I0819 10:54:31.777368 136937940970368 array_metadata_store.py:248] [process=0][thread=MainThread] No metadata found for process_index=0, checkpoint_dir=gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items. If the checkpoint does not contain jax.Array then it is expected. If checkpoint contains jax.Array then it should lead to an error eventually; if no error is raised then it is a bug.
+W0819 10:54:48.626856 136937940970368 transform_utils.py:230] The transformations API will eventually be replaced by an upgraded design. The current API will not be removed until this point, but it will no longer be actively worked on.
+I0819 10:54:48.634377 136937940970368 event_tracking.py:185] [process=0] [sync] Finished load in 17.58 seconds @ gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items
+Generating train_1M split: 0 examples [00:00, ? examples/s]Generating train_1M split: 28000 examples [00:00, 277432.51 examples/s]Generating train_1M split: 62000 examples [00:00, 310964.48 examples/s]Generating train_1M split: 104000 examples [00:00, 331522.50 examples/s]Generating train_1M split: 147000 examples [00:00, 364815.65 examples/s]Generating train_1M split: 204000 examples [00:00, 367946.29 examples/s]Generating train_1M split: 241000 examples [00:00, 366198.40 examples/s]Generating train_1M split: 284000 examples [00:00, 365135.30 examples/s]Generating train_1M split: 326000 examples [00:00, 378518.10 examples/s]Generating train_1M split: 379334 examples [00:01, 366612.83 examples/s]Generating train_1M split: 434334 examples [00:01, 363569.63 examples/s]Generating train_1M split: 490334 examples [00:01, 352181.47 examples/s]Generating train_1M split: 533334 examples [00:01, 368903.80 examples/s]Generating train_1M split: 591334 examples [00:01, 373492.97 examples/s]Generating train_1M split: 629334 examples [00:01, 372498.13 examples/s]Generating train_1M split: 667667 examples [00:01, 364045.56 examples/s]Generating train_1M split: 712667 examples [00:01, 383435.54 examples/s]Generating train_1M split: 753667 examples [00:02, 388070.32 examples/s]Generating train_1M split: 793667 examples [00:02, 381373.38 examples/s]Generating train_1M split: 852667 examples [00:02, 383358.39 examples/s]Generating train_1M split: 912667 examples [00:02, 384009.93 examples/s]Generating train_1M split: 951667 examples [00:02, 379120.64 examples/s]Generating train_1M split: 994667 examples [00:02, 388763.78 examples/s]Generating train_1M split: 1000000 examples [00:02, 371843.44 examples/s]
+I0819 10:54:59.476556 136937940970368 _schedule.py:129] A polynomial schedule was set with a non-positive `transition_steps` value; this results in a constant schedule with value `init_value`.
+W0819 10:54:59.506088 136937940970368 pyconfig.py:112] base_output_directory is not provided; Using local directory called maxtext_output
+I0819 10:54:59.529464 136937940970368 max_utils.py:245] Skipping jax distributed system due to skip_jax_distributed_system=True flag.
+/usr/local/lib/python3.12/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+  PydanticSerializationUnexpectedValue(Expected `enum` - serialized value may not be as expected [field_name='decoder_block', input_value='llama2', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `enum` - serialized value may not be as expected [field_name='shard_mode', input_value='auto', input_type=str])
+  return self.__pydantic_serializer__.to_python(
+I0819 10:54:59.531039 136937940970368 train_rl.py:537] Creating RL cluster...
+I0819 10:54:59.531192 136937940970368 export.py:104] Collecting perf metrics with rollout on one mesh, and actor and reference on another mesh.
+I0819 10:55:00.474814 136937940970368 metrics_logger.py:95] WandbBackend skipped: 'wandb' library not installed.
+I0819 10:55:00.482929 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'model' with value 'google/gemma-4-E2B-it'.
+I0819 10:55:00.483018 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'max_model_len' with value '8448'.
+I0819 10:55:00.483049 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'async_scheduling' with value 'False'.
+I0819 10:55:00.483083 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'max_num_batched_tokens' with value '8448'.
+I0819 10:55:00.483110 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'max_num_seqs' with value '256'.
+I0819 10:55:00.483136 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'hf_config_path' with value ''.
+I0819 10:55:00.483162 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'max_logprobs' with value '1'.
+I0819 10:55:00.483188 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'logprobs_mode' with value 'processed_logprobs'.
+I0819 10:55:00.483215 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'hf_overrides' with value '{'architectures': ['Gemma4ForCausalLM']}'.
+I0819 10:55:00.483246 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'enable_expert_parallel' with value 'False'.
+I0819 10:55:00.483270 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'enable_prefix_caching' with value 'True'.
+I0819 10:55:00.483319 136937940970368 vllm_sampler.py:105] Engine kwargs setting key 'dtype' with value 'bfloat16'.
+INFO 08-19 10:55:00 [attention_interface.py:59] Using default RPA kernel
+INFO 08-19 10:55:00 [__init__.py:112] Registered model loader `<class 'tpu_inference.models.common.pathways_dummy_loader.PathwaysDummyModelLoader'>` with load format `pathways_dummy`
+INFO 08-19 10:55:00 [__init__.py:112] Registered model loader `<class 'tpu_inference.models.vllm.vllm_model_loader.IncrementalModelLoader'>` with load format `tpu_streaming_loader`
+WARNING 08-19 10:55:00 [__init__.py:101] Load format `runai_streamer` is already registered, and will be overwritten by the new loader class `<class 'tpu_inference.models.vllm.vllm_model_loader.RunaiIncrementalModelLoader'>`.
+INFO 08-19 10:55:00 [__init__.py:112] Registered model loader `<class 'tpu_inference.models.vllm.vllm_model_loader.RunaiIncrementalModelLoader'>` with load format `runai_streamer`
+INFO 08-19 10:55:01 [__init__.py:31] Registering MaxTextForCausalLM model with tpu_inference and vllm.
+INFO 08-19 10:55:01 [model_loader.py:855] Registered JAX model MaxTextForCausalLM with tpu_inference and vLLM registries.
+I0819 10:55:01.177874 136937940970368 adapter.py:523] Successfully applied KVCacheManager patch for hybrid GDN models.
+INFO 08-19 10:55:01 [__init__.py:40] Successfully registered MaxTextForCausalLM model.
+INFO 08-19 10:55:01 [api_utils.py:273] non-default args: {'hf_config_path': '', 'load_format': 'dummy', 'dtype': 'bfloat16', 'max_model_len': 8448, 'tensor_parallel_size': 4, 'enable_prefix_caching': True, 'gpu_memory_utilization': 0.6, 'max_num_batched_tokens': 8448, 'max_num_seqs': 256, 'max_logprobs': 1, 'logprobs_mode': 'processed_logprobs', 'disable_log_stats': True, 'hf_overrides': {'architectures': ['Gemma4ForCausalLM']}, 'additional_config': {'enable_continue_decode': True, 'max_decode_steps': 64, 'sharding': {'sharding_strategy': {'expert_parallelism': 1, 'device_indexes': [4, 5, 6, 7], 'enable_dp_attention': False}}}, 'async_scheduling': False, 'model': 'google/gemma-4-E2B-it'}
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_HWANGINHO_SERVICE_PORT_8000_TCP_ADDR
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_1_HWANGINHO_SERVICE_PORT_8000_TCP_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_SERVICE_PORT_8000_TCP_PROTO
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_1_HWANGINHO_SERVICE_PORT_8000_TCP_PROTO
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_HWANGINHO_SERVICE_PORT_8000_TCP_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_R1_HWANGINHO_SERVICE_SERVICE_HOST
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_HWANGINHO_SERVICE_PORT_8000_TCP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_1_HWANGINHO_SERVICE_PORT_8000_TCP_ADDR
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_SERVICE_PORT_8000_TCP_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_SERVICE_SERVICE_HOST
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_SERVICE_SERVICE_HOST
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_HWANGINHO_SERVICE_PORT_8000_TCP_PROTO
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_1_HWANGINHO_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_SERVICE_SERVICE_PORT_HTTP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_SERVICE_PORT_8000_TCP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_R1_HWANGINHO_SERVICE_SERVICE_PORT_HTTP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_R1_HWANGINHO_SERVICE_PORT_8000_TCP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_SERVICE_PORT_8000_TCP_PROTO
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_HWANGINHO_SERVICE_SERVICE_PORT_HTTP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_1_HWANGINHO_SERVICE_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_R1_HWANGINHO_SERVICE_PORT_8000_TCP_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_SERVICE_SERVICE_PORT_HTTP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_HWANGINHO_SERVICE_PORT_8000_TCP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_HWANGINHO_SERVICE_PORT_8000_TCP_PROTO
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_HWANGINHO_SERVICE_PORT_8000_TCP_ADDR
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_R1_HWANGINHO_SERVICE_PORT_8000_TCP_PROTO
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_HWANGINHO_SERVICE_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_HWANGINHO_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_SERVICE_PORT_8000_TCP_ADDR
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_SERVICE_PORT_8000_TCP_ADDR
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_R1_HWANGINHO_SERVICE_PORT_8000_TCP_ADDR
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_1_HWANGINHO_SERVICE_SERVICE_PORT_HTTP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_HWANGINHO_SERVICE_SERVICE_HOST
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_HWANGINHO_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_HWANGINHO_SERVICE_PORT_8000_TCP_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_SERVICE_PORT_8000_TCP_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_R1_HWANGINHO_SERVICE_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_SERVICE_PORT_8000_TCP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_1_HWANGINHO_SERVICE_SERVICE_HOST
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_HWANGINHO_SERVICE_SERVICE_PORT_HTTP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_SERVICE_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_R1_HWANGINHO_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_SERVICE_SERVICE_PORT
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_DEEPSEEK_V3_1_HWANGINHO_SERVICE_PORT_8000_TCP
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_HWANGINHO_SERVICE_SERVICE_HOST
+WARNING 08-19 10:55:01 [envs.py:2098] Unknown vLLM environment variable detected: VLLM_QWEN_HWANGINHO_SERVICE_SERVICE_PORT
+WARNING 08-19 10:55:01 [arg_utils.py:1628] The global random seed is set to 0. Since VLLM_ENABLE_V1_MULTIPROCESSING is set to False, this may affect the random state of the Python process that launched vLLM.
+INFO 08-19 10:55:26 [model.py:627] Resolved architecture: Gemma4ForCausalLM
+INFO 08-19 10:55:26 [model.py:1799] Using max model len 8448
+INFO 08-19 10:55:26 [scheduler.py:242] Chunked prefill is enabled with max_num_batched_tokens=8448.
+INFO 08-19 10:55:26 [config.py:240] Gemma4 model has heterogeneous head dimensions (head_dim=256, global_head_dim=512). FA4 not available, forcing TRITON_ATTN backend.
+INFO 08-19 10:55:26 [vllm.py:1114] Asynchronous scheduling is disabled.
+WARNING 08-19 10:55:26 [vllm.py:1218] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 08-19 10:55:26 [kernel.py:303] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+INFO 08-19 10:55:26 [tpu_platform.py:233] Initialized sharding configuration: ShardingConfigManager(total_devices=4, sharding_strategy=ShardingStrategy(tensor_parallelism=4, expert_parallelism=1, sequence_parallelism=1, data_parallelism=1, attention_data_parallelism=1, attention_data_expert_parallelism=1, decode_context_parallelism=1, prefill_context_parallelism=1), mm_encoder_tp_mode=weights, device_indexes=[4, 5, 6, 7])
+WARNING 08-19 10:55:26 [tpu_platform.py:303] Increase the page size from 16 to 32 to avoid SMEM OOM
+INFO 08-19 10:55:26 [tpu_platform.py:318] Force using UniProcExecutor for JAX on single host without pipeline parallelism.
+WARNING 08-19 10:55:26 [vllm.py:582] Model Runner V2 requires Triton; using the V1 model runner instead.
+INFO 08-19 10:55:26 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+INFO 08-19 10:55:34 [core.py:116] Initializing a V1 LLM engine (v0.23.1rc1.dev1474+g0ba2aa35a) with config: model='google/gemma-4-E2B-it', speculative_config=None, tokenizer='google/gemma-4-E2B-it', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8448, download_dir=None, load_format=dummy, tensor_parallel_size=4, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=None, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=google/gemma-4-E2B-it, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'eager', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::kda_attention', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': [8448], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': None, 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': True, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+INFO 08-19 10:55:36 [parallel_state.py:1612] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/tmp37ehw9g_ backend=gloo
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+INFO 08-19 10:55:36 [parallel_state.py:1943] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+INFO 08-19 10:55:38 [tpu_runner.py:898] Creating new model mesh | devices=4, num_slices=1
+INFO 08-19 10:55:38 [tpu_runner.py:893] Init mesh | mesh=Mesh('data': 1, 'attn_dp': 1, 'attn_dp_expert': 1, 'expert': 1, 'model': 4, 'dcp': 1, 'pcp': 1, axis_types=(Auto, Auto, Auto, Auto, Auto, Auto, Auto))
+INFO 08-19 10:55:38 [utils.py:601] Phased-based profiler enabled. Traces will be saved to: gs://ubench-logs/alisachen-tpu7x/runs/g4n10s1052/phased_profile
+INFO 08-19 10:55:38 [utils.py:211] Prepared token paddings: [16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
+INFO 08-19 10:55:40 [utils.py:157] Prepared request paddings: [8, 16, 32, 64, 128, 256]
+INFO 08-19 10:55:40 [utils.py:176] Prepared attn request paddings: [256]
+INFO 08-19 10:55:40 [compilation_manager.py:65] Enabling JAX compile cache.
+INFO 08-19 10:55:40 [tpu_worker.py:466] Init worker | rank=0 | is_first_rank=True | is_last_rank=True | topology_order_id=0 | is_driver_worker=True | hbm=[(0.0, 96.0), (0.0, 96.0), (0.0, 96.0), (0.0, 96.0)]GiB |self.devices=[device(4,TPU_DEVICE,coords=[0,1,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(5,TPU_DEVICE,coords=[0,1,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(6,TPU_DEVICE,coords=[1,1,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(7,TPU_DEVICE,coords=[1,1,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3)] | total devices=[device(0,TPU_DEVICE,coords=[0,0,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(1,TPU_DEVICE,coords=[0,0,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(2,TPU_DEVICE,coords=[1,0,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(3,TPU_DEVICE,coords=[1,0,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(4,TPU_DEVICE,coords=[0,1,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(5,TPU_DEVICE,coords=[0,1,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(6,TPU_DEVICE,coords=[1,1,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(7,TPU_DEVICE,coords=[1,1,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3)] | local_devices=[device(0,TPU_DEVICE,coords=[0,0,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(1,TPU_DEVICE,coords=[0,0,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(2,TPU_DEVICE,coords=[1,0,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(3,TPU_DEVICE,coords=[1,0,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(4,TPU_DEVICE,coords=[0,1,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(5,TPU_DEVICE,coords=[0,1,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(6,TPU_DEVICE,coords=[1,1,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3), device(7,TPU_DEVICE,coords=[1,1,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3)]
+INFO 08-19 10:55:40 [model_loader.py:645] Loading model with MODEL_IMPL_TYPE=auto
+INFO 08-19 10:55:40 [model_loader.py:648] Resolved MODEL_IMPL_TYPE 'auto' to 'flax_nnx'
+ERROR 08-19 10:55:40 [tpu_info.py:40] Unable to poll TPU GCE Metadata. Got status code: 404 and content: <!DOCTYPE html>
+ERROR 08-19 10:55:40 [tpu_info.py:40] <html lang=en>
+ERROR 08-19 10:55:40 [tpu_info.py:40]   <meta charset=utf-8>
+ERROR 08-19 10:55:40 [tpu_info.py:40]   <meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">
+ERROR 08-19 10:55:40 [tpu_info.py:40]   <title>Error 404 (Not Found)!!1</title>
+ERROR 08-19 10:55:40 [tpu_info.py:40]   <style>
+ERROR 08-19 10:55:40 [tpu_info.py:40]     *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}
+ERROR 08-19 10:55:40 [tpu_info.py:40]   </style>
+ERROR 08-19 10:55:40 [tpu_info.py:40]   <a href=//www.google.com/><span id=logo aria-label=Google></span></a>
+ERROR 08-19 10:55:40 [tpu_info.py:40]   <p><b>404.</b> <ins>That’s an error.</ins>
+ERROR 08-19 10:55:40 [tpu_info.py:40]   <p>The requested URL <code>/computeMetadata/v1/instance/attributes/accelerator-type</code> was not found on this server.  <ins>That’s all we know.</ins>
+ERROR 08-19 10:55:40 [tpu_info.py:40] 
+WARNING 08-19 10:55:42 [gemma4.py:309] num_kv_heads=1 is not divisible by TP size 4, sharding k/v projections on head_dim instead of kv-heads. This may cause all-to-all communication overhead.
+INFO 08-19 10:57:17 [pathways_dummy_loader.py:125] Pathways dummy weight loading (jax) took 91.75s
+INFO 08-19 10:57:23 [tpu_runner.py:1263] Cleared JIT caches after weight loading
+INFO 08-19 10:57:24 [tpu_runner.py:1265] Init model | hbm=[(2.22, 96.0), (2.22, 96.0), (2.22, 96.0), (2.22, 96.0)]GiB
+INFO 08-19 10:57:24 [tpu_platform.py:393] Using cache_config.block_size: 32 instead of overriding with _align_hybrid_block_size() since we set mamba_page_size_padded in kv_cache_manager.py
+INFO 08-19 10:57:24 [tpu_worker.py:552] Memory statistics | total_hbm_limit_gb=384.0GiB | total_hbm_limit_cap_gb=230.4GiB | total_hbm_used_gb=8.89GiB | total_hbm_avail_gb=221.51GiB
+INFO 08-19 10:57:24 [kv_cache_utils.py:2214] GPU KV cache size: 3,225,984 tokens
+INFO 08-19 10:57:24 [kv_cache_utils.py:2215] Maximum concurrency for 8,448 tokens per request: 381.86x
+INFO 08-19 10:57:26 [kv_cache_manager.py:985] Hybrid KV cache layout: num_kv_cache_groups=1, num_kv_cache_tensors=15, kv_cache_config.num_blocks=100812, duplicate_shared_layers=False
+INFO 08-19 10:57:26 [kv_cache_manager.py:1013] Init kv-cache | num_total_layers=15 | num_blocks=[100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812] | regular_attn_layers=15 | regular_attn_shape=(num_blocks, (32, 4, 2, 256)) | regular_attn_sharding=NamedSharding(mesh=Mesh('data': 1, 'attn_dp': 1, 'attn_dp_expert': 1, 'expert': 1, 'model': 4, 'dcp': 1, 'pcp': 1, axis_types=(Auto, Auto, Auto, Auto, Auto, Auto, Auto)), spec=P(('data', 'attn_dp', 'attn_dp_expert'), ('pcp', 'dcp'), ('model', 'expert')), memory_kind=device) | regular_attn_dtype=bfloat16 | hbm=[(57.6, 96.0), (57.6, 96.0), (57.6, 96.0), (57.6, 96.0)]Gb
+INFO 08-19 10:57:28 [core.py:347] init engine (profile, create kv cache, warmup model) took 3.96 s
+INFO 08-19 10:57:29 [block_pool.py:790] Successfully reset prefix cache
+INFO 08-19 10:57:29 [kv_cache_manager.py:1047] Deleting kv-cache | num_layers=15 | hbm_before=[(57.6, 96.0), (57.6, 96.0), (57.6, 96.0), (57.6, 96.0)]Gb
+INFO 08-19 10:57:29 [kv_cache_manager.py:1059] KV cache delete complete | hbm_after=[(2.22, 96.0), (2.22, 96.0), (2.22, 96.0), (2.22, 96.0)]Gb
+I0819 10:58:20.923133 136896311195328 reshard.py:232] Reshard finished in 8.45s
+INFO 08-19 10:58:21 [kv_cache_manager.py:1088] Reinitializing kv-cache | hbm_before=[(2.22, 96.0), (2.22, 96.0), (2.22, 96.0), (2.22, 96.0)]Gb
+INFO 08-19 10:58:21 [kv_cache_manager.py:985] Hybrid KV cache layout: num_kv_cache_groups=1, num_kv_cache_tensors=15, kv_cache_config.num_blocks=100812, duplicate_shared_layers=False
+INFO 08-19 10:58:21 [kv_cache_manager.py:1013] Init kv-cache | num_total_layers=15 | num_blocks=[100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812, 100812] | regular_attn_layers=15 | regular_attn_shape=(num_blocks, (32, 4, 2, 256)) | regular_attn_sharding=NamedSharding(mesh=Mesh('data': 1, 'attn_dp': 1, 'attn_dp_expert': 1, 'expert': 1, 'model': 4, 'dcp': 1, 'pcp': 1, axis_types=(Auto, Auto, Auto, Auto, Auto, Auto, Auto)), spec=P(('data', 'attn_dp', 'attn_dp_expert'), ('pcp', 'dcp'), ('model', 'expert')), memory_kind=device) | regular_attn_dtype=bfloat16 | hbm=[(57.6, 96.0), (57.6, 96.0), (57.6, 96.0), (57.6, 96.0)]Gb
+I0819 10:59:08.691760 136937940970368 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I0819 10:59:08.691979 136937940970368 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=False, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7c874bd4c680>, enable_pinned_host_transfer=False, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I0819 10:59:08.692100 136937940970368 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I0819 10:59:08.692199 136937940970368 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=False, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7c874bd4c680>, enable_pinned_host_transfer=False, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I0819 10:59:08.692271 136937940970368 checkpoint_manager.py:65] Using persistence API for checkpointing with Pathways.
+I0819 10:59:08.692368 136937940970368 checkpoint_manager.py:709] [process=0][thread=MainThread] CheckpointManager init: checkpointers=None, item_names=None, item_handlers={'model_params': <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7c846cd5f0e0>, 'optimizer_state': <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7c846c7efec0>, 'custom_metadata': <orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7c82be099ca0>}, handler_registry=None
+I0819 10:59:08.692777 136937940970368 composite_checkpoint_handler.py:237] Deferred registration for item: "model_params". Adding handler `<orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7c846cd5f0e0>` for item "model_params" and save args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>` to `_handler_registry`.
+I0819 10:59:08.692859 136937940970368 composite_checkpoint_handler.py:237] Deferred registration for item: "optimizer_state". Adding handler `<orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7c846c7efec0>` for item "optimizer_state" and save args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>` to `_handler_registry`.
+I0819 10:59:08.692907 136937940970368 composite_checkpoint_handler.py:237] Deferred registration for item: "custom_metadata". Adding handler `<orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7c82be099ca0>` for item "custom_metadata" and save args `<class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonRestoreArgs'>` to `_handler_registry`.
+I0819 10:59:08.692976 136937940970368 composite_checkpoint_handler.py:237] Deferred registration for item: "metrics". Adding handler `<orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7c846e4e90a0>` for item "metrics" and save args `<class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonRestoreArgs'>` to `_handler_registry`.
+I0819 10:59:08.693751 136937940970368 composite_checkpoint_handler.py:505] Initialized registry DefaultCheckpointHandlerRegistry({('model_params', <class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>): <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7c846cd5f0e0>, ('model_params', <class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>): <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7c846cd5f0e0>, ('optimizer_state', <class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>): <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7c846c7efec0>, ('optimizer_state', <class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>): <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7c846c7efec0>, ('custom_metadata', <class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonSaveArgs'>): <orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7c82be099ca0>, ('custom_metadata', <class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonRestoreArgs'>): <orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7c82be099ca0>, ('metrics', <class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonSaveArgs'>): <orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7c846e4e90a0>, ('metrics', <class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonRestoreArgs'>): <orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7c846e4e90a0>}).
+I0819 10:59:08.693945 136937940970368 async_checkpointer.py:192] [process=0][thread=MainThread] Using barrier_sync_fn: <function get_barrier_sync_fn.<locals>.<lambda> at 0x7c82be1ea0c0> timeout: 1200 secs and primary_host=0 for async checkpoint writes
+I0819 10:59:09.183735 136937940970368 checkpoint_manager.py:565] Created directory=gs://ubench-logs/alisachen-tpu7x/runs/g4n10s1052/checkpoints/actor
+I0819 10:59:09.450815 136937940970368 checkpoint_manager.py:1820] Found 0 checkpoint steps in gs://ubench-logs/alisachen-tpu7x/runs/g4n10s1052/checkpoints/actor
+I0819 10:59:09.451151 136937940970368 checkpoint_manager.py:931] [process=0][thread=MainThread] CheckpointManager created,  primary_host=0, CheckpointManagerOptions=CheckpointManagerOptions(save_interval_steps=10, max_to_keep=10, keep_time_interval=None, keep_period=None, should_keep_fn=None, best_fn=None, best_mode='max', keep_checkpoints_without_metrics=True, step_prefix=None, step_format_fixed_length=None, step_name_format=None, create=True, cleanup_tmp_directories=False, save_on_steps=frozenset(), single_host_load_and_broadcast=False, todelete_subdir=None, todelete_full_path=None, enable_background_delete=False, num_deletion_threads=None, read_only=False, enable_async_checkpointing=True, async_options=None, multiprocessing_options=MultiprocessingOptions(primary_host=0, active_processes=None, barrier_sync_key_prefix=None), should_save_fn=None, file_options=FileOptions(path_permission_mode=None), save_root_metadata=True, temporary_path_class=None, save_decision_policy=None, preservation_policy=None, prevent_write_metrics=False, enable_should_save_is_saving_in_progress_check=True, enable_per_process_directory_creation=False, lightweight_initialize=False), root_directory=gs://ubench-logs/alisachen-tpu7x/runs/g4n10s1052/checkpoints/actor: <orbax.checkpoint.checkpoint_manager.CheckpointManager object at 0x7c82be099640>
+I0819 10:59:09.617054 136937940970368 train_rl.py:575] Setting up RL trainer...
+I0819 10:59:09.617182 136937940970368 train_rl.py:616] Using standard GRPOLearner with offline rollouts.
+I0819 10:59:09.631825 136937940970368 utils.py:161] RLLearner init - Using Pathways compatible HBM stats collector
+I0819 10:59:09.917886 136937940970368 utils.py:165] Using 12.9 GiB on device(0,TPU_DEVICE,coords=[0,0,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3)
+I0819 10:59:09.918013 136937940970368 utils.py:165] Using 12.9 GiB on device(1,TPU_DEVICE,coords=[0,0,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3)
+I0819 10:59:09.918060 136937940970368 utils.py:165] Using 12.9 GiB on device(2,TPU_DEVICE,coords=[1,0,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3)
+I0819 10:59:09.918098 136937940970368 utils.py:165] Using 12.9 GiB on device(3,TPU_DEVICE,coords=[1,0,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3)
+I0819 10:59:09.918133 136937940970368 utils.py:165] Using 57.6 GiB on device(4,TPU_DEVICE,coords=[0,1,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3)
+I0819 10:59:09.918168 136937940970368 utils.py:165] Using 57.6 GiB on device(5,TPU_DEVICE,coords=[0,1,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3)
+I0819 10:59:09.918203 136937940970368 utils.py:165] Using 57.6 GiB on device(6,TPU_DEVICE,coords=[1,1,0,0],logical_task=0,slice=0,default_mem=device,mem_spaces=3)
+I0819 10:59:09.918237 136937940970368 utils.py:165] Using 57.6 GiB on device(7,TPU_DEVICE,coords=[1,1,0,1],logical_task=0,slice=0,default_mem=device,mem_spaces=3)
+W0819 10:59:09.918421 136937940970368 train_rl.py:774] Starting RL training...
+I0819 10:59:10.494950 136937940970368 rl_learner.py:556] Training with full_batch_size=8, mini_batch_size=8, train_micro_batch_size=4, self._rollout_micro_batch_size=8, self._compute_logps_micro_batch_size=4, grad_acc_steps=2
+WARNING 08-19 10:59:10 [model.py:1553] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'temperature': 1.0, 'top_k': 64, 'top_p': 0.95}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.
+I0819 10:59:10.642098 136896151799488 vllm_sampler.py:496] Received additional kwargs that are not explicitly defined in the method signature: {'stop': None, 'detokenize': False, 'include_stop_str_in_output': False}. These will be forwarded to the underlying sampler, but please ensure that they are valid.
+Rendering prompts:   0%|          | 0/64 [00:00<?, ?it/s]Rendering prompts: 100%|██████████| 64/64 [00:00<00:00, 7494.01it/s]
+INFO 08-19 10:59:10 [utils.py:680] Starting profiling for prefill_only phase
+INFO 08-19 10:59:10 [utils.py:681] Batch composition stats: {'batch_id': 1, 'total_num_scheduled_tokens': 2096, 'num_prefill_tokens': 2096, 'num_decode_tokens': 0, 'padded_total_num_scheduled_tokens': 4096, 'num_reqs': 64, 'min_kv_len': 0, 'phase': 'PREFILL_ONLY'}
+Processed prompts:   0%|          | 0/64 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]I0819 10:59:12.441531     863 profiler_session.cc:119] Profiler session initializing.
+I0819 10:59:12.441552     863 profiler_session.cc:134] Profiler session started.
+Processed prompts:   2%|▏         | 1/64 [02:22<2:29:09, 142.05s/it, est. speed input: 0.67 toks/s, output: 0.01 toks/s]Processed prompts:   5%|▍         | 3/64 [03:34<1:04:42, 63.65s/it, est. speed input: 1.50 toks/s, output: 0.10 toks/s] Processed prompts:   9%|▉         | 6/64 [03:35<23:58, 24.81s/it, est. speed input: 3.45 toks/s, output: 0.84 toks/s]  Processed prompts:  11%|█         | 7/64 [03:36<18:27, 19.42s/it, est. speed input: 4.02 toks/s, output: 1.72 toks/s]Processed prompts:  19%|█▉        | 12/64 [03:37<06:32,  7.54s/it, est. speed input: 8.10 toks/s, output: 6.08 toks/s]Processed prompts:  20%|██        | 13/64 [03:38<05:33,  6.54s/it, est. speed input: 8.50 toks/s, output: 7.24 toks/s]Processed prompts:  23%|██▎       | 15/64 [03:40<03:57,  4.84s/it, est. speed input: 9.46 toks/s, output: 10.49 toks/s]Processed prompts:  28%|██▊       | 18/64 [03:45<02:45,  3.60s/it, est. speed input: 11.12 toks/s, output: 17.38 toks/s]I0819 11:02:58.805789     863 profiler_session.cc:82] Profiler session collecting data.
+I0819 11:03:37.069980     863 save_profile.cc:151] Collecting XSpace to repository: gs://ubench-logs/alisachen-tpu7x/runs/g4n10s1052/phased_profile/prefill_only/dp_rank_0/plugins/profile/2026_08_19_10_59_10/gke-bodaborg-tpu7x-nap-cpu-np-7722bcae-9n7d.xplane.pb
+I0819 11:04:15.045159     863 save_profile.cc:124] Creating directory: gs://ubench-logs/alisachen-tpu7x/runs/g4n10s1052/phased_profile/prefill_only/dp_rank_0/plugins/profile/2026_08_19_10_59_10
+
+I0819 11:04:16.807156     863 save_profile.cc:130] Dumped gzipped tool data for trace.json.gz to gs://ubench-logs/alisachen-tpu7x/runs/g4n10s1052/phased_profile/prefill_only/dp_rank_0/plugins/profile/2026_08_19_10_59_10/gke-bodaborg-tpu7x-nap-cpu-np-7722bcae-9n7d.trace.json.gz
+I0819 11:04:18.946142     863 profiler_session.cc:152] Profiler session tear down.
+INFO 08-19 11:04:20 [utils.py:728] Profiling for prefill_only phase finished
+INFO 08-19 11:04:21 [utils.py:680] Starting profiling for decode_only phase
+INFO 08-19 11:04:21 [utils.py:681] Batch composition stats: {'batch_id': 17, 'total_num_scheduled_tokens': 46, 'num_prefill_tokens': 0, 'num_decode_tokens': 46, 'padded_total_num_scheduled_tokens': 64, 'num_reqs': 46, 'min_kv_len': 1054, 'phase': 'DECODE_ONLY'}
+I0819 11:04:21.129436     863 profiler_session.cc:119] Profiler session initializing.
+I0819 11:04:21.129795     863 profiler_session.cc:134] Profiler session started.
+I0819 11:04:35.722092     863 profiler_session.cc:82] Profiler session collecting data.
+I0819 11:04:36.477207     863 save_profile.cc:151] Collecting XSpace to repository: gs://ubench-logs/alisachen-tpu7x/runs/g4n10s1052/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_19_10_59_10/gke-bodaborg-tpu7x-nap-cpu-np-7722bcae-9n7d.xplane.pb
+I0819 11:04:38.504762     863 save_profile.cc:124] Creating directory: gs://ubench-logs/alisachen-tpu7x/runs/g4n10s1052/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_19_10_59_10
+
+I0819 11:04:40.079846     863 save_profile.cc:130] Dumped gzipped tool data for trace.json.gz to gs://ubench-logs/alisachen-tpu7x/runs/g4n10s1052/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_19_10_59_10/gke-bodaborg-tpu7x-nap-cpu-np-7722bcae-9n7d.trace.json.gz
+I0819 11:04:40.379329     863 profiler_session.cc:152] Profiler session tear down.
+INFO 08-19 11:04:40 [utils.py:728] Profiling for decode_only phase finished
+Processed prompts:  30%|██▉       | 19/64 [05:36<15:21, 20.49s/it, est. speed input: 8.01 toks/s, output: 18.69 toks/s] Processed prompts:  31%|███▏      | 20/64 [05:56<15:02, 20.51s/it, est. speed input: 7.90 toks/s, output: 29.09 toks/s]Processed prompts: 100%|██████████| 64/64 [05:56<00:00, 20.51s/it, est. speed input: 25.97 toks/s, output: 534.30 toks/s]Processed prompts: 100%|██████████| 64/64 [05:56<00:00,  5.57s/it, est. speed input: 25.97 toks/s, output: 534.30 toks/s]
+/usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+W0819 11:05:12.038296 136896151799488 reward_manager.py:206] Reward fn match_format_exactly failed in worker processes (PicklingError("Can't pickle <function match_format_exactly at 0x7c82be0caca0>: it's not the same object as maxtext.trainers.post_train.rl.utils_rl.match_format_exactly")); evaluating it in the parent process from now on.
+W0819 11:05:12.059154 136896151799488 reward_manager.py:206] Reward fn match_format_approximately failed in worker processes (PicklingError("Can't pickle <function match_format_approximately at 0x7c82be3663e0>: it's not the same object as maxtext.trainers.post_train.rl.utils_rl.match_format_approximately")); evaluating it in the parent process from now on.
+W0819 11:05:12.061167 136896151799488 reward_manager.py:206] Reward fn check_numbers failed in worker processes (PicklingError("Can't pickle <function check_numbers at 0x7c82be3667a0>: it's not the same object as maxtext.trainers.post_train.rl.utils_rl.check_numbers")); evaluating it in the parent process from now on.
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/usr/local/lib/python3.12/site-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV32Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+[transformers] DeepseekV4Config got `key=rope_scaling` in kwargs but hasn't set it as attribute. For RoPE standardization you need to set `self.rope_parameters` in model's config. 
+2026-08-19 11:05:29.281310: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:29.281625: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:29.282207: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:29.282482: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:29.322586: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:29.322903: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:29.329202: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:29.329204: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:29.372680: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:29.380793: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:29.381198: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:29.433125: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:29.453346: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:29.453679: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:29.500749: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:29.605821: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:29.606270: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:29.655192: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:29.711081: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:29.711484: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:29.764580: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:29.975985: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:29.976326: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.007813: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:30.008137: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.026976: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:30.054587: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:30.158905: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:30.159242: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.209726: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:30.212386: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:30.212730: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.262859: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:30.267203: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:30.267538: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.316793: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:30.356725: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:30.357070: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.375317: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:30.375671: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.405697: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:30.423645: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:30.446677: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:30.447068: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.500532: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:30.613857: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:30.614203: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.664145: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:30.769746: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:30.770114: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.819424: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:30.819826: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:30.822802: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:30.874072: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.064692: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.065040: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.113676: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.168112: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.169482: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.192492: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.194042: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.207367: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.207382: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.207716: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.207716: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.256152: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.256158: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.260078: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.260510: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.283668: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.284875: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.285660: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.287127: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.287667: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.288004: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.307421: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.308438: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.315704: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.337936: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.395527: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.396012: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.464048: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.465153: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.476558: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.507002: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.507346: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.557117: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.557315: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.557436: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.609564: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.661991: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.663131: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.691625: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.691947: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.739840: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.812701: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.813122: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.864237: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:31.864569: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:31.893166: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:31.914699: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:32.035644: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.037097: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.078554: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.079911: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.089542: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.090849: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.107301: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.108494: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.170367: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.170684: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.202928: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.204901: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.209316: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.210762: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.219126: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:32.253488: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.253863: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.299225: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.300341: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.301081: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:32.483223: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.484556: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.641170: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.642347: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.691443: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.697068: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:32.873312: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:32.874396: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:33.244199: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:33.244881: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:33.325225: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:33.330591: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:33.332069: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-19 11:05:33.343940: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:33.346682: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:33.389855: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:33.391127: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:33.393217: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:33.394436: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:33.505422: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:33.506782: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:33.649656: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:33.650764: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:33.759192: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:33.759646: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:33.762445: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:33.766014: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:33.917912: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:33.919099: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:34.156771: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:34.157814: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:34.260808: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:34.288770: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:34.529853: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:34.530916: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:34.638948: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:34.640092: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-08-19 11:05:36.709106: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-08-19 11:05:36.711060: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:math_verify.parser:Timeout is disabled as parsing_timeout is None or <= 0, you must provide                         the logic for timeout interuption yourself to prevent code getting stuck.
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:math_verify.parser:Timeout is disabled as parsing_timeout is None or <= 0, you must provide                         the logic for timeout interuption yourself to prevent code getting stuck.
+WARNING:math_verify.grader:Timeout is disabled as timeout_seconds is None or <= 0, you must provide                         the logic for timeout interuption yourself to prevent code getting stuck.
+WARNING:math_verify.grader:Timeout is disabled as timeout_seconds is None or <= 0, you must provide                         the logic for timeout interuption yourself to prevent code getting stuck.
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+I0819 11:05:41.830485 136896151799488 math_verify_pool.py:257] math_verify_pool: Processed 39/39 items (0 timed out).
+LENDIST step=0 n=64 cap=4096 truncated=45 (70.31%) eos_at_cap=0 osl_mean=2978.2 isl_mean=144.8
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+WARNING:absl:Type handler registry type "<class 'jax.Array'>" overriding jax.Array
+I0819 11:05:45.280825 136937940970368 peft_trainer.py:598] Training with mesh: Mesh('data': 1, 'stage': 1, 'fsdp': 4, 'fsdp_transpose': 1, 'sequence': 1, 'context': 1, 'context_autoregressive': 1, 'tensor': 1, 'tensor_sequence': 1, 'expert': 1, 'autoregressive': 1, axis_types=(Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto))
+I0819 11:06:18.306384 136937940970368 peft_trainer.py:608] Compiled train_step cache size: 0
+PHASETIME step=0 compute_rewards=31.05 engine_generate=357.06 generate_and_advantage=391.67 micro_batch_steps=436.73 prepare_data=394.78 run_global_step=436.73
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 213, in _broadcast_shapes_uncached
+[rank0]:     return _try_broadcast_shapes(*rank_promoted_shapes, name='broadcast_shapes')
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 126, in _try_broadcast_shapes
+[rank0]:     raise TypeError(f'{name} got incompatible shapes for broadcasting: '
+[rank0]: TypeError: broadcast_shapes got incompatible shapes for broadcasting: (32, 4, 1024), (1, 32, 4096).
+
+[rank0]: The above exception was the direct cause of the following exception:
+
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 191, in broadcast_shapes
+[rank0]:     return _broadcast_shapes_cached(*shapes)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/util.py", line 274, in wrapper
+[rank0]:     return cached(trace_context(), *args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/util.py", line 268, in cached
+[rank0]:     return f(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 197, in _broadcast_shapes_cached
+[rank0]:     return _broadcast_shapes_uncached(*shapes)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 216, in _broadcast_shapes_uncached
+[rank0]:     raise ValueError(f"Incompatible shapes for broadcasting: shapes={list(shapes)}") from err
+[rank0]: ValueError: Incompatible shapes for broadcasting: shapes=[(32, 4, 1024), (32, 4096)]
+
+[rank0]: During handling of the above exception, another exception occurred:
+
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 213, in _broadcast_shapes_uncached
+[rank0]:     return _try_broadcast_shapes(*rank_promoted_shapes, name='broadcast_shapes')
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 126, in _try_broadcast_shapes
+[rank0]:     raise TypeError(f'{name} got incompatible shapes for broadcasting: '
+[rank0]: TypeError: broadcast_shapes got incompatible shapes for broadcasting: (32, 4, 1024), (1, 32, 4096).
+
+[rank0]: The above exception was the direct cause of the following exception:
+
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank0]:   File "<frozen runpy>", line 88, in _run_code
+[rank0]:   File "/deps/src/maxtext/trainers/post_train/rl/train_rl.py", line 819, in <module>
+[rank0]:     app.run(main)
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/absl/app.py", line 367, in run
+[rank0]:     _run_main(main, args)
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/absl/app.py", line 312, in _run_main
+[rank0]:     sys.exit(main(argv))
+[rank0]:              ^^^^^^^^^^
+[rank0]:   File "/deps/src/maxtext/trainers/post_train/rl/train_rl.py", line 815, in main
+[rank0]:     rl_train(argv, kwargs)
+[rank0]:   File "/deps/src/maxtext/trainers/post_train/rl/train_rl.py", line 667, in rl_train
+[rank0]:     _rl_train_impl(argv, kwargs)
+[rank0]:   File "/deps/src/maxtext/trainers/post_train/rl/train_rl.py", line 775, in _rl_train_impl
+[rank0]:     rl_trainer.train(train_dataset)
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/grpo/grpo_learner.py", line 507, in train
+[rank0]:     super().train(train_ds, eval_ds, skip_jit)
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/rl_learner.py", line 581, in train
+[rank0]:     self._run_global_step(
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/rl_learner.py", line 845, in _pt_global_step
+[rank0]:     return _pt_orig_gs(self, *a, **k)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/rl_learner.py", line 648, in _run_global_step
+[rank0]:     self._run_mini_batch_step(
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/rl_learner.py", line 673, in _run_mini_batch_step
+[rank0]:     self._run_all_micro_batch_steps(
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/rl_learner.py", line 804, in _w
+[rank0]:     return _orig(self, *a, **k)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/rl_learner.py", line 769, in _run_all_micro_batch_steps
+[rank0]:     self.rl_cluster.update_actor(
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/rl_cluster.py", line 858, in update_actor
+[rank0]:     self.actor_trainer.train(train_ds, eval_ds, skip_jit)
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/sft/peft_trainer.py", line 707, in train
+[rank0]:     train_loss, aux, grad_norm = train_step(train_example)
+[rank0]:                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/flax/nnx/graphlib.py", line 1693, in cache_args_wrapper
+[rank0]:     return f(*cached_args, *args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/flax/nnx/transforms/compilation.py", line 1023, in __call__
+[rank0]:     pure_args_out, pure_kwargs_out, pure_out = self.jitted_fn(
+[rank0]:                                                ^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/flax/nnx/transforms/compilation.py", line 138, in __call__
+[rank0]:     out = self.f(*args, **kwargs)
+[rank0]:           ^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/sft/peft_trainer.py", line 352, in _train_step
+[rank0]:     out, grads = grad_fn(model, **inputs)
+[rank0]:                  ^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/flax/nnx/graphlib.py", line 2114, in update_context_manager_wrapper
+[rank0]:     return f(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/flax/nnx/transforms/autodiff.py", line 250, in grad_wrapper
+[rank0]:     fn_out = gradded_fn(*pure_args)
+[rank0]:              ^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/flax/nnx/transforms/autodiff.py", line 122, in __call__
+[rank0]:     out = self.f(*args)
+[rank0]:           ^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/grpo/grpo_learner.py", line 179, in <lambda>
+[rank0]:     loss_fn = lambda model, train_example, algo_config: policy_loss_fn(
+[rank0]:                                                         ^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/algo_core.py", line 413, in grpo_loss_fn
+[rank0]:     ppo_kl = masked_mean(-seq_importance_ratio, completion_mask)
+[rank0]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/tunix/rl/algo_core.py", line 137, in masked_mean
+[rank0]:     return jnp.sum(x * cast_mask, axis=axis) / (
+[rank0]:                    ~~^~~~~~~~~~~
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/numpy/array_methods.py", line 1532, in op
+[rank0]:     return getattr(self.aval, f"_{name}")(self, *args)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/numpy/array_methods.py", line 774, in _operator_mul
+[rank0]:     return ufuncs.multiply(self, cast(ArrayLike, other))
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/numpy/ufunc_api.py", line 182, in __call__
+[rank0]:     return call(*args)
+[rank0]:            ^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/numpy/ufuncs.py", line 1280, in multiply
+[rank0]:     x, y = promote_args("multiply", x, y)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/numpy/util.py", line 229, in promote_args
+[rank0]:     return promote_shapes(fun_name, *promote_dtypes(*args))
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/jax/_src/numpy/util.py", line 59, in promote_shapes
+[rank0]:     result_rank = len(lax.broadcast_shapes(*shapes))
+[rank0]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]: ValueError: Incompatible shapes for broadcasting: shapes=[(32, 4, 1024), (32, 4096)]
+[rank0]: --------------------
+[rank0]: For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/usr/local/lib/python3.12/weakref.py", line 666, in _exitfunc
+[rank0]:     f()
+[rank0]:   File "/usr/local/lib/python3.12/weakref.py", line 590, in __call__
+[rank0]:     return info.func(*info.args, **(info.kwargs or {}))
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 441, in _cleanup_instance_caches
+[rank0]:     for module in model.modules():
+[rank0]:                   ^^^^^^^^^^^^^
+[rank0]: AttributeError: 'Gemma4ForCausalLM' object has no attribute 'modules'
+MaxText Job Ended at: Wed Aug 19 11:06:33 UTC 2026 with exit code 1
+DEBUG-HOLD: failure detected, keeping pod alive 20 min for log capture

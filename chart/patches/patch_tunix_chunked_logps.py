@@ -76,8 +76,9 @@ def _compute_chunked_logps(model, hidden_states, target_ids, temperature, chunk_
     return carry, (logps_chunk, entropy_chunk)
 
   _, (logps, entropy) = jax.lax.scan(logp_step, None, (hs, ids))
-  logps = jnp.swapaxes(logps, 0, 1)[:, :seq_len]
-  entropy = jnp.swapaxes(entropy, 0, 1)[:, :seq_len]
+  # scan output is (num_chunks, B, chunk) -> (B, num_chunks*chunk) -> drop padding
+  logps = jnp.swapaxes(logps, 0, 1).reshape(batch_size, -1)[:, :seq_len]
+  entropy = jnp.swapaxes(entropy, 0, 1).reshape(batch_size, -1)[:, :seq_len]
   return logps, entropy
 
 '''
