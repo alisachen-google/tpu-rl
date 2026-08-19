@@ -15,7 +15,10 @@ MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
 # --- g4r1-native-pr: + maxtext PR #4409 chunked actor log-probs (R1_LOGPS_CHUNK>0 enables; lets tmbs>1 at 262k vocab). NATIVE tpu_inference Gemma4ForCausalLM sampler (weight_mapping/gemma4.py, maxtext fork 840ffd361) + full tianyu-rl-14 stack (5 patches, CD-64, sharded logprobs, async off) ---
 # --- runtime patches (self-verifying, fail-open) ---
 export PYTHONPATH=/app/src:/deps/src:${PYTHONPATH:-}   # patch_engine_kwargs locates maxtext via importlib
-for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_phasetime patch_sharded_sampling patch_pr4409 patch_engine_kwargs; do
+# Native sampler TP degree for the gemma4 weight-mapping fusion (interleaved per-shard layout of
+# tpu_inference's fused qkv/gate_up kernels). MUST equal rollout_tensor_parallelism (R1_TP).
+export GEMMA4_NATIVE_TP="${R1_TP:-8}"
+for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_phasetime patch_sharded_sampling patch_gemma4_tp_fusion patch_pr4409 patch_engine_kwargs; do
   if [ -f /workload/patches/$P ]; then
     python3 /workload/patches/$P
   fi
