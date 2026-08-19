@@ -1,0 +1,51 @@
+PKG tpu-inference==0.0.0
+PKG tpu_inference==0.0.0
+PKG vllm==0.23.1rc1.dev1474+g0ba2aa35a.tpu
+PKG jax==0.10.2
+PKG jaxlib==0.10.2
+PKG libtpu==0.0.43
+PKG pathwaysutils==0.1.11
+PKG flax==0.12.8
+PKG orbax-checkpoint==0.12.1
+PKG transformers==5.14.1
+LOC tunix /usr/local/lib/python3.12/site-packages/tunix
+LOC tpu_inference /usr/local/lib/python3.12/site-packages/tpu_inference
+LOC vllm /usr/local/lib/python3.12/site-packages/vllm
+LOC maxtext /deps/src/maxtext
+GREP rl/rl_cluster.py: 12 hits
+    offload_to_cpu: Whether to offload models to CPU at each step..
+    offload_to_cpu: bool = False
+    if is_on_device and self.cluster_config.offload_to_cpu:
+    if not self.cluster_config.offload_to_cpu:
+    if not self.cluster_config.offload_to_cpu:
+    if self.cluster_config.offload_to_cpu:
+    if self.cluster_config.offload_to_cpu:
+    if self.cluster_config.offload_to_cpu:
+    if self.cluster_config.offload_to_cpu:
+    # `offload_to_cpu` is enabled cluster-wide; otherwise the host round-trip
+    if actor_trainer_state_on_device and self.cluster_config.offload_to_cpu:
+    if actor_trainer_state_on_device and self.cluster_config.offload_to_cpu:
+GREP rl/common.py: 1 hits
+    def compute_per_token_logps(
+GREP rl/rl_learner.py: 3 hits
+    A list of small TrainExample chunks, split back by original micro
+    smaller chunks that correspond to the original input micro-batches.
+    5. **Enqueue**: These smaller `TrainExample` chunks are then put into the
+GREP generate/vllm_sampler.py: 22 hits
+    additional_config: Optional[Dict[str, Any]] = None
+    engine_kwargs: dataclasses.InitVar[Optional[Dict[str, Any]]] = None
+    _processed_engine_kwargs: Dict[str, Any] = dataclasses.field(
+    # vLLM and must not be passed via engine_kwargs, which is a raw pass-through
+    def __post_init__(self, engine_kwargs: Optional[Dict[str, Any]]):
+    engine_kwargs = engine_kwargs or {}
+    illegal = self._RESERVED_KEYS & engine_kwargs.keys()
+    f" via engine_kwargs: {sorted(illegal)}"
+    self._processed_engine_kwargs = engine_kwargs
+    if engine_kwargs:
+    for key, value in engine_kwargs.items():
+    # Direct Weight Sync (e.g. MaxText -> MaxText)
+GREP rl/rollout/base_rollout.py: 1 hits
+    rollout_vllm_kwargs: dict[str, Any] = dataclasses.field(default_factory=dict)
+TUNIX git: n/a
+BIN patch /usr/bin/patch
+BIN git /usr/bin/git

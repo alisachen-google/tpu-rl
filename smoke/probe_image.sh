@@ -26,4 +26,5 @@ for b in ["patch","git"]:
     print("BIN",b, subprocess.run(["which",b],capture_output=True,text=True).stdout.strip() or "missing")
 PY
 echo "PROBE: done"
+sleep 600   # keep the pod alive so logs can be fetched (jobset is reaped on completion)
 exit 0
