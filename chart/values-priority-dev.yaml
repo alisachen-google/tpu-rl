@@ -1,5 +1,5 @@
-# Submit into namespace `priority-dev` via LocalQueue `multislice-queue` (owns nominal tpu7x quota,
-# per tianyu-rl-05.yaml), unlike LocalQueue `default` which only borrows from the cohort and gets reclaimed.
-# Requires RoleBinding from rbac/alisa-runner-priority-dev.yaml.
+# Submit into namespace priority-dev via its LocalQueue multislice-queue (ClusterQueue priority-dev,
+# idle/dedicated). Under the 2026-08-19 two-layer security model users submit workloads here directly;
+# RBAC objects can no longer be user-created.
 namespace: priority-dev
 queue: multislice-queue
