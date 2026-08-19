@@ -1,0 +1,36 @@
+# Apply from alisachenspecial as alisachen@google.com:
+#   kubectl --context=gke_cloud-tpu-shared-capacity_us-central1_bodaborg-tpu7x-nap apply -f rbac/alisa-runner-priority-dev.yaml
+# Grants SA default/alisa-runner the same verbs in namespace priority-dev that it has in default.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: alisa-runner
+  namespace: priority-dev
+rules:
+- apiGroups: [""]
+  resources: [pods, pods/log, configmaps, services, events]
+  verbs: [get, list, watch, create, update, patch, delete]
+- apiGroups: [batch]
+  resources: [jobs]
+  verbs: [get, list, watch, create, update, patch, delete]
+- apiGroups: [jobset.x-k8s.io]
+  resources: [jobsets]
+  verbs: [get, list, watch, create, update, patch, delete]
+# Read-only Kueue visibility so we can see admission/eviction ourselves (drop this rule if it trips the escalation check).
+- apiGroups: [kueue.x-k8s.io]
+  resources: [localqueues, workloads]
+  verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: alisa-runner
+  namespace: priority-dev
+subjects:
+- kind: ServiceAccount
+  name: alisa-runner
+  namespace: default
+roleRef:
+  kind: Role
+  name: alisa-runner
+  apiGroup: rbac.authorization.k8s.io

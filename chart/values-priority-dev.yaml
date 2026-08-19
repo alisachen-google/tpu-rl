@@ -1,6 +1,5 @@
-# Submit into namespace priority-dev via LocalQueue multislice-queue (tianyu-rl manifests' home;
-# owns nominal tpu7x quota, unlike `default` which only borrows from the cohort and gets reclaimed).
-# Requires Role/RoleBinding for default/alisa-runner in priority-dev. Set kueue_priority_class to a class
-# that exists on the cluster (check `kubectl get priorityclasses`).
+# Submit into namespace `priority-dev` via LocalQueue `multislice-queue` (owns nominal tpu7x quota,
+# per tianyu-rl-05.yaml), unlike LocalQueue `default` which only borrows from the cohort and gets reclaimed.
+# Requires RoleBinding from rbac/alisa-runner-priority-dev.yaml.
 namespace: priority-dev
 queue: multislice-queue
