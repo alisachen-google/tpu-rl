@@ -10,6 +10,6 @@ workload:
     - name: R1_STEPS
       value: "2"
     - name: R1_BATCH
-      value: "8"
+      value: "4"
     - name: R1_TP
-      value: "8"
+      value: "4"
