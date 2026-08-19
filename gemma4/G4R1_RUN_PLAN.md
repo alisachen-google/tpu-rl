@@ -28,3 +28,20 @@ on the cpu-np node (Fix #22); `kubectl get localqueues` still has `default`.
 
 Known trap: do NOT enable the tunix profiler together with PHASED_PROFILING_DIR — g4dlv2
 (2026-08-18 17:53Z) died at step 1 with `start_trace called while a trace is already being taken`.
+
+## 2026-08-19 campaign log (native route)
+
+- Root-caused + fixed native-route gibberish at rollout_tensor_parallelism>1: fused qkv/gate_up must be
+  interleaved per TP shard (tpu_inference merged-linear layout). `patches/patch_gemma4_tp_fusion.py`
+  + `GEMMA4_NATIVE_TP`; maxtext fork `ironwood-rl-gemma4` @ 35b7903. Validated: g4n4s (tp=4) coherent,
+  X2/g4nx2s (tp=1) coherent, g4n1s/g4nx1s (tp=4, old fusion) gibberish → reward 0, mean_length 4k cap.
+- aysu serving tuning (batched RPA + block 256) measured at 2x2x1: regression (see tuning/AYSU_ROLLOUT_TUNING.md).
+- PR #4409 needs tunix half: `patches/patch_tunix_chunked_logps.py` (image tunix 0.1.7-snapshot);
+  smoke g4n9s (tmbs=4, chunk 1024) in progress.
+- 4x4x4 native+stack g4r1n-08191021 (tp=4/dp16, priority high): admitted 10:41Z after 21 min queue,
+  16 workers on pool gke-tpu-2d1077c3, all patches applied, Num_devices 64 — then EVICTED 10:48Z by
+  Kueue cohort reclamation (preemptor /tpu-shared-cohort/ubench-regression-tests; we borrow from the
+  cohort in ClusterQueue `default`). Requeued automatically. Ask: nominal 64-chip quota for `default`
+  or access to a queue with nominal quota (priority-dev/multislice-queue).
+- Kueue priority: ubench uses `high` (750); our `medium` (500) gets preempted within `default`. Use
+  `--set kueue_priority_class=high` for 4x4x4 runs (does not protect against cohort reclamation).
