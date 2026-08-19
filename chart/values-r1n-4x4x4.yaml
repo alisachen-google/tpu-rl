@@ -8,4 +8,4 @@ workload:
     - {name: R1_STEPS, value: "30"}
     - {name: R1_BATCH, value: "256"}
     - {name: R1_TMBS, value: "1"}
-    - {name: R1_TP, value: "8"}
+    - {name: R1_TP, value: "4"}

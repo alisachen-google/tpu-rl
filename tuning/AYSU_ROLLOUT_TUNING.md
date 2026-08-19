@@ -31,3 +31,16 @@ GPU KV cache 4.94M tokens per DP rank.
 
 Launcher switches (both r1 launchers): `USE_BATCHED_RPA_KERNEL`, `RL_VLLM_ENGINE_KWARGS`, `R1_TP`,
 `R1_RPA` (RPA_V3_DECODE_BLOCK_SIZES). Chart overlay `values-r1-smoke-tuned.yaml` carries the tuned smoke.
+
+## Measured on 2x2x1 native-route smokes (2026-08-19, warm step 1, 64 seqs × ≤4096 tokens, CD window 64)
+
+| Run | Sampler layout | Tuning | engine_generate warm | ≈ tok/s |
+|---|---|---|---|---|
+| g4nx2s0851 | tp=1 / dp=4 | none | 110 s | ~1900 |
+| g4n4s0919 | tp=4 / dp=1 (+TP-fusion fix) | none | 147 s | ~1300 |
+| g4n5s0946 | tp=4 / dp=1 (+fix) | USE_BATCHED_RPA_KERNEL=1 + block_size=256 | 192 s | ~800 |
+
+Verdict at this shape: the serving tuning REGRESSES RL decode (its regime was 16k-token prompts
+at 218-way concurrency, not CD-window RL decode), and DP beats TP for the 2B model. The 4x4x4
+native run goes out untuned at tp=4/dp=16 (the fix-validated layout); tp=1/dp=64, tp=8 and the
+tuning are ablation rungs to measure at 4x4x4, not defaults.
