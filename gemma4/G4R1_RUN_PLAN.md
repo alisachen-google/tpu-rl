@@ -45,3 +45,6 @@ Known trap: do NOT enable the tunix profiler together with PHASED_PROFILING_DIR 
   or access to a queue with nominal quota (priority-dev/multislice-queue).
 - Kueue priority: ubench uses `high` (750); our `medium` (500) gets preempted within `default`. Use
   `--set kueue_priority_class=high` for 4x4x4 runs (does not protect against cohort reclamation).
+- 11:15Z: g4r1n-08191021 admitted/evicted 4× by cohort reclamation (ubench-regression-tests) within
+  minutes each time → withdrawn to stop churning the shared queue. BLOCKED ON QUOTA. Relaunch:
+  `RUN=g4r1n-$(date +%m%d%H%M); helm template $RUN chart -f chart/values.yaml -f chart/values-4x4x4.yaml -f chart/values-dl.yaml -f chart/values-r1n-4x4x4.yaml --set kueue_priority_class=high --set-file workload_launcher=gemma4/gemma4_e2b_r1_native_launcher.sh --set-file workload_config=chart/config.yml > renders/$RUN.yaml && ~/bin/kb apply -f renders/$RUN.yaml`
