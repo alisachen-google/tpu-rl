@@ -1,0 +1,89 @@
+run_name: aysu-ubench-8terxbx7
+run_source: ubench
+benchmark_type: system
+run_release_status: local
+logs_artifact_directory: gs://ubench-logs/aysu-ubench-8terxbx7
+logs_profile: gs://ubench-logs/aysu-ubench-8terxbx7
+model_id: gemma4_e2b-fp8_1k_1k
+software_id: vllm_inference
+configs_container_version: vllm/vllm-tpu:nightly-20260730-30dcf7a-48aa8d8
+result_success: true
+run_group: gemma4-e2b-16k-bf16-kvfp8
+run_mode: 0
+run_type: user
+hardware_id: tpu7x
+hardware_num_chips_per_node_used: 4
+nodes: 1
+chips: 4
+hardware_num_slices: '1'
+hardware_topology: 2x2x1
+cluster_name: bodaborg-tpu7x-nap
+cloud_region: us-central1
+nap_enabled: true
+control_plane_version: 1.36.0-gke.3712000
+nodepools:
+- name: default-pool
+  version: 1.36.0-gke.3712000
+- name: cpu-np
+  version: 1.35.6-gke.1127000
+- name: nap-tpu7x-stand-4t-1so72ok6
+  version: 1.36.0-gke.3712000
+- name: nap-tpu7x-stand-4t-4u3fnaa9
+  version: 1.36.0-gke.3712000
+- name: nap-tpu7x-stand-4t-1smfn8dt
+  version: 1.36.0-gke.3712000
+- name: nap-tpu7x-stand-4t-cf5psik5
+  version: 1.36.0-gke.3712000
+- name: nap-tpu7x-stand-4t-1j4m60kt
+  version: 1.36.0-gke.3712000
+- name: nap-tpu7x-stand-4t-1q6zch53
+  version: 1.36.0-gke.3712000
+- name: nap-tpu7x-stand-4t-gbzfqtbi
+  version: 1.36.0-gke.3712000
+workload_client_type: INFERENCEX
+vllm_config:
+  model: google/gemma-4-E2B-it
+  serving_mode: COLOCATED
+  prefill: null
+  decode: null
+  dataset_name: random
+  model_dir: null
+  load_format: null
+  dataset_path: null
+  topology: 2x2x1
+  num_chips_per_node: 4
+  engine_label: null
+  num_warmups: null
+  image: null
+  data_disk_size: 100Gi
+  tokenizer: null
+  model_loader_extra_config: null
+  server_flags:
+    additional_config: '{}'
+    tp: 2
+    max_model_len: 4096
+    max_num_batched_tokens: 4096
+    block_size: 256
+    no_enable_prefix_caching: true
+    kv_cache_dtype: fp8
+    async_scheduling: false
+    disable_chunked_mm_input: true
+    enable_auto_tool_choice: true
+    tool_call_parser: gemma4
+  client_flags:
+    backend: vllm
+    request_rate: 'inf'
+    input_len: 1024
+    output_len: 1024
+    random_range_ratio: 0.8
+    num_prompts: 320
+    max_concurrency: 64
+    ignore_eos: true
+  client_config: {}
+  server_env_vars: {}
+  client_env_vars: {}
+  client_manifest: INFERENCEX
+  server_manifest: null
+  ready_check_timeout_sec: null
+  existing_pvc: null
+  external_server_host: null

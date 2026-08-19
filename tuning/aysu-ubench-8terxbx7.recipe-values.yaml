@@ -1,0 +1,111 @@
+"client":
+  "bash_command": |-
+    while ! curl http://${SERVER_HOSTNAME}:8000/ping; do sleep 30 && echo 'Waiting for server...'; done
+
+    apt-get update && apt-get install -y git && git clone https://github.com/SemiAnalysisAI/InferenceX.git /ubench/inferencex && cd /ubench/inferencex && git checkout 89ce6098ef2bc4576a735c43f39c7d972b091cfc && \
+    VLLM_ENGINE_READY_TIMEOUT_S=60000 USE_BATCHED_RPA_KERNEL=1 python3 /ubench/inferencex/utils/bench_serving/benchmark_serving.py \
+    --backend=vllm \
+    --request-rate=inf \
+    --percentile-metrics='ttft,tpot,itl,e2el' \
+    --dataset-name=random \
+    --random-input-len=16384 \
+    --random-output-len=4096 \
+    --random-range-ratio=0.8 \
+    --host=${SERVER_HOSTNAME} \
+    --port=8000 \
+    --model=google/gemma-4-E2B-it \
+    --tokenizer=google/gemma-4-E2B-it \
+    --ignore-eos \
+    --use-chat-template \
+    --num-prompts=1024 \
+    --max-concurrency=218
+  "client_type": |-
+    INFERENCEX
+  "external_server_host": !!null |-
+    null
+  "image": |-
+    vllm/vllm-tpu:nightly-20260730-30dcf7a-48aa8d8
+"custom_volume_mounts": []
+"gcp_service_account": !!null |-
+  null
+"gcsfuse":
+  "enabled": !!bool |-
+    true
+  "volumes":
+  - "bucketName": |-
+      ubench-logs
+    "mountOptions": |-
+      implicit-dirs,metadata-cache:negative-ttl-secs:0
+    "mountPath": |-
+      /job-logs
+    "name": |-
+      gcs-job-logs
+    "readOnly": !!bool |-
+      false
+"gke_reservation": !!null |-
+  null
+"hf_token": !!null |-
+  null
+"is_multi_host": !!bool |-
+  false
+"k8s_service_account": !!null |-
+  null
+"kueue_local_queue": !!null |-
+  null
+"kueue_priority_class": |-
+  medium
+"persistent_volume_claims": []
+"persistent_volumes": []
+"placement_policy": !!null |-
+  null
+"run_mode": !!int |-
+  0
+"server":
+  "bash_command": |-
+    if [ -d google/gemma-4-E2B-it ]; then
+      mnt_point=$(df -P google/gemma-4-E2B-it 2>/dev/null | tail -n 1 | awk '{print $NF}')
+      if mount | grep -q "on ${mnt_point} type lustre"; then
+        echo "UBENCH_MODEL_WEIGHTS_SIZE: "$(du -sk google/gemma-4-E2B-it 2>/dev/null | awk '{printf "%.2fGiB\n", $1/1024/1024}')
+      else
+        echo "Model is not on Lustre, skipping du in container logs"
+      fi
+    fi
+    VLLM_ENGINE_READY_TIMEOUT_S=60000 USE_BATCHED_RPA_KERNEL=1 VLLM_TORCH_COMPILE_CACHE_DIR=/data/torch_compile_cache VLLM_XLA_CACHE_PATH=/data/xla_cache vllm serve \
+    --host=0.0.0.0 \
+    --port=8000 \
+    --download-dir=/data \
+    --additional_config='{}' \
+    --tensor-parallel-size=4 \
+    --max-model-len=20480 \
+    --max-num-batched-tokens=4096 \
+    --block-size=256 \
+    --no-enable-prefix-caching \
+    --kv-cache-dtype=fp8 \
+    --no-async-scheduling \
+    --disable-chunked-mm-input \
+    --enable-auto-tool-choice \
+    --tool-call-parser=gemma4 \
+    --data-parallel-size=2 \
+    --model=google/gemma-4-E2B-it \
+    --tokenizer=google/gemma-4-E2B-it
+  "data_disk_size": |-
+    100Gi
+  "image": |-
+    vllm/vllm-tpu:nightly-20260730-30dcf7a-48aa8d8
+  "model_impl_type": !!null |-
+    null
+  "num_chips_per_node": !!int |-
+    4
+  "num_nodes": !!int |-
+    1
+  "phased_profiling_dir": |-
+    gs://ubench-logs/aysu-ubench-8terxbx7/profile
+  "profile": !!bool |-
+    true
+  "pvc_mounts": []
+  "topology": |-
+    2x2x1
+  "worker_bash_command": !!null |-
+    null
+"service_type": |-
+  ClusterIP
