@@ -2,7 +2,6 @@
 
 TPU v7x (Ironwood) RL benchmarking — runbooks, launchers, and command references.
 
-## Docs
 ## Operating guide
 - [OPERATING.md](OPERATING.md) — **start here**: access, one-command launch/watch/gates, pre-flight,
   known failure modes. Launchers and the helm chart live in `gemma4/`, `chart/`; helpers in `tools/`.
