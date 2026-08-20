@@ -34,3 +34,29 @@ qwen3-0.6b vs gemma4-e2b; 16384/8192 vs 8192/4096; tmbs 32 vs 1 (262k vocab wall
 unlocks 2); scan True vs False; their levers RPA=1,1024,1,1024 + EOS_CHECK_INTERVAL=8 + CD depth 128
 vs our control (no tuple, interval 0, depth 64). Their validity model (distributional gates: LENDIST
 band, osl_mean, reward band) matches ours.
+
+## Workload-knob audit: did we follow tianyu's config? (2026-08-20)
+
+FOLLOWED (recipe core): rl.num_generations=8, grpo_beta=0.0, grpo_epsilon=0.2, epsilon_high=0.28,
+lr=1e-6, temp/top_k/top_p = 0.8/50/0.95, batch_size=256, rollout_micro_batch_size=256,
+gradient_clipping_threshold=1.0, async_scheduling=False, math_verify_num_procs=32, max_num_seqs=256,
+enable_dp_attention=False, allow_split_physical_axes=True, enable_tunix_perf_metrics=True,
+checkpoint_storage_use_ocdbt=False, the 27 proxy XLA flags @ scoped_vmem 65536, maxRestarts=5,
+queue multislice-queue, priority medium, and the 5 stack patches.
+
+FORCED DEVIATIONS (gemma4 physics): tmbs 32→1 (Fix #21, 262k vocab), scan_layers True→False (KV
+sharing), max_target/prefill 16384/8192→8192/4096, max_num_batched_tokens 16640→8448 (same formula).
+
+CHOSEN DEVIATIONS — open rungs:
+| knob | tianyu | ours | note |
+|---|---|---|---|
+| trainer/sampler_devices_fraction | 1.0 / 1.0 (colocated, 128 core-devices per phase) | 0.5 / 0.5 (split, 64 each) | biggest delta; drives their dp16xtp8 vs our dp16xtp4 |
+| rollout_tensor_parallelism | 8 | 4 | our TP preference came from 2x2x1 (4 devices), untested at scale |
+| hbm_utilization_vllm | 0.3 | 0.6 | inherited from our gemma4 recipe |
+| CD max_decode_steps | 128 | 64 | |
+| CONTINUE_DECODE_EOS_CHECK_INTERVAL | 8 | 0 | they warn of a 3x regression at their old config |
+| RPA_V3_DECODE_BLOCK_SIZES | 1,1024,1,1024 | unset (knob R1_RPA; our validated tuple 1,8704,1,2176) | |
+| chips_per_vm | 8 | 4 | ours matches the node's 4 chips/host; confirm which tpu7x wants |
+
+Colocated mesh is the highest-value rung: it changes both utilization and the compiled train_step
+program shape (128-way vs 64-way SPMD), which also bears on the ~25-min compile wall.
