@@ -1,0 +1,14 @@
+# Compile-time escape hatch: drop the 27 pathways-proxy XLA flags.
+#
+# WHY. Every 4x4x4 attempt on 2026-08-20 died ~25 min into the jit__train_step compile
+# (4 attempts, 24.0/25.0/24.3/25.7 min — invariant against pod age, which varied 39–48 min).
+# The decode-heavy program is huge (35 layers UNROLLED because gemma4 needs scan_layers=False,
+# x 262k-vocab logits, x 128-way SPMD) and the flags add the most compile-expensive passes:
+# latency-hiding layer scheduler + SparseCore collective offload. g4dl compiled fine WITH the
+# flags but at max_target_length=576 (a far smaller program).
+#
+# Use with: -f chart/values.yaml -f chart/values-4x4x4.yaml -f chart/values-noxla.yaml ...
+# (order matters — this must come after values-4x4x4.yaml/values-dl.yaml to win).
+# Expect: faster compile, possibly slower steps. Report both.
+pathways:
+  proxyXlaFlags: []

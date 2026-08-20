@@ -52,3 +52,11 @@ Known trap: do NOT enable the tunix profiler together with PHASED_PROFILING_DIR 
   tmbs=2 / chunk 512 → 2/2 steps, exit 0, rewards identical to tmbs=1 control (0.0198/0.0594, 0.023/0.055),
   warm actor_train 8.45 s vs 8.49 s (fixed-cost dominated at 64 seqs). tmbs=4/chunk1024 OOM (113G>94.7G).
   4x4x4 launch: values-r1np-4x4x4.yaml + gemma4_e2b_r1_native_pr_launcher.sh (same quota blocker).
+- **2026-08-20 kill invariant (4 attempts):** head SIGTERMed (exit 143, no traceback, no Kueue event,
+  no activeDeadlineSeconds, safe-to-evict=false ineffective) at **~25 min into the jit__train_step
+  compile** every time — 24.0 / 25.0 / 24.3 / 25.7 min — while pod age at death varied (39–48 min).
+  Workers idle during compile ("Device set detected idle" in the proxy log) → suspect a Pathways-side
+  idle/compile timeout tearing down the session. Next evidence: pathways-rm / pathways-proxy container
+  logs during the DEBUG-HOLD window. Mitigation prepared: `chart/values-noxla.yaml`
+  (profile `r1n-noxla-4x4x4`) drops the 27 proxy XLA flags whose scheduler/offload passes dominate
+  compile time; also worth trying max_target_length reduction or a smaller mesh for the first compile.

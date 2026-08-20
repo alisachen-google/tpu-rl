@@ -11,6 +11,7 @@
 #   r1-smoke     native route + stack, 2x2x1, 2 steps                (pre-flight)
 #   r1-smoke-pr  PR#4409 rung at 2x2x1, tmbs=2 / chunk 512           (pre-flight)
 #   r1n-prs-4x4x4 control + gemma4 fidelity PRs #4807/#4860/#4790     (PR-stack rung)
+#   r1n-noxla-4x4x4 control WITHOUT the 27 proxy XLA flags            (compile-time escape hatch)
 #   r1-smoke-prs PR-stack rung at 2x2x1, 2 steps                     (pre-flight)
 #
 # Prints the run name; artifacts land in gs://ubench-logs/alisachen-tpu7x/runs/<run>/.
@@ -29,6 +30,9 @@ case "$PROFILE" in
   r1-smoke)
     VALUES=(-f chart/values.yaml -f chart/values-r1-smoke-tpfix.yaml)
     LAUNCHER=gemma4/gemma4_e2b_r1_native_launcher.sh; PREFIX=g4ns ;;
+  r1n-noxla-4x4x4)
+    VALUES=(-f chart/values.yaml -f chart/values-4x4x4.yaml -f chart/values-dl.yaml -f chart/values-noxla.yaml -f chart/values-r1n-4x4x4.yaml)
+    LAUNCHER=gemma4/gemma4_e2b_r1_native_launcher.sh; PREFIX=g4r1nnx ;;
   r1n-prs-4x4x4)
     VALUES=(-f chart/values.yaml -f chart/values-4x4x4.yaml -f chart/values-dl.yaml -f chart/values-r1nprs-4x4x4.yaml)
     LAUNCHER=gemma4/gemma4_e2b_r1_native_prs_launcher.sh; PREFIX=g4r1nprs ;;
