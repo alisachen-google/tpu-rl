@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: g4-sentinel
+  namespace: default
+  labels: {app: g4-sentinel}
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+spec:
+  restartPolicy: Never
+  priorityClassName: medium
+  nodeSelector:
+    cloud.google.com/gke-nodepool: cpu-np
+  tolerations:
+  - key: cloud.google.com/gke-nodepool
+    operator: Exists
+    effect: NoSchedule
+  containers:
+  - name: sleeper
+    image: busybox
+    command: ["sh","-c","trap 'echo SENTINEL got SIGTERM at $(date -u); exit 143' TERM; i=0; while [ $i -lt 120 ]; do echo SENTINEL alive $i min $(date -u); i=$((i+1)); sleep 60; done"]
+    resources: {requests: {cpu: "100m", memory: 256Mi}, limits: {cpu: "200m", memory: 512Mi}}

@@ -10,6 +10,8 @@
 #   r1np-4x4x4   as above + maxtext PR#4409 chunked logps, tmbs=2    (PR rung)
 #   r1-smoke     native route + stack, 2x2x1, 2 steps                (pre-flight)
 #   r1-smoke-pr  PR#4409 rung at 2x2x1, tmbs=2 / chunk 512           (pre-flight)
+#   r1n-prs-4x4x4 control + gemma4 fidelity PRs #4807/#4860/#4790     (PR-stack rung)
+#   r1-smoke-prs PR-stack rung at 2x2x1, 2 steps                     (pre-flight)
 #
 # Prints the run name; artifacts land in gs://ubench-logs/alisachen-tpu7x/runs/<run>/.
 set -euo pipefail
@@ -27,6 +29,12 @@ case "$PROFILE" in
   r1-smoke)
     VALUES=(-f chart/values.yaml -f chart/values-r1-smoke-tpfix.yaml)
     LAUNCHER=gemma4/gemma4_e2b_r1_native_launcher.sh; PREFIX=g4ns ;;
+  r1n-prs-4x4x4)
+    VALUES=(-f chart/values.yaml -f chart/values-4x4x4.yaml -f chart/values-dl.yaml -f chart/values-r1nprs-4x4x4.yaml)
+    LAUNCHER=gemma4/gemma4_e2b_r1_native_prs_launcher.sh; PREFIX=g4r1nprs ;;
+  r1-smoke-prs)
+    VALUES=(-f chart/values.yaml -f chart/values-r1-smoke-tpfix.yaml)
+    LAUNCHER=gemma4/gemma4_e2b_r1_native_prs_launcher.sh; PREFIX=g4nprss ;;
   r1-smoke-pr)
     VALUES=(-f chart/values.yaml -f chart/values-r1-smoke-pr3.yaml)
     LAUNCHER=gemma4/gemma4_e2b_r1_native_pr_launcher.sh; PREFIX=g4nps ;;
