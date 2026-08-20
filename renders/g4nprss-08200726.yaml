@@ -1,0 +1,3737 @@
+---
+# Source: pathways-tpu-jobset-workload/templates/patches-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "g4nprss-08200726-patches"
+  namespace: default
+data:
+  gemma4_prs.diff: |-
+    diff --git a/src/maxtext/checkpoint_conversion/utils/hf_shape.py b/src/maxtext/checkpoint_conversion/utils/hf_shape.py
+    index 06f6a87..d775ca0 100644
+    --- a/src/maxtext/checkpoint_conversion/utils/hf_shape.py
+    +++ b/src/maxtext/checkpoint_conversion/utils/hf_shape.py
+    @@ -367,6 +367,71 @@ def GEMMA4_SMALL_HF_WEIGHTS_TO_SHAPE(config):
+           shapes[f"{hf_prefix}.per_layer_projection.weight"] = [hidden_size, ple_dim]
+           shapes[f"{hf_prefix}.post_per_layer_input_norm.weight"] = [hidden_size]
+     
+    +  # Vision tower (multimodal E2B / E4B). Mirrors the vision block of
+    +  # GEMMA4_HF_WEIGHTS_TO_SHAPE (26B/31B): each clipped-linear vision projection
+    +  # emits a ``.linear.weight``. Emitted only when a ``vision_config`` is present,
+    +  # matching GEMMA4_SMALL_MAXTEXT_TO_HF_PARAM_MAPPING's ``use_multimodal and vcfg`` gate.
+    +  #
+    +  # When the clipped-linears path is enabled, that mapping additionally maps four
+    +  # scalar activation clip bounds per projection (input_min/input_max/output_min/
+    +  # output_max). The shape fn takes only the HF config (not the MaxText config) so
+    +  # it cannot see ``use_clipped_linears_for_vit``; the shape map is a lookup table
+    +  # keyed by HF target and ``_process`` only iterates targets the param map emits,
+    +  # so emitting the bound shapes unconditionally is a harmless superset when
+    +  # clipped-linears is off and required coverage when it is on. Bounds are scalar
+    +  # ``[]`` (NOT ``[1]``) — a rank-1 shape makes the HF loader reinitialize the
+    +  # bound to a non-finite sentinel.
+    +  if vision_cfg:
+    +    vis_hidden = vision_cfg["hidden_size"]
+    +    vis_intermediate = vision_cfg["intermediate_size"]
+    +    vis_num_layers = vision_cfg["num_hidden_layers"]
+    +    vis_num_heads = vision_cfg["num_attention_heads"]
+    +    vis_head_dim = vision_cfg["head_dim"]
+    +    vis_q_dim = vis_num_heads * vis_head_dim
+    +    vis_kv_heads = vision_cfg.get("num_key_value_heads", vis_num_heads)
+    +    vis_kv_dim = vis_kv_heads * vis_head_dim
+    +    vis_pos_emb_size = vision_cfg.get("position_embedding_size", 10240)
+    +    vis_patch_size = vision_cfg.get("patch_size", 16)
+    +    num_channels = vision_cfg.get("num_channels", 3)  # RGB
+    +    patch_flat = num_channels * vis_patch_size * vis_patch_size
+    +
+    +    # VisionEntry: input_proj is a linear [patch_flat, vis_hidden] transposed to [vis_hidden, patch_flat].
+    +    shapes["model.vision_tower.patch_embedder.input_proj.weight"] = [vis_hidden, patch_flat]
+    +    # pos_emb_param MaxText shape (N, 2, D) -> transpose(1, 0, 2) -> HF (2, N, D).
+    +    shapes["model.vision_tower.patch_embedder.position_embedding_table"] = [2, vis_pos_emb_size, vis_hidden]
+    +    # std_scale / std_bias exist only under standardize=true. E2B / E4B ship
+    +    # standardize=false (0 std keys), consistent with the mapping's placeholder
+    +    # path (which points std_scale/std_bias at an always-present layernorm key).
+    +    if vision_cfg.get("standardize", False):
+    +      shapes["model.vision_tower.std_scale"] = [vis_hidden]
+    +      shapes["model.vision_tower.std_bias"] = [vis_hidden]
+    +    # Vision projector: [vis_hidden, hidden_size] -> reshape_kernel -> [hidden_size, vis_hidden].
+    +    shapes["model.embed_vision.embedding_projection.weight"] = [hidden_size, vis_hidden]
+    +
+    +    for i in range(vis_num_layers):
+    +      vis_prefix = f"model.vision_tower.encoder.layers.{i}"
+    +      shapes[f"{vis_prefix}.self_attn.q_proj.linear.weight"] = [vis_q_dim, vis_hidden]
+    +      shapes[f"{vis_prefix}.self_attn.k_proj.linear.weight"] = [vis_kv_dim, vis_hidden]
+    +      shapes[f"{vis_prefix}.self_attn.v_proj.linear.weight"] = [vis_kv_dim, vis_hidden]
+    +      shapes[f"{vis_prefix}.self_attn.o_proj.linear.weight"] = [vis_hidden, vis_q_dim]
+    +      shapes[f"{vis_prefix}.self_attn.q_norm.weight"] = [vis_head_dim]
+    +      shapes[f"{vis_prefix}.self_attn.k_norm.weight"] = [vis_head_dim]
+    +      shapes[f"{vis_prefix}.input_layernorm.weight"] = [vis_hidden]
+    +      shapes[f"{vis_prefix}.post_attention_layernorm.weight"] = [vis_hidden]
+    +      shapes[f"{vis_prefix}.pre_feedforward_layernorm.weight"] = [vis_hidden]
+    +      shapes[f"{vis_prefix}.post_feedforward_layernorm.weight"] = [vis_hidden]
+    +      shapes[f"{vis_prefix}.mlp.gate_proj.linear.weight"] = [vis_intermediate, vis_hidden]
+    +      shapes[f"{vis_prefix}.mlp.up_proj.linear.weight"] = [vis_intermediate, vis_hidden]
+    +      shapes[f"{vis_prefix}.mlp.down_proj.linear.weight"] = [vis_hidden, vis_intermediate]
+    +      # Clipped-linear activation clip bounds (scalar []). Covers the targets
+    +      # GEMMA4_SMALL_MAXTEXT_TO_HF_PARAM_MAPPING maps under use_clipped_linears_for_vit.
+    +      for _proj in ("q_proj", "k_proj", "v_proj", "o_proj"):
+    +        for _bound in ("input_min", "input_max", "output_min", "output_max"):
+    +          shapes[f"{vis_prefix}.self_attn.{_proj}.{_bound}"] = []
+    +      for _proj in ("gate_proj", "up_proj", "down_proj"):
+    +        for _bound in ("input_min", "input_max", "output_min", "output_max"):
+    +          shapes[f"{vis_prefix}.mlp.{_proj}.{_bound}"] = []
+    +
+       return shapes
+     
+     
+    diff --git a/src/maxtext/checkpoint_conversion/utils/param_mapping.py b/src/maxtext/checkpoint_conversion/utils/param_mapping.py
+    index 2ea04d8..df61355 100644
+    --- a/src/maxtext/checkpoint_conversion/utils/param_mapping.py
+    +++ b/src/maxtext/checkpoint_conversion/utils/param_mapping.py
+    @@ -3106,7 +3106,9 @@ def GEMMA4_SMALL_MAXTEXT_TO_HF_PARAM_MAPPING(config, maxtext_config, scan_layers
+               }
+           )
+     
+    -  # TODO: gemma4-small multimodal not yet supported — vision-encoder mappings below are dead.
+    +  # Gemma-4 E2B/E4B vision-encoder param mapping. Active when use_multimodal is set;
+    +  # the clipped-linears activation clip bounds are additionally mapped when
+    +  # use_clipped_linears_for_vit is enabled (required for image parity on E2B/E4B).
+       if maxtext_config.use_multimodal and vcfg:
+         nvis = vcfg.get("num_hidden_layers", 0)
+         mapping.update(
+    @@ -3162,6 +3164,23 @@ def GEMMA4_SMALL_MAXTEXT_TO_HF_PARAM_MAPPING(config, maxtext_config, scan_layers
+                   f"{prefix}-mlp-wo-kernel": f"{hf_prefix}.mlp.down_proj.linear.weight",
+               }
+           )
+    +      # Gemma-4 vision clipped-linears: per-projection activation clip bounds
+    +      # (scalar {input,output}_{min,max}) carried in the reference checkpoint.
+    +      # Only mapped when the clipped-linears path is enabled; the nnx leaves live
+    +      # at <proj>_clip.{input,output}_{min,max} under attention/mlp.
+    +      if getattr(maxtext_config, "use_clipped_linears_for_vit", False):
+    +        _clip_proj = {
+    +            "attention-q_clip": f"{hf_prefix}.self_attn.q_proj",
+    +            "attention-k_clip": f"{hf_prefix}.self_attn.k_proj",
+    +            "attention-v_clip": f"{hf_prefix}.self_attn.v_proj",
+    +            "attention-o_clip": f"{hf_prefix}.self_attn.o_proj",
+    +            "mlp-gate_clip": f"{hf_prefix}.mlp.gate_proj",
+    +            "mlp-up_clip": f"{hf_prefix}.mlp.up_proj",
+    +            "mlp-down_clip": f"{hf_prefix}.mlp.down_proj",
+    +        }
+    +        for mt_sub, hf_proj in _clip_proj.items():
+    +          for bound in ("input_min", "input_max", "output_min", "output_max"):
+    +            mapping[f"{prefix}-{mt_sub}-{bound}"] = f"{hf_proj}.{bound}"
+     
+       return {k: v for k, v in mapping.items() if v is not None}
+     
+    diff --git a/src/maxtext/configs/base.yml b/src/maxtext/configs/base.yml
+    index db0b1a6..3293240 100644
+    --- a/src/maxtext/configs/base.yml
+    +++ b/src/maxtext/configs/base.yml
+    @@ -1182,6 +1182,18 @@ freeze_vision_encoder_params: true
+     freeze_audio_encoder_params: true
+     dtype_mm: "float32"  # Data type for multimodal model's vision encoder
+     remat_policy_for_vit: "minimal"  # Remat policy for multimodal model's vision encoder. Check `remat_policy` for options.
+    +# Gemma-4 vision only: apply the per-projection activation clip bounds carried in the
+    +# reference checkpoint (self_attn.{q,k,v,o}_proj and mlp.{gate,up,down}_proj each have
+    +# scalar {input,output}_{min,max}). A prerequisite for Gemma-4 E2B/E4B image parity
+    +# (necessary but not on its own sufficient); no-op for other vision encoders. Bounds are
+    +# checkpoint-resident, non-trainable scalars.
+    +use_clipped_linears_for_vit: false
+    +# Gemma-4 E2B/E4B decoder image-handling (defaults preserve behavior for other models):
+    +use_bidirectional_image_attn: false  # E2B/E4B image spans are causal
+    +ple_pad_substitute_image_rows: false  # substitute pad id for image rows in the per-layer-embedding path (HF gemma4)
+    +ple_pad_mode: "identity"  # 'identity' (token-id path) or 'both' (also context/embedding path)
+    +image_placeholder_token_id: 258880  # GEMMA4_TOKEN_PLACEHOLDER
+    +ple_pad_token_id: 0  # E2B text_config.pad_token_id
+     image_size_for_vit: 896 # Default for Gemma3, and should be overwritten by model's config
+     image_path: "" # Local image path used for decoding, can be multiple paths separated by comma, exp "/path/image1.jpg,/path/image2.jpg"
+     video_path: "" # Local video path used for decoding, can be multiple paths separated by comma, exp "/path/video1.mp4,/path/video2.mp4"
+    diff --git a/src/maxtext/configs/models/gemma4-e2b.yml b/src/maxtext/configs/models/gemma4-e2b.yml
+    index 81c8d4e..502e847 100644
+    --- a/src/maxtext/configs/models/gemma4-e2b.yml
+    +++ b/src/maxtext/configs/models/gemma4-e2b.yml
+    @@ -44,7 +44,8 @@ global_rope_proportion: 0.25
+     local_rope_proportion: 1.0
+     final_logits_soft_cap: 30.0
+     
+    -# Vision encoder flags — multimodal not yet supported for E2B / E4B.
+    +# Vision encoder flags. Image (multimodal) parity requires use_clipped_linears_for_vit=true
+    +# (set at runtime alongside use_multimodal=true); the flags below configure the E2B image contract.
+     vision_encoder_block: "gemma4"
+     rope_theta_for_vit: 100
+     image_size_for_vit: [672, 960]
+    @@ -58,3 +59,11 @@ num_attention_heads_for_vit: 12
+     image_placeholder: "<|image|>"
+     vision_output_length: 280
+     num_position_embeddings_for_vit: 10240
+    +# E2B image contract (decoder-side): image spans are causal and the per-layer-embedding path
+    +# substitutes the pad token for image placeholder rows (matches HF modeling_gemma4).
+    +use_bidirectional_image_attn: False
+    +ple_pad_substitute_image_rows: True
+    +ple_pad_mode: "identity"
+    +image_placeholder_token_id: 258880
+    +ple_pad_token_id: 0
+    +packing: false  # Gemma-4 E2B/E4B multimodal does not support packed image spans (see configs/types.py gate)
+    diff --git a/src/maxtext/configs/models/gemma4-e4b.yml b/src/maxtext/configs/models/gemma4-e4b.yml
+    index b8da0d1..d2cf5bd 100644
+    --- a/src/maxtext/configs/models/gemma4-e4b.yml
+    +++ b/src/maxtext/configs/models/gemma4-e4b.yml
+    @@ -45,7 +45,8 @@ global_rope_proportion: 0.25
+     local_rope_proportion: 1.0
+     final_logits_soft_cap: 30.0
+     
+    -# Vision encoder flags — multimodal not yet supported for E2B / E4B.
+    +# Vision encoder flags. Image (multimodal) parity requires use_clipped_linears_for_vit=true
+    +# (set at runtime alongside use_multimodal=true); the flags below configure the E4B image contract.
+     vision_encoder_block: "gemma4"
+     rope_theta_for_vit: 100
+     image_size_for_vit: [672, 960]
+    @@ -59,3 +60,11 @@ num_attention_heads_for_vit: 12
+     image_placeholder: "<|image|>"
+     vision_output_length: 280
+     num_position_embeddings_for_vit: 10240
+    +# E4B image contract (decoder-side): image spans are causal and the per-layer-embedding path
+    +# substitutes the pad token for image placeholder rows (matches HF modeling_gemma4).
+    +use_bidirectional_image_attn: False
+    +ple_pad_substitute_image_rows: True
+    +ple_pad_mode: "identity"
+    +image_placeholder_token_id: 258880
+    +ple_pad_token_id: 0
+    +packing: false  # Gemma-4 E2B/E4B multimodal does not support packed image spans (see configs/types.py gate)
+    diff --git a/src/maxtext/configs/types.py b/src/maxtext/configs/types.py
+    index 5c708d5..c754eae 100644
+    --- a/src/maxtext/configs/types.py
+    +++ b/src/maxtext/configs/types.py
+    @@ -2114,6 +2114,47 @@ class MultimodalGeneral(BaseModel):
+     
+       use_multimodal: bool = Field(False, description="Enable multimodal capabilities.")
+       attention_for_vit: str = Field("dot_product", description="The attention algorithm to use for vision encoder.")
+    +  use_clipped_linears_for_vit: bool = Field(
+    +      False,
+    +      description=(
+    +          "Gemma-4 vision only: apply the per-projection activation clip bounds carried in the reference "
+    +          "checkpoint (self_attn.{q,k,v,o}_proj and mlp.{gate,up,down}_proj each have scalar "
+    +          "{input,output}_{min,max}). A prerequisite for Gemma-4 E2B/E4B image parity (necessary but not "
+    +          "on its own sufficient); no-op for other encoders."
+    +      ),
+    +  )
+    +  use_bidirectional_image_attn: bool = Field(
+    +      False,
+    +      description=(
+    +          "Whether image placeholder tokens attend bidirectionally in the text decoder. Gemma-4 E2B/E4B "
+    +          "use causal image spans (False); bidirectional-image models (Gemma-3, gemma4-26b/31b) use True."
+    +      ),
+    +  )
+    +  ple_pad_substitute_image_rows: bool = Field(
+    +      False,
+    +      description=(
+    +          "Gemma-4 E2B/E4B per-layer-embedding (PLE) path: substitute ple_pad_token_id for image placeholder "
+    +          "rows before the per-layer embedder, matching HF modeling_gemma4 (llm_input_ids pad substitution). "
+    +          "Default False preserves the native PLE for other models."
+    +      ),
+    +  )
+    +  ple_pad_mode: str = Field(
+    +      "identity",
+    +      description=(
+    +          "PLE pad-substitution scope when ple_pad_substitute_image_rows=True. 'identity' (DEFAULT, "
+    +          "HF-faithful): map image placeholder rows -> pad in the token-identity PLE path only; the context/"
+    +          "projection path keeps the merged image features (matches HF Transformers 5.9.0 "
+    +          "Gemma4ForConditionalGeneration, where get_per_layer_inputs ignores inputs_embeds when input_ids is "
+    +          "provided). 'both': additionally overwrite the context path with the pad embedding — this is "
+    +          "HF-DIVERGENT and provided only for ablation. Validated as an enum; unknown values hard-fail."
+    +      ),
+    +  )
+    +  image_placeholder_token_id: int = Field(
+    +      258880, description="Gemma-4 image placeholder token id (GEMMA4_TOKEN_PLACEHOLDER)."
+    +  )
+    +  ple_pad_token_id: int = Field(
+    +      0, description="Pad token id used for PLE image-row substitution (Gemma-4 E2B text_config.pad_token_id=0)."
+    +  )
+       vision_encoder_block: VisionEncoderBlockType = Field(
+           VisionEncoderBlockType.NONE,
+           description="The style of VisionEncoderBlock to use (e.g., 'gemma3', 'llama4').",
+    @@ -3530,16 +3571,84 @@ class MaxTextConfig(
+               f"{self.model_name} requires scan_layers=False (per-layer KV sharing is incompatible with nn.scan)."
+           )
+         if self.use_multimodal:
+    -      # Gemma 4 small (E2B / E4B) only supports text for now; multimodal
+    -      # support is pending clipped-linears in the vision encoder.
+    +      # Gemma 4 small (E2B / E4B) multimodal requires the vision-encoder clipped-linears AND the
+    +      # padded-patch masking / position-threading path; gate on the clipped-linears flag.
+    +      if self.model_name in ("gemma4-e2b", "gemma4-e4b") and not self.use_clipped_linears_for_vit:
+    +        raise ValueError(
+    +            f"Multimodal for {self.model_name} requires use_clipped_linears_for_vit=True "
+    +            "(the vision encoder ships per-projection activation clip bounds; without them the "
+    +            "image span diverges). Set use_clipped_linears_for_vit=True to enable image inputs."
+    +        )
+    +      # ---- Gemma-4 E2B/E4B multimodal STATIC contract gate (fail-closed) ----
+    +      # These invariants encode the semantics validated against pinned HF Transformers 5.9.0
+    +      # (Gemma4ForConditionalGeneration). Any deviation silently corrupts image/post-image logits, so we
+    +      # refuse to build the model rather than degrade to a wrong-but-runnable path.
+           if self.model_name in ("gemma4-e2b", "gemma4-e4b"):
+    -        raise ValueError(f"Multimodal is not yet supported for {self.model_name}; only text inputs are supported.")
+    +        # (a) PLE pad-substitution mode must be a known value. HF maps image placeholder tokens -> pad in the
+    +        #     token-identity PLE path only (the context path keeps the merged image features); that is
+    +        #     "identity". "both" additionally overwrites the context path, which is HF-DIVERGENT. We keep the
+    +        #     knob for experimentation but hard-fail unknown/typo values instead of silently defaulting.
+    +        _valid_ple_modes = ("identity", "both")
+    +        if str(self.ple_pad_mode) not in _valid_ple_modes:
+    +          raise ValueError(
+    +              f"ple_pad_mode='{self.ple_pad_mode}' is not one of {_valid_ple_modes}. "
+    +              f"For Gemma-4 E2B/E4B the HF-faithful contract is 'identity' (token-identity PLE path maps "
+    +              f"image rows -> pad; context path keeps merged image features). 'both' is HF-divergent and "
+    +              f"provided only for ablation. Refusing to run with an unrecognized PLE mode."
+    +          )
+    +        # (b) The image placeholder id and PLE pad id are semantic constants tied to the tokenizer/model. We
+    +        #     require them to be set explicitly (single source of truth: the model yml derived from HF config)
+    +        #     so a silent hidden default cannot mask a tokenizer mismatch.
+    +        if self.ple_pad_substitute_image_rows:
+    +          if int(self.image_placeholder_token_id) < 0:
+    +            raise ValueError(
+    +                "image_placeholder_token_id must be a valid non-negative token id when "
+    +                "ple_pad_substitute_image_rows=True (derive it from the model/tokenizer config)."
+    +            )
+    +          if int(self.ple_pad_token_id) < 0:
+    +            raise ValueError(
+    +                "ple_pad_token_id must be a valid non-negative token id when "
+    +                "ple_pad_substitute_image_rows=True (Gemma-4 E2B text_config.pad_token_id=0)."
+    +            )
+    +        # (c) Gemma-4 E2B/E4B image spans are CAUSAL. Bidirectional image attention is a Gemma-3 / 26B / 31B
+    +        #     feature and would change the attention pattern for E2B/E4B.
+    +        if bool(getattr(self, "use_bidirectional_image_attn", False)):
+    +          raise ValueError(
+    +              f"{self.model_name} uses CAUSAL image spans; use_bidirectional_image_attn must be False. "
+    +              "Bidirectional image attention is for Gemma-3 / gemma4-26b / gemma4-31b."
+    +          )
+    +        # (d) The clipped path clamps q/k/v and gate/up/down per-projection; a fused QKV or fused MLP would
+    +        #     apply a single clamp and silently bypass the per-projection clip semantics. Fail closed here
+    +        #     (defense in depth alongside the runtime guards in gemma4_vision).
+    +        if bool(getattr(self, "fused_qkv", False)):
+    +          raise ValueError(
+    +              f"{self.model_name} multimodal clipped-linears require fused_qkv=False "
+    +              "(distinct q/k/v activation clip bounds must be applied per-projection)."
+    +          )
+    +        if bool(getattr(self, "fused_mlp", False)):
+    +          raise ValueError(
+    +              f"{self.model_name} multimodal clipped-linears require fused_mlp=False "
+    +              "(distinct gate/up/down activation clip bounds must be applied per-projection)."
+    +          )
+    +        # (e) Sequence packing is not supported for Gemma-4 E2B/E4B multimodal in ANY training mode. The stock
+    +        #     data pipeline does not pack image spans, and packing image-bearing examples together would risk
+    +        #     cross-document image attention and PLE image-row substitution bleeding across segment boundaries.
+    +        #     MaxText already forbids packing for multimodal SFT; extend that to every mode for these models
+    +        #     (fail closed rather than silently produce cross-doc image attention).
+    +        if bool(getattr(self, "packing", False)):
+    +          raise ValueError(
+    +              f"{self.model_name} multimodal does not support sequence packing (packing=True). The stock data "
+    +              "pipeline does not pack image spans; packing image-bearing examples risks cross-document image "
+    +              "attention and PLE image-row substitution across segment boundaries. Set packing=False."
+    +          )
+           valid_mm_models = (
+               "gemma3-4b",
+               "gemma3-12b",
+               "gemma3-27b",
+               "gemma4-26b",
+               "gemma4-31b",
+    +          "gemma4-e2b",
+    +          "gemma4-e4b",
+               "llama4-17b-16e",
+               "llama4-17b-128e",
+               "qwen3-omni-30b-a3b",
+    diff --git a/src/maxtext/layers/decoders.py b/src/maxtext/layers/decoders.py
+    index 6c5d3ff..e60c22d 100644
+    --- a/src/maxtext/layers/decoders.py
+    +++ b/src/maxtext/layers/decoders.py
+    @@ -1657,6 +1657,18 @@ class Decoder(nn.Module):
+     
+         per_layer_inputs = None
+         if cfg.hidden_size_per_layer_input > 0 and cfg.vocab_size_per_layer_input > 0:
+    +      # Fail-closed: the pure-Linen Gemma-4-small decoder does NOT implement the PLE image-row pad
+    +      # substitution (the HF-faithful mapping of image placeholder rows -> pad in the token-identity PLE
+    +      # path). That logic lives in the NNX decoder (nnx_decoders._apply_gemma4_small_layers) and is exercised
+    +      # by the supported enable_nnx=True path. Running E2B/E4B multimodal through this pure-Linen path would
+    +      # silently diverge on the image-span / post-image logits, so we refuse rather than degrade quietly.
+    +      if bool(getattr(cfg, "ple_pad_substitute_image_rows", False)) and multimodal_input is not None:
+    +        raise NotImplementedError(
+    +            "Gemma-4 E2B/E4B multimodal PLE pad-substitution is only implemented on the NNX decoder path "
+    +            "(enable_nnx=True, the default). The pure-Linen decoder does not perform the image-row PLE "
+    +            "substitution and would silently diverge from the HF reference. Set enable_nnx=True (default) to "
+    +            "run Gemma-4 E2B/E4B multimodal."
+    +        )
+           per_layer_inputs = gemma4_small.PLEToLinen(
+               config=cfg,
+               mesh=mesh,
+    diff --git a/src/maxtext/layers/encoders.py b/src/maxtext/layers/encoders.py
+    index e5e32d0..a5a0c38 100644
+    --- a/src/maxtext/layers/encoders.py
+    +++ b/src/maxtext/layers/encoders.py
+    @@ -106,13 +106,21 @@ class VisionEncoder(nnx.Module):
+     
+         return encoder_name, projector_name
+     
+    -  def __call__(self, input_images, input_masks=None, video_grid_thw=None, deterministic=False):
+    +  def __call__(self, input_images, input_masks=None, video_grid_thw=None, deterministic=False,
+    +               image_position_ids=None):
+         # vision encoder output, frozen params in many cases
+         encoder = getattr(self, self.encoder_name)
+    +    vision_image_masks = None
+         if self.vision_encoder_block.value.startswith("qwen3") and input_masks is not None:
+           encoder_output = encoder(
+               input_images, video_mask=input_masks, video_grid_thw=video_grid_thw, deterministic=deterministic
+           )
+    +    elif self.vision_encoder_block == VisionEncoderBlockType.GEMMA4 and image_position_ids is not None:
+    +      # Gemma-4 padded-patch path: pre-patchified patches + per-patch positions (-1 = pad). The
+    +      # encoder returns (embeddings, image_masks); the mask marks the valid pooled tokens.
+    +      encoder_output = encoder(input_images, deterministic=deterministic, image_position_ids=image_position_ids)
+    +      embeddings, vision_image_masks = encoder_output
+    +      encoder_output = embeddings
+         else:
+           encoder_output = encoder(input_images, deterministic=deterministic)
+         deep_feats = None
+    @@ -131,7 +139,7 @@ class VisionEncoder(nnx.Module):
+         projector = getattr(self, self.projector_name)
+         embeddings = projector(embeddings)
+     
+    -    return embeddings, deep_feats
+    +    return embeddings, deep_feats, vision_image_masks
+     
+     
+     class MultimodalMLPProjector(nnx.Module):
+    diff --git a/src/maxtext/layers/nnx_decoders.py b/src/maxtext/layers/nnx_decoders.py
+    index 3fc8f4b..7312636 100644
+    --- a/src/maxtext/layers/nnx_decoders.py
+    +++ b/src/maxtext/layers/nnx_decoders.py
+    @@ -1699,6 +1699,7 @@ class NNXDecoder(nnx.Module):
+                 attention_metadata=attention_metadata,
+                 previous_chunk=previous_chunk,
+                 slot=slot,
+    +            shared_embedding=shared_embedding,
+             )
+           elif cfg.scan_layers:
+             if self.is_deepseek:
+    @@ -2095,14 +2096,47 @@ class NNXDecoder(nnx.Module):
+           attention_metadata=None,
+           previous_chunk=None,
+           slot=None,
+    +      shared_embedding=None,
+       ):
+         """Apply Gemma 4 small (E2B/E4B) decoder layers (pure-NNX)."""
+         cfg = self.config
+         bidirectional_mask_value = multimodal_input.bidirectional_mask if multimodal_input is not None else None
+    +    # Gemma-4 E2B/E4B image spans are causal (text_config.use_bidirectional_attention is unset), unlike
+    +    # the bidirectional-image Gemma-3 / 26B / 31B models. Suppress the bidirectional attention carve-out
+    +    # unless explicitly enabled via config (gate on a flag, not the model name).
+    +    if not bool(getattr(cfg, "use_bidirectional_image_attn", False)):
+    +      bidirectional_mask_value = None
+     
+         per_layer_inputs = None
+         if cfg.hidden_size_per_layer_input > 0 and cfg.vocab_size_per_layer_input > 0:
+    -      per_layer_inputs = self.per_layer_embedder(decoder_input_tokens, y)
+    +      ple_tokens = decoder_input_tokens
+    +      ple_context = y
+    +      # Gemma-4 E2B/E4B build the per-layer inputs from llm_input_ids with the image placeholder
+    +      # tokens mapped to pad_token_id (HF modeling_gemma4.py), rather than feeding the image
+    +      # placeholder id / merged image features into the PLE path. Without this substitution the
+    +      # per-layer embeddings at the image placeholder positions diverge from the reference, which
+    +      # corrupts the image-span and post-image logits. Gated on ple_pad_substitute_image_rows
+    +      # (default False preserves the native PLE for other models).
+    +      if bool(getattr(cfg, "ple_pad_substitute_image_rows", False)) and multimodal_input is not None:
+    +        _img_id = int(getattr(cfg, "image_placeholder_token_id", 258880))
+    +        _pad_id = int(getattr(cfg, "ple_pad_token_id", 0))
+    +        _img_row = decoder_input_tokens.astype(jnp.int32) == _img_id
+    +        ple_tokens = jnp.where(_img_row, _pad_id, decoder_input_tokens.astype(jnp.int32))
+    +        # ple_pad_mode: 'identity' (HF-faithful default) substitutes ONLY the token-identity path (above),
+    +        # leaving the context/projection path reading the merged image features — this matches HF
+    +        # Transformers 5.9.0 (get_per_layer_inputs ignores inputs_embeds when input_ids is given). The
+    +        # 'both' mode additionally overwrites the context path with the pad embedding; this is HF-DIVERGENT
+    +        # and provided only for ablation (see M9 ablation matrix). Enum-validated in configs/types.py.
+    +        if str(getattr(cfg, "ple_pad_mode", "identity")) == "both":
+    +          if shared_embedding is None:
+    +            raise ValueError(
+    +                "ple_pad_mode='both' requires the shared token embedding to compute the pad context "
+    +                "vector, but shared_embedding was not threaded into the Gemma-4-small PLE path. This is "
+    +                "an HF-divergent ablation mode; use the default 'identity' for HF-faithful behavior."
+    +            )
+    +          _pad_vec = shared_embedding(jnp.full_like(decoder_input_tokens, _pad_id).astype(jnp.int32), model_mode=model_mode)
+    +          ple_context = jnp.where(_img_row[..., None], _pad_vec, y)
+    +      per_layer_inputs = self.per_layer_embedder(ple_tokens, ple_context)
+     
+         layer_types = gemma4_small.build_layer_types(cfg.num_decoder_layers, cfg.model_name)
+         num_kv_shared = cfg.num_kv_shared_layers
+    diff --git a/src/maxtext/models/gemma4_vision.py b/src/maxtext/models/gemma4_vision.py
+    index 72cd841..b65836b 100644
+    --- a/src/maxtext/models/gemma4_vision.py
+    +++ b/src/maxtext/models/gemma4_vision.py
+    @@ -16,6 +16,8 @@
+     """Vision transformer implementation for Gemma4."""
+     
+     from typing import cast
+    +import functools
+    +import operator
+     import jax
+     import jax.numpy as jnp
+     from flax import linen as nn
+    @@ -30,6 +32,230 @@ from maxtext.layers import nnx_wrappers
+     from maxtext.layers import normalizations
+     
+     
+    +# =============================================================================
+    +# Gemma-4 vision clipped-linears (Navi upstream contribution)
+    +# -----------------------------------------------------------------------------
+    +# The Gemma-4 E2B/E4B vision tower ships per-projection activation clip bounds in
+    +# the reference (HF) checkpoint: for each of the 7 vision projections
+    +# (self_attn.{q,k,v,o}_proj and mlp.{gate,up,down}_proj) in each of the 16 encoder
+    +# blocks, a scalar {input_min,input_max,output_min,output_max} = 16*7*4 = 448
+    +# checkpoint tensors. The reference forward clamps each projection's input by
+    +# [input_min,input_max] and its output by [output_min,output_max]. Omitting the
+    +# clamps produces large activation drift in the image span (empirically KL 4-17
+    +# on a 340-token teacher-forced parity harness), because a handful of vision
+    +# activations blow up without the trained saturation. Upstream MaxText marks
+    +# E2B/E4B multimodal "not yet supported" and does not model these bounds.
+    +#
+    +# This module adds them as OPT-IN, checkpoint-resident, NON-TRAINABLE scalars,
+    +# gated on ``config.use_clipped_linears_for_vit`` (exact no-op when False).
+    +# Design: plain ``nnx.Param`` bounds (so they map to the canonical ``params``
+    +# collection and round-trip through the nnx->linen->orbax checkpoint path), plus
+    +# a leaf-PATH optimizer-freeze mask so the 448 bounds are excluded from optimizer
+    +# updates and weight decay without a custom nnx.Variable subclass (subclasses are
+    +# renamed by the linen bridge and silently dropped from the saved checkpoint).
+    +# A NaN sentinel + ``validate_clip_bounds`` hard-fails on a missing/non-finite
+    +# bound rather than silently degrading to an identity clamp.
+    +
+    +# Leaf-name tokens that identify a clip-bound scalar in a flattened params tree.
+    +_CLIP_LEAF_TOKENS = ("q_clip", "k_clip", "v_clip", "o_clip", "gate_clip", "up_clip", "down_clip")
+    +_CLIP_BOUND_NAMES = ("input_min", "input_max", "output_min", "output_max")
+    +
+    +
+    +def _mk_clip_bound(init_val=jnp.nan):
+    +  """A checkpoint-resident scalar clip bound as a plain ``nnx.Param`` (maps to the
+    +  canonical ``params`` collection; NaN sentinel marks an unloaded bound)."""
+    +  return nnx.Param(jnp.asarray(init_val, dtype=jnp.float32))
+    +
+    +
+    +def _is_clip_bound_path(path) -> bool:
+    +  """True iff a flattened-params key path addresses a clip-bound scalar."""
+    +  s = "/".join(str(getattr(p, "key", p)) for p in path) if not isinstance(path, str) else path
+    +  return any(tok in s for tok in _CLIP_LEAF_TOKENS) and any(b in s for b in _CLIP_BOUND_NAMES)
+    +
+    +
+    +def clip_optimizer_freeze_mask(params_tree):
+    +  """Bool pytree (same structure as ``params_tree``): True for TRAINABLE leaves,
+    +  False for the immutable clip bounds. Feed to ``optax.masked``/``multi_transform``
+    +  so the bounds get ``set_to_zero()`` updates. Path-based, so it survives the
+    +  nnx->linen->orbax round-trip regardless of leaf type erasure."""
+    +  flat = jax.tree_util.tree_flatten_with_path(params_tree)[0]
+    +  leaves_mask = [not _is_clip_bound_path(path) for path, _ in flat]
+    +  treedef = jax.tree_util.tree_structure(params_tree)
+    +  return jax.tree_util.tree_unflatten(treedef, leaves_mask)
+    +
+    +
+    +def _clip_bound_value(bound, dtype):
+    +  """Read a clip-bound scalar as a constant: stop_gradient defends the bounds from receiving
+    +  gradient at the clamp use-site (defense in depth alongside the optimizer freeze mask), so clip-bound
+    +  gradients can never contaminate gradient statistics even if the freeze mask were misconfigured."""
+    +  return jax.lax.stop_gradient(bound.value).astype(dtype)
+    +
+    +
+    +def _clip_in(x, cb):
+    +  """clamp(x, input_min, input_max) in x's dtype; no-op if ``cb`` is None. Bounds are stop_gradient'd."""
+    +  if cb is None:
+    +    return x
+    +  xd = x.dtype
+    +  return jnp.clip(x, _clip_bound_value(cb.input_min, xd), _clip_bound_value(cb.input_max, xd))
+    +
+    +
+    +def _clip_out(y, cb):
+    +  """clamp(y, output_min, output_max) in y's dtype; no-op if ``cb`` is None. Bounds are stop_gradient'd."""
+    +  if cb is None:
+    +    return y
+    +  yd = y.dtype
+    +  return jnp.clip(y, _clip_bound_value(cb.output_min, yd), _clip_bound_value(cb.output_max, yd))
+    +
+    +
+    +class _ClipBounds(nnx.Module):
+    +  """Holds the four checkpoint-resident scalar clip bounds as ``nnx.Param`` leaves."""
+    +
+    +  def __init__(self):
+    +    self.input_min = _mk_clip_bound()
+    +    self.input_max = _mk_clip_bound()
+    +    self.output_min = _mk_clip_bound()
+    +    self.output_max = _mk_clip_bound()
+    +
+    +
+    +def _make_clip_state():
+    +  """Four NaN-sentinel scalar bounds (checkpoint-resident, non-trainable)."""
+    +  return _ClipBounds()
+    +
+    +
+    +def validate_clip_bounds(cb, where=""):
+    +  """Hard-fail: every bound finite + scalar, and input_min<=input_max, output_min<=output_max.
+    +  Raises ValueError otherwise. No-op if ``cb`` is None."""
+    +  if cb is None:
+    +    return
+    +  vals = {}
+    +  for nm in ("input_min", "input_max", "output_min", "output_max"):
+    +    v = getattr(cb, nm).value
+    +    if getattr(v, "shape", ()) not in ((), (1,)):
+    +      raise ValueError(f"Gemma4 vision clip bound '{nm}'{(' @ '+where) if where else ''} has non-scalar "
+    +                       f"shape {v.shape}; expected scalar.")
+    +    fv = float(jnp.reshape(v, (-1,))[0])
+    +    if not bool(jnp.isfinite(jnp.asarray(fv))):
+    +      raise ValueError(f"Gemma4 vision clip bound '{nm}'{(' @ '+where) if where else ''} = {fv} is non-finite "
+    +                       f"(missing/NaN/Inf). use_clipped_linears_for_vit=True declares a FINITE clipped model; "
+    +                       f"refusing to fall back to an identity clamp.")
+    +    vals[nm] = fv
+    +  if vals["input_min"] > vals["input_max"]:
+    +    raise ValueError(f"Gemma4 vision clip bound{(' @ '+where) if where else ''}: input_min={vals['input_min']} "
+    +                     f"> input_max={vals['input_max']} (a clamp with min>max would empty the interval).")
+    +  if vals["output_min"] > vals["output_max"]:
+    +    raise ValueError(f"Gemma4 vision clip bound{(' @ '+where) if where else ''}: output_min={vals['output_min']} "
+    +                     f"> output_max={vals['output_max']} (a clamp with min>max would empty the interval).")
+    +
+    +
+    +# Expected clipped-module accounting for a Gemma-4 vision tower: 16 encoder blocks x 7 projections
+    +# (attention q/k/v/o = 4 modules holding q/k/v/o clip states + mlp gate/up/down = 3) -> but the clip
+    +# STATE lives on 2 modules per block (the Gemma4Attention holding q/k/v/o_clip, and the
+    +# Gemma4ClippedMlpBlock holding gate/up/down_clip). The scalar bound count is the invariant that matters:
+    +# 16 blocks x 7 projections x 4 bounds = 448. We validate the projection-level clip states (16x7 = 112).
+    +EXPECTED_CLIP_PROJECTIONS = 112   # 16 blocks x 7 projections (q,k,v,o,gate,up,down)
+    +EXPECTED_CLIP_BOUNDS = 448        # 112 projections x 4 scalar bounds
+    +
+    +
+    +def validate_all_vision_clip_bounds(model, *, expected_projections=EXPECTED_CLIP_PROJECTIONS,
+    +                                    expected_bounds=EXPECTED_CLIP_BOUNDS):
+    +  """Post-checkpoint-load, pre-first-JIT validation of ALL Gemma-4 vision clip bounds. Fail-closed.
+    +
+    +  Walks the model graph, collects every ``_ClipBounds`` module (each carries the 4 scalars for one
+    +  projection), validates each (finite, scalar, min<=max), and asserts EXACT counts:
+    +  ``expected_projections`` clip-state modules and ``expected_bounds`` scalar leaves. Raises ValueError on
+    +  any deficiency. The exact-count check is what prevents a traversal that accidentally finds zero modules
+    +  from silently "passing".
+    +  """
+    +  from flax import nnx  # pylint: disable=import-outside-toplevel
+    +  n_proj = 0
+    +  n_bounds = 0
+    +  for path, mod in nnx.iter_graph(model):
+    +    # A clip-state module has exactly the four bound leaves.
+    +    if (hasattr(mod, "input_min") and hasattr(mod, "input_max")
+    +        and hasattr(mod, "output_min") and hasattr(mod, "output_max")
+    +        and not isinstance(mod, (int, float))):
+    +      where = "/".join(str(getattr(p, "key", p)) for p in path) if isinstance(path, (list, tuple)) else str(path)
+    +      validate_clip_bounds(mod, where)
+    +      n_proj += 1
+    +      n_bounds += 4
+    +  if n_proj != expected_projections:
+    +    raise ValueError(
+    +        f"Gemma-4 vision clip validation found {n_proj} clip-state modules, expected exactly "
+    +        f"{expected_projections} (16 blocks x 7 projections). A mismatch means the clip bounds were not "
+    +        f"loaded/mapped correctly; refusing to run with a partially-clipped vision tower."
+    +    )
+    +  if n_bounds != expected_bounds:
+    +    raise ValueError(
+    +        f"Gemma-4 vision clip validation found {n_bounds} clip-bound scalars, expected exactly {expected_bounds}."
+    +    )
+    +  return n_proj, n_bounds
+    +
+    +
+    +# Sentinel value marking a padded (phantom) patch position in the Option-S padded-patch contract.
+    +POSITIONS_PAD_VALUE = -1
+    +
+    +
+    +def option_s_position_sentinel_ok(positions_xy):
+    +  """Return (all_rows_valid_or_full_sentinel, n_bad_rows) for an Option-S position tensor.
+    +
+    +  The padded-patch contract requires every per-patch position row to be EXACTLY one of:
+    +    * [x, y] with both coordinates >= 0 (a valid patch), or
+    +    * [POSITIONS_PAD_VALUE, POSITIONS_PAD_VALUE] (a fully-padded sentinel).
+    +  A MIXED row such as [-1, y] or [x, -1] is malformed: it would be classified as "valid" by the
+    +  ``(pos == -1).all(axis=-1)`` pad test (silently attended-to as a real patch) yet carry a negative
+    +  coordinate into pooling. This helper flags such rows so callers can fail closed rather than
+    +  silently mis-handle them. Pure (numpy/jax-eager friendly); does not allocate on-device state.
+    +
+    +  Args:
+    +    positions_xy: int array [..., 2] of per-patch (x, y) positions.
+    +  Returns:
+    +    (ok: bool, n_bad: int) where ok is True iff no malformed (mixed-sentinel) row exists.
+    +  """
+    +  import numpy as _np  # local import: this is called eagerly (host) for validation, not in the JIT forward
+    +  p = _np.asarray(positions_xy)
+    +  if p.shape[-1] != 2:
+    +    raise ValueError(f"option_s positions must have last dim 2 (x,y); got shape {p.shape}")
+    +  is_neg = p == POSITIONS_PAD_VALUE
+    +  any_neg = is_neg.any(axis=-1)
+    +  all_neg = is_neg.all(axis=-1)
+    +  # A row is malformed iff it has SOME sentinel coord but is not FULLY sentinel.
+    +  bad = _np.logical_and(any_neg, _np.logical_not(all_neg))
+    +  # Also reject any negative coordinate other than the exact sentinel (e.g. -2), which is never valid.
+    +  other_neg = _np.logical_and(p < 0, p != POSITIONS_PAD_VALUE).any(axis=-1)
+    +  bad = _np.logical_or(bad, other_neg)
+    +  n_bad = int(bad.sum())
+    +  return (n_bad == 0), n_bad
+    +
+    +
+    +def validate_option_s_positions(positions_xy, where=""):
+    +  """Hard-fail if any Option-S position row is a malformed mixed sentinel. No-op if positions is None."""
+    +  if positions_xy is None:
+    +    return
+    +  ok, n_bad = option_s_position_sentinel_ok(positions_xy)
+    +  if not ok:
+    +    raise ValueError(
+    +        f"Gemma-4 Option-S position sentinel integrity{(' @ '+where) if where else ''}: found {n_bad} malformed "
+    +        f"row(s). Every patch position must be [x,y] with both coords >= 0, or [-1,-1] (full sentinel). Mixed "
+    +        f"rows like [-1, y] / [x, -1] (or other negatives) would be silently treated as valid patches and "
+    +        f"corrupt pooling; refusing to run."
+    +    )
+    +
+    +
+    +def option_s_pooled_matches_placeholder(image_mask, n_placeholder):
+    +  """Return (ok, n_valid_pooled) checking the count of valid pooled image tokens == n_placeholder.
+    +
+    +  ``image_mask`` is the [..., K] validity mask returned by the vision pooler (True where a pooled slot
+    +  received at least one real patch). ``n_placeholder`` is the number of image placeholder positions in the
+    +  decoder sequence for the SAME sample. The Option-S contract requires these to be equal so that the pooled
+    +  image tokens scatter 1:1 onto the placeholder rows; a mismatch means the merge would drop or duplicate
+    +  image tokens regardless of padded-embedding ordering.
+    +  """
+    +  import numpy as _np
+    +  m = _np.asarray(image_mask)
+    +  n_valid = int(_np.asarray(m).astype(bool).sum())
+    +  return (n_valid == int(n_placeholder)), n_valid
+    +
+    +
+     def factorized_posemb(posemb: jax.Array, positions_xy: jax.Array, precision) -> jax.Array:
+       """Computes factorized position embedding from (x, y) coordinates.
+     
+    @@ -409,7 +635,15 @@ class Gemma4VisionRotaryEmbedding(nnx.Module):
+     
+     
+     class Gemma4Attention(attentions.Attention):
+    -  """Gemma 4 specific Attention module."""
+    +  """Gemma 4 specific Attention module.
+    +
+    +  When ``use_clipped_linears`` is enabled, the q/k/v/o projections apply the
+    +  per-projection activation clip bounds carried in the Gemma-4 vision checkpoint
+    +  (input clamp before the matmul, output clamp after). The clamps are wired by
+    +  overriding the base ``Attention`` projection methods, so the underlying
+    +  ``DenseGeneral`` weights and their checkpoint key paths are unchanged. When the
+    +  flag is off, every override is an exact delegate to the base implementation.
+    +  """
+     
+       def init_rotary_embedding(self) -> Gemma4VisionRotaryEmbedding:
+         """Initializes the rotary position embedding module for Gemma 4 vision."""
+    @@ -418,6 +652,124 @@ class Gemma4Attention(attentions.Attention):
+             rotary_fraction=None,  # Or assume it from config if available
+         )
+     
+    +  def enable_vision_clip_bounds(self):
+    +    """Attach the four checkpoint-resident clip-bound scalars for each of q/k/v/o.
+    +
+    +    Called once by ``Gemma4EncoderBlock`` after construction when
+    +    ``config.use_clipped_linears_for_vit`` is set. Idempotent.
+    +    """
+    +    if getattr(self, "_use_clipped_linears", False):
+    +      return
+    +    # Fail-closed: the clipped path clamps q/k/v independently, which requires SEPARATE q/k/v projections.
+    +    # A fused QKV projection would apply a single clamp and silently bypass the per-projection clip semantics.
+    +    if bool(getattr(self.config, "fused_qkv", False)):
+    +      raise ValueError(
+    +          "Gemma-4 vision clipped-linears require fused_qkv=False: the checkpoint carries distinct "
+    +          "q/k/v activation clip bounds that must be applied per-projection. Refusing to silently clip a "
+    +          "fused QKV projection."
+    +      )
+    +    self._use_clipped_linears = True
+    +    self.q_clip = _make_clip_state()
+    +    self.k_clip = _make_clip_state()
+    +    self.v_clip = _make_clip_state()
+    +    self.o_clip = _make_clip_state()
+    +
+    +  def validate_clip_bounds(self):
+    +    if not getattr(self, "_use_clipped_linears", False):
+    +      return
+    +    validate_clip_bounds(self.q_clip, "q_proj")
+    +    validate_clip_bounds(self.k_clip, "k_proj")
+    +    validate_clip_bounds(self.v_clip, "v_proj")
+    +    validate_clip_bounds(self.o_clip, "o_proj")
+    +
+    +  # --- projection overrides: clamp(input) -> DenseGeneral -> clamp(output) ---
+    +  def query_projection(self, inputs_q, out_sharding=None):
+    +    if not getattr(self, "_use_clipped_linears", False):
+    +      return super().query_projection(inputs_q, out_sharding=out_sharding)
+    +    x = _clip_in(inputs_q, self.q_clip)
+    +    y = self.query(x, out_sharding=out_sharding)
+    +    return _clip_out(y, self.q_clip)
+    +
+    +  def kv_projection(self, inputs_kv, proj_name, out_sharding=None):
+    +    if not getattr(self, "_use_clipped_linears", False):
+    +      return super().kv_projection(inputs_kv, proj_name=proj_name, out_sharding=out_sharding)
+    +    if proj_name == "key":
+    +      cb, module = self.k_clip, self.key
+    +    elif proj_name == "value":
+    +      cb, module = self.v_clip, self.value
+    +    else:
+    +      raise ValueError(f"proj_name must be 'key' or 'value', but got {proj_name}")
+    +    x = _clip_in(inputs_kv, cb)
+    +    y = module(x, out_sharding=out_sharding)
+    +    return _clip_out(y, cb)
+    +
+    +  def out_projection(self, out, out_sharding=None):
+    +    if not getattr(self, "_use_clipped_linears", False):
+    +      return super().out_projection(out, out_sharding=out_sharding)
+    +    x = _clip_in(out, self.o_clip)
+    +    y = self.out(x, out_sharding=out_sharding)
+    +    return _clip_out(y, self.o_clip)
+    +
+    +
+    +class Gemma4ClippedMlpBlock(linears.MlpBlock):
+    +  """MlpBlock that applies the Gemma-4 vision per-projection activation clip bounds
+    +  to the gate (wi_0), up (wi_1) and down (wo) projections.
+    +
+    +  Only the non-fused activation path is supported (E2B/E4B use
+    +  ``activations=("gelu", "linear")`` with ``fused_mlp=False``), because gate and up
+    +  carry distinct clip bounds. When ``use_clipped_linears`` is off, this delegates to
+    +  the base ``MlpBlock`` unchanged.
+    +  """
+    +
+    +  def __init__(self, *args, use_clipped_linears=False, **kwargs):
+    +    super().__init__(*args, **kwargs)
+    +    self._use_clipped_linears = bool(use_clipped_linears)
+    +    if self._use_clipped_linears:
+    +      self.gate_clip = _make_clip_state()  # wi_0
+    +      self.up_clip = _make_clip_state()    # wi_1
+    +      self.down_clip = _make_clip_state()  # wo
+    +
+    +  def validate_clip_bounds(self):
+    +    if not self._use_clipped_linears:
+    +      return
+    +    validate_clip_bounds(self.gate_clip, "gate_proj")
+    +    validate_clip_bounds(self.up_clip, "up_proj")
+    +    validate_clip_bounds(self.down_clip, "down_proj")
+    +
+    +  def __call__(self, inputs, decode=False, deterministic=False,
+    +               intermediate_sharding=None, out_sharding=None):
+    +    if not self._use_clipped_linears:
+    +      return super().__call__(inputs, decode=decode, deterministic=deterministic,
+    +                              intermediate_sharding=intermediate_sharding, out_sharding=out_sharding)
+    +    cfg = self.config
+    +    if getattr(cfg, "fused_mlp", False):
+    +      # Clipped vision MLP requires the unfused path so gate/up get their own output clamps.
+    +      raise ValueError("Gemma4ClippedMlpBlock requires fused_mlp=False (per-projection clip bounds).")
+    +    if self.mlp_layer_norm is not None:
+    +      inputs = self.mlp_layer_norm(inputs)
+    +    clips = [self.gate_clip, self.up_clip]  # order matches activations ("gelu", "linear") == (gate, up)
+    +    activations = []
+    +    for idx, act_fn in enumerate(self.activations):
+    +      dense_name = "wi" if len(self.activations) == 1 else f"wi_{idx}"
+    +      module = getattr(self, dense_name)
+    +      x = _clip_in(inputs, clips[idx])
+    +      x = module(x, out_sharding=intermediate_sharding)
+    +      x = _clip_out(x, clips[idx])
+    +      x = linears.checkpoint_name(x, "mlp" + dense_name)
+    +      if cfg.activations_in_float32:
+    +        x = x.astype(jnp.float32)
+    +      x = linears._convert_to_activation_function(act_fn)(x)
+    +      activations.append(x)
+    +    x = functools.reduce(operator.mul, activations).astype(self.dtype)
+    +    x = self.dropout(x, deterministic=deterministic)
+    +    x = self._maybe_shard_with_logical(x, self.intermediate_logical)
+    +    x = _clip_in(x, self.down_clip)
+    +    output = self.wo(x, out_sharding=out_sharding)
+    +    output = _clip_out(output, self.down_clip)
+    +    output = linears.checkpoint_name(output, "mlpwo")
+    +    return output
+    +
+    +
+     
+     class Gemma4EncoderBlock(nnx.Module):
+       """Single transformer encoder block (MHSA + MLP)."""
+    @@ -487,6 +839,11 @@ class Gemma4EncoderBlock(nnx.Module):
+             is_vision=True,
+             rngs=self.rngs,
+         )
+    +    # Opt-in Gemma-4 vision clipped-linears: attach the q/k/v/o checkpoint-resident
+    +    # clip bounds and route the projections through the clamp-in/clamp-out overrides.
+    +    self._use_clipped_linears = bool(getattr(config, "use_clipped_linears_for_vit", False))
+    +    if self._use_clipped_linears:
+    +      self.attention.enable_vision_clip_bounds()
+     
+         self.pre_ffw_norm = normalizations.RMSNorm(
+             num_features=config.hidden_size_for_vit,
+    @@ -506,7 +863,9 @@ class Gemma4EncoderBlock(nnx.Module):
+             rngs=self.rngs,
+         )
+     
+    -    self.mlp = linears.MlpBlock(
+    +    mlp_cls = Gemma4ClippedMlpBlock if self._use_clipped_linears else linears.MlpBlock
+    +    mlp_kwargs = {"use_clipped_linears": True} if self._use_clipped_linears else {}
+    +    self.mlp = mlp_cls(
+             config=config,
+             mesh=mesh,
+             in_features=config.hidden_size_for_vit,
+    @@ -516,13 +875,32 @@ class Gemma4EncoderBlock(nnx.Module):
+             weight_dtype=config.weight_dtype,
+             intermediate_dropout_rate=config.dropout_rate,
+             rngs=self.rngs,
+    +        **mlp_kwargs,
+         )
+     
+    -  def __call__(self, x: jax.Array, positions: jax.Array | None = None, deterministic: bool = False) -> jax.Array:
+    -    """Applies the encoder block (MHSA + MLP) to the inputs."""
+    +  def __call__(
+    +      self,
+    +      x: jax.Array,
+    +      positions: jax.Array | None = None,
+    +      deterministic: bool = False,
+    +      decoder_segment_ids: jax.Array | None = None,
+    +  ) -> jax.Array:
+    +    """Applies the encoder block (MHSA + MLP) to the inputs.
+    +
+    +    When ``decoder_segment_ids`` is provided, patches carrying distinct segment
+    +    ids cannot attend to each other. This is used by the padded-patch path
+    +    (valid patches = segment 1, padded/sentinel patches = segment 2) so that the
+    +    phantom pad patches are masked out of vision self-attention.
+    +    """
+         x_normed = self.pre_attention_norm(x)
+    -    # Pass positions to attention for RoPE
+    -    x_attn, _ = self.attention(x_normed, x_normed, inputs_positions=positions, deterministic=deterministic)
+    +    # Pass positions to attention for RoPE (+ optional segment mask for padded patches).
+    +    x_attn, _ = self.attention(
+    +        x_normed,
+    +        x_normed,
+    +        inputs_positions=positions,
+    +        decoder_segment_ids=decoder_segment_ids,
+    +        deterministic=deterministic,
+    +    )
+         x_attn = self.post_attention_norm(x_attn)
+         x_after_attn = x_attn + x
+     
+    @@ -573,34 +951,127 @@ class Gemma4VisionEncoderLayer(nnx.Module):
+             nnx.initializers.ones(self.rngs.params(), (config.hidden_size_for_vit,), config.weight_dtype), sharding=(None,)
+         )
+     
+    -  def __call__(self, inputs: jax.Array, deterministic: bool = False) -> jax.Array:
+    -    """Applies the vision encoder layer."""
+    -    if inputs.ndim == 4:
+    -      inputs = jnp.expand_dims(inputs, 1)
+    -    b, n, h, w, c = inputs.shape
+    -    inputs_flat = jnp.reshape(inputs, (b * n, h, w, c))
+    +  def __call__(
+    +      self,
+    +      inputs: jax.Array,
+    +      deterministic: bool = False,
+    +      image_position_ids: jax.Array | None = None,
+    +  ):
+    +    """Applies the vision encoder layer.
+    +
+    +    Two contracts:
+    +
+    +    (A) Legacy all-valid (``image_position_ids is None``): ``inputs`` are raw images
+    +        [B, N, H, W, C] (or [B, H, W, C]); patchify -> full unmasked attention -> pool by the
+    +        derived positions -> return embeddings only (4D array [B, N, K, D]).
+    +
+    +    (B) Padded-patch dynamic-N (``image_position_ids is not None``): ``inputs`` are ALREADY
+    +        patchified pixel_values with shape [B, L, P*P*C] (or [B, N, L, P*P*C]) and
+    +        ``image_position_ids`` is [B, L, 2] (or [B, N, L, 2]) with -1 sentinel rows marking padded
+    +        patches. The pre-patchified patches + REAL positions are fed to VisionEntry, per-patch
+    +        ``decoder_segment_ids`` (valid=1, pad=2) mask the phantom pad patches out of self-attention,
+    +        pooling uses the real positions (``avg_pool_by_positions`` maps a -1 patch to a zero-weight
+    +        bucket), and the VisionExit validity mask is returned. Returns a 2-tuple
+    +        ``(embeddings[B, N, K, D], image_masks[B*N, K])`` where ``image_masks.sum()`` is the number
+    +        of valid pooled tokens, threaded to ``merge_mm_embeddings.token_masks`` so exactly the valid
+    +        pooled tokens land in the image placeholders.
+    +    """
+    +    if image_position_ids is None:
+    +      # ---- Legacy path: raw images -> patchify -> full (unmasked) attention ----
+    +      # Fail-closed contract guard: the legacy path requires FULL images ([B,N,H,W,C] or [B,H,W,C]).
+    +      # Pre-patchified inputs ([B,L,F] or [B,N,L,F]) only make sense with per-patch image_position_ids
+    +      # (the padded-patch path). Refuse to silently mis-handle pre-patchified input as a full image, which
+    +      # would either crash cryptically or produce wrong pooling.
+    +      if inputs.ndim not in (4, 5):
+    +        raise ValueError(
+    +            "Gemma4 vision legacy path expects full images with shape [B, H, W, C] or [B, N, H, W, C]; "
+    +            f"got inputs.ndim={inputs.ndim} (shape {tuple(inputs.shape)}). Pre-patchified pixel_values must be "
+    +            "accompanied by image_position_ids (the padded-patch path). Refusing to silently take the legacy "
+    +            "all-valid vision path."
+    +        )
+    +      if inputs.ndim == 4:
+    +        inputs = jnp.expand_dims(inputs, 1)
+    +      b, n, h, w, c = inputs.shape
+    +      inputs_flat = jnp.reshape(inputs, (b * n, h, w, c))
+     
+    -    x, positions_xy = self.vision_entry(inputs_flat)
+    +      x, positions_xy = self.vision_entry(inputs_flat)
+    +
+    +      for i in range(self.config.num_hidden_layers_for_vit):
+    +        layer = getattr(self, f"layer_{i}")
+    +        x = layer(x, positions=positions_xy, deterministic=deterministic)
+    +
+    +      vision_exit_results = self.vision_exit(x, positions_xy=positions_xy)
+    +      (embeddings, _) = vision_exit_results[0]
+    +
+    +      embeddings = (embeddings - self.std_bias.value.astype(embeddings.dtype)) * self.std_scale.value.astype(
+    +          embeddings.dtype
+    +      )
+    +
+    +      # Unflatten batch and num_images
+    +      final_x = jnp.reshape(embeddings, (b, n, embeddings.shape[1], embeddings.shape[2]))
+    +      return final_x
+    +
+    +    # ---- Padded-patch dynamic-N path: pre-patchified patches + sentinel positions ----
+    +    # inputs: [B, L, P*P*C] pre-patchified pixel_values. Support an optional per-image N dim
+    +    # [B, N, L, F] -> flatten to [B*N, L, F] to match positions.
+    +    if inputs.ndim == 4:
+    +      b, n, l, f = inputs.shape
+    +      patches = jnp.reshape(inputs, (b * n, l, f))
+    +      pos = jnp.reshape(image_position_ids, (b * n, l, 2))
+    +    else:
+    +      assert inputs.ndim == 3, f"padded-patch path expects pre-patchified [B, L, F] patches, got {inputs.shape}"
+    +      b, l, f = inputs.shape
+    +      n = 1
+    +      patches = inputs
+    +      pos = image_position_ids
+    +      if pos.ndim == 2:
+    +        pos = jnp.broadcast_to(pos, (b, l, 2))
+    +
+    +    pos = pos.astype(jnp.int32)
+    +
+    +    # VisionEntry consumes pre-patchified patches + REAL positions (incl -1 sentinels).
+    +    x, positions_xy = self.vision_entry(patches, positions_xy=pos)
+    +
+    +    # Segment ids: valid patch (any coord != -1) -> 1, padded sentinel patch -> 2. Distinct segments
+    +    # cannot attend to each other, masking the phantom pad patches out of self-attention.
+    +    is_pad = (positions_xy == -1).all(axis=-1)  # [B*N, L]
+    +    decoder_segment_ids = jnp.where(is_pad, 2, 1).astype(jnp.int32)
+    +
+    +    # Sanitize padded-patch rows to zero BEFORE attention. Segment masking already prevents pad patches
+    +    # from influencing valid patches' attention outputs, and pooling excludes pad positions — so for FINITE
+    +    # pad content the valid outputs are provably invariant (verified byte-identical under 1e6 garbage pad).
+    +    # However, attention computes q/k/v on ALL rows before masking, so a NON-FINITE (NaN/Inf) pad patch would
+    +    # produce NaN q/k/v and leak through the softmax normalization into valid rows (NaN*0=NaN). Zeroing pad
+    +    # rows here makes the isolation hold for arbitrary (incl. non-finite) pad content without changing any
+    +    # valid output. This is defense-in-depth for malformed processor output; the frozen processor emits finite
+    +    # pad, which was already invariant.
+    +    x = jnp.where(is_pad[..., None], jnp.zeros_like(x), x)
+     
+         for i in range(self.config.num_hidden_layers_for_vit):
+           layer = getattr(self, f"layer_{i}")
+    -      x = layer(x, positions=positions_xy, deterministic=deterministic)
+    +      x = layer(
+    +          x,
+    +          positions=positions_xy,
+    +          deterministic=deterministic,
+    +          decoder_segment_ids=decoder_segment_ids,
+    +      )
+     
+    +    # Pool with REAL positions; avg_pool_by_positions returns (embeddings, validity_mask).
+         vision_exit_results = self.vision_exit(x, positions_xy=positions_xy)
+    -
+    -    # Return embeddings from VisionExit tuple
+    -    # vision_exit_results is a tuple of (embeddings, mask) tuples, one for each output length.
+    -    # We take the first result.
+    -    (embeddings, _) = vision_exit_results[0]
+    +    (embeddings, image_masks) = vision_exit_results[0]  # embeddings [B*N, K, D], mask [B*N, K]
+     
+         embeddings = (embeddings - self.std_bias.value.astype(embeddings.dtype)) * self.std_scale.value.astype(
+             embeddings.dtype
+         )
+     
+    -    # Unflatten batch and num_images
+         final_x = jnp.reshape(embeddings, (b, n, embeddings.shape[1], embeddings.shape[2]))
+    +    if image_masks is None:
+    +      image_masks = jnp.ones((b * n, embeddings.shape[1]), dtype=jnp.int32)
+    +    else:
+    +      # merge_mm_embeddings does argsort(-token_mask); use int32 so negation/sort is well-defined.
+    +      image_masks = image_masks.astype(jnp.int32)
+     
+    -    return final_x
+    +    return final_x, image_masks
+     
+     
+     class Gemma4VisionProjector(nnx.Module):
+    diff --git a/src/maxtext/models/models.py b/src/maxtext/models/models.py
+    index a70ad78..aab8f1b 100644
+    --- a/src/maxtext/models/models.py
+    +++ b/src/maxtext/models/models.py
+    @@ -129,6 +129,7 @@ class TransformerLinenPure(nn.Module):
+           decoder_segment_ids=None,
+           encoder_images: None | jnp.ndarray = None,
+           encoder_image_masks: None | jnp.ndarray = None,
+    +      encoder_image_position_ids: None | jnp.ndarray = None,
+           encoder_videos: None | jnp.ndarray = None,
+           encoder_video_masks: None | jnp.ndarray = None,
+           encoder_video_grid_thw: None | jnp.ndarray = None,
+    @@ -164,17 +165,19 @@ class TransformerLinenPure(nn.Module):
+         video_embeddings = None
+         audio_embeddings = None
+         deepstack_visual_embeds = None
+    +    vision_image_masks = None
+     
+         if getattr(self.config, "use_multimodal", False) and encoder_images is not None:
+    -      image_embeddings, deepstack_visual_embeds = self.vision_encoder(  # pyrefly: ignore[not-callable]
+    -          input_images=encoder_images, deterministic=not enable_dropout
+    +      image_embeddings, deepstack_visual_embeds, vision_image_masks = self.vision_encoder(  # pyrefly: ignore[not-callable]
+    +          input_images=encoder_images, deterministic=not enable_dropout,
+    +          image_position_ids=encoder_image_position_ids,
+           )
+           bidirectional_mask_image = mm_processor.get_bidirectional_mask_vision(
+               self.config, decoder_input_tokens, is_video=False
+           )
+     
+         if getattr(self.config, "use_multimodal", False) and encoder_videos is not None:
+    -      video_embeddings, deepstack_visual_embeds = self.vision_encoder(  # pyrefly: ignore[not-callable]
+    +      video_embeddings, deepstack_visual_embeds, _ = self.vision_encoder(  # pyrefly: ignore[not-callable]
+               input_images=encoder_videos,
+               input_masks=encoder_video_masks,
+               video_grid_thw=encoder_video_grid_thw,
+    @@ -197,7 +200,7 @@ class TransformerLinenPure(nn.Module):
+         if image_embeddings is not None or video_embeddings is not None or audio_embeddings is not None:
+           multimodal_input = MultimodalInput(
+               image_embeddings=image_embeddings,
+    -          image_masks=encoder_image_masks,
+    +          image_masks=vision_image_masks if vision_image_masks is not None else encoder_image_masks,
+               video_embeddings=video_embeddings,
+               video_masks=encoder_video_masks,
+               audio_embeddings=audio_embeddings,
+    @@ -449,6 +452,7 @@ class Transformer(nnx.Module):
+           cache=None,
+           encoder_images: jax.Array | None = None,
+           encoder_image_masks: jax.Array | None = None,
+    +      encoder_image_position_ids: jax.Array | None = None,
+           encoder_videos: jax.Array | None = None,
+           encoder_video_masks: jax.Array | None = None,
+           encoder_video_grid_thw: jax.Array | None = None,
+    @@ -499,16 +503,18 @@ class Transformer(nnx.Module):
+         video_embeddings = None
+         audio_embeddings = None
+         deepstack_visual_embeds = None
+    +    vision_image_masks = None
+         if getattr(self.config, "use_multimodal", False) and encoder_images is not None:
+    -      image_embeddings, deepstack_visual_embeds = self.vision_encoder(  # pyrefly: ignore[not-callable]
+    -          input_images=encoder_images, deterministic=not enable_dropout
+    +      image_embeddings, deepstack_visual_embeds, vision_image_masks = self.vision_encoder(  # pyrefly: ignore[not-callable]
+    +          input_images=encoder_images, deterministic=not enable_dropout,
+    +          image_position_ids=encoder_image_position_ids,
+           )
+           bidirectional_mask_image = mm_processor.get_bidirectional_mask_vision(
+               self.config, decoder_input_tokens, is_video=False
+           )
+     
+         if getattr(self.config, "use_multimodal", False) and encoder_videos is not None:
+    -      video_embeddings, deepstack_visual_embeds = self.vision_encoder(  # pyrefly: ignore[not-callable]
+    +      video_embeddings, deepstack_visual_embeds, _ = self.vision_encoder(  # pyrefly: ignore[not-callable]
+               input_images=encoder_videos,
+               input_masks=encoder_video_masks,
+               video_grid_thw=encoder_video_grid_thw,
+    @@ -531,7 +537,7 @@ class Transformer(nnx.Module):
+         if image_embeddings is not None or video_embeddings is not None or audio_embeddings is not None:
+           multimodal_input = MultimodalInput(
+               image_embeddings=image_embeddings,
+    -          image_masks=encoder_image_masks,
+    +          image_masks=vision_image_masks if vision_image_masks is not None else encoder_image_masks,
+               video_embeddings=video_embeddings,
+               video_masks=encoder_video_masks,
+               audio_embeddings=audio_embeddings,
+    diff --git a/src/maxtext/optimizers/optimizers.py b/src/maxtext/optimizers/optimizers.py
+    index 8ffa41b..38223f8 100644
+    --- a/src/maxtext/optimizers/optimizers.py
+    +++ b/src/maxtext/optimizers/optimizers.py
+    @@ -239,14 +239,32 @@ def get_optimizer(config, learning_rate_schedule, model=None):
+       # When trainable_parameters_mask is empty, freeze_mask_fn is None and all parameters are trained.
+       trainable_patterns = getattr(config, "trainable_parameters_mask", None)
+       freeze_mask_fn = _get_path_mask_fn(trainable_patterns, match_returns_true=False)
+    -  if freeze_mask_fn is not None:
+    -    # Use optax.multi_transform to explicitly map frozen parameters to a stateless set_to_zero() optimizer.
+    -    # If we simply wrapped base_opt in optax.masked() or chained it, Optax would still allocate
+    -    # massive states (momentum, variance) for the entire model before zeroing the updates.
+    -    # By using multi_transform, only the trainable parameters get states allocated.
+    +
+    +  # Gemma-4 vision clipped-linears: the 448 clip bounds are checkpoint-resident, immutable state and must
+    +  # NEVER receive optimizer updates, weight decay, or momentum/variance slots. Freeze them via a leaf-PATH
+    +  # mask (robust to the nnx->linen bridge's type erasure). This composes with any trainable_parameters_mask:
+    +  # a parameter is "trainable" only if it is trainable under the whitelist AND is not a clip bound.
+    +  freeze_clip_bounds = bool(getattr(config, "use_clipped_linears_for_vit", False))
+    +
+    +  if freeze_mask_fn is not None or freeze_clip_bounds:
+    +    def _partition(params):
+    +      # trainable_mask: True where trainable under the whitelist (all-True if no whitelist).
+    +      if freeze_mask_fn is not None:
+    +        trainable_mask = freeze_mask_fn(params)
+    +      else:
+    +        trainable_mask = jax.tree_util.tree_map(lambda _: True, params)
+    +      if freeze_clip_bounds:
+    +        # clip_optimizer_freeze_mask returns True for trainable leaves, False for clip bounds.
+    +        from maxtext.models import gemma4_vision  # pylint: disable=import-outside-toplevel
+    +        clip_trainable = gemma4_vision.clip_optimizer_freeze_mask(params)
+    +        trainable_mask = jax.tree_util.tree_map(lambda a, b: bool(a) and bool(b), trainable_mask, clip_trainable)
+    +      return jax.tree_util.tree_map(lambda x: "trainable" if x else "frozen", trainable_mask)
+    +
+    +    # Use optax.multi_transform so frozen (and clip-bound) params map to a stateless set_to_zero() optimizer
+    +    # and never allocate momentum/variance slots.
+         return optax.multi_transform(
+             {"trainable": base_opt, "frozen": optax.set_to_zero()},
+    -        lambda params: jax.tree_util.tree_map(lambda x: "frozen" if x else "trainable", freeze_mask_fn(params)),
+    +        _partition,
+         )
+     
+       return base_opt
+    diff --git a/src/maxtext/trainers/pre_train/train.py b/src/maxtext/trainers/pre_train/train.py
+    index 138bfe1..0ab638c 100644
+    --- a/src/maxtext/trainers/pre_train/train.py
+    +++ b/src/maxtext/trainers/pre_train/train.py
+    @@ -143,6 +143,14 @@ def loss_fn(model, config, data, dropout_rng, params, sparsity_state=None, is_tr
+             decoder_segment_ids=data["inputs_segmentation"],
+             encoder_images=data["images"] if config.use_multimodal else None,
+             encoder_image_masks=data["image_masks"] if config.use_multimodal and "image_masks" in data else None,
+    +        # Gemma-4 padded-patch (Option-S) contract: when the data pipeline produces per-patch image
+    +        # position ids (native-resolution / pan-and-scan processors), thread them to the vision encoder
+    +        # so pad patches are masked and pooled by real coordinates. The stock fixed-grid Gemma-4 processor
+    +        # produces all-valid patches and does NOT emit this key, so the legacy all-valid path is used
+    +        # (correct for its contract). See gemma4_vision.Gemma4VisionEncoderLayer for the fail-closed guard.
+    +        encoder_image_position_ids=(
+    +            data["image_position_ids"] if config.use_multimodal and "image_position_ids" in data else None
+    +        ),
+             enable_dropout=config.enable_dropout if is_train else False,
+             rngs={"dropout": rng1, "params": aqt_rng},  # pyrefly: ignore[bad-argument-type]
+             mutable=mutable_collections,
+    @@ -192,6 +200,11 @@ def loss_fn(model, config, data, dropout_rng, params, sparsity_state=None, is_tr
+             decoder_segment_ids=data["inputs_segmentation"],
+             encoder_images=data["images"] if config.use_multimodal else None,
+             encoder_image_masks=data["image_masks"] if config.use_multimodal and "image_masks" in data else None,
+    +        # See the Linen branch above: thread per-patch image position ids when the data pipeline emits
+    +        # them (Gemma-4 Option-S padded-patch contract); None for the stock fixed-grid all-valid processor.
+    +        encoder_image_position_ids=(
+    +            data["image_position_ids"] if config.use_multimodal and "image_position_ids" in data else None
+    +        ),
+             enable_dropout=config.enable_dropout if is_train else False,
+             decoder_target_tokens=data["targets"],
+             decoder_target_mask=data["targets_segmentation"],
+    diff --git a/src/maxtext/utils/model_creation_utils.py b/src/maxtext/utils/model_creation_utils.py
+    index 2326bff..dc52fb1 100644
+    --- a/src/maxtext/utils/model_creation_utils.py
+    +++ b/src/maxtext/utils/model_creation_utils.py
+    @@ -1210,6 +1210,14 @@ def from_pretrained(
+                 "Please ensure the checkpoint format matches the scan_layers setting."
+             )
+     
+    +    # Gemma-4 vision clipped-linears: fail-closed post-load validation BEFORE the first JIT forward/train.
+    +    # Asserts exactly 112 clip-state modules / 448 finite, correctly-ordered scalar bounds. A missing/NaN/
+    +    # unordered bound or wrong module count raises here rather than silently degrading to an identity clamp.
+    +    if bool(getattr(config, "use_clipped_linears_for_vit", False)) and bool(getattr(config, "use_multimodal", False)):
+    +      from maxtext.models import gemma4_vision  # pylint: disable=import-outside-toplevel
+    +      n_proj, n_bounds = gemma4_vision.validate_all_vision_clip_bounds(model)
+    +      max_logging.log(f"Gemma-4 vision clip validation OK: {n_proj} clip-state modules, {n_bounds} scalar bounds.")
+    +
+         if wrap_with_tunix_adapter:
+           with mesh:
+             use_no_op_mappings = "maxtext_config" in config.vllm_additional_config
+    
+  patch_cd_proper.py: |-
+    """Apply the PROPER continue-decode fix (PR #3374) to the installed tpu_inference.
+    
+    Mirrors https://github.com/vllm-project/tpu-inference/pull/3374 exactly:
+    
+      (a) models/common/model_loader.py -- build an options-free twin of run_model and
+          expose it as `step_fn_no_options` on the model object, mirroring the torchax
+          path in models/vllm/vllm_model_wrapper.py.
+      (b) runner/decode_loop.py -- build the fused-decode loop jit lazily from
+          get_step_fn_compiler_options() instead of a hardcoded 3-entry literal, so the
+          fused program keeps all 5 options (incl. the SparseCore offload thresholds).
+    
+    Every edit asserts its anchor and re-verifies after writing. Prints exactly one of:
+        CD-PROPER PATCH: APPLIED
+        CD-PROPER PATCH: FAILED <reason>
+    A FAILED line means the run proves nothing -- check it before reading any result.
+    """
+    
+    import ast
+    import os
+    import sys
+    
+    SITE = os.environ.get("PATCH_ROOT", "/usr/local/lib/python3.12/site-packages")
+    ROOT = os.path.join(SITE, "tpu_inference")
+    ML = os.path.join(ROOT, "models/common/model_loader.py")
+    DL = os.path.join(ROOT, "runner/decode_loop.py")
+    
+    
+    def fail(msg):
+        print(f"CD-PROPER PATCH: FAILED {msg}")
+        sys.exit(0)  # non-fatal: let the run start so the failure is visible in logs
+    
+    
+    def sub(text, old, new, what):
+        if text.count(old) != 1:
+            fail(f"[{what}] anchor found {text.count(old)} times, expected 1")
+        return text.replace(old, new)
+    
+    
+    # ---------------------------------------------------------------- (a) model_loader
+    if not os.path.exists(ML):
+        fail(f"{ML} not found")
+    ml = open(ML, encoding="utf-8").read()
+    
+    if "step_fn_no_options" in ml and "run_model_no_options" in ml:
+        print("CD-PROPER PATCH: model_loader already patched")
+    else:
+        if "\nimport functools\n" not in ml:
+            ml = sub(ml, "from typing import Any, Optional\n",
+                     "import functools\nfrom typing import Any, Optional\n",
+                     "ml-import")
+    
+        ml = sub(
+            ml,
+            """    @jax.jit(
+            out_shardings=(
+                kv_cache_sharding,
+                hidden_states_sharding,
+                hidden_states_sharding,  # aux hidden states
+                None,  # expert ids
+            ),
+            donate_argnums=1,  # 0 is state_leaves, 1 is kv_cache
+            static_argnums=(
+                6, 9, 10
+            ),  # 6 is layer_name_to_kvcache_index, 9 is is_first_rank, 10 is is_last_rank
+            compiler_options=get_step_fn_compiler_options(),
+        )
+        def run_model(state_leaves, *args):
+            state = jax.tree_util.tree_unflatten(_state_treedef, state_leaves)
+            model = nnx.merge(graphdef, state)
+            return model(*args)
+    """,
+            """    def run_model_impl(state_leaves, *args):
+            state = jax.tree_util.tree_unflatten(_state_treedef, state_leaves)
+            model = nnx.merge(graphdef, state)
+            return model(*args)
+    
+        run_model_jit = functools.partial(
+            jax.jit,
+            out_shardings=(
+                kv_cache_sharding,
+                hidden_states_sharding,
+                hidden_states_sharding,  # aux hidden states
+                None,  # expert ids
+            ),
+            donate_argnums=1,  # 0 is state_leaves, 1 is kv_cache
+            static_argnums=(
+                6, 9, 10
+            ),  # 6 is layer_name_to_kvcache_index, 9 is is_first_rank, 10 is is_last_rank
+        )
+    
+        run_model_no_options = run_model_jit(run_model_impl)
+    
+        run_model = run_model_jit(
+            run_model_impl,
+            compiler_options=get_step_fn_compiler_options(),
+        )
+    """,
+            "ml-run_model")
+    
+        ml = sub(
+            ml,
+            """    def wrapped_model_fn(*args, **kwargs):
+            if not model_supports_spec_step:
+                kwargs.pop("spec_step_idx", None)
+            kwargs.pop("shared_attention_metadata", None)
+            return jitted_model_fn(*args, **kwargs)
+    """,
+            """    def wrapped_model_fn(*args, **kwargs):
+            if not model_supports_spec_step:
+                kwargs.pop("spec_step_idx", None)
+            kwargs.pop("shared_attention_metadata", None)
+            return jitted_model_fn(*args, **kwargs)
+    
+        jitted_model_fn_no_options = (run_draft_model
+                                      if is_draft_model else run_model_no_options)
+    
+        def wrapped_model_fn_no_options(*args, **kwargs):
+            if not model_supports_spec_step:
+                kwargs.pop("spec_step_idx", None)
+            kwargs.pop("shared_attention_metadata", None)
+            return jitted_model_fn_no_options(*args, **kwargs)
+    """,
+            "ml-wrapper")
+    
+        ml = sub(
+            ml,
+            """    return ModelInterface(
+            model_fn=wrapped_model_fn,""",
+            """    jit_model.step_fn_no_options = wrapped_model_fn_no_options
+    
+        return ModelInterface(
+            model_fn=wrapped_model_fn,""",
+            "ml-attach")
+    
+        try:
+            ast.parse(ml)
+        except SyntaxError as e:
+            fail(f"[model_loader] patched source does not parse: {e}")
+        open(ML, "w", encoding="utf-8").write(ml)
+    
+    # ---------------------------------------------------------------- (b) decode_loop
+    if not os.path.exists(DL):
+        fail(f"{DL} not found")
+    dl = open(DL, encoding="utf-8").read()
+    
+    if "_get_decode_core" in dl:
+        print("CD-PROPER PATCH: decode_loop already patched")
+    else:
+        dl = sub(
+            dl,
+            """from tpu_inference.layers.common.attention_metadata import (
+        AttentionMetadata, SharedAttentionMetadata)""",
+            """from tpu_inference.layers.common.attention_metadata import (
+        AttentionMetadata, SharedAttentionMetadata)
+    from tpu_inference.models.common.compiler_options import \\
+        get_step_fn_compiler_options""",
+            "dl-import")
+    
+        STATIC = """    static_argnames=(
+            "model_fn",
+            "compute_logits_fn",
+            "sample_fn",
+            "mesh",
+            "static_max_decode_steps",
+            "eos_token_id",
+            "padding_token_id",
+            "dp_size",
+            "pad_len",
+            "has_experts",
+            "expert_shape",
+            "expert_dtype",
+            "layer_name_to_kvcache_index",
+            "is_first_rank",
+            "is_last_rank",
+            "max_logprobs",
+            "logprobs_mode",
+            "continue_decode_eos_check_interval",
+        ),
+        donate_argnames=("kv_caches", ),"""
+    
+        old_dec = ("@functools.partial(\n    jax.jit,\n" + STATIC + """
+        # Hoisted here from the model's step_fun: JAX forbids compiler_options on
+        # a nested jit, so they must live on this top-level loop jit instead.
+        compiler_options={
+            "xla_tpu_all_gather_collective_matmul_mode": "post_spmd_conservative",
+            "xla_tpu_reduce_scatter_collective_matmul_mode":
+            "post_spmd_conservative",
+            "xla_tpu_use_minor_sharding_for_major_trivial_input": "true"
+        },
+    )
+    def _decode_core(
+    """)
+        dl = sub(dl, old_dec, "def _decode_core_impl(\n", "dl-decorator")
+    
+        factory = ("@functools.lru_cache(maxsize=1)\ndef _get_decode_core():\n"
+                   "    return functools.partial(\n        jax.jit,\n"
+                   + STATIC.replace("    static_argnames", "        static_argnames")
+                   .replace('        "model_fn"', '            "model_fn"')
+                   + "\n        compiler_options=get_step_fn_compiler_options(),\n"
+                   "    )(_decode_core_impl)\n\n\n")
+        # rebuild the static block with consistent 8-space indent instead of string surgery
+        inner = "\n".join(("    " + ln) if ln.strip() else ln
+                          for ln in STATIC.split("\n"))
+        factory = ("@functools.lru_cache(maxsize=1)\n"
+                   "def _get_decode_core():\n"
+                   "    # Built lazily (the \"auto\" SparseCore threshold needs live devices) and\n"
+                   "    # cached so the jit is constructed once, not per decode step.\n"
+                   "    return functools.partial(\n"
+                   "        jax.jit,\n"
+                   + inner + "\n"
+                   "        compiler_options=get_step_fn_compiler_options(),\n"
+                   "    )(_decode_core_impl)\n\n\n")
+        dl = sub(dl, "def continue_decode(\n", factory + "def continue_decode(\n",
+                 "dl-factory")
+    
+        dl = sub(dl, "lp_ranks_buffer) = _decode_core(",
+                 "lp_ranks_buffer) = _get_decode_core()(", "dl-callsite")
+    
+        try:
+            ast.parse(dl)
+        except SyntaxError as e:
+            fail(f"[decode_loop] patched source does not parse: {e}")
+        open(DL, "w", encoding="utf-8").write(dl)
+    
+    # ---------------------------------------------------------------- verify
+    ml2 = open(ML, encoding="utf-8").read()
+    dl2 = open(DL, encoding="utf-8").read()
+    problems = []
+    if "jit_model.step_fn_no_options = wrapped_model_fn_no_options" not in ml2:
+        problems.append("step_fn_no_options not attached")
+    if "run_model_no_options = run_model_jit(run_model_impl)" not in ml2:
+        problems.append("options-free twin missing")
+    if "_get_decode_core()(" not in dl2:
+        problems.append("decode_loop call site not rewired")
+    if "compiler_options=get_step_fn_compiler_options()," not in dl2:
+        problems.append("decode_loop still not sourcing options from the function")
+    if '"xla_tpu_use_minor_sharding_for_major_trivial_input": "true"' in dl2:
+        problems.append("decode_loop hardcoded literal still present")
+    
+    if problems:
+        fail("; ".join(problems))
+    print("CD-PROPER PATCH: APPLIED")
+  patch_engine_kwargs.py: |-
+    """Forward extra vLLM engine kwargs into the GRPO rollout engine via env.
+    
+    WHY. maxtext train_rl.py hardcodes the vLLM `rollout_vllm_kwargs` dict (hf_overrides,
+    enable_expert_parallel, enable_prefix_caching, dtype). Rollout-side serving tuning
+    validated by aysu on gemma4-e2b/tpu7x (ubench aysu-ubench-8terxbx7: block_size=256,
+    kv_cache_dtype=fp8, ...) needs engine args that rl.yml does not expose. tunix passes
+    `rollout_vllm_kwargs` straight through to vllm EngineArgs, so one extra `**dict` there
+    is enough.
+    
+    WHAT. Inserts, as the LAST entry of the rollout_vllm_kwargs literal (so it overrides
+    the hardcoded keys):
+        **json.loads(os.environ.get("RL_VLLM_ENGINE_KWARGS", "{}")),
+    Usage:  RL_VLLM_ENGINE_KWARGS='{"block_size": 256}'   (any vllm EngineArgs field)
+    Reserved tunix keys (tensor/data/expert_parallel_size) are rejected by tunix itself.
+    
+    FAIL-OPEN. Anchor mismatch prints FAILED and exits 0 without touching the file.
+    Prints exactly one of:
+        ENGINE-KWARGS PATCH: APPLIED
+        ENGINE-KWARGS PATCH: already patched
+        ENGINE-KWARGS PATCH: FAILED <reason>
+    """
+    import importlib.util
+    import os
+    import sys
+    
+    MARK = '**json.loads(os.environ.get("RL_VLLM_ENGINE_KWARGS", "{}")),'
+    ANCHOR = '"dtype": trainer_config.weight_dtype.value,\n'
+    
+    
+    def fail(msg):
+      print(f"ENGINE-KWARGS PATCH: FAILED {msg}")
+      sys.exit(0)
+    
+    
+    def main():
+      spec = importlib.util.find_spec("maxtext")  # top-level: does not import the package
+      if spec is None or not spec.submodule_search_locations:
+        fail("cannot locate maxtext package")
+      path = os.path.join(list(spec.submodule_search_locations)[0], "trainers", "post_train", "rl", "train_rl.py")
+      if not os.path.exists(path):
+        fail(f"{path} missing")
+      src = open(path).read()
+      if MARK in src:
+        print("ENGINE-KWARGS PATCH: already patched")
+        return
+      n = src.count(ANCHOR)
+      if n != 1:
+        fail(f"anchor count {n} != 1 in {path}")
+      if "import json" not in src or "import os" not in src:
+        fail("train_rl.py lacks json/os import")
+      # keep the anchor's indentation for the inserted line
+      idx = src.index(ANCHOR)
+      line_start = src.rfind("\n", 0, idx) + 1
+      indent = src[line_start:idx]
+      new = src.replace(ANCHOR, ANCHOR + indent + MARK + "\n", 1)
+      open(path, "w").write(new)
+      if MARK not in open(path).read():
+        fail("re-verify failed")
+      extra = os.environ.get("RL_VLLM_ENGINE_KWARGS", "{}")
+      print(f"ENGINE-KWARGS PATCH: APPLIED (RL_VLLM_ENGINE_KWARGS={extra}) -> {path}")
+    
+    
+    if __name__ == "__main__":
+      main()
+    
+  patch_gemma4_prs.py: |-
+    """Apply the gemma4 correctness/parity PR stack at runtime (maxtext #4807, #4860, #4790).
+    
+    WHY. Three open PRs fix gemma4 model/checkpoint fidelity:
+      #4807  vision std_bias/std_scale classification per HF `standardize` (config + types + gemma4_vision)
+      #4860  emit vision-tower shapes in the HF export map (hf_shape.py) — used by offline mapping checks
+      #4790  Gemma-4 E2B image (multimodal) E2E parity: clipped-linears, padded-patch masking, PLE
+             substitution; also adds the E2B image-contract config fields and their param mappings.
+    
+    TEXT-PATH IMPACT (verified before adopting): every param_mapping change is gated behind
+    `use_multimodal` / `use_clipped_linears_for_vit`, both False on the RL path, so the pushed
+    text parameter set is unchanged. The stack is carried to (a) keep our tree aligned with the
+    fidelity fixes, (b) let a multimodal-config run be attempted later, and (c) catch RLConfig
+    schema drift early (Fix #9/#10/#20 class) via the smoke gate.
+    
+    WHAT. Applies `gemma4_prs.diff` (the three PRs squashed and rebased onto the image's tree =
+    maxtext fork `ironwood-rl-gemma4` @ 35b7903) with `patch -p3` under the importable maxtext
+    package root. Touches only `src/maxtext/**` (tests are excluded from the diff). Coexists with
+    patch_pr4409 (verified: 4409 applies cleanly on top of this stack) — run this one FIRST.
+    
+    FAIL-OPEN. Dry-run first; any failure prints FAILED and exits 0 with the tree untouched.
+    Prints exactly one of:
+        GEMMA4-PRS PATCH: APPLIED
+        GEMMA4-PRS PATCH: already patched
+        GEMMA4-PRS PATCH: FAILED <reason>
+    """
+    import importlib.util
+    import os
+    import shutil
+    import subprocess
+    import sys
+    
+    HERE = os.path.dirname(os.path.abspath(__file__))
+    DIFF = os.path.join(HERE, "gemma4_prs.diff")
+    MARK = "use_clipped_linears_for_vit"
+    
+    
+    def fail(msg):
+      print(f"GEMMA4-PRS PATCH: FAILED {msg}")
+      sys.exit(0)
+    
+    
+    def main():
+      spec = importlib.util.find_spec("maxtext")
+      if spec is None or not spec.submodule_search_locations:
+        fail("cannot import maxtext")
+      root = list(spec.submodule_search_locations)[0]  # .../src/maxtext
+      if not os.path.exists(DIFF):
+        fail(f"diff not found at {DIFF}")
+      mark_file = os.path.join(root, "configs", "models", "gemma4-e2b.yml")
+      if os.path.exists(mark_file) and MARK in open(mark_file).read():
+        print("GEMMA4-PRS PATCH: already patched")
+        return
+      if shutil.which("patch"):
+        base = ["patch", "-p3", "-d", root, "--forward", "--batch", "-i", DIFF]
+        dry = subprocess.run(base + ["--dry-run"], capture_output=True, text=True)
+        if dry.returncode != 0:
+          fail(f"patch --dry-run failed under {root}: {dry.stdout[-600:]} {dry.stderr[-300:]}")
+        r = subprocess.run(base, capture_output=True, text=True)
+        if r.returncode != 0:
+          fail(f"patch apply failed: {r.stdout[-600:]} {r.stderr[-300:]}")
+      elif shutil.which("git"):
+        base = ["git", "apply", "--unsafe-paths", "-p3", f"--directory={root}", DIFF]
+        chk = subprocess.run(base + ["--check"], capture_output=True, text=True)
+        if chk.returncode != 0:
+          fail(f"git apply --check failed under {root}: {chk.stderr[-600:]}")
+        r = subprocess.run(base, capture_output=True, text=True)
+        if r.returncode != 0:
+          fail(f"git apply failed: {r.stderr[-600:]}")
+      else:
+        fail("neither `patch` nor `git` available in the image")
+      if MARK not in open(mark_file).read():
+        fail("re-verify failed (gemma4-e2b.yml lacks the new image-contract fields)")
+      print(f"GEMMA4-PRS PATCH: APPLIED -> {root}")
+    
+    
+    if __name__ == "__main__":
+      main()
+    
+  patch_gemma4_tp_fusion.py: |-
+    """Make the gemma4 native weight-mapping fusion TP-aware (fix for tp>1 gibberish).
+    
+    ROOT CAUSE (2026-08-19, runs g4n1s/g4n2s/g4nx1s). maxtext weight_mapping/gemma4.py
+    `_fuse_for_native` builds the fused `gate_up` and `qkv` source kernels in plain
+    [gate|up] / [Q|K|V] feature order. tpu_inference's JaxMergedColumnParallelLinear /
+    JaxQKVParallelLinear store the fused kernel INTERLEAVED PER TP SHARD: shard i holds
+    [proj0_slice_i, proj1_slice_i, ...] (see UnquantizedMergedLinearMethod + utils
+    `reorder_concatenated_tensor_for_sharding`; the forward un-interleaves with
+    `slice_sharded_tensor_for_concatenation`). Plain concat == interleaved only when tp=1
+    (t6gn8 PASS at tp=1/dp=4); at rollout_tensor_parallelism=4 every attention/MLP
+    projection is scrambled -> 97% of completions hit the cap with random-token text.
+    The mapping's docstring even states it does not model TP>1.
+    
+    FIX. Replace `_fuse_for_native` with a version that interleaves along the fused
+    output dim for n_shards = GEMMA4_NATIVE_TP (env, set by the launcher to the
+    rollout tensor-parallel degree; default 1 == previous behaviour). Identical to
+    tpu_inference's reorder: split -> reshape (.., n, size_i/n) -> concat -> flatten.
+    
+    FAIL-OPEN. Anchor mismatch prints FAILED, file untouched. Prints exactly one of:
+        GEMMA4-TP-FUSION PATCH: APPLIED (tp=N)
+        GEMMA4-TP-FUSION PATCH: already patched
+        GEMMA4-TP-FUSION PATCH: FAILED <reason>
+    """
+    import importlib.util
+    import os
+    import re
+    import sys
+    
+    NEW_FN = r'''
+    def _interleave_for_shards(pieces, n_shards):
+      """[p0|p1|...] -> per-shard interleaved [p0_s0 p1_s0 ... | p0_s1 p1_s1 ... | ...].
+    
+      Mirrors tpu_inference `reorder_concatenated_tensor_for_sharding` on the last dim,
+      which is the storage layout of JaxMergedColumnParallelLinear / JaxQKVParallelLinear.
+      """
+      import jax.numpy as jnp
+    
+      if n_shards <= 1:
+        return jnp.concatenate(pieces, axis=-1)
+      lead = pieces[0].shape[:-1]
+      per = []
+      for p in pieces:
+        if p.shape[-1] % n_shards != 0:
+          raise ValueError(f"fused piece size {p.shape[-1]} not divisible by tp={n_shards}")
+        per.append(p.reshape(*lead, n_shards, p.shape[-1] // n_shards))
+      return jnp.concatenate(per, axis=-1).reshape(*lead, -1)
+    
+    
+    def _native_tp():
+      """Rollout tensor-parallel degree of the native sampler (env GEMMA4_NATIVE_TP, default 1)."""
+      import os as _os
+    
+      try:
+        return max(1, int(_os.environ.get("GEMMA4_NATIVE_TP", "1")))
+      except ValueError:
+        return 1
+    
+    
+    def _fuse_for_native(state):
+      """Fuses mlp wi_0/wi_1 -> gate_up and attention q/k/v -> qkv for the native model.
+    
+      The fused kernels are 2D (hidden, sum(out_sizes)) laid out INTERLEAVED PER TP
+      SHARD (shard i = [gate_i|up_i] / [q_i|k_i|v_i]) for tp = GEMMA4_NATIVE_TP, which
+      is how tpu_inference's merged column-parallel linears store their kernel
+      (plain [Q|K|V] order is the tp=1 special case). KV-shared layers have no
+      MaxText k/v weights; their sections are zero-filled (computed but never
+      consumed — the layer reads the share target's KV cache).
+      """
+      import jax.numpy as jnp
+      from flax import nnx
+    
+      tp = _native_tp()
+      flat = dict(state.flat_state())
+      # kv head count is uniform across layers that have k/v (gemma4: 1).
+      kv_heads = 1
+      for path, var in flat.items():
+        if len(path) >= 2 and str(path[-2]) == "key" and str(path[-1]) == "kernel":
+          kv_heads = var.value.shape[-2]
+          break
+    
+      out = []
+      for path, var in flat.items():
+        parts = tuple(str(p) for p in path)
+        if len(parts) >= 3 and parts[-3] == "mlp" and parts[-2] in ("wi_0", "wi_1"):
+          if parts[-2] == "wi_0":
+            wi_1 = flat[(*path[:-2], "wi_1", path[-1])]
+            fused = _interleave_for_shards([var.value, wi_1.value], tp)
+            out.append(((*path[:-2], "gate_up", path[-1]), var.replace(value=fused)))
+          continue  # drop wi_0/wi_1 from the pushed state
+        if len(parts) >= 3 and parts[-3] == "self_attention" and parts[-2] in ("query", "key", "value"):
+          if parts[-2] == "query":
+            q = var.value  # (hidden, heads, head_dim)
+            hidden, _, head_dim = q.shape
+            q2 = q.reshape(hidden, -1)
+            kv_shape = (hidden, kv_heads * head_dim)
+            k_path = (*path[:-2], "key", path[-1])
+            v_path = (*path[:-2], "value", path[-1])
+            k2 = flat[k_path].value.reshape(hidden, -1) if k_path in flat else jnp.zeros(kv_shape, q.dtype)
+            v2 = flat[v_path].value.reshape(hidden, -1) if v_path in flat else jnp.zeros(kv_shape, q.dtype)
+            fused = _interleave_for_shards([q2, k2, v2], tp)
+            out.append(((*path[:-2], "qkv", path[-1]), var.replace(value=fused)))
+          continue  # drop query/key/value from the pushed state
+        out.append((path, var))
+      return nnx.State.from_flat_path(out)
+    
+    
+    '''
+    
+    MARK = "_interleave_for_shards"
+    
+    
+    def fail(msg):
+      print(f"GEMMA4-TP-FUSION PATCH: FAILED {msg}")
+      sys.exit(0)
+    
+    
+    def main():
+      spec = importlib.util.find_spec("maxtext")
+      if spec is None or not spec.submodule_search_locations:
+        fail("cannot locate maxtext")
+      path = os.path.join(list(spec.submodule_search_locations)[0], "integration", "tunix", "weight_mapping", "gemma4.py")
+      if not os.path.exists(path):
+        fail(f"{path} missing")
+      src = open(path).read()
+      if MARK in src:
+        print("GEMMA4-TP-FUSION PATCH: already patched")
+        return
+      m = re.search(r"\ndef _fuse_for_native\(state\):.*?(?=\ndef build_gemma4_vllm_mapping)", src, flags=re.S)
+      if not m:
+        fail("anchor `_fuse_for_native` .. `build_gemma4_vllm_mapping` not found")
+      new = src[: m.start()] + "\n" + NEW_FN.lstrip("\n") + src[m.end() + 1 :]
+      try:
+        compile(new, path, "exec")
+      except SyntaxError as e:
+        fail(f"syntax error after patch: {e}")
+      open(path, "w").write(new)
+      if MARK not in open(path).read() or "def _fuse_for_native" not in open(path).read():
+        fail("re-verify failed")
+      print(f"GEMMA4-TP-FUSION PATCH: APPLIED (tp={os.environ.get('GEMMA4_NATIVE_TP', '1')}) -> {path}")
+    
+    
+    if __name__ == "__main__":
+      main()
+    
+  patch_lendist.py: |-
+    """Record per-step ISL / OSL / truncation distributions from the GRPO rollout.
+    
+    WHY. Tunix logs only completions/{mean,max,min}_length -- three scalars. We have never
+    seen the length DISTRIBUTION, and `max_length` is 8192 (the OSL cap) in every single
+    step, so we know something is truncated but not whether it is 1 sequence or 40%. That
+    number gates the tuning plan: holding the OSL cap fixed is only safe if truncation is
+    rare.
+    
+    WHAT IT COSTS. Nothing measurable. Every array read here is ALREADY host-side numpy at
+    this point in the function:
+        rollout_output.tokens                 list[np.ndarray], UNPADDED  -> OSL = len()
+        rollout_output.left_padded_prompt_tokens  np.ndarray              -> ISL
+        pad_value / eos_value                 plain ints (rollout.pad_id()/eos_id())
+        rollout_config.max_tokens_to_generate  the cap
+    No device->host sync is introduced, so step timing is unaffected. ~30 KB/step.
+    
+    Using rollout_output.tokens directly (rather than inferring from completion_mask) makes
+    OSL exact: len() cannot be fooled by a pad token appearing mid-sequence.
+    
+    FAIL-OPEN. This patches a file on the live training path. Any anchor mismatch prints
+    FAILED and exits 0 without modifying anything -- it must never crash a run. The injected
+    code is itself wrapped in try/except so a logging bug cannot take down training.
+    
+    Prints exactly one of:
+        LENDIST PATCH: APPLIED
+        LENDIST PATCH: FAILED <reason>
+    """
+    
+    import ast
+    import os
+    import sys
+    
+    SITE = os.environ.get("PATCH_ROOT", "/usr/local/lib/python3.12/site-packages")
+    ROOT = os.path.join(SITE, "tunix")
+    GL = os.path.join(ROOT, "rl/grpo/grpo_learner.py")
+    
+    
+    def fail(msg):
+        print(f"LENDIST PATCH: FAILED {msg}")
+        sys.exit(0)
+    
+    
+    if not os.path.exists(GL):
+        fail(f"{GL} not found")
+    src = open(GL, encoding="utf-8").read()
+    
+    if "_LENDIST_DUMP" in src:
+        print("LENDIST PATCH: already patched")
+        sys.exit(0)
+    
+    ANCHOR = "    # Log completion lengths.\n    agg_completion_mask = completion_mask.sum(axis=-1)\n"
+    if src.count(ANCHOR) != 1:
+        fail(f"anchor found {src.count(ANCHOR)} times, expected 1")
+    
+    # Verify the names we rely on are actually in scope in this function.
+    for name in ("rollout_output", "rollout_config", "pad_value", "eos_value"):
+        if name not in src:
+            fail(f"expected local '{name}' not present in grpo_learner.py")
+    
+    INJECT = '''    # --- _LENDIST_DUMP: per-step ISL/OSL/truncation distributions -------------
+        # All inputs are already host-side numpy here; no device sync is added.
+        try:
+          import json as _json, os as _os, numpy as _np
+          _cap = int(getattr(rollout_config, "max_tokens_to_generate", 0) or 0)
+          _osl, _trunc, _eos_end = [], 0, 0
+          for _t in rollout_output.tokens:
+            _n = int(len(_t))
+            _osl.append(_n)
+            if _cap and _n >= _cap:
+              # Distinguish "ran into the wall" from "happened to finish exactly there".
+              if _n > 0 and int(_t[-1]) == int(eos_value):
+                _eos_end += 1
+              else:
+                _trunc += 1
+          _p = _np.asarray(rollout_output.left_padded_prompt_tokens)
+          _isl = (_p != pad_value).sum(axis=-1).astype(int).tolist()
+          _rec = {
+              "step": int(self.rl_cluster.global_steps),
+              "mode": str(mode),
+              "cap": _cap,
+              "n": len(_osl),
+              "osl": _osl,
+              "isl": _isl,
+              "truncated_at_cap": _trunc,
+              "eos_exactly_at_cap": _eos_end,
+          }
+          _run = _os.environ.get("JOB_IDENTIFIER", "unknown-run")
+          _art = _os.environ.get("ARTIFACT_DIR", "")
+          _line = _json.dumps(_rec)
+          print("LENDIST step=%d n=%d cap=%d truncated=%d (%.2f%%) eos_at_cap=%d "
+                "osl_mean=%.1f isl_mean=%.1f"
+                % (_rec["step"], _rec["n"], _cap, _trunc,
+                   100.0 * _trunc / max(1, len(_osl)), _eos_end,
+                   sum(_osl) / max(1, len(_osl)), sum(_isl) / max(1, len(_isl))),
+                flush=True)
+          if _art.startswith("gs://"):
+            from google.cloud import storage as _st
+            _b, _, _pre = _art[5:].partition("/")
+            _key = "%s/%s/lendist/step_%06d.json" % (_pre.rstrip("/"), _run, _rec["step"])
+            _st.Client().bucket(_b).blob(_key.lstrip("/")).upload_from_string(
+                _line, content_type="application/json")
+        except Exception as _e:  # never take down training for a logging bug
+          print("LENDIST ERROR: %r" % (_e,), flush=True)
+        # --- end _LENDIST_DUMP ----------------------------------------------------
+    
+    '''
+    
+    src = src.replace(ANCHOR, INJECT + ANCHOR, 1)
+    
+    try:
+        ast.parse(src)
+    except SyntaxError as e:
+        fail(f"patched source does not parse: {e}")
+    
+    open(GL, "w", encoding="utf-8").write(src)
+    
+    v = open(GL, encoding="utf-8").read()
+    problems = []
+    if "_LENDIST_DUMP" not in v:
+        problems.append("marker missing")
+    if "truncated_at_cap" not in v:
+        problems.append("truncation logic missing")
+    if v.count("agg_completion_mask = completion_mask.sum(axis=-1)") != 1:
+        problems.append("original metric line disturbed")
+    try:
+        ast.parse(v)
+    except SyntaxError as e:
+        problems.append(f"reparse failed: {e}")
+    if problems:
+        fail("; ".join(problems))
+    print("LENDIST PATCH: APPLIED")
+  patch_phasetime.py: |-
+    """Phasetime v2 -- split the `other` residual INTO its components.
+    
+    V1 (runs 10/10b) plus TensorBoard arithmetic already proved the ~30 s `other`
+    residual is exactly `generate_and_compute_advantage - vllm_rollout`, i.e. the
+    reward + advantage + data-marshaling stage between the vLLM generate call and
+    the train loop (verified to +-0.5 s on three matched steps). V2 answers the
+    next question: WHICH of those dominates. It keeps all four v1 timers and adds:
+    
+        engine_generate    RLCluster.generate wall -- the vLLM call INCLUDING
+                           tunix-side detokenization; against TensorBoard's
+                           rollout_time this locates where detokenize lands
+        compute_rewards    RLLearner._compute_rewards wall -- the Python reward
+                           functions (match_format_*, check_numbers) over 2048
+                           completions
+    
+    Derived offline, no extra timers needed:
+        marshal+advantage  = generate_and_advantage - engine_generate
+                             - compute_rewards
+        (contains the 2048 x 8192 pad-and-stack ~67 MB numpy build, jnp
+        conversions, advantage estimator, device_put)
+    
+    Same mechanics as v1: append-and-monkeypatch on the class objects, six
+    perf_counter pairs per global step, no device sync, JSON per step to
+    <ARTIFACT_DIR>/<run>/phasetime/step_NNNNNN.json plus a PHASETIME stdout line.
+    
+    CIRCULAR-IMPORT NOTE. rl_learner imports rl_cluster at module load, so the
+    block appended to rl_cluster.py must import rl_learner LAZILY inside the
+    wrapper body, never at module level.
+    
+    FAIL-OPEN. Any missing class/method prints FAILED and exits 0 without
+    writing. Prints exactly one of:
+        PHASETIME2 PATCH: APPLIED
+        PHASETIME2 PATCH: FAILED <reason>
+    """
+    
+    import ast
+    import os
+    import sys
+    
+    SITE = os.environ.get("PATCH_ROOT", "/usr/local/lib/python3.12/site-packages")
+    ROOT = os.path.join(SITE, "tunix")
+    RL = os.path.join(ROOT, "rl/rl_learner.py")
+    GL = os.path.join(ROOT, "rl/grpo/grpo_learner.py")
+    RC = os.path.join(ROOT, "rl/rl_cluster.py")
+    
+    
+    def fail(msg):
+        print(f"PHASETIME2 PATCH: FAILED {msg}")
+        sys.exit(0)
+    
+    
+    for p in (RL, GL, RC):
+        if not os.path.exists(p):
+            fail(f"{p} not found")
+    
+    rl_src = open(RL, encoding="utf-8").read()
+    gl_src = open(GL, encoding="utf-8").read()
+    rc_src = open(RC, encoding="utf-8").read()
+    
+    if any("_PHASETIME" in s for s in (rl_src, gl_src, rc_src)):
+        print("PHASETIME2 PATCH: already patched")
+        sys.exit(0)
+    
+    for needle, where in (("class RLLearner", "rl_learner.py"),
+                          ("def _run_global_step", "rl_learner.py"),
+                          ("def _prepare_data", "rl_learner.py"),
+                          ("def _run_all_micro_batch_steps", "rl_learner.py"),
+                          ("def _compute_rewards", "rl_learner.py")):
+        if needle not in rl_src:
+            fail(f"'{needle}' not present in {where}")
+    for needle in ("class GRPOLearner", "def _generate_and_compute_advantage"):
+        if needle not in gl_src:
+            fail(f"'{needle}' not present in grpo_learner.py")
+    for needle in ("class RLCluster", "def generate"):
+        if needle not in rc_src:
+            fail(f"'{needle}' not present in rl_cluster.py")
+    
+    RL_APPEND = '''
+    
+    # --- _PHASETIME v2: break out the `other` residual --------------------------------
+    # Appended by patch_phasetime2.py. Six perf_counter pairs per global step; no
+    # device sync. Wrappers are installed on the class objects only.
+    try:
+      import time as _pt_time
+      import json as _pt_json
+      import os as _pt_os
+    
+      _PHASETIME = {}
+    
+      def _pt_add(_name, _dt):
+        _PHASETIME[_name] = _PHASETIME.get(_name, 0.0) + float(_dt)
+    
+      def _pt_wrap(_cls, _meth, _label):
+        _orig = getattr(_cls, _meth)
+    
+        def _w(self, *a, **k):
+          _t0 = _pt_time.perf_counter()
+          try:
+            return _orig(self, *a, **k)
+          finally:
+            _pt_add(_label, _pt_time.perf_counter() - _t0)
+    
+        _w.__name__ = getattr(_orig, "__name__", _meth)
+        setattr(_cls, _meth, _w)
+    
+      def _pt_flush(self):
+        try:
+          _step = -1
+          try:
+            _step = int(self.rl_cluster.global_steps)
+          except Exception:
+            pass
+          _rec = dict(_PHASETIME)
+          _rec["step"] = _step
+          print("PHASETIME step=%d " % _step
+                + " ".join("%s=%.2f" % (_k, _v) for _k, _v in sorted(_rec.items())
+                           if _k != "step"), flush=True)
+          _run = _pt_os.environ.get("JOB_IDENTIFIER", "unknown-run")
+          _art = _pt_os.environ.get("ARTIFACT_DIR", "")
+          if _art.startswith("gs://"):
+            from google.cloud import storage as _st
+            _b, _, _pre = _art[5:].partition("/")
+            _key = "%s/%s/phasetime/step_%06d.json" % (_pre.rstrip("/"), _run, _step)
+            _st.Client().bucket(_b).blob(_key.lstrip("/")).upload_from_string(
+                _pt_json.dumps(_rec), content_type="application/json")
+        except Exception as _e:
+          print("PHASETIME ERROR: %r" % (_e,), flush=True)
+        finally:
+          _PHASETIME.clear()
+    
+      _pt_wrap(RLLearner, "_prepare_data", "prepare_data")
+      _pt_wrap(RLLearner, "_run_all_micro_batch_steps", "micro_batch_steps")
+      _pt_wrap(RLLearner, "_compute_rewards", "compute_rewards")
+    
+      _pt_orig_gs = RLLearner._run_global_step
+    
+      def _pt_global_step(self, *a, **k):
+        _t0 = _pt_time.perf_counter()
+        try:
+          return _pt_orig_gs(self, *a, **k)
+        finally:
+          _pt_add("run_global_step", _pt_time.perf_counter() - _t0)
+          _pt_flush(self)
+    
+      RLLearner._run_global_step = _pt_global_step
+    except Exception as _e:
+      print("PHASETIME ERROR (install): %r" % (_e,), flush=True)
+    # --- end _PHASETIME ---------------------------------------------------------------
+    '''
+    
+    GL_APPEND = '''
+    
+    # --- _PHASETIME v2: time the GRPO payload inside prepare_data ---------------------
+    try:
+      import time as _pt2_time
+      from tunix.rl import rl_learner as _pt2_rl
+    
+      _pt2_orig = GRPOLearner._generate_and_compute_advantage
+    
+      def _pt2_w(self, *a, **k):
+        _t0 = _pt2_time.perf_counter()
+        try:
+          return _pt2_orig(self, *a, **k)
+        finally:
+          try:
+            _pt2_rl._pt_add("generate_and_advantage", _pt2_time.perf_counter() - _t0)
+          except Exception:
+            pass
+    
+      GRPOLearner._generate_and_compute_advantage = _pt2_w
+    except Exception as _e:
+      print("PHASETIME ERROR (grpo install): %r" % (_e,), flush=True)
+    # --- end _PHASETIME ---------------------------------------------------------------
+    '''
+    
+    RC_APPEND = '''
+    
+    # --- _PHASETIME v2: time the engine generate call (vLLM + detokenize) -------------
+    # NOTE: rl_learner imports THIS module at load time, so rl_learner must be
+    # imported lazily inside the wrapper to avoid a circular import.
+    try:
+      import time as _pt3_time
+    
+      _pt3_orig = RLCluster.generate
+    
+      def _pt3_w(self, *a, **k):
+        _t0 = _pt3_time.perf_counter()
+        try:
+          return _pt3_orig(self, *a, **k)
+        finally:
+          try:
+            from tunix.rl import rl_learner as _pt3_rl
+            _pt3_rl._pt_add("engine_generate", _pt3_time.perf_counter() - _t0)
+          except Exception:
+            pass
+    
+      _pt3_w.__name__ = "generate"
+      RLCluster.generate = _pt3_w
+    except Exception as _e:
+      print("PHASETIME ERROR (cluster install): %r" % (_e,), flush=True)
+    # --- end _PHASETIME ---------------------------------------------------------------
+    '''
+    
+    new_rl = rl_src + RL_APPEND
+    new_gl = gl_src + GL_APPEND
+    new_rc = rc_src + RC_APPEND
+    for name, s in (("rl_learner.py", new_rl), ("grpo_learner.py", new_gl),
+                    ("rl_cluster.py", new_rc)):
+        try:
+            ast.parse(s)
+        except SyntaxError as e:
+            fail(f"patched {name} does not parse: {e}")
+    
+    open(RL, "w", encoding="utf-8").write(new_rl)
+    open(GL, "w", encoding="utf-8").write(new_gl)
+    open(RC, "w", encoding="utf-8").write(new_rc)
+    
+    problems = []
+    v_rl = open(RL, encoding="utf-8").read()
+    v_gl = open(GL, encoding="utf-8").read()
+    v_rc = open(RC, encoding="utf-8").read()
+    if "_pt_flush" not in v_rl or 'compute_rewards"' not in v_rl:
+        problems.append("rl_learner wrappers missing")
+    if "_pt2_w" not in v_gl:
+        problems.append("grpo_learner wrapper missing")
+    if "_pt3_w" not in v_rc:
+        problems.append("rl_cluster wrapper missing")
+    if v_rl.count("def _run_global_step") != 1:
+        problems.append("rl_learner._run_global_step disturbed")
+    for name, s in (("rl_learner.py", v_rl), ("grpo_learner.py", v_gl),
+                    ("rl_cluster.py", v_rc)):
+        try:
+            ast.parse(s)
+        except SyntaxError as e:
+            problems.append(f"reparse {name}: {e}")
+    if problems:
+        fail("; ".join(problems))
+    print("PHASETIME2 PATCH: APPLIED")
+  patch_pr4409.py: |-
+    """Apply maxtext PR #4409 (OOM-safe chunked log-probs for the RL actor) at runtime.
+    
+    WHY. Fix #21: gemma4's 262k-vocab logits force train_micro_batch_size=1 (256 grad-acc
+    microsteps per update, ~131 s train segment at 4x4x4). PR #4409 (lokic233, stale-closed
+    2026-08-18 for CLA, never rejected) threads tunix's in-tree `compute_logps_chunk_size`
+    through MaxText: the actor projects the LM head in sequence chunks (scan+remat), capping
+    live logits at [B, chunk, V]. DEFAULT-OFF: byte-identical unless
+    `rl_compute_logps_chunk_size>0` is passed.
+    
+    WHAT. The diff `pr4409_chunked_logps.diff` (PR rebased onto the image's tree = maxtext fork
+    `ironwood-rl-gemma4` @ 840ffd3; one conflict in tunix_adapter.py resolved by keeping both the
+    fork's JAX compat shims and the PR's NAVI_MEM_LOG helper) is applied with `patch -p3` (or
+    `git apply`) under the importable maxtext package root. Touches: configs/post_train/rl.yml,
+    configs/types.py, integration/tunix/tunix_adapter.py, layers/decoders.py,
+    layers/nnx_decoders.py, models/models.py, trainers/post_train/rl/train_rl.py.
+    Run it BEFORE patch_engine_kwargs (independent hunks, but keep the order deterministic).
+    
+    FAIL-OPEN. Any failure prints FAILED and exits 0 with the tree untouched (dry-run first).
+    Prints exactly one of:
+        PR4409 PATCH: APPLIED
+        PR4409 PATCH: already patched
+        PR4409 PATCH: FAILED <reason>
+    """
+    import importlib.util
+    import os
+    import shutil
+    import subprocess
+    import sys
+    
+    HERE = os.path.dirname(os.path.abspath(__file__))
+    DIFF = os.path.join(HERE, "pr4409_chunked_logps.diff")
+    MARK = "rl_compute_logps_chunk_size"
+    
+    
+    def fail(msg):
+      print(f"PR4409 PATCH: FAILED {msg}")
+      sys.exit(0)
+    
+    
+    def main():
+      spec = importlib.util.find_spec("maxtext")
+      if spec is None or not spec.submodule_search_locations:
+        fail("cannot import maxtext")
+      root = list(spec.submodule_search_locations)[0]  # .../src/maxtext
+      if not os.path.exists(DIFF):
+        fail(f"diff not found at {DIFF}")
+      rl_yml = os.path.join(root, "configs", "post_train", "rl.yml")
+      if os.path.exists(rl_yml) and MARK in open(rl_yml).read():
+        print("PR4409 PATCH: already patched")
+        return
+      if shutil.which("patch"):
+        base = ["patch", "-p3", "-d", root, "--forward", "--batch", "-i", DIFF]
+        dry = subprocess.run(base + ["--dry-run"], capture_output=True, text=True)
+        if dry.returncode != 0:
+          fail(f"patch --dry-run failed under {root}: {dry.stdout[-600:]} {dry.stderr[-300:]}")
+        r = subprocess.run(base, capture_output=True, text=True)
+        if r.returncode != 0:
+          fail(f"patch apply failed: {r.stdout[-600:]} {r.stderr[-300:]}")
+      elif shutil.which("git"):
+        base = ["git", "apply", "--unsafe-paths", "-p3", f"--directory={root}", DIFF]
+        chk = subprocess.run(base + ["--check"], capture_output=True, text=True)
+        if chk.returncode != 0:
+          fail(f"git apply --check failed under {root}: {chk.stderr[-600:]}")
+        r = subprocess.run(base, capture_output=True, text=True)
+        if r.returncode != 0:
+          fail(f"git apply failed: {r.stderr[-600:]}")
+      else:
+        fail("neither `patch` nor `git` available in the image")
+      if MARK not in open(rl_yml).read():
+        fail("re-verify failed (rl.yml lacks new knob)")
+      # Follow-up fix for trees whose decoder is a native NNXDecoder (no `rngs` kwarg on
+      # apply_output_head): only forward rngs when the signature accepts it. The PR's static-key
+      # trick targets the ToNNX-wrapped Linen decoder; on NNXDecoder it raised
+      # TypeError: apply_output_head() got an unexpected keyword argument 'rngs' (run g4n9s).
+      models_py = os.path.join(root, "models", "models.py")
+      ms = open(models_py).read()
+      old_line = '    extra = {"rngs": rngs} if rngs is not None else {}\n'
+      new_line = ('    extra = {"rngs": rngs} if (rngs is not None and "rngs" in __import__("inspect")'
+                  '.signature(self.decoder.apply_output_head).parameters) else {}\n')
+      if old_line in ms:
+        open(models_py, "w").write(ms.replace(old_line, new_line, 1))
+      elif new_line not in ms:
+        fail("models.py rngs-forwarding anchor not found after apply")
+      print(f"PR4409 PATCH: APPLIED -> {root}")
+    
+    
+    if __name__ == "__main__":
+      main()
+    
+  patch_sharded_sampling.py: |-
+    """Vocab-sharded sampling + logprobs for the fused decode window.
+    
+    WHY. sampling.py force-replicates the logits over the vocab dim every decode
+    iteration ("Unshard the logits explicitly...", with an upstream TODO asking
+    for exactly this change): a (batch, 151936) f32 all-gather (~78 MB per DP
+    rank per iteration), followed by topk_mask/topp_mask -- 32-33 full vocab-axis
+    reduction sweeps each (the ~800us/call while-loops in every profile) -- and a
+    full-vocab categorical, all computed redundantly on every TP device. The
+    logprobs path (gather_logprobs) repeats full-vocab log_softmax + top-N + a
+    rank reduction on the same replicated array.
+    
+    WHAT. Rebinds `sample` and `compute_and_gather_logprobs` with vocab-sharded
+    implementations under jax.shard_map:
+      - per TP shard: one lax.top_k over vocab/8, all-gather only the top-64
+        candidate (value, index) pairs (~0.4 MB vs ~78 MB);
+      - exact top-k cutoff, top-p cutoff, and categorical on the merged
+        candidates. EXACTNESS: temperature scaling is monotone (order preserved);
+        the union of per-shard top-64 contains the global top-k for k <= 64; the
+        cutoff mask keeps values >= cutoff exactly like topk_mask (ties
+        included); masked/non-candidate entries underflow to exactly zero
+        probability in f32 softmax, so top-p mass sums and the categorical
+        distribution equal the full-vocab computation. Verified on CPU with an
+        8-device mesh: kept sets identical on adversarial ties, greedy exact,
+        draw distribution within statistical noise, logprob top-N ids exact,
+        values within 1e-6, ranks exact (scratchpad/shard_proto.py).
+      - logprobs: log_softmax via pmax/psum, top-N from the same candidates
+        (log_softmax is monotone in logits), token logprob + rank via psum.
+    
+    WHAT CHANGES NUMERICALLY. The categorical RNG stream differs (noise drawn
+    over candidates, not the full vocab), so sampled tokens are not bitwise equal
+    to the old path -- distribution-equal only. Logprob VALUES shift ~1e-6 from
+    reduction order. Validity gates for the run: LENDIST truncation band and
+    reward band, not bitwise reward equality.
+    
+    GUARDS.
+      - lax.cond falls back to the ORIGINAL implementation for the whole batch
+        if any row has top_k <= 0 or top_k > 64 (e.g. eval "liberal" top_k=2000)
+        or top_p <= 0; both branches are compiled, only the taken one runs.
+      - compute_and_gather_logprobs falls back statically if max_logprobs > 48.
+      - env SHARDED_SAMPLING=0 disables the rebinding entirely at patch time...
+        is checked at RUNTIME by the wrappers, so the kill-switch works from the
+        manifest without re-patching.
+      - `sample`'s ret_logits in the sharded path is the RAW (still-sharded)
+        logits: valid for logprobs_mode="raw" (our config). A processed_logprobs
+        deployment must disable this patch.
+    
+    FAIL-OPEN. Any missing anchor prints FAILED and exits 0.
+    Prints exactly one of:
+        SHARDED-SAMPLING PATCH: APPLIED
+        SHARDED-SAMPLING PATCH: FAILED <reason>
+    """
+    
+    import ast
+    import os
+    import sys
+    
+    SITE = os.environ.get("PATCH_ROOT", "/usr/local/lib/python3.12/site-packages")
+    ROOT = os.path.join(SITE, "tpu_inference")
+    SP = os.path.join(ROOT, "layers/jax/sample/sampling.py")
+    
+    
+    def fail(msg):
+        print(f"SHARDED-SAMPLING PATCH: FAILED {msg}")
+        sys.exit(0)
+    
+    
+    if not os.path.exists(SP):
+        fail(f"{SP} not found")
+    src = open(SP, encoding="utf-8").read()
+    
+    if "_SHARDED_SAMPLING" in src:
+        print("SHARDED-SAMPLING PATCH: already patched")
+        sys.exit(0)
+    
+    for needle in ("def sample(", "def compute_and_gather_logprobs(",
+                   "def gather_logprobs(", "def _apply_sampling_transforms(",
+                   "ShardingAxisName"):
+        if needle not in src:
+            fail(f"anchor '{needle}' not present in sampling.py")
+    
+    APPEND = '''
+    
+    # --- _SHARDED_SAMPLING -------------------------------------------------------
+    # Appended by patch_sharded_sampling.py (see its docstring). Rebinds `sample`
+    # and `compute_and_gather_logprobs` below; originals are kept as fallbacks.
+    try:
+      import os as _ss_os
+      from jax import lax as _ss_lax
+      try:
+        from jax import shard_map as _ss_shard_map          # jax >= 0.8
+      except ImportError:
+        from jax.experimental.shard_map import shard_map as _ss_shard_map
+    
+      _SS_CAND = 64
+      _SS_NEG = -1e12
+    
+      _ss_orig_sample = sample
+      _ss_orig_cgl = compute_and_gather_logprobs
+    
+      def _ss_axes(mesh):
+        """(batch_axes, vocab_axis) restricted to axes present in the mesh."""
+        def present(name):
+          if name is None:
+            return ()
+          if isinstance(name, (tuple, list)):
+            return tuple(a for a in name if a in mesh.axis_names)
+          return (name,) if name in mesh.axis_names else ()
+        batch = present(ShardingAxisName.ATTN_DATA)
+        vocab = present(ShardingAxisName.MODEL)
+        return batch, (vocab[0] if vocab else None)
+    
+      def _ss_merged_candidates(x_blk, vocab_axis):
+        v_shard = x_blk.shape[-1]
+        midx = _ss_lax.axis_index(vocab_axis)
+        vals, idx = _ss_lax.top_k(x_blk, _SS_CAND)
+        gidx = idx + midx * v_shard
+        av = _ss_lax.all_gather(vals, vocab_axis)
+        ai = _ss_lax.all_gather(gidx, vocab_axis)
+        n = av.shape[0]
+        av = jnp.transpose(av, (1, 0, 2)).reshape(-1, n * _SS_CAND)
+        ai = jnp.transpose(ai, (1, 0, 2)).reshape(-1, n * _SS_CAND)
+        return av, ai
+    
+      def _ss_greedy(cv, ci):
+        m = jnp.max(cv, axis=-1, keepdims=True)
+        big = jnp.iinfo(jnp.int32).max
+        return jnp.min(jnp.where(cv >= m, ci, big), axis=-1)
+    
+      def _ss_kth(cv, k):
+        sv = -jnp.sort(-cv, axis=-1)
+        kk = jnp.clip(k, 1, cv.shape[-1]) - 1
+        return jnp.take_along_axis(sv, kk[:, None], axis=-1)
+    
+      def _ss_topp_cutoff(probs, p):
+        sp = -jnp.sort(-probs, axis=-1)
+        cum = jnp.cumsum(sp, axis=-1)
+        jstar = jnp.argmax(cum >= p[:, None], axis=-1)
+        return jnp.take_along_axis(sp, jstar[:, None], axis=-1)
+    
+      def _ss_sample_block(vocab_axis, batch_axes, rng, x, temperature, top_k,
+                           top_p, do_argmax_only):
+        # x: (b_local, v_shard) f32
+        didx = 0
+        for i, a in enumerate(batch_axes):
+          didx = didx * _ss_lax.axis_size(a) + _ss_lax.axis_index(a)
+        xt = x / temperature[:, None]
+        cv, ci = _ss_merged_candidates(xt, vocab_axis)
+        greedy = _ss_greedy(cv, ci)
+        if do_argmax_only:
+          return _ss_lax.pmax(greedy, vocab_axis)
+        kth = _ss_kth(cv, top_k)
+        mk = jnp.where((top_k > 0)[:, None] & ~(cv >= kth), _SS_NEG, cv)
+        probs = jax.nn.softmax(mk, axis=-1)
+        pcut = _ss_topp_cutoff(probs, top_p)
+        mp = jnp.where((top_p < 1.0)[:, None] & ~(probs >= pcut), _SS_NEG, mk)
+        r = jax.random.fold_in(rng, didx)
+        choice = jax.random.categorical(r, mp)
+        sampled = jnp.take_along_axis(ci, choice[:, None], axis=-1)[:, 0]
+        out = jnp.where(temperature < _SAMPLING_EPS, greedy, sampled)
+        # Values are identical on every vocab shard (built from all-gathered
+        # candidates); the pmax is an identity that makes that replication
+        # provable to shard_map's output check on every jax version.
+        return _ss_lax.pmax(out, vocab_axis)
+    
+      def _ss_sample(rng, mesh, logits, meta):
+        batch_axes, vocab_axis = _ss_axes(mesh)
+        bspec = P(batch_axes if batch_axes else None)
+        lspec = P(batch_axes if batch_axes else None, vocab_axis)
+        logits = jax.lax.with_sharding_constraint(logits,
+                                                  NamedSharding(mesh, lspec))
+    
+        def blk(rng, x, t, k, p):
+          return _ss_sample_block(vocab_axis, batch_axes, rng, x, t, k, p,
+                                  do_argmax_only=not meta.do_sampling)
+    
+        tokens = _ss_shard_map(blk, mesh=mesh,
+                               in_specs=(P(), lspec, bspec, bspec, bspec),
+                               out_specs=bspec)(
+                                   rng, logits, meta.temperature.astype(
+                                       jnp.float32), meta.top_k, meta.top_p)
+        tokens = jax.lax.with_sharding_constraint(tokens, NamedSharding(mesh, P()))
+        return tokens, logits
+    
+      def sample(rng, mesh, logits, tpu_sampling_metadata):
+        if _ss_os.environ.get("SHARDED_SAMPLING", "1") == "0":
+          return _ss_orig_sample(rng, mesh, logits, tpu_sampling_metadata)
+        meta = tpu_sampling_metadata
+        if meta._cache_collision_dummy is not None:
+          logits = logits + 0 * jnp.sum(meta._cache_collision_dummy)
+        _, vocab_axis = _ss_axes(mesh)
+        if vocab_axis is None:
+          return _ss_orig_sample(rng, mesh, logits, meta)
+        logits = logits.astype(jnp.float32)
+        if not meta.do_sampling:
+          return _ss_sample(rng, mesh, logits, meta)
+        safe = jnp.all((meta.top_k > 0) & (meta.top_k <= _SS_CAND)
+                       & (meta.top_p > 0.0))
+        return _ss_cond_sample(safe, rng, mesh, logits, meta)
+    
+      def _ss_cond_sample(safe, rng, mesh, logits, meta):
+        # mesh/meta are closed over rather than passed as lax.cond operands
+        # (Mesh is not a valid JAX type). Both branches constrain ret_logits to
+        # the SHARDED spec so cond-output unification cannot reintroduce the
+        # vocab all-gather on the hot path (the fallback branch has already paid
+        # its own gather internally; re-constraining its output is cheap).
+        batch_axes, vocab_axis = _ss_axes(mesh)
+        lspec = P(batch_axes if batch_axes else None, vocab_axis)
+    
+        def tru(op):
+          r, lg = op
+          return _ss_sample(r, mesh, lg, meta)
+    
+        def fls(op):
+          r, lg = op
+          toks, ret = _ss_orig_sample(r, mesh, lg, meta)
+          ret = jax.lax.with_sharding_constraint(ret, NamedSharding(mesh, lspec))
+          return toks, ret
+    
+        return jax.lax.cond(safe, tru, fls, (rng, logits))
+    
+      def compute_and_gather_logprobs(logits, next_tokens, max_logprobs):
+        if (_ss_os.environ.get("SHARDED_SAMPLING", "1") == "0"
+            or max_logprobs > 48):
+          return _ss_orig_cgl(logits, next_tokens, max_logprobs)
+        # Mesh is implicit here (no arg); derive from the array sharding if
+        # available, else fall back.
+        sh = getattr(logits, "sharding", None)
+        mesh = getattr(sh, "mesh", None)
+        if mesh is None or getattr(mesh, "empty", False):
+          return _ss_orig_cgl(logits, next_tokens, max_logprobs)
+        batch_axes, vocab_axis = _ss_axes(mesh)
+        if vocab_axis is None:
+          return _ss_orig_cgl(logits, next_tokens, max_logprobs)
+        bspec = P(batch_axes if batch_axes else None)
+        lspec = P(batch_axes if batch_axes else None, vocab_axis)
+        logits = jax.lax.with_sharding_constraint(
+            logits, NamedSharding(mesh, lspec))
+    
+        def blk(x, toks):
+          v_shard = x.shape[-1]
+          midx = _ss_lax.axis_index(vocab_axis)
+          gmax = _ss_lax.pmax(jnp.max(x, axis=-1), vocab_axis)
+          se = _ss_lax.psum(jnp.sum(jnp.exp(x - gmax[:, None]), axis=-1),
+                            vocab_axis)
+          lse = gmax + jnp.log(se)
+          rv, ri = _ss_merged_candidates(x, vocab_axis)
+          nv, ni = _ss_lax.top_k(rv, max_logprobs)
+          top_ids = jnp.take_along_axis(ri, ni, axis=-1)
+          top_lps = nv - lse[:, None]
+          owner = (toks >= midx * v_shard) & (toks < (midx + 1) * v_shard)
+          col = jnp.clip(toks - midx * v_shard, 0, v_shard - 1)
+          lval = jnp.take_along_axis(x, col[:, None], axis=-1)[:, 0]
+          tok_logit = _ss_lax.psum(jnp.where(owner, lval, 0.0), vocab_axis)
+          tok_lp = tok_logit - lse
+          rank = _ss_lax.psum(jnp.sum(x >= tok_logit[:, None], axis=-1),
+                              vocab_axis)
+          idx = jnp.concatenate((toks[:, None], top_ids), axis=1).astype(jnp.int32)
+          lps = jnp.concatenate((tok_lp[:, None], top_lps), axis=1)
+          # identity pmax: values already replicated across vocab shards; makes
+          # the replication provable to shard_map's output check.
+          return (_ss_lax.pmax(idx, vocab_axis), _ss_lax.pmax(lps, vocab_axis),
+                  _ss_lax.pmax(rank, vocab_axis))
+    
+        idx, lps, rank = _ss_shard_map(
+            blk, mesh=mesh,
+            in_specs=(lspec, bspec),
+            out_specs=(P(batch_axes if batch_axes else None, None),
+                       P(batch_axes if batch_axes else None, None), bspec),
+            )(logits.astype(jnp.float32), next_tokens)
+        return LogprobsTensors(idx, lps, rank)
+    except Exception as _e:
+      print("SHARDED-SAMPLING ERROR (install): %r" % (_e,), flush=True)
+    # --- end _SHARDED_SAMPLING ---------------------------------------------------
+    '''
+    
+    new = src + APPEND
+    try:
+        ast.parse(new)
+    except SyntaxError as e:
+        fail(f"patched source does not parse: {e}")
+    
+    open(SP, "w", encoding="utf-8").write(new)
+    
+    v = open(SP, encoding="utf-8").read()
+    problems = []
+    if "_ss_sample_block" not in v or "_ss_orig_cgl" not in v:
+        problems.append("appended block incomplete")
+    if v.count("def sample(") != 2:
+        problems.append("expected original + rebound sample definitions")
+    try:
+        ast.parse(v)
+    except SyntaxError as e:
+        problems.append(f"reparse failed: {e}")
+    if problems:
+        fail("; ".join(problems))
+    print("SHARDED-SAMPLING PATCH: APPLIED")
+  patch_tunix_chunked_logps.py: |-
+    """Port tunix chunked log-probs (tunix b02231b8 / PR#4409's tunix half) onto the image's tunix.
+    
+    WHY. maxtext PR #4409 (patch_pr4409) adds `skip_lm_head` + `compute_final_logits` on the
+    MaxText side and passes `compute_logps_chunk_size` into tunix's RLTrainingConfig — but the
+    image ships google-tunix 0.1.7-snapshot, which predates tunix commit b02231b8 ("enable
+    chunked logps computation"): RLTrainingConfig has no such field (TypeError at startup, run
+    g4n3s0840) and common.compute_per_token_logps always materializes the full
+    [B, S, 262144] f32 logits (Fix #21: tmbs>1 OOM at 8192 tokens).
+    
+    WHAT (all default-off, byte-identical behaviour when chunk_size == 0):
+      rl/rl_cluster.py   RLTrainingConfig.compute_logps_chunk_size: int = 0; old-logps call
+                         passes chunk_size.
+      rl/common.py       compute_per_token_logps(..., chunk_size=0): when >0 calls the model with
+                         skip_lm_head=True, then projects+log-softmaxes hidden states in sequence
+                         chunks under lax.scan+remat (_compute_chunked_logps), returning
+                         per-token logps and per-token ENTROPY in the `logits` return slot
+                         (2-D == entropy; callers check ndim).
+      rl/algo_core.py    grpo_loss_fn passes chunk_size from kwargs and uses the precomputed
+                         entropy when the second return is 2-D.
+      rl/grpo/grpo_learner.py  loss lambda forwards compute_logps_chunk_size from the cluster's
+                         RLTrainingConfig.
+    
+    FAIL-OPEN. Every edit asserts its anchor; any miss prints FAILED and leaves ALL files
+    untouched (edits are staged in memory and written only if all succeed + compile).
+    Prints exactly one of:
+        TUNIX-CHUNKED-LOGPS PATCH: APPLIED
+        TUNIX-CHUNKED-LOGPS PATCH: already patched
+        TUNIX-CHUNKED-LOGPS PATCH: FAILED <reason>
+    """
+    import importlib.util
+    import os
+    import sys
+    
+    MARK = "_compute_chunked_logps"
+    
+    
+    def fail(msg):
+      print(f"TUNIX-CHUNKED-LOGPS PATCH: FAILED {msg}")
+      sys.exit(0)
+    
+    
+    def rep(src, old, new, what):
+      n = src.count(old)
+      if n != 1:
+        fail(f"{what}: anchor count {n} != 1")
+      return src.replace(old, new, 1)
+    
+    
+    CHUNK_FN = '''
+    
+    def _compute_chunked_logps(model, hidden_states, target_ids, temperature, chunk_size):
+      """Per-token log-probs + entropy from hidden states in sequence chunks (scan+remat).
+    
+      Peak live logits are [B, chunk_size, V] instead of [B, S, V]. Requires the model to
+      expose `compute_final_logits(hidden)` (maxtext PR #4409 TunixMaxTextAdapter).
+      Returns (per_token_logps [B, S], per_token_entropy [B, S]).
+      """
+      batch_size, seq_len, hidden_dim = hidden_states.shape
+      pad_len = (chunk_size - (seq_len % chunk_size)) % chunk_size
+      if pad_len > 0:
+        hidden_states = jnp.pad(hidden_states, ((0, 0), (0, pad_len), (0, 0)))
+        target_ids = jnp.pad(target_ids, ((0, 0), (0, pad_len)))
+      num_chunks = (seq_len + pad_len) // chunk_size
+      hs = jnp.swapaxes(hidden_states.reshape(batch_size, num_chunks, chunk_size, hidden_dim), 0, 1)
+      ids = jnp.swapaxes(target_ids.reshape(batch_size, num_chunks, chunk_size), 0, 1)
+    
+      @nnx.remat
+      def logp_step(carry, xs):
+        hs_chunk, ids_chunk = xs
+        logits_chunk = model.compute_final_logits(hs_chunk).astype(jnp.float32)
+        if temperature != 0.0 and temperature != 1.0:
+          logits_chunk = logits_chunk / temperature
+        logps_chunk = selective_log_softmax(logits_chunk, ids_chunk)
+        log_probs = jax.nn.log_softmax(logits_chunk, axis=-1)
+        entropy_chunk = -jnp.sum(jnp.exp(log_probs) * log_probs, axis=-1)
+        return carry, (logps_chunk, entropy_chunk)
+    
+      _, (logps, entropy) = jax.lax.scan(logp_step, None, (hs, ids))
+      # scan output is (num_chunks, B, chunk) -> (B, num_chunks*chunk) -> drop padding
+      logps = jnp.swapaxes(logps, 0, 1).reshape(batch_size, -1)[:, :seq_len]
+      entropy = jnp.swapaxes(entropy, 0, 1).reshape(batch_size, -1)[:, :seq_len]
+      return logps, entropy
+    
+    '''
+    
+    
+    def main():
+      spec = importlib.util.find_spec("tunix")
+      if spec is None or not spec.submodule_search_locations:
+        fail("cannot locate tunix")
+      root = list(spec.submodule_search_locations)[0]
+      paths = {k: os.path.join(root, v) for k, v in {
+          "common": "rl/common.py", "cluster": "rl/rl_cluster.py",
+          "algo": "rl/algo_core.py", "grpo": "rl/grpo/grpo_learner.py"}.items()}
+      for p in paths.values():
+        if not os.path.exists(p):
+          fail(f"{p} missing")
+      src = {k: open(p).read() for k, p in paths.items()}
+      if MARK in src["common"]:
+        print("TUNIX-CHUNKED-LOGPS PATCH: already patched")
+        return
+    
+      # ---- common.py ----
+      c = src["common"]
+      c = rep(c, '''    return_logits: bool = False,
+        segment_ids: jax.Array | None = None,
+        segment_positions: jax.Array | None = None,
+        temperature: float = 1.0,
+    ) -> jax.Array | tuple[jax.Array, jax.Array]:
+      """Computes the per-token log probabilities.''', '''    return_logits: bool = False,
+        segment_ids: jax.Array | None = None,
+        segment_positions: jax.Array | None = None,
+        temperature: float = 1.0,
+        chunk_size: int = 0,
+    ) -> jax.Array | tuple[jax.Array, jax.Array]:
+      """Computes the per-token log probabilities.''', "common signature")
+      c = rep(c, '''  logits, _ = model(input_tokens, **model_kwargs)
+    
+      if segment_ids is not None:
+        # Packed Mode: Evaluate the full sequence (mixed prompts + completions).
+        # Since predicting token[i] requires logit[i-1], we skip the first token.
+        # This shrinks the output shape to [Batch, FullSeqLen - 1]
+        logits_to_keep = input_tokens.shape[1] - 1
+      else:
+        logits_to_keep = completion_tokens.shape[1]
+    
+      logits = logits[:, -logits_to_keep - 1 : -1, :]
+      if temperature != 0.0 and temperature != 1.0:
+        logits /= temperature
+    
+      input_tokens_to_keep = input_tokens[:, -logits_to_keep:]
+      per_token_logps = selective_log_softmax(logits, input_tokens_to_keep)
+    ''', '''  if chunk_size > 0:
+        # Chunked path (maxtext PR #4409 / tunix b02231b8): the model returns hidden
+        # states instead of logits; project per chunk below.
+        model_kwargs["skip_lm_head"] = True
+      logits, _ = model(input_tokens, **model_kwargs)
+    
+      if segment_ids is not None:
+        # Packed Mode: Evaluate the full sequence (mixed prompts + completions).
+        # Since predicting token[i] requires logit[i-1], we skip the first token.
+        # This shrinks the output shape to [Batch, FullSeqLen - 1]
+        logits_to_keep = input_tokens.shape[1] - 1
+      else:
+        logits_to_keep = completion_tokens.shape[1]
+    
+      input_tokens_to_keep = input_tokens[:, -logits_to_keep:]
+      if chunk_size > 0:
+        hidden = logits[:, -logits_to_keep - 1 : -1, :]
+        per_token_logps, logits = _compute_chunked_logps(
+            model, hidden, input_tokens_to_keep, temperature, chunk_size
+        )  # NOTE: `logits` now holds per-token ENTROPY [B, L] (2-D), not logits.
+      else:
+        logits = logits[:, -logits_to_keep - 1 : -1, :]
+        if temperature != 0.0 and temperature != 1.0:
+          logits /= temperature
+        per_token_logps = selective_log_softmax(logits, input_tokens_to_keep)
+    ''', "common body")
+      c = rep(c, '''    if return_logits:
+          logits = jnp.pad(logits, ((0, 0), (1, 0), (0, 0)), constant_values=0.0)
+    ''', '''    if return_logits:
+          if logits.ndim == 2:  # chunked path: entropy [B, L]
+            logits = jnp.pad(logits, ((0, 0), (1, 0)), constant_values=0.0)
+          else:
+            logits = jnp.pad(logits, ((0, 0), (1, 0), (0, 0)), constant_values=0.0)
+    ''', "common segment pad")
+      # insert helper BEFORE the jit decorator of compute_per_token_logps, and make
+      # chunk_size a static arg (python control flow on it inside the jitted fn).
+      DECO = '''@partial(
+        jax.jit,
+        static_argnames=(
+            "pad_id",
+            "eos_id",
+            "stop_gradient",
+            "return_logits",
+            "temperature",
+        ),
+    )
+    def compute_per_token_logps(
+    '''
+      DECO_NEW = '''@partial(
+        jax.jit,
+        static_argnames=(
+            "pad_id",
+            "eos_id",
+            "stop_gradient",
+            "return_logits",
+            "temperature",
+            "chunk_size",
+        ),
+    )
+    def compute_per_token_logps(
+    '''
+      c = rep(c, DECO, CHUNK_FN + DECO_NEW, "common helper insert + static chunk_size")
+    
+      # ---- rl_cluster.py ----
+      r = src["cluster"]
+      r = rep(r, '''  rollout_micro_batch_size: int | None = None
+      compute_logps_micro_batch_size: int | None = None
+    ''', '''  rollout_micro_batch_size: int | None = None
+      compute_logps_micro_batch_size: int | None = None
+      # Sequence chunk size for log-prob computation (0 = full logits). Requires a
+      # model exposing skip_lm_head/compute_final_logits (maxtext PR #4409).
+      compute_logps_chunk_size: int = 0
+    ''', "cluster RLTrainingConfig field")
+      r = rep(r, '''                stop_gradient=True,
+                    return_logits=False,
+                    temperature=temperature,
+                )
+            )
+          actor_per_token_logps = jnp.concatenate(outs, axis=0)''', '''                stop_gradient=True,
+                    return_logits=False,
+                    temperature=temperature,
+                    chunk_size=self.cluster_config.training_config.compute_logps_chunk_size,
+                )
+            )
+          actor_per_token_logps = jnp.concatenate(outs, axis=0)''', "cluster old-logps call")
+    
+      # ---- algo_core.py (grpo_loss_fn) ----
+      a = src["algo"]
+      a = rep(a, '''      segment_positions=getattr(train_example, "segment_positions", None),
+          temperature=algo_config.temperature,
+      )
+      per_token_logps = jnp.astype(per_token_logps, jnp.float32)''', '''      segment_positions=getattr(train_example, "segment_positions", None),
+          temperature=algo_config.temperature,
+          chunk_size=kwargs.get("compute_logps_chunk_size", 0),
+      )
+      per_token_logps = jnp.astype(per_token_logps, jnp.float32)''', "algo grpo call")
+      a = rep(a, '''  token_entropy = compute_entropy_from_logits(logits)
+      entropy_loss = common.aggregate_loss(
+          token_entropy, completion_mask, loss_aggregation_mode
+      )
+      aux["entropy"] = entropy_loss
+    
+      return loss, aux
+    ''', '''  # chunked log-probs path returns per-token entropy (2-D) in the logits slot
+      token_entropy = logits if logits.ndim == 2 else compute_entropy_from_logits(logits)
+      entropy_loss = common.aggregate_loss(
+          token_entropy, completion_mask, loss_aggregation_mode
+      )
+      aux["entropy"] = entropy_loss
+    
+      return loss, aux
+    ''', "algo grpo entropy")
+    
+      # ---- grpo_learner.py ----
+      g = src["grpo"]
+      g = rep(g, '''        algo_config=self.algo_config,
+            pad_id=self.rl_cluster.rollout.pad_id(),
+            eos_id=self.rl_cluster.rollout.eos_id(),
+        )
+    ''', '''        algo_config=self.algo_config,
+            pad_id=self.rl_cluster.rollout.pad_id(),
+            eos_id=self.rl_cluster.rollout.eos_id(),
+            compute_logps_chunk_size=getattr(
+                self.rl_cluster.cluster_config.training_config,
+                "compute_logps_chunk_size", 0),
+        )
+    ''', "grpo loss lambda")
+    
+      new = {"common": c, "cluster": r, "algo": a, "grpo": g}
+      for k, s in new.items():
+        try:
+          compile(s, paths[k], "exec")
+        except SyntaxError as e:
+          fail(f"{k}: syntax error after patch: {e}")
+      for k, s in new.items():
+        open(paths[k], "w").write(s)
+      print(f"TUNIX-CHUNKED-LOGPS PATCH: APPLIED -> {root}")
+    
+    
+    if __name__ == "__main__":
+      main()
+    
+  patch_vllm_sampler.py: |-
+    """Hotfix for pathwaysutils profiling + tpu_runner req_id_kwargs nanobind limit.
+    
+    Adapted for image head-612fcd2e-gemma4c-perf. Two of the four original
+    sub-fixes are already merged upstream in this image and are DETECTED, not
+    re-applied:
+      - profiling.py executable.call(out_avals=..., out_shardings=...): the image
+        passes them conditionally (xprofTraceOptions branch) -- already fixed.
+      - profiling.py advanced_config int -> {"int64Value": v}: already present.
+    Still applied here:
+      - profiling.py start_trace / start_trace_patch: max_num_hosts default 1 ->
+        None, resolved to 16 inside start_trace.
+      - tpu_runner.py: cap **req_id_kwargs at 100 entries (nanobind kwargs limit).
+    
+    Fail-open: prints exactly one of
+        VLLM-SAMPLER PATCH: APPLIED
+        VLLM-SAMPLER PATCH: already patched
+        VLLM-SAMPLER PATCH: FAILED <reason>
+    """
+    
+    import os
+    import sys
+    
+    SITE = os.environ.get("PATCH_ROOT", "/usr/local/lib/python3.12/site-packages")
+    PROF = os.path.join(SITE, "pathwaysutils/profiling.py")
+    TR = os.path.join(SITE, "tpu_inference/runner/tpu_runner.py")
+    
+    
+    def fail(msg):
+        print(f"VLLM-SAMPLER PATCH: FAILED {msg}")
+        sys.exit(0)  # non-fatal: let the run start so the failure is visible
+    
+    
+    problems = []
+    applied_any = False
+    already_all = True
+    
+    # --- pathwaysutils/profiling.py ---------------------------------------------
+    if not os.path.exists(PROF):
+        fail(f"{PROF} not found")
+    with open(PROF, "r", encoding="utf-8") as f:
+        c4 = f.read()
+    modified4 = False
+    
+    # (1) executable.call out_avals/out_shardings -- merged upstream in this image
+    # (conditional xprofTraceOptions branch). Detect either form.
+    target4 = "      _, result_future = _profile_state.executable.call()"
+    if target4 in c4:
+        c4 = c4.replace(target4, (
+            "      import jax\n"
+            "      import jax.numpy as jnp\n"
+            "      out_avals = ()\n"
+            "      out_shardings = ()\n"
+            "      _, result_future = _profile_state.executable.call(\n"
+            "          out_avals=out_avals, out_shardings=out_shardings\n"
+            "      )"
+        ))
+        modified4 = True
+    elif "out_avals=out_avals, out_shardings=out_shardings" not in c4:
+        problems.append("profiling.py: executable.call anchor missing and "
+                        "out_avals fix not present")
+    
+    # (2) int -> int64Value -- merged upstream in this image.
+    target4_int = ("      elif isinstance(v, int):\n"
+                   '        advanced_config[k] = {"intValue": v}')
+    if target4_int in c4:
+        c4 = c4.replace(target4_int,
+                        "      elif isinstance(v, int):\n"
+                        '        advanced_config[k] = {"int64Value": v}')
+        modified4 = True
+    elif '{"int64Value": v}' not in c4:
+        problems.append("profiling.py: intValue anchor missing and int64Value "
+                        "fix not present")
+    
+    # traceSessionName is enabled now; no replacement needed (as in original).
+    
+    # (3) start_trace: max_num_hosts default 1 -> None (resolved to 16).
+    target4_start = (
+        "def start_trace(\n"
+        "    log_dir: os.PathLike[str] | str,\n"
+        "    *,\n"
+        "    create_perfetto_link: bool = False,\n"
+        "    create_perfetto_trace: bool = False,\n"
+        "    profiler_options: jax.profiler.ProfileOptions | None = None,\n"
+        "    max_num_hosts: int = 1,\n"
+        ") -> None:"
+    )
+    replacement4_start = (
+        "def start_trace(\n"
+        "    log_dir: os.PathLike[str] | str,\n"
+        "    *,\n"
+        "    create_perfetto_link: bool = False,\n"
+        "    create_perfetto_trace: bool = False,\n"
+        "    profiler_options: jax.profiler.ProfileOptions | None = None,\n"
+        "    max_num_hosts: int | None = None,\n"
+        ") -> None:\n"
+        "  if max_num_hosts is None:\n"
+        "    max_num_hosts = 16"
+    )
+    if target4_start in c4:
+        c4 = c4.replace(target4_start, replacement4_start)
+        modified4 = True
+        already_all = False
+    elif "  if max_num_hosts is None:\n    max_num_hosts = 16" not in c4:
+        problems.append("profiling.py: start_trace signature anchor missing and "
+                        "max_num_hosts fix not present")
+    
+    # (4) start_trace_patch: same default change on the monkeypatch wrapper.
+    target4_monkey = (
+        "  def start_trace_patch(\n"
+        "      log_dir,\n"
+        "      create_perfetto_link: bool = False,\n"
+        "      create_perfetto_trace: bool = False,\n"
+        "      profiler_options: jax.profiler.ProfileOptions | None = None,\n"
+        "      max_num_hosts: int = 1,\n"
+        "  ) -> None:"
+    )
+    replacement4_monkey = (
+        "  def start_trace_patch(\n"
+        "      log_dir,\n"
+        "      create_perfetto_link: bool = False,\n"
+        "      create_perfetto_trace: bool = False,\n"
+        "      profiler_options: jax.profiler.ProfileOptions | None = None,\n"
+        "      max_num_hosts: int | None = None,\n"
+        "  ) -> None:"
+    )
+    if target4_monkey in c4:
+        c4 = c4.replace(target4_monkey, replacement4_monkey)
+        modified4 = True
+        already_all = False
+    elif ("  def start_trace_patch(\n"
+          "      log_dir,\n"
+          "      create_perfetto_link: bool = False,\n"
+          "      create_perfetto_trace: bool = False,\n"
+          "      profiler_options: jax.profiler.ProfileOptions | None = None,\n"
+          "      max_num_hosts: int | None = None,\n") not in c4:
+        problems.append("profiling.py: start_trace_patch anchor missing and "
+                        "None-default fix not present")
+    
+    if problems:
+        fail("; ".join(problems))
+    
+    if modified4:
+        with open(PROF, "w", encoding="utf-8") as f:
+            f.write(c4)
+        applied_any = True
+    
+    # --- tpu_inference/runner/tpu_runner.py --------------------------------------
+    if not os.path.exists(TR):
+        fail(f"{TR} not found")
+    with open(TR, "r", encoding="utf-8") as f:
+        c5 = f.read()
+    
+    target5 = ", **req_id_kwargs):"
+    replacement5 = ", **dict(list(req_id_kwargs.items())[:100])):"
+    if target5 in c5:
+        c5 = c5.replace(target5, replacement5)
+        with open(TR, "w", encoding="utf-8") as f:
+            f.write(c5)
+        applied_any = True
+        already_all = False
+    elif "dict(list(req_id_kwargs.items())" not in c5:
+        fail("tpu_runner.py: req_id_kwargs anchor missing and cap not present")
+    
+    # --- verify ------------------------------------------------------------------
+    import ast
+    
+    for path in (PROF, TR):
+        try:
+            ast.parse(open(path, encoding="utf-8").read())
+        except SyntaxError as e:
+            fail(f"patched {path} does not parse: {e}")
+    
+    v_prof = open(PROF, encoding="utf-8").read()
+    v_tr = open(TR, encoding="utf-8").read()
+    if "  if max_num_hosts is None:\n    max_num_hosts = 16" not in v_prof:
+        fail("verify: start_trace max_num_hosts fix missing after write")
+    if "dict(list(req_id_kwargs.items())[:100])" not in v_tr:
+        fail("verify: tpu_runner req_id_kwargs cap missing after write")
+    
+    if applied_any or not already_all:
+        print("VLLM-SAMPLER PATCH: APPLIED")
+    else:
+        print("VLLM-SAMPLER PATCH: already patched")
+    
+  pr4409_chunked_logps.diff: |-
+    diff --git a/src/maxtext/configs/post_train/rl.yml b/src/maxtext/configs/post_train/rl.yml
+    index f1f245b..74ddc53 100644
+    --- a/src/maxtext/configs/post_train/rl.yml
+    +++ b/src/maxtext/configs/post_train/rl.yml
+    @@ -115,6 +115,13 @@ num_batches: 4
+     # and/or async sampling and training.
+     train_micro_batch_size: -1
+     rollout_micro_batch_size: -1
+    +# [NAVI patch C] Chunk size for LM-head projection when computing per-token logps.
+    +# 0 = OFF (stock full-logits path). >0 caps logits peak at [micro, chunk, vocab],
+    +# lifting the train_micro_batch_size HBM ceiling. Correctness-preserving.
+    +rl_compute_logps_chunk_size: 0
+    +# [NAVI patch D] Whole-model host offload (tunix ClusterConfig.offload_to_cpu).
+    +# False = OFF (stock). True moves params to pinned_host between phases.
+    +rl_offload_to_cpu: false
+     # Keep `num_test_batches` low so that evaluation runs quickly. It can be
+     # increased to a max. of 330 (if batch size is 4).
+     num_test_batches: 5  # 200
+    diff --git a/src/maxtext/configs/types.py b/src/maxtext/configs/types.py
+    index 5c708d5..b203edd 100644
+    --- a/src/maxtext/configs/types.py
+    +++ b/src/maxtext/configs/types.py
+    @@ -2358,6 +2358,29 @@ class RLDataset(BaseModel):
+       train_fraction: float = Field(1.0, gt=0.0, le=1.0, description="Fraction of the dataset to be used for training.")
+       train_micro_batch_size: int = Field(-1, description="Micro batch size for training.")
+       rollout_micro_batch_size: int = Field(-1, description="Micro batch size for rollout.")
+    +  rl_compute_logps_chunk_size: int = Field(
+    +      0,
+    +      description=(
+    +          "[NAVI patch C] If > 0, compute the actor/ref/old per-token log-probs "
+    +          "with the LM head projected in sequence chunks of this size (tunix "
+    +          "compute_chunked_logps: skip_lm_head + scan + remat). Caps the logits "
+    +          "memory peak at [micro, chunk, vocab] instead of [micro, seq, vocab], "
+    +          "which lifts the train_micro_batch_size HBM ceiling. Default 0 (OFF, "
+    +          "identical to stock full-logits path). Requires the model adapter to "
+    +          "expose skip_lm_head + compute_final_logits."
+    +      ),
+    +  )
+    +  rl_offload_to_cpu: bool = Field(
+    +      False,
+    +      description=(
+    +          "[NAVI patch D] If True, set tunix ClusterConfig.offload_to_cpu so the "
+    +          "actor/reference/rollout model params are moved to pinned_host between "
+    +          "phases (whole-model host offload; a DIFFERENT mechanism from the "
+    +          "validate-blocked optimizer_memory_host_offload). Trades host<->device "
+    +          "transfer time for device HBM headroom. Default False (OFF). Gate with "
+    +          "EXPERIMENTAL_RL_HOST_OFFLOAD."
+    +      ),
+    +  )
+       dataset_processor_path: str = Field(
+           "",
+           description=(
+    diff --git a/src/maxtext/integration/tunix/tunix_adapter.py b/src/maxtext/integration/tunix/tunix_adapter.py
+    index 03d7a96..a6e0ba9 100644
+    --- a/src/maxtext/integration/tunix/tunix_adapter.py
+    +++ b/src/maxtext/integration/tunix/tunix_adapter.py
+    @@ -21,8 +21,10 @@ It also handles weight mapping for compatibility with Hugging Face models.
+     
+     from __future__ import annotations
+     
+    +import os
+     from typing import Any, Optional, Tuple
+     
+    +import jax
+     import jax.numpy as jnp
+     from flax import nnx
+     from jax import Array
+    @@ -67,6 +69,53 @@ def _compat_top_k(operand, k, axis=-1):
+     jax.lax.with_sharding_constraint = _compat_wsc
+     jax.lax.top_k = _compat_top_k
+     
+    +# [NAVI patch E] Opt-in microbatch memory/shape logging. Enable with NAVI_MEM_LOG=1.
+    +# Prints tensor shape/dtype/bytes at the trainer forward boundary + device HBM
+    +# in-use, so we can empirically prove the [micro, seq, vocab] logits
+    +# materialization and measure the chunked/offload reduction. Zero cost when off.
+    +_NAVI_MEM_LOG = os.environ.get("NAVI_MEM_LOG", "0") == "1"
+    +_navi_mem_seen: set[str] = set()
+    +
+    +
+    +def _navi_log_mem(tag: str, **arrays: Any) -> None:
+    +  """Opt-in (NAVI_MEM_LOG=1) logging of tensor shape/dtype/bytes + device HBM
+    +  in-use at the trainer forward boundary. First occurrence per tag only."""
+    +  if not _NAVI_MEM_LOG:
+    +    return
+    +  try:
+    +    # Only log the first occurrence of each tag to avoid trace-time spam.
+    +    if tag in _navi_mem_seen:
+    +      return
+    +    _navi_mem_seen.add(tag)
+    +    parts = []
+    +    for name, a in arrays.items():
+    +      if a is None:
+    +        continue
+    +      shp = getattr(a, "shape", None)
+    +      dt = getattr(a, "dtype", None)
+    +      nbytes = None
+    +      if shp is not None and dt is not None:
+    +        try:
+    +          nbytes = int(jnp.prod(jnp.array(shp))) * jnp.dtype(dt).itemsize
+    +        except Exception:  # pylint: disable=broad-exception-caught
+    +          nbytes = None
+    +      gb = f"{nbytes/1e9:.2f}GB" if nbytes else "?"
+    +      parts.append(f"{name}={shp}:{dt}:{gb}")
+    +    hbm = ""
+    +    try:
+    +      d = jax.devices()[0]
+    +      if hasattr(d, "memory_stats"):
+    +        ms = d.memory_stats() or {}
+    +        used = ms.get("bytes_in_use")
+    +        peak = ms.get("peak_bytes_in_use")
+    +        if used is not None:
+    +          hbm = f" | HBM_in_use={used/1e9:.1f}GB peak={((peak or 0))/1e9:.1f}GB"
+    +    except Exception:  # pylint: disable=broad-exception-caught
+    +      pass
+    +    print(f"[NAVI_MEM_LOG] {tag}: {' '.join(parts)}{hbm}", flush=True)
+    +  except Exception:  # pylint: disable=broad-exception-caught
+    +    pass
+    +
+     
+     class TunixMaxTextAdapter(nnx.Module):
+       """Adapter exposing Tunix Trainer call signature over a Transformer model."""
+    @@ -107,19 +156,69 @@ class TunixMaxTextAdapter(nnx.Module):
+           attention_mask: Optional[Array],  # [B, L, L] or None
+           decoder_segment_ids: Optional[Array] = None,
+           output_hidden_states: bool = False,  # ignored
+    +      skip_lm_head: bool = False,  # [NAVI patch C] chunked-logps memory lever
+       ) -> Tuple[Array, None]:
+         """Forward compatible with Tunix Trainers default loss.
+         Returns logits, None.
+    +
+    +    When ``skip_lm_head=True`` (used by tunix ``compute_chunked_logps`` when
+    +    ``compute_logps_chunk_size > 0``), the expensive [B, L, vocab] output-head
+    +    projection is deferred; the decoder's final hidden state [B, L, hidden] is
+    +    returned instead and the caller projects it chunk-by-chunk via
+    +    ``compute_final_logits`` under ``jax.lax.scan`` + ``nnx.remat``. This caps
+    +    the LM-head logits peak at [B, chunk, vocab] instead of [B, L, vocab],
+    +    lifting the train_micro-batch HBM ceiling. Math is identical: per-token
+    +    log-softmax is independent along the vocab axis (see smoke proof).
+         """
+         if decoder_segment_ids is None and self._pad_id is not None:
+           decoder_segment_ids = (input_tokens != self._pad_id).astype(jnp.int32)
+    +    if skip_lm_head:
+    +      # Return the decoder hidden state; LM head applied later per-chunk.
+    +      hidden_state = self.base(
+    +          decoder_input_tokens=input_tokens,
+    +          decoder_positions=positions,
+    +          decoder_segment_ids=decoder_segment_ids,
+    +          skip_lm_head=True,
+    +      )
+    +      _navi_log_mem("actor_fwd.skip_lm_head", input_tokens=input_tokens, hidden_state=hidden_state)
+    +      return hidden_state, None
+         logits = self.base(
+             decoder_input_tokens=input_tokens,
+             decoder_positions=positions,
+             decoder_segment_ids=decoder_segment_ids,
+         )
+    +    _navi_log_mem("actor_fwd.full_logits", input_tokens=input_tokens, logits=logits)
+         return logits, None
+     
+    +  def compute_final_logits(self, hidden_states: Array) -> Array:
+    +    """[NAVI patch C] LM-head projection over precomputed hidden states.
+    +
+    +    Required by tunix ``compute_chunked_logps``. Delegates to the MaxText
+    +    Transformer's existing ``logits_from_hidden_states_for_vocab_tiling`` (the
+    +    same output-head used by native vocab-tiling), so no new params/graph.
+    +
+    +    NOTE: tunix calls this inside ``jax.lax.scan`` + ``nnx.remat``. The output
+    +    head's ``nn.Dropout`` (a no-op here: dropout_rate=0 + deterministic=True) is
+    +    made RNG-free at its source by the ``skip_lm_head`` deterministic guard in
+    +    apply_output_head (see layers/decoders.py) so it does not mutate an RngCount
+    +    across the scan's trace level (which would raise flax TraceContextError).
+    +    """
+    +    from maxtext.common.common_types import MODEL_MODE_TRAIN  # pylint: disable=import-outside-toplevel
+    +    # Pass a STATIC rng key so the ToNNX decoder wrapper takes its jax.Array branch
+    +    # (_rngs={"params": key}) instead of calling stream() on live Rngs. stream() would
+    +    # mutate an RngCount across the enclosing jax.lax.scan trace level (tunix
+    +    # compute_chunked_logps) and raise flax TraceContextError. The projection is
+    +    # deterministic (dropout guarded off), so this key is never used to draw randomness.
+    +    _static_key = jax.random.PRNGKey(0)
+    +    logits = self.base.logits_from_hidden_states_for_vocab_tiling(
+    +        hidden_states=hidden_states,
+    +        deterministic=True,
+    +        model_mode=MODEL_MODE_TRAIN,
+    +        rngs=_static_key,
+    +    )
+    +    _navi_log_mem("actor_fwd.chunk_logits", hidden_states=hidden_states, logits=logits)
+    +    return logits
+    +
+       def to_hf_mappings(self):
+         if self.use_no_op_mappings:
+           return {}
+    diff --git a/src/maxtext/layers/decoders.py b/src/maxtext/layers/decoders.py
+    index 6c5d3ff..4792da3 100644
+    --- a/src/maxtext/layers/decoders.py
+    +++ b/src/maxtext/layers/decoders.py
+    @@ -786,7 +786,14 @@ class Decoder(nn.Module):
+             kernel_axes=("norm",),
+             parameter_memory_host_offload=cfg.parameter_memory_host_offload,
+         )(y, out_sharding=norm_out_sharding)
+    -    y = nn.Dropout(rate=cfg.dropout_rate, broadcast_dims=(-2,))(y, deterministic=deterministic)
+    +    # [NAVI patch C] Skip the output-head Dropout entirely when deterministic. It is a
+    +    # mathematical no-op (identity) in that case, but instantiating nn.Dropout still
+    +    # registers/mutates an RngCount on the module. When this head is invoked inside
+    +    # tunix compute_chunked_logps' jax.lax.scan (chunked-logps memory lever), that
+    +    # RngCount mutation crosses the scan trace level and raises flax TraceContextError.
+    +    # Guarding on `deterministic` removes the RNG touch at its source with zero math change.
+    +    if not deterministic:
+    +      y = nn.Dropout(rate=cfg.dropout_rate, broadcast_dims=(-2,))(y, deterministic=deterministic)
+     
+         if model_mode in (MODEL_MODE_PREFILL, MODEL_MODE_AUTOREGRESSIVE):
+           out_sharding = create_sharding(self.mesh, (None, None, "activation_vocab"))
+    @@ -849,6 +856,7 @@ class Decoder(nn.Module):
+           kv_caches: list[jax.Array] | None = None,
+           attention_metadata=None,
+           deepstack_visual_embeds: None | list[jnp.ndarray] = None,
+    +      skip_lm_head: bool = False,  # [NAVI patch C] robust: skip output head INSIDE decoder
+       ):
+         cfg = self.config
+         mesh = self.mesh
+    @@ -1288,6 +1296,14 @@ class Decoder(nn.Module):
+           logits = None
+           self.sow("intermediates", "hidden_states", hidden_state)
+     
+    +    # [NAVI patch C] Robust chunked-logps: when the caller (tunix compute_chunked_logps)
+    +    # asks to skip the LM head, DO NOT run apply_output_head here. Guarantees the
+    +    # [B, L, vocab] logits matmul never enters the graph (same mechanism as num_vocab_tiling),
+    +    # rather than relying on XLA DCE to prune an already-emitted 40GB matmul. The caller
+    +    # re-projects hidden_state chunk-by-chunk via compute_final_logits under scan+remat.
+    +    elif skip_lm_head:
+    +      logits = None
+    +
+         else:
+           logits = self.apply_output_head(shared_embedding, hidden_state, deterministic, model_mode)
+     
+    diff --git a/src/maxtext/layers/nnx_decoders.py b/src/maxtext/layers/nnx_decoders.py
+    index 3fc8f4b..4fb6d99 100644
+    --- a/src/maxtext/layers/nnx_decoders.py
+    +++ b/src/maxtext/layers/nnx_decoders.py
+    @@ -1530,6 +1530,7 @@ class NNXDecoder(nnx.Module):
+           attention_metadata=None,
+           deepstack_visual_embeds: None | list[jnp.ndarray] = None,
+           multimodal_input: None | MultimodalInput = None,
+    +      skip_lm_head: bool = False,  # [NAVI patch C] robust: skip output head INSIDE decoder
+       ):
+         cfg = self.config
+         assert decoder_input_tokens.ndim == 2  # [batch, len]
+    @@ -1921,6 +1922,14 @@ class NNXDecoder(nnx.Module):
+           logits = None
+           self.sow(nnx.Intermediate, "hidden_states", hidden_state)
+     
+    +    # [NAVI patch C] Robust chunked-logps: when the caller (tunix compute_chunked_logps)
+    +    # asks to skip the LM head, DO NOT run apply_output_head here. This guarantees the
+    +    # [B, L, vocab] logits matmul never enters the graph (same mechanism as num_vocab_tiling
+    +    # above), rather than relying on XLA DCE to prune an already-emitted 40GB matmul. The
+    +    # caller re-projects hidden_state chunk-by-chunk via compute_final_logits under scan+remat.
+    +    elif skip_lm_head:
+    +      logits = None
+    +
+         else:
+           logits = self.apply_output_head(shared_embedding, hidden_state, deterministic, model_mode)
+     
+    diff --git a/src/maxtext/models/models.py b/src/maxtext/models/models.py
+    index a70ad78..821abb7 100644
+    --- a/src/maxtext/models/models.py
+    +++ b/src/maxtext/models/models.py
+    @@ -419,13 +419,24 @@ class Transformer(nnx.Module):
+         """A no-op method to allow the model to be used in a lazy context."""
+         return
+     
+    -  def logits_from_hidden_states_for_vocab_tiling(self, hidden_states, deterministic, model_mode):
+    -    """Computes logits from hidden states; used by vocabulary tiling."""
+    +  def logits_from_hidden_states_for_vocab_tiling(self, hidden_states, deterministic, model_mode, rngs=None):
+    +    """Computes logits from hidden states; used by vocabulary tiling.
+    +
+    +    Optional ``rngs`` (a static jax.Array key) is forwarded to the ToNNX-wrapped
+    +    decoder so that, when this projection runs inside tunix ``compute_chunked_logps``
+    +    ``jax.lax.scan``, the ToNNX wrapper takes its ``isinstance(rngs, jax.Array)``
+    +    branch (``_rngs={"params": rngs}``) instead of calling ``stream()`` on live
+    +    Rngs — which would mutate an RngCount across the scan trace level and raise
+    +    ``flax.errors.TraceContextError``. Default ``None`` preserves the exact native
+    +    (non-chunked) behavior for all existing callers.
+    +    """
+    +    extra = {"rngs": rngs} if rngs is not None else {}
+         return self.decoder.apply_output_head(
+             shared_embedding=self.token_embedder,
+             y=hidden_states,
+             deterministic=deterministic,
+             model_mode=model_mode,
+    +        **extra,
+         )
+     
+       def init_cache(self, cache_size: int, batch_size: int, dtype=jnp.float32):
+    @@ -462,6 +473,7 @@ class Transformer(nnx.Module):
+           decoder_target_mask: jax.Array | None = None,
+           kv_caches: list[jax.Array] | None = None,
+           attention_metadata: dict[str, Any] | None = None,
+    +      skip_lm_head: bool = False,
+       ):
+         """Applies the Zero-1 FSDP wrapped Transformer model.
+     
+    @@ -562,6 +574,7 @@ class Transformer(nnx.Module):
+               kv_caches=kv_caches,
+               attention_metadata=attention_metadata,
+               deepstack_visual_embeds=deepstack_visual_embeds,
+    +          skip_lm_head=skip_lm_head,  # [NAVI] robust chunked-logps: skip output head inside decoder
+           )  # pytype: disable=wrong-keyword-args
+         else:
+           logits, hidden_state, kv_caches = self.decoder(
+    @@ -577,6 +590,7 @@ class Transformer(nnx.Module):
+               kv_caches=kv_caches,
+               attention_metadata=attention_metadata,
+               deepstack_visual_embeds=deepstack_visual_embeds,
+    +          skip_lm_head=skip_lm_head,  # [NAVI] robust chunked-logps: skip output head inside decoder
+               mutable=mutable_collections,  # pyrefly: ignore[unexpected-keyword]
+           )  # pytype: disable=wrong-keyword-args
+     
+    @@ -616,4 +630,10 @@ class Transformer(nnx.Module):
+           # In vLLM, logits are computed separately after updating the KV cache.
+           return hidden_state, kv_caches
+     
+    +    # [NAVI] Defer LM-head projection to the caller (tunix chunked-logps) to cap the
+    +    # logits peak at [B, chunk, vocab]. hidden_state is already computed; the caller
+    +    # re-projects chunk-by-chunk via compute_final_logits under scan+remat.
+    +    if skip_lm_head:
+    +      return hidden_state
+    +
+         return logits
+    diff --git a/src/maxtext/trainers/post_train/rl/train_rl.py b/src/maxtext/trainers/post_train/rl/train_rl.py
+    index b674203..3ae6bd2 100644
+    --- a/src/maxtext/trainers/post_train/rl/train_rl.py
+    +++ b/src/maxtext/trainers/post_train/rl/train_rl.py
+    @@ -479,7 +479,7 @@ def create_rl_components(  # pylint: disable=too-many-positional-arguments
+               rl_cluster_lib.Role.ROLLOUT: vllm_config.logical_axis_rules,
+           },
+           rollout_engine=rl_rollout_engine,
+    -      offload_to_cpu=False,
+    +      offload_to_cpu=trainer_config.rl_offload_to_cpu,  # [NAVI patch D] whole-model host offload (default False)
+           training_config=rl_cluster_lib.RLTrainingConfig(
+               actor_optimizer=optimizer,
+               eval_every_n_steps=trainer_config.eval_interval,
+    @@ -487,6 +487,8 @@ def create_rl_components(  # pylint: disable=too-many-positional-arguments
+               mini_batch_size=trainer_config.batch_size,
+               train_micro_batch_size=train_micro_batch_size,
+               rollout_micro_batch_size=rollout_micro_batch_size,
+    +          # [NAVI patch C] chunked logps (default 0 = off)
+    +          compute_logps_chunk_size=trainer_config.rl_compute_logps_chunk_size,
+               metrics_logging_options=metrics_logging_options,
+               profiler_options=profiler_options,
+               checkpoint_root_directory=checkpoint_dir,
+---
+# Source: pathways-tpu-jobset-workload/templates/workload-config-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "g4nprss-08200726-config"
+  namespace: default
+data:
+  workload-configuration: |-
+    # Minimal workload config; the launcher passes every knob on the command line
+    # (MAXTEXT_CONFIG_PATH is resolved inside the launcher to maxtext/configs/post_train/rl.yml).
+    base_config: "maxtext/configs/post_train/rl.yml"
+---
+# Source: pathways-tpu-jobset-workload/templates/workload-launcher-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "g4nprss-08200726-launcher"
+  namespace: default
+data:
+  launch-workload.sh: |-
+    #!/bin/bash
+    # Exit immediately if a command exits with a non-zero status.
+    set -e
+    
+    # --- Graceful Shutdown Logic ---
+    _sigterm() {
+      echo "Caught SIGTERM signal, sending to child process..."
+      kill -SIGTERM "$PID" 2>/dev/null
+    }
+    trap _sigterm SIGTERM
+    
+    MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
+    # Ironwood bring-up fixes (from smoke ladder):
+    
+    # --- g4r1-native-prs: + gemma4 fidelity PR stack (maxtext #4807 std/scale, #4860 HF export shapes, #4790 E2B image parity).
+    # Text-path-neutral (all new param mappings gated on use_multimodal/use_clipped_linears_for_vit) — carried for
+    # tree alignment + RLConfig schema-drift detection. NATIVE tpu_inference Gemma4ForCausalLM sampler (weight_mapping/gemma4.py, maxtext fork 840ffd361) + full tianyu-rl-14 stack (5 patches, CD-64, sharded logprobs, async off) ---
+    # --- runtime patches (self-verifying, fail-open) ---
+    export PYTHONPATH=/app/src:/deps/src:${PYTHONPATH:-}   # patch_engine_kwargs locates maxtext via importlib
+    # Native sampler TP degree for the gemma4 weight-mapping fusion (interleaved per-shard layout of
+    # tpu_inference's fused qkv/gate_up kernels). MUST equal rollout_tensor_parallelism (R1_TP).
+    export GEMMA4_NATIVE_TP="${R1_TP:-8}"
+    for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_phasetime patch_sharded_sampling patch_gemma4_prs patch_gemma4_tp_fusion patch_engine_kwargs; do
+      if [ -f /workload/patches/$P ]; then
+        python3 /workload/patches/$P
+      fi
+    done
+    
+    export JAX_PLATFORMS="proxy,cpu"
+    export CONTINUE_DECODE_EOS_CHECK_INTERVAL=0
+    if [ -n "${R1_RPA:-}" ]; then export RPA_V3_DECODE_BLOCK_SIZES="$R1_RPA"; fi
+    # aysu rollout-side tuning (ubench aysu-ubench-8terxbx7, gemma4-e2b serving on tpu7x):
+    #   USE_BATCHED_RPA_KERNEL=1 (experimental batched RPA kernel; env read by tpu_inference)
+    #   RL_VLLM_ENGINE_KWARGS='{"block_size": 256}' (forwarded by patch_engine_kwargs; kv_cache_dtype fp8 = optional non-bf16 rung)
+    # Both are opt-in via the chart envs so control runs stay flag-free.
+    export VLLM_ENGINE_READY_TIMEOUT_S="${VLLM_ENGINE_READY_TIMEOUT_S:-60000}"
+    [ -n "${USE_BATCHED_RPA_KERNEL:-}" ] && echo "TUNING: USE_BATCHED_RPA_KERNEL=$USE_BATCHED_RPA_KERNEL"
+    [ -n "${RL_VLLM_ENGINE_KWARGS:-}" ] && echo "TUNING: RL_VLLM_ENGINE_KWARGS=$RL_VLLM_ENGINE_KWARGS"   # e.g. 1,8704,1,2176 (g4p3-validated)
+    export PHASED_PROFILING_DIR="${ARTIFACT_DIR}/${JOB_IDENTIFIER}/phased_profile"
+    export JAX_COMPILATION_CACHE_DIR="gs://ubench-logs/alisachen-tpu7x/compilation_cache/gemma4-e2b-r1nprs"            # newer tpu_inference stages on cpu backend
+    export VLLM_ENABLE_V1_MULTIPROCESSING=0     # required under Pathways
+    XLA_FLAGS=""
+    
+    # Fallback check to support different image structures
+    if [ ! -f "${MAXTEXT_CONFIG_PATH}" ] && [ -f "src/${MAXTEXT_CONFIG_PATH}" ]; then
+      echo "MAXTEXT_CONFIG_PATH not found at ${MAXTEXT_CONFIG_PATH}, falling back to src/${MAXTEXT_CONFIG_PATH}"
+      MAXTEXT_CONFIG_PATH="src/${MAXTEXT_CONFIG_PATH}"
+    fi
+    
+    # --- TPU Worker Hostnames & ID ---
+    if [ ! -z "${NNODES}" ] && [ ! -z "${JOBSET_NAME}" ] && [ ! -z "${SUBDOMAIN}" ]; then
+      HOSTS=""
+      for i in $(seq 0 $((NNODES - 1))); do
+        # JobSet pod naming: ${JOBSET_NAME}-workload-0-${i}.${SUBDOMAIN}
+        HOSTS="${HOSTS}${JOBSET_NAME}-workload-0-${i}.${SUBDOMAIN},"
+      done
+      export TPU_WORKER_HOSTNAMES=${HOSTS%,}
+      echo "Computed TPU_WORKER_HOSTNAMES: ${TPU_WORKER_HOSTNAMES}"
+    fi
+    
+    # --- Log for Debugging ---
+    echo "MaxText config overrides from command line:"
+    echo "  g4r1-native-prs decode-heavy run; args as in command below. base_output_directory=${ARTIFACT_DIR}"
+    
+    # --- RL Sampler Patches & Env Setup ---
+    if [ "maxtext.trainers.post_train.rl.train_rl" = "maxtext.trainers.post_train.rl.train_rl" ]; then
+      export HF_HUB_ENABLE_HF_TRANSFER=0
+      export HF_HUB_DISABLE_XET=1
+      export PYTHONPATH=/app/src:$PYTHONPATH
+      export NUM_PRECOMPILE_WORKERS=1
+      export NEW_MODEL_DESIGN=1
+      export JAX_BACKEND_TARGET="${JAX_BACKEND_TARGET:-grpc://127.0.0.1:29000}"
+    fi
+    
+    # --- Main Execution ---
+    # The python process is run in the background (&)
+    (
+      # Set up the environment
+      export ENABLE_PATHWAYS_PERSISTENCE='1'
+      export JAX_PLATFORMS="${JAX_PLATFORMS:-tpu,cpu}"
+      export ENABLE_PJRT_COMPATIBILITY='true'
+      if [ ! -z "${XLA_FLAGS}" ]; then
+        export LIBTPU_INIT_ARGS="${XLA_FLAGS}"
+      fi
+    
+      # Execute the training script, passing the config file AND the command-line overrides
+      python3 -m maxtext.trainers.post_train.rl.train_rl "${MAXTEXT_CONFIG_PATH}" model_name='gemma4-e2b' data_template_path=maxtext/examples/chat_templates/openmathinstruct2_rl.json chat_template_path=maxtext/examples/chat_templates/gemma-3-27b-chat_template.json tokenizer_path='google/gemma-4-E2B-it' dataset_name='nvidia/OpenMathInstruct-2' hf_train_files='hf://datasets/nvidia/OpenMathInstruct-2/data/train_1M-*.parquet' train_split='train_1M' rl.num_generations=8 rl.grpo_beta=0.0 rl.epsilon_high=0.28 rl.grpo_epsilon=0.2 enable_checkpointing=True checkpoint_storage_use_ocdbt=False checkpoint_storage_use_zarr3=False checkpoint_period=10 async_scheduling=False chips_per_vm=4 num_batches=${R1_STEPS:-30} num_test_batches=0 gradient_clipping_threshold=1.0 decode_sampling_temperature=0.8 decode_sampling_top_k=50 decode_sampling_nucleus_p=0.95 max_target_length=8192 max_prefill_predict_length=4096 learning_rate=1e-6 batch_size=${R1_BATCH:-256} train_micro_batch_size=${R1_TMBS:-1} rollout_micro_batch_size=${R1_BATCH:-256} rollout_data_parallelism=-1 rollout_tensor_parallelism=${R1_TP:-8} enable_dp_attention=False hbm_utilization_vllm=0.6 max_num_seqs=256 max_num_batched_tokens=8448 math_verify_num_procs=32 scan_layers=False vllm_hf_overrides='{architectures: ["Gemma4ForCausalLM"]}' vllm_additional_config='{"enable_continue_decode": true, "max_decode_steps": 64}' allow_split_physical_axes=True enable_tunix_perf_metrics=True load_parameters_path='gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw/0/items' skip_jax_distributed_system=True log_period=1 base_output_directory=${ARTIFACT_DIR} run_name=${JOB_IDENTIFIER}
+    ) & PID=$!
+    
+    # Wait for the python process to finish
+    EXIT_CODE=0
+    wait $PID || EXIT_CODE=$?   # tolerate failure so the debug-hold below can run (set -e)
+    
+    echo "MaxText Job Ended at: $(date) with exit code $EXIT_CODE"
+    if [ "$EXIT_CODE" -ne 0 ]; then
+      echo "DEBUG-HOLD: failure detected, keeping pod alive 20 min for log capture"
+      sleep 1200
+    fi
+    exit $EXIT_CODE
+---
+# Source: pathways-tpu-jobset-workload/templates/pathways-jobset.yaml
+# yamllint disable
+
+
+
+
+
+
+
+apiVersion: jobset.x-k8s.io/v1alpha2
+kind: JobSet
+metadata:
+  name: "g4nprss-08200726"
+  namespace: default
+  labels:
+    kueue.x-k8s.io/queue-name: "multislice-queue"
+spec:
+  coordinator:
+    replicatedJob: pathways-head
+  network:
+    enableDNSHostnames: true
+    publishNotReadyAddresses: true
+  failurePolicy:
+    # restartStrategy: Recreate not supported by this cluster's JobSet CRD
+    # (older controller than the v6e cluster); leoch convention:
+    maxRestarts: 0
+  startupPolicy:
+    startupPolicyOrder: InOrder
+  successPolicy:
+    operator: All
+    targetReplicatedJobs:
+    - pathways-head
+  replicatedJobs:
+# ----------------------------------------------------
+# 1. Pathways-Head Replicated Job
+# ----------------------------------------------------
+  - name: pathways-head
+    replicas: 1
+    template:
+      spec:
+        parallelism: 1
+        completions: 1
+        backoffLimit: 0
+        template:
+          metadata:
+            labels:
+              kueue.x-k8s.io/podset: pathways-head
+            annotations:
+              kubectl.kubernetes.io/default-container: jax-tpu
+              gke-gcsfuse/volumes: "true"
+              # optimize-utilization autoscaler drains under-packed cpu-np nodes; without this the
+              # head gets SIGTERMed mid-run (two 143 kills during train compile, 2026-08-20).
+              cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+          spec:
+            restartPolicy: OnFailure
+            priorityClassName: "medium"
+            hostNetwork: true
+            hostIPC: true
+            dnsPolicy: ClusterFirstWithHostNet
+            nodeSelector:
+              cloud.google.com/gke-nodepool: "cpu-np"
+            tolerations:
+            - key: cloud.google.com/gke-nodepool
+              operator: Exists
+              effect: NoSchedule
+            containers:
+            - name: jax-tpu
+              image: "gcr.io/supercomputer-testing/maxtext-rl-ironwood:head-612fcd2e-gemma4c-perf"
+              command:
+              - bash
+              - -c
+              - |
+                echo Pathways Helm Start: $(date);
+                _sigterm() (kill -SIGTERM $! 2>/dev/null;);
+                trap _sigterm SIGTERM;
+
+                echo "Executing payload from /workload/launcher/launch-workload.sh..."
+                ( bash /workload/launcher/launch-workload.sh ) & PID=$!;
+
+                while kill -0 $PID 2>/dev/null;
+                    do sleep 5;
+                done;
+                wait $PID;
+                EXIT_CODE=$?;
+
+                echo Pathways Helm End: $(date);
+                echo EXIT_CODE=$EXIT_CODE;
+                exit $EXIT_CODE
+              env:
+              - name: JAX_PLATFORMS
+                value: proxy
+              - name: PATHWAYS_HEAD
+                value: "g4nprss-08200726-pathways-head-0-0.g4nprss-08200726"
+              - name: JAX_BACKEND_TARGET
+                value: grpc://g4nprss-08200726-pathways-head-0-0.g4nprss-08200726:29100
+              - name: JOB_IDENTIFIER
+                value: "g4nprss-08200726"
+              - name: ARTIFACT_DIR
+                value: "gs://ubench-logs/alisachen-tpu7x/runs"
+              - name: SKIP_JAX_PRECOMPILE
+                value: "1"
+              - name: R1_STEPS
+                value: "2"
+              - name: R1_BATCH
+                value: "8"
+              - name: R1_TP
+                value: "4"
+              - name: SHARDED_SAMPLING
+                value: "1"
+              resources:
+                limits:
+                  cpu: "44"
+                  memory: 170G
+                requests:
+                  cpu: "28"
+                  memory: 130G
+              securityContext:
+                privileged: true
+
+              volumeMounts:
+              - name: workload-launcher
+                mountPath: /workload/launcher
+              - name: shared-tmp
+                mountPath: /tmp
+              - name: workload-patches
+                mountPath: /workload/patches
+              - name: workload-configuration
+                mountPath: /workload/configs
+            initContainers:
+            # Native Sidecar Pattern: restartPolicy Always prevents pod hangs
+            - name: pathways-rm
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260730-jax_0.10.2"
+              restartPolicy: Always
+              env:
+              - name: HOST_ADDRESS
+                value: "g4nprss-08200726-pathways-head-0-0.g4nprss-08200726"
+              args:
+              - --server_port=29101
+              - --node_type=resource_manager
+              - --gcs_scratch_location=gs://ubench-logs/alisachen-tpu7x/pathways-2x2x1/5f5711e1-13d9-45a3-bdf3-96b61ba471c8
+              - --instance_count=1
+              - --instance_type=tpu7x:2x2x1
+              resources:
+                requests:
+                  cpu: "2"
+                  memory: 8G
+                limits:
+                  cpu: "4"
+                  memory: 16G
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            - name: pathways-proxy
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/proxy_server:20260730-jax_0.10.2"
+              restartPolicy: Always
+              env:
+              - name: PATHWAYS_HEAD
+                value: "g4nprss-08200726-pathways-head-0-0.g4nprss-08200726"
+              args:
+              - --server_port=29100
+              - --resource_manager_address=g4nprss-08200726-pathways-head-0-0.g4nprss-08200726:29101
+              - --gcs_scratch_location=gs://ubench-logs/alisachen-tpu7x/pathways-2x2x1/5f5711e1-13d9-45a3-bdf3-96b61ba471c8
+              resources:
+                requests:
+                  cpu: "8"
+                  memory: 32G
+                limits:
+                  cpu: "16"
+                  memory: 64G
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            volumes:
+            - name: shared-tmp
+              emptyDir: {}   # was hostPath /tmp — leaked pathways state across pods on reused nodes
+            - name: workload-launcher
+              configMap:
+                name: "g4nprss-08200726-launcher"
+            - name: workload-patches
+              configMap:
+                name: "g4nprss-08200726-patches"
+                items:
+                - key: gemma4_prs.diff
+                  path: gemma4_prs.diff
+                - key: patch_cd_proper.py
+                  path: patch_cd_proper
+                - key: patch_engine_kwargs.py
+                  path: patch_engine_kwargs
+                - key: patch_gemma4_prs.py
+                  path: patch_gemma4_prs
+                - key: patch_gemma4_tp_fusion.py
+                  path: patch_gemma4_tp_fusion
+                - key: patch_lendist.py
+                  path: patch_lendist
+                - key: patch_phasetime.py
+                  path: patch_phasetime
+                - key: patch_pr4409.py
+                  path: patch_pr4409
+                - key: patch_sharded_sampling.py
+                  path: patch_sharded_sampling
+                - key: patch_tunix_chunked_logps.py
+                  path: patch_tunix_chunked_logps
+                - key: patch_vllm_sampler.py
+                  path: patch_vllm_sampler
+                - key: pr4409_chunked_logps.diff
+                  path: pr4409_chunked_logps.diff
+            - name: workload-configuration
+              configMap:
+                name: "g4nprss-08200726-config"
+                items:
+                - key: workload-configuration
+                  path: workload-config.yaml
+
+# ----------------------------------------------------
+# 2. Worker Replicated Job
+# ----------------------------------------------------
+  - name: worker
+    replicas: 1
+    template:
+      spec:
+        parallelism: 1
+        completions: 1
+        backoffLimit: 32
+        completionMode: Indexed
+        template:
+          metadata:
+            annotations:
+              alpha.jobset.sigs.k8s.io/exclusive-topology: cloud.google.com/gke-nodepool
+              cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+            labels:
+              kueue.x-k8s.io/podset: worker
+          spec:
+            restartPolicy: OnFailure
+            priorityClassName: "medium"
+            hostNetwork: true
+            hostIPC: true
+            dnsPolicy: ClusterFirstWithHostNet
+            tolerations:
+            - key: google.com/tpu
+              operator: Exists
+            nodeSelector:
+              cloud.google.com/gke-tpu-topology: "2x2x1"
+              cloud.google.com/gke-tpu-accelerator: tpu7x
+            containers:
+            - name: pathways-worker
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260730-jax_0.10.2"
+              env:
+              - name: PATHWAYS_HEAD
+                value: "g4nprss-08200726-pathways-head-0-0.g4nprss-08200726"
+              - name: MEGASCALE_SLICE_ID
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/job-index']
+              - name: MEGASCALE_NUM_SLICES
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/replicatedjob-replicas']
+              - name: JOBSET_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/jobset-name']
+              - name: MEGASCALE_COORDINATOR_ADDRESS
+                value: "g4nprss-08200726-pathways-head-0-0.g4nprss-08200726"
+              args:
+              - --server_port=29105
+              - --resource_manager_address=g4nprss-08200726-pathways-head-0-0.g4nprss-08200726:29101
+              - --gcs_scratch_location=gs://ubench-logs/alisachen-tpu7x/pathways-2x2x1/5f5711e1-13d9-45a3-bdf3-96b61ba471c8
+              - --enable_metrics_collection=true
+              - --xla_tpu_use_enhanced_launch_barrier=true
+              ports:
+              - containerPort: 29105
+                protocol: TCP
+              - containerPort: 29106
+                protocol: TCP
+              - containerPort: 8471
+                protocol: TCP
+              - containerPort: 8080
+                protocol: TCP
+              resources:
+                limits:
+                  google.com/tpu: "4"
+                requests:
+                  google.com/tpu: "4"
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            initContainers:
+            volumes:
+            - name: shared-tmp
+              emptyDir: {}   # was hostPath /tmp — leaked pathways state across pods on reused nodes
