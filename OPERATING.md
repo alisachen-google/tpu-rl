@@ -9,9 +9,9 @@ How to launch, watch, and read a run with this repo. Companions: `RUNBOOK.md` (F
 ## 0. Access (VM `ac-ml-perf`)
 
 **Approved path (prior campaign, re-validated 2026-08-20):** your `alisachen@google.com` ADC, minted on
-the MacBook and copied here; `gke-gcloud-auth-plugin` mints cluster tokens from it on this VM.
+the **cloudtop `alisachenspecial`** (NOT the MacBook — that copy is CAA-blocked) and copied here; `gke-gcloud-auth-plugin` mints cluster tokens from it on this VM.
 ```bash
-# MacBook (browser login), then copy:
+# cloudtop alisachenspecial (browser login), then copy:
 gcloud auth application-default login
 gcloud compute scp ~/.config/gcloud/application_default_credentials.json \
   ac-ml-perf:~/.config/gcloud/application_default_credentials.json --zone us-central1-b --project gke-aishared-gsc-dev
@@ -19,13 +19,13 @@ gcloud compute scp ~/.config/gcloud/application_default_credentials.json \
 gke-gcloud-auth-plugin --use_application_default_credentials | head -c 80   # JSON => OK
 ```
 When access breaks with `invalid_rapt` / "Reauthentication failed" → the RAPT expired (~daily): redo the
-two MacBook lines. That is NOT the Context-Aware-Access block (`"Account restricted"` / "Access was
+two cloudtop lines. That is NOT the Context-Aware-Access block (`"Account restricted"` / "Access was
 blocked by Context Aware Access") — that one only hits `gcloud auth login`-style user creds refreshed
-here; ADC copied from the MacBook has been accepted on this VM.
+here; ADC copied from alisachenspecial has been accepted on this VM (the MacBook's ADC is the one CAA rejects).
 
 | Piece | Value |
 |---|---|
-| kubectl | `~/bin/kb` = kubectl pinned to bodaborg. Prefers context `bodaborg-adc` (exec plugin + ADC); falls back to the SA-token context if ADC is expired. **Always use it** — a background process on this VM rewrites `~/.kube/config` and flips the current context to a GPU cluster; never `use-context`. |
+| kubectl | `~/bin/kb` = kubectl pinned to bodaborg. Tries `bodaborg-adc` (gke-gcloud-auth-plugin + ADC), then `bodaborg-adc2` (`~/bin/adc-exec-cred.sh`), then the SA-token context. **Always use it** — a background process on this VM rewrites `~/.kube/config` and flips the current context to a GPU cluster; never `use-context`. |
 | fallback identity | K8s ServiceAccount `default/alisa-runner` via `~/.k8s-token` (tokenFile). Namespaced Role: pods, pods/log, configmaps, services, jobs, jobsets. No secrets (→ `helm template \| kubectl apply`), no nodes/queues. Renewal needs `container.serviceAccounts.createToken` (removed by the 2026-08-19 RBAC rollout) — or the vendor pod `tools/token-vendor-pod.yaml`, which publishes the SA's projected token to `gs://alisachen/tpu_rl/auth/` for `tools/refresh_token.sh`. |
 | GCS | works via the VM service account (read; runs/ubench-logs artifacts readable, `gs://alisachen` readable). |
 | GitHub | PAT in `~/.git-token`; commits authored as `alisachen-google` only. |
