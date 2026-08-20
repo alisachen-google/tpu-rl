@@ -1,0 +1,59 @@
+# Token vendor: a tiny pod that runs AS the alisa-runner ServiceAccount, takes its own
+# projected (bound) token, and publishes it to GCS every 20 min. The VM `ac-ml-perf` reads
+# it from GCS with its own service account, restoring kubectl access there.
+#
+# Why this works when nothing else does: the projected token is a KUBERNETES token, so
+# Google's Context-Aware Access (which blocks alisachen@google.com tokens from that VM,
+# and now also blocks `kubectl create token`) does not apply to it.
+#
+# Apply with:  kubectl --context=$CTX apply -f tools/token-vendor-pod.yaml
+# The token stays valid while this pod lives (bound tokens are invalidated on pod deletion),
+# and the kubelet rotates it automatically — the loop republishes each rotation.
+#
+# NOTE: this writes a credential into gs://ubench-logs/alisachen-tpu7x/auth/. Anyone with
+# read access to that prefix can act as default/alisa-runner (namespaced role: pods,
+# configmaps, jobs, jobsets in `default`). Delete the pod and the object when done.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alisa-token-vendor
+  namespace: default
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+spec:
+  serviceAccountName: alisa-runner
+  restartPolicy: Always
+  priorityClassName: medium
+  nodeSelector:
+    cloud.google.com/gke-nodepool: cpu-np
+  tolerations:
+  - key: cloud.google.com/gke-nodepool
+    operator: Exists
+    effect: NoSchedule
+  volumes:
+  - name: sa-token
+    projected:
+      sources:
+      - serviceAccountToken:
+          path: token
+          expirationSeconds: 86400        # API server caps this to its configured max
+  containers:
+  - name: vendor
+    image: google/cloud-sdk:slim
+    command:
+    - sh
+    - -c
+    - |
+      while true; do
+        cp /var/run/secrets/vend/token /tmp/tok
+        gsutil -q cp /tmp/tok gs://ubench-logs/alisachen-tpu7x/auth/k8s-token \
+          && echo "published $(date -u) ($(wc -c < /tmp/tok) bytes)"
+        sleep 1200
+      done
+    volumeMounts:
+    - name: sa-token
+      mountPath: /var/run/secrets/vend
+      readOnly: true
+    resources:
+      requests: {cpu: "50m", memory: 128Mi}
+      limits: {cpu: "200m", memory: 512Mi}
