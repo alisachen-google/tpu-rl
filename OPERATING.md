@@ -8,8 +8,29 @@ How to launch, watch, and read a run with this repo. Companions: `RUNBOOK.md` (F
 
 ## 0. Access (VM `ac-ml-perf`)
 
+**Approved path (prior campaign, re-validated 2026-08-20):** your `alisachen@google.com` ADC, minted on
+the MacBook and copied here; `gke-gcloud-auth-plugin` mints cluster tokens from it on this VM.
+```bash
+# MacBook (browser login), then copy:
+gcloud auth application-default login
+gcloud compute scp ~/.config/gcloud/application_default_credentials.json \
+  ac-ml-perf:~/.config/gcloud/application_default_credentials.json --zone us-central1-b --project gke-aishared-gsc-dev
+# VM: verify
+gke-gcloud-auth-plugin --use_application_default_credentials | head -c 80   # JSON => OK
+```
+When access breaks with `invalid_rapt` / "Reauthentication failed" → the RAPT expired (~daily): redo the
+two MacBook lines. That is NOT the Context-Aware-Access block (`"Account restricted"` / "Access was
+blocked by Context Aware Access") — that one only hits `gcloud auth login`-style user creds refreshed
+here; ADC copied from the MacBook has been accepted on this VM.
+
 | Piece | Value |
 |---|---|
+| kubectl | `~/bin/kb` = kubectl pinned to bodaborg. Prefers context `bodaborg-adc` (exec plugin + ADC); falls back to the SA-token context if ADC is expired. **Always use it** — a background process on this VM rewrites `~/.kube/config` and flips the current context to a GPU cluster; never `use-context`. |
+| fallback identity | K8s ServiceAccount `default/alisa-runner` via `~/.k8s-token` (tokenFile). Namespaced Role: pods, pods/log, configmaps, services, jobs, jobsets. No secrets (→ `helm template \| kubectl apply`), no nodes/queues. Renewal needs `container.serviceAccounts.createToken` (removed by the 2026-08-19 RBAC rollout) — or the vendor pod `tools/token-vendor-pod.yaml`, which publishes the SA's projected token to `gs://alisachen/tpu_rl/auth/` for `tools/refresh_token.sh`. |
+| GCS | works via the VM service account (read; runs/ubench-logs artifacts readable, `gs://alisachen` readable). |
+| GitHub | PAT in `~/.git-token`; commits authored as `alisachen-google` only. |
+
+---|---|
 | kubectl | `~/bin/kb` = `kubectl --context=gke_cloud-tpu-shared-capacity_us-central1_bodaborg-tpu7x-nap`. **Always use it** — a background process on this VM rewrites `~/.kube/config` and flips the current context to a GPU cluster. |
 | identity | K8s ServiceAccount `default/alisa-runner`; bearer token in `~/.k8s-token` (`~/.kube/config` uses `tokenFile`). Namespaced Role: pods, pods/log, configmaps, services, jobs, jobsets — full CRUD. **No secrets** (hence `helm template \| kubectl apply`, never `helm install`), no nodes/queues/priorityclasses (read those from a machine with user creds). |
 | token renewal | on a machine with cluster creds: `kubectl create token alisa-runner -n default --duration=168h > /tmp/tok` then `gcloud compute scp /tmp/tok ac-ml-perf:~/.k8s-token --zone us-central1-b --project gke-aishared-gsc-dev`. The API server caps the lifetime (observed 48 h). |
