@@ -3,6 +3,11 @@
 TPU v7x (Ironwood) RL benchmarking — runbooks, launchers, and command references.
 
 ## Docs
+## Operating guide
+- [OPERATING.md](OPERATING.md) — **start here**: access, one-command launch/watch/gates, pre-flight,
+  known failure modes. Launchers and the helm chart live in `gemma4/`, `chart/`; helpers in `tools/`.
+
+### Background
 - [gemma4/GEMMA4_E2B_RUN.md](gemma4/GEMMA4_E2B_RUN.md) — commands for running gemma4-e2b GRPO RL
 - [gemma4/GEMMA_BENCH_PLAN.md](gemma4/GEMMA_BENCH_PLAN.md) — benchmark ladder
 - [RUNBOOK.md](RUNBOOK.md) — Fix Catalog #1–21
