@@ -23,6 +23,7 @@ metadata:
 spec:
   serviceAccountName: alisa-runner
   restartPolicy: Always
+  terminationGracePeriodSeconds: 5
   priorityClassName: medium
   nodeSelector:
     cloud.google.com/gke-nodepool: cpu-np
@@ -44,11 +45,12 @@ spec:
     - sh
     - -c
     - |
+      trap 'exit 0' TERM INT          # exit promptly on kubectl delete (PID 1 ignores TERM otherwise)
       while true; do
         cp /var/run/secrets/vend/token /tmp/tok
         gsutil -q cp /tmp/tok gs://alisachen/tpu_rl/auth/k8s-token \
           && echo "published $(date -u) ($(wc -c < /tmp/tok) bytes)"
-        sleep 1200
+        sleep 1200 & wait $!           # interruptible sleep so the trap fires immediately
       done
     volumeMounts:
     - name: sa-token
