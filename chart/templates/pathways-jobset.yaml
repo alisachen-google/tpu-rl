@@ -52,6 +52,9 @@ spec:
             annotations:
               kubectl.kubernetes.io/default-container: jax-tpu
               gke-gcsfuse/volumes: "true"
+              # optimize-utilization autoscaler drains under-packed cpu-np nodes; without this the
+              # head gets SIGTERMed mid-run (two 143 kills during train compile, 2026-08-20).
+              cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
           spec:
             restartPolicy: OnFailure
             {{- if .Values.kueue_priority_class }}
@@ -238,6 +241,7 @@ spec:
           metadata:
             annotations:
               alpha.jobset.sigs.k8s.io/exclusive-topology: cloud.google.com/gke-nodepool
+              cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
             labels:
               kueue.x-k8s.io/podset: worker
           spec:
