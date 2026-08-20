@@ -44,8 +44,23 @@ enable_dp_attention=False, allow_split_physical_axes=True, enable_tunix_perf_met
 checkpoint_storage_use_ocdbt=False, the 27 proxy XLA flags @ scoped_vmem 65536, maxRestarts=5,
 queue multislice-queue, priority medium, and the 5 stack patches.
 
-FORCED DEVIATIONS (gemma4 physics): tmbs 32→1 (Fix #21, 262k vocab), scan_layers True→False (KV
-sharing), max_target/prefill 16384/8192→8192/4096, max_num_batched_tokens 16640→8448 (same formula).
+DEVIATIONS FORCED BY THE MODEL vs BY OUR CURRENT SETUP (corrected 2026-08-20 — the earlier
+"gemma4 physics" label was too strong):
+- scan_layers True→False: ARCHITECTURAL. gemma4 layers share KV caches across layers; nn.scan needs
+  identical layer bodies over a carried state, so it cannot express it. maxtext's PARAM_MAPPING for
+  gemma4 assumes scan_layers=False.
+- tmbs 32→1: MEASURED LIMIT OF OUR CURRENT SHARDING, not a law. Logits are [tmbs, seq, vocab] f32 =
+  8.59 GB/sequence at 8192x262144; t6g9 measured 130.13 G temporaries at tmbs=4 vs 94.74 G available
+  (~32 G/sequence), i.e. cost scales linearly with tmbs => the tensor is REPLICATED, not batch-sharded.
+  Our trainer mesh is (data=1, fsdp=64), so with tmbs=1 there is no batch axis to shard along.
+  tianyu's qwen3 is larger per sequence (16384x151936x4 = 9.96 GB) yet runs tmbs=32, so on their path
+  the logits do shard. OPEN LEAD: make the gemma4 logits shard (maxtext num_vocab_tiling for the vocab
+  axis; check the activation_batch axis-rule mapping). PR #4409 sequence-chunking already lifted us to
+  tmbs=2 (g4n13s1205), which is the same problem attacked from the sequence axis.
+- max_target/prefill 16384/8192→8192/4096: MEMORY-DRIVEN CHOICE inherited from the team e4b recipe
+  (head_dim 256 doubles KV/token vs qwen3's 128; 262k vocab inflates logits). Not impossible, just
+  costlier; revisit together with the sharding lead.
+- max_num_batched_tokens 16640→8448: NOT a deviation — same formula (max_target_length + kv_cache_buffer).
 
 CHOSEN DEVIATIONS — open rungs:
 | knob | tianyu | ours | note |
