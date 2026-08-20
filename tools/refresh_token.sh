@@ -1,7 +1,7 @@
 #!/bin/bash
 # Pull the vended K8s SA token from GCS into ~/.k8s-token (see tools/token-vendor-pod.yaml).
 set -euo pipefail
-SRC=${1:-gs://ubench-logs/alisachen-tpu7x/auth/k8s-token}
+SRC=${1:-gs://alisachen/tpu_rl/auth/k8s-token}
 TMP=$(mktemp)
 gsutil -q cp "$SRC" "$TMP"
 test -s "$TMP"                      # never overwrite a good token with an empty file

@@ -10,7 +10,7 @@
 # The token stays valid while this pod lives (bound tokens are invalidated on pod deletion),
 # and the kubelet rotates it automatically — the loop republishes each rotation.
 #
-# NOTE: this writes a credential into gs://ubench-logs/alisachen-tpu7x/auth/. Anyone with
+# NOTE: this writes a credential into gs://alisachen/tpu_rl/auth/. Anyone with
 # read access to that prefix can act as default/alisa-runner (namespaced role: pods,
 # configmaps, jobs, jobsets in `default`). Delete the pod and the object when done.
 apiVersion: v1
@@ -46,7 +46,7 @@ spec:
     - |
       while true; do
         cp /var/run/secrets/vend/token /tmp/tok
-        gsutil -q cp /tmp/tok gs://ubench-logs/alisachen-tpu7x/auth/k8s-token \
+        gsutil -q cp /tmp/tok gs://alisachen/tpu_rl/auth/k8s-token \
           && echo "published $(date -u) ($(wc -c < /tmp/tok) bytes)"
         sleep 1200
       done
