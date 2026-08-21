@@ -66,6 +66,57 @@ rewards, tmbs=1, CD disabled, no patches/flags. Preempted by Kueue at batch
 the PRs are activation-gated. This finding shaped the g4dl config, where the
 same code, activated, delivered the headline above.
 
+## Decode-heavy stack benchmark (`g4r1c`, 2026-08-21) — the R0 rematch
+
+The full stack (same as g4dl: 5 runtime patches, CD window 64, sharded
+sampling, RPA `1,8704,1,2176`, 27 XLA proxy flags, `async_scheduling=False`,
+compile cache) on **exactly the g4r0a benchmark shape** (batch 256×8 = 2,048
+completions, 4096+4096, math rewards, tmbs=1, 20 steps). Completed 20/20,
+zero restarts, records recovered from GCS phasetime/lendist JSONs.
+
+| Metric (median, steps ≥3, n=17) | g4r1c (stack) | g4r0a (baseline) | Gain |
+|---|---|---|---|
+| **Global step time** | **271.2 s** (floor 253.8, max 441) | 490 s (floor 438) | **1.81×** |
+| Rollout (engine_generate) | 145.5 s | 357 s | **2.45×** |
+| Trainer segment (global − gen&adv) | 108.1 s | ~131 s | 1.2× |
+| Rewards (math_verify, in-step) | 11.9 s (spiky: 4.0–103) | inside rollout gap | — |
+| Regime (LENDIST) | 81% median truncation at cap-4096, osl_mean 3412 | same shape | decode-heavy confirmed |
+
+Reading: the stack's value on the *real* workload is a 1.81× cycle speedup,
+delivered almost entirely by the rollout rebuild (357→146 s: CD window +
+sharded sampling/logprobs + RPA forwarding + XLA flags). The trainer segment
+(108 s, tmbs=1 grad-acc ×256) is now the largest single phase → next rungs:
+tmbs=2 scout, dp32×tp4. Step 7 (441 s) was a one-off reward-pool fallback
+spike (rewards 103 s that step).
+
+### Getting it to run at all: Fixes #23–#24 (three attempts died at the same spot)
+
+- **Fix #23 (eviction guard)**: ClusterAutoscaler deleted the NAP 4x4x4 pool
+  under g4r1 attempt 1 (`ClusterAutoscalerCleanup node/... removed` events).
+  `cluster-autoscaler.kubernetes.io/safe-to-evict: "false"` on head+worker
+  pod templates.
+- **Fix #24 (RM OOMKill)**: g4r1/g4r1b attempts died ~25 min into the
+  train-step compile with clean SIGTERMs. Cloud Logging node stream showed
+  `Memory cgroup out of memory: Killed process (cloud_pathways_)
+  anon-rss:15537816kB` — the Pathways **resource manager** hosts the
+  server-side compile, and gemma4's unscanned 262k-vocab train HLO peaks
+  >15.5 G against the 16 G container limit. Deterministic at end-of-compile.
+  Fix: RM memory limit 16G→48G (+ cpu 4→8, which also cut the compile from
+  ~25 to ~13 min). Sampled RM peak on the passing run: 13.7 G (2-min sampling).
+  Forensics recipe recorded: container stdout (what the app saw) + k8s_node
+  logs (what the kernel did) + pod events/jobset controller (who ordered the
+  teardown) — all in Cloud Logging, surviving pod deletion.
+
+### Side result — qwen3 ladder point run for tianyu (run-17 → `tianyu-rl-17a`)
+
+Teammate's RPA decode-tile sweep point 2 (`1,1024,1,1024`), their manifest
+verbatim (renamed 17a; eviction guard added): 20/20 steps, exit 0, all bands
+green. **Official read: 133.6 s median global (steps ≥3) vs parent 15b's
+126.1 s — the 1024 fetch/compute tile is a ~6% regression, entirely
+rollout-side (92.1→105.4 s), train unchanged (24.8→25.1 s).** Matches the
+pre-registered DMA-bandwidth risk; ladder keeps `1,16384,1,4096`.
+Artifacts: `gs://ubench-logs/tianyu-rl-17a/`.
+
 ## Tuning probe ladder (in progress)
 
 - **RPA block-size forwarding proven live** (#3395 path): probe g4p2's tuple
