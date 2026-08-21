@@ -159,10 +159,13 @@ spec:
               resources:
                 requests:
                   cpu: "2"
-                  memory: 6G
+                  memory: 8G
                 limits:
-                  cpu: "4"
-                  memory: 16G
+                  cpu: "8"
+                  # Fix #24: the RM hosts the train-step compile; gemma4's
+                  # unscanned 262k-vocab HLO peaked >15.5G and the 16G limit
+                  # OOMKilled it at end-of-compile (g4r1 + g4r1b attempt 1).
+                  memory: 48G
               volumeMounts:
               - name: shared-tmp
                 mountPath: /tmp
