@@ -4,7 +4,7 @@ set -e
 
 # --- Graceful Shutdown Logic ---
 _sigterm() {
-  echo "Caught SIGTERM signal, sending to child process..."
+  echo "EXTERNAL-KILL: SIGTERM received at $(date -u +%H:%M:%S) with no application error -- cause is outside the job (preemption / autoscaler / node loss). Check cluster events."
   kill -SIGTERM "$PID" 2>/dev/null
 }
 trap _sigterm SIGTERM
@@ -43,7 +43,7 @@ if [ "maxtext.trainers.post_train.rl.train_rl" = "maxtext.trainers.post_train.rl
   export PYTHONPATH=/app/src:$PYTHONPATH
   export NUM_PRECOMPILE_WORKERS=1
   export NEW_MODEL_DESIGN=1
-  export JAX_BACKEND_TARGET=grpc://127.0.0.1:29000
+  export JAX_BACKEND_TARGET="${JAX_BACKEND_TARGET:-grpc://127.0.0.1:29000}"
 fi
 
 # --- Main Execution ---

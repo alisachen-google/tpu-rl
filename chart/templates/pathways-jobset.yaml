@@ -13,7 +13,7 @@ apiVersion: jobset.x-k8s.io/v1alpha2
 kind: JobSet
 metadata:
   name: "{{ .Release.Name }}"
-  namespace: {{ .Values.namespace | default "default" }}
+  namespace: default
   labels:
     {{- if .Values.queue }}
     kueue.x-k8s.io/queue-name: {{ .Values.queue | quote }}
@@ -47,14 +47,13 @@ spec:
         backoffLimit: 0
         template:
           metadata:
+            annotations:
+              cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
             labels:
               kueue.x-k8s.io/podset: pathways-head
             annotations:
               kubectl.kubernetes.io/default-container: jax-tpu
               gke-gcsfuse/volumes: "true"
-              # optimize-utilization autoscaler drains under-packed cpu-np nodes; without this the
-              # head gets SIGTERMed mid-run (two 143 kills during train compile, 2026-08-20).
-              cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
           spec:
             restartPolicy: OnFailure
             {{- if .Values.kueue_priority_class }}
@@ -101,7 +100,7 @@ spec:
               - name: PATHWAYS_HEAD
                 value: "{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}"
               - name: JAX_BACKEND_TARGET
-                value: grpc://{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:{{ .Values.pathways.proxyPort | default 29000 }}
+                value: grpc://{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:29100
               - name: JOB_IDENTIFIER
                 value: "{{ .Release.Name }}"
               {{- range .Values.workload.envs }}
@@ -109,19 +108,24 @@ spec:
                 value: {{ .value | quote }}
               {{- end }}
               resources:
-{{ toYaml (.Values.workload.headResources | default (dict "requests" (dict "cpu" "28" "memory" "130G") "limits" (dict "cpu" "44" "memory" "170G"))) | indent 16 }}
+                requests:
+                  cpu: "10"
+                  memory: 40G
+                limits:
+                  cpu: "44"
+                  memory: 170G
               securityContext:
                 privileged: true
 
               volumeMounts:
               - name: workload-launcher
                 mountPath: /workload/launcher
-              - name: shared-tmp
-                mountPath: /tmp
-              {{- if .Values.patches.enabled }}
+              {{- if .Values.workload_patches }}
               - name: workload-patches
                 mountPath: /workload/patches
               {{- end }}
+              - name: shared-tmp
+                mountPath: /tmp
               {{- if .Values.workload.configFile }}
               - name: workload-configuration
                 mountPath: {{ .Values.workload.configPath | default "/workload/configs" }}
@@ -144,7 +148,7 @@ spec:
               {{- toYaml . | nindent 14 }}
               {{- end }}
               args:
-              - --server_port={{ .Values.pathways.rmPort | default 29001 }}
+              - --server_port=29101
               - --node_type=resource_manager
               - --gcs_scratch_location={{ .Values.pathways.gcsLocation }}/{{ $jobuuid }}
               - --instance_count={{ .Values.pathways.numSlices | default 1 }}
@@ -155,7 +159,7 @@ spec:
               resources:
                 requests:
                   cpu: "2"
-                  memory: 8G
+                  memory: 6G
                 limits:
                   cpu: "4"
                   memory: 16G
@@ -172,8 +176,8 @@ spec:
               {{- toYaml . | nindent 14 }}
               {{- end }}
               args:
-              - --server_port={{ .Values.pathways.proxyPort | default 29000 }}
-              - --resource_manager_address={{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:{{ .Values.pathways.rmPort | default 29001 }}
+              - --server_port=29100
+              - --resource_manager_address={{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:29101
               - --gcs_scratch_location={{ .Values.pathways.gcsLocation }}/{{ $jobuuid }}
               {{- range .Values.pathways.proxyXlaFlags }}
               - {{ . | quote }}
@@ -183,8 +187,8 @@ spec:
               {{- end }}
               resources:
                 requests:
-                  cpu: "8"
-                  memory: 32G
+                  cpu: "6"
+                  memory: 24G
                 limits:
                   cpu: "16"
                   memory: 64G
@@ -197,15 +201,10 @@ spec:
             - name: workload-launcher
               configMap:
                 name: "{{.Release.Name}}-launcher"
-            {{- if .Values.patches.enabled }}
+            {{- if .Values.workload_patches }}
             - name: workload-patches
               configMap:
-                name: "{{.Release.Name}}-patches"
-                items:
-                {{- range $path, $_ := .Files.Glob "patches/*" }}
-                - key: {{ base $path }}
-                  path: {{ base $path | trimSuffix ".py" }}
-                {{- end }}
+                name: "{{ .Release.Name }}-patches"
             {{- end }}
             {{- if .Values.workload.configFile }}
             - name: workload-configuration
@@ -287,8 +286,8 @@ spec:
               {{- toYaml . | nindent 14 }}
               {{- end }}
               args:
-              - --server_port={{ .Values.pathways.workerPort | default 29005 }}
-              - --resource_manager_address={{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:{{ .Values.pathways.rmPort | default 29001 }}
+              - --server_port=29005
+              - --resource_manager_address={{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:29101
               - --gcs_scratch_location={{ .Values.pathways.gcsLocation }}/{{ $jobuuid }}
               - --enable_metrics_collection=true
               - --xla_tpu_use_enhanced_launch_barrier=true
@@ -296,9 +295,9 @@ spec:
               {{- toYaml . | nindent 14 }}
               {{- end }}
               ports:
-              - containerPort: {{ .Values.pathways.workerPort | default 29005 }}
+              - containerPort: 29005
                 protocol: TCP
-              - containerPort: {{ add (.Values.pathways.workerPort | default 29005) 1 }}
+              - containerPort: 29006
                 protocol: TCP
               - containerPort: 8471
                 protocol: TCP

@@ -4,7 +4,7 @@ set -e
 
 # --- Graceful Shutdown Logic ---
 _sigterm() {
-  echo "Caught SIGTERM signal, sending to child process..."
+  echo "EXTERNAL-KILL: SIGTERM received at $(date -u +%H:%M:%S) with no application error -- cause is outside the job (preemption / autoscaler / node loss). Check cluster events."
   kill -SIGTERM "$PID" 2>/dev/null
 }
 trap _sigterm SIGTERM
