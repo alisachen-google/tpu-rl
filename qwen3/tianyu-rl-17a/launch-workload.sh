@@ -1,0 +1,223 @@
+
+#!/bin/bash
+set -e
+
+_sigterm() {
+  echo "Caught SIGTERM signal, sending to child process..."
+  kill -SIGTERM "$PID" 2>/dev/null
+}
+trap _sigterm SIGTERM
+
+MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
+
+# Fallback check to support different image structures
+if [ ! -f "${MAXTEXT_CONFIG_PATH}" ] && [ -f "src/${MAXTEXT_CONFIG_PATH}" ]; then
+  echo "MAXTEXT_CONFIG_PATH not found at ${MAXTEXT_CONFIG_PATH}, falling back to src/${MAXTEXT_CONFIG_PATH}"
+  MAXTEXT_CONFIG_PATH="src/${MAXTEXT_CONFIG_PATH}"
+fi
+
+# --- pathwaysutils profiling hotfix (upstream scripts/patch_vllm_sampler.py) ---
+# Non-fatal: if the target strings are absent the patch is a no-op.
+if [ -f /workload/patches/patch_vllm_sampler.py ]; then
+  echo "Applying pathwaysutils profiling hotfix..."
+  python3 /workload/patches/patch_vllm_sampler.py || echo "WARN: hotfix did not apply cleanly; continuing"
+fi
+
+# --- PROPER continue-decode fix (mirrors PR #3374) ---
+# Adds step_fn_no_options on the flax_nnx path AND makes decode_loop source its
+# compiler options from get_step_fn_compiler_options() instead of a 3-entry literal.
+# Self-verifying: prints CD-PROPER PATCH: APPLIED or ... FAILED <reason>.
+if [ -f /workload/patches/patch_cd_proper.py ]; then
+  python3 /workload/patches/patch_cd_proper.py
+fi
+
+# --- ISL/OSL/truncation instrumentation ---
+# max_prefill_predict_length drops 16384 -> 8192 in this run, so prompt truncation
+# stops being a curiosity and becomes a CORRECTNESS dependency: if any prompt
+# exceeds 8192 we silently change the RL problem and the comparison against Magellan's
+# 299 s is void. This dumps the per-step ISL/OSL distribution + truncation counts.
+# Fail-open and free (all inputs are already host-side numpy; no device sync).
+# Prints LENDIST PATCH: APPLIED or ... FAILED <reason>.
+if [ -f /workload/patches/patch_lendist.py ]; then
+  python3 /workload/patches/patch_lendist.py
+fi
+
+# --- RPA v3 block-size forwarding (THE POINT OF RUN 06) ---
+# PR #3102's env override is wired into layers/jax/attention/attention.py only;
+# MaxText's forward_serve_vllm enters through layers/common/attention_interface.py,
+# which never forwards it -- so RPA_V3_DECODE_BLOCK_SIZES has been INERT in every
+# run to date, including the 274.9 s one. Proven from run 05's decode_only trace:
+# the only kernel executed was RPAd-p_64-bq_1_1-bkv_16384_16384 (the default),
+# 138.4 ms = 74.7% of leaf decode time, despite the env var being set.
+# Self-verifying: prints RPA-BLOCKS PATCH: APPLIED or ... FAILED <reason>.
+if [ -f /workload/patches/patch_rpa_blocks.py ]; then
+  python3 /workload/patches/patch_rpa_blocks.py
+fi
+
+# --- CONTINUOUS-BATCHING DECODE WINDOW: the two halves must BOTH apply ---
+# (1) stop cond_fn ending the window on any EOS; (2) make the host read each
+# sequence's last NON-PADDING row. Run 10 applied only (1) and was VOID --
+# reward 0.146 -> 0.053 -- because the host read the window's last row, saw
+# padding for every sequence that finished mid-window, never retired it, and
+# re-seeded it from a padding token. Termination became a lottery.
+# If CD-REPORT reports FAILED while CD-MASK reports APPLIED, KILL THE RUN.
+if [ -f /workload/patches/patch_cd_masking.py ]; then
+  python3 /workload/patches/patch_cd_masking.py
+fi
+if [ -f /workload/patches/patch_cd_report.py ]; then
+  python3 /workload/patches/patch_cd_report.py
+fi
+if [ -f /workload/patches/patch_phasetime.py ]; then
+  python3 /workload/patches/patch_phasetime.py
+fi
+if [ -f /workload/patches/patch_reward_parallel.py ]; then
+  python3 /workload/patches/patch_reward_parallel.py
+fi
+if [ -f /workload/patches/patch_sharded_sampling.py ]; then
+  python3 /workload/patches/patch_sharded_sampling.py
+fi
+if [ -f /workload/patches/patch_log_stats.py ]; then
+  python3 /workload/patches/patch_log_stats.py
+fi
+if [ -f /workload/patches/patch_perf_v2.py ]; then
+  python3 /workload/patches/patch_perf_v2.py
+fi
+
+
+# --- ROLLOUT PROFILING (the whole point of this run) ---
+# profiler=xplane captures ONLY the trainer mesh -- verified by grepping a 111 MB
+# xplane from the 2026-08-13 run: jit__train_step x31, jit_compute_per_token_logps
+# x16, and ZERO step_fn / ragged_paged_attention / continue_decode / jit__generate.
+# So rollout (~70% of the step, 100% of its variance) has never been profiled.
+# PHASED_PROFILING_DIR is tpu_inference's own profiler (envs.py:23,
+# tpu_runner._init_phased_profiling) and DOES capture the decode path.
+#
+# THE PATH MUST BE gs://, NOT LOCAL. Attempt 1 of this run used /tmp and crashed on
+# the FIRST rollout, 14 times:
+#   tpu_runner._prepare_inputs:2816 -> phase_based_profiler.step()
+#     -> utils.py:699 _start_profiling -> jax.profiler.start_trace
+#       -> pathwaysutils/profiling.py:269
+#          ValueError: log_dir must be a GCS bucket path, got /tmp/phased_profile/...
+# Under Pathways the trace writer requires GCS. (The accompanying
+# "AttributeError: 'Qwen3ForCausalLM' object has no attribute 'modules'" is an
+# atexit/weakref cleanup firing during the shutdown that follows -- a symptom, not
+# a second bug.)
+#
+# _start_profiling ALSO does os.makedirs() on this path and _resolve_canonical_dst_ts
+# opens a marker file under it with a plain open(). With a gs:// value those create a
+# junk LOCAL tree ./gs:/... and succeed (POSIX collapses the double slash), while
+# start_trace gets the GCS path it needs. Side effect: the small
+# batch_composition_stats files land in that junk local tree and are lost. The traces
+# -- the actual objective -- go straight to GCS, so no syncer is needed.
+export PHASED_PROFILING_DIR="${ARTIFACT_DIR}/${JOB_IDENTIFIER}/phased_profile"
+echo "PHASED_PROFILING_DIR=$PHASED_PROFILING_DIR"
+
+# --- Magellan's two decode-kernel env levers (rungs 3 and 4 of their ladder) ---
+# NOTE: their launch.sh exports GRR_RPA_DECODE_BLOCKS / GRR_CD_EOS_CHECK_INTERVAL.
+# Those names exist in NO version of tpu-inference (checked all 346 open PRs, the
+# fork at their PR head, and both images) -- an internal prefix that leaked into
+# the published script. These are the names the code actually reads:
+#   RPA_V3_DECODE_BLOCK_SIZES        -- PR #3102, bq_sz,bkv_sz,bq_csz,bkv_csz
+#   CONTINUE_DECODE_EOS_CHECK_INTERVAL -- PR #3174, default 1
+# WARNING on the second one: at OUR old config (batch 480, max_decode_steps=10)
+# interval 8 measured 719 -> ~2157 s. Their claim is 327 -> 299 s. The regimes
+# differ (compute-bound vs dispatch-bound), so it is included here for a faithful
+# reproduction -- but if this run lands far above 299 s, THIS IS SUSPECT #1 and the
+# follow-up is to drop it and target their 327 s rung instead.
+export RPA_V3_DECODE_BLOCK_SIZES="1,1024,1,1024"
+export CONTINUE_DECODE_EOS_CHECK_INTERVAL="8"
+
+# --- RL Sampler Patches & Env Setup ---
+export HF_TOKEN=''
+export HF_HUB_ENABLE_HF_TRANSFER=0
+export HF_HUB_DISABLE_XET=1
+export NUM_PRECOMPILE_WORKERS=1
+export NEW_MODEL_DESIGN=1
+export TPU_MIN_LOG_LEVEL=0
+export TF_CPP_MIN_LOG_LEVEL=0
+export TPU_STDERR_LOG_LEVEL=0
+export JAX_BACKEND_TARGET=grpc://127.0.0.1:29000
+
+# Multimodal-default shims carried over from the ubench recipe (harmless if unused)
+cat << 'EOF' >> /deps/src/maxtext/configs/types.py
+
+# --- Auto-patch RLConfig with Multimodal defaults ---
+if 'RLConfig' in globals():
+  if not hasattr(RLConfig, 'use_mrope'):
+    RLConfig.use_mrope = False
+  if not hasattr(RLConfig, 'mrope_section'):
+    RLConfig.mrope_section = [24, 20, 20]
+  if not hasattr(RLConfig, 'position_id_per_seconds'):
+    RLConfig.position_id_per_seconds = 25
+EOF
+sed -i 's/mrope_section=config.mrope_section/mrope_section=getattr(config, "mrope_section", [24, 20, 20])/g; s/mrope_section=cfg.mrope_section/mrope_section=getattr(cfg, "mrope_section", [24, 20, 20])/g' /deps/src/maxtext/models/qwen3.py 2>/dev/null || true
+
+# --- Main Execution ---
+(
+  export ENABLE_PATHWAYS_PERSISTENCE='1'
+  export JAX_PLATFORMS="${JAX_PLATFORMS:-proxy,cpu}"
+  export ENABLE_PJRT_COMPATIBILITY='true'
+  # NOTE: XLA flags are NOT set here. Under JAX_PLATFORMS=proxy the client owns
+  # no TPU, so LIBTPU_INIT_ARGS would be inert. They are passed as argv to the
+  # pathways-proxy container instead (upstream: --custom-pathways-proxy-server-args).
+
+  # continue-decode is ENABLED with max_decode_steps=128 (Magellan's value; every prior
+  # CD run of ours silently used DEFAULT_MAX_DECODE_STEPS = 10). This depends on
+  # patch_cd_proper.py (PR #3374) having applied -- without it the fused loop raises
+  # "compiler_options can only be passed to top-level jax.jit" on this image.
+  python3 -m maxtext.trainers.post_train.rl.train_rl "${MAXTEXT_CONFIG_PATH}" \
+    model_name='qwen3-0.6b' \
+    tokenizer_path='Qwen/Qwen3-0.6B' \
+    dataset_name='nvidia/OpenMathInstruct-2' \
+    hf_train_files='hf://datasets/nvidia/OpenMathInstruct-2/data/train_1M-*.parquet' \
+    train_split='train_1M' \
+    rl.num_generations=8 \
+    rl.grpo_beta=0.0 \
+    rl.grpo_epsilon=0.2 \
+    rl.epsilon_high=0.28 \
+    checkpoint_storage_use_ocdbt=False \
+    async_scheduling=False \
+    math_verify_num_procs=32 \
+    chips_per_vm=8 \
+    num_batches=20 \
+    num_test_batches=0 \
+    debug=True \
+    profiler=xplane \
+    skip_first_n_steps_for_profiler=1 \
+    profiler_steps=1 \
+    gradient_clipping_threshold=1.0 \
+    decode_sampling_temperature=0.8 \
+    decode_sampling_top_k=50 \
+    decode_sampling_nucleus_p=0.95 \
+    max_target_length=16384 \
+    max_prefill_predict_length=8192 \
+    learning_rate=1e-6 \
+    batch_size=256 \
+    train_micro_batch_size=32 \
+    rollout_micro_batch_size=256 \
+    trainer_devices_fraction=1.0 \
+    sampler_devices_fraction=1.0 \
+    rollout_data_parallelism=16 \
+    rollout_tensor_parallelism=8 \
+    enable_dp_attention=false \
+    hbm_utilization_vllm=0.3 \
+    max_num_seqs=256 \
+    max_num_batched_tokens=16640 \
+    scan_layers=True \
+    allow_split_physical_axes=True \
+    enable_tunix_perf_metrics=True \
+    checkpoint_period=100 \
+    max_num_checkpoints_to_keep=1000 \
+    enable_checkpointing=true \
+    load_parameters_path='gs://mohitkhatwani_multipods/qwen3-0.6b/pathways-compat/0/items' \
+    skip_jax_distributed_system=True \
+    vllm_additional_config='{"enable_continue_decode": true, "max_decode_steps": 128}' \
+    base_output_directory=${ARTIFACT_DIR} \
+    run_name=${JOB_IDENTIFIER}
+) & PID=$!
+
+wait $PID
+EXIT_CODE=$?
+
+echo "MaxText Job Ended at: $(date) with exit code $EXIT_CODE"
+exit $EXIT_CODE
