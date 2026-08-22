@@ -89,6 +89,30 @@ sharded sampling/logprobs + RPA forwarding + XLA flags). The trainer segment
 tmbs=2 scout, dp32×tp4. Step 7 (441 s) was a one-off reward-pool fallback
 spike (rewards 103 s that step).
 
+### Per-step phase table (tianyu-ladder format; step 1 = cold, median over steps 2–20)
+
+| phase (seconds) | step 1 | step 2 | step 3 | step 4 | step 5 | step 6 | step 7 | step 8 | step 9 | step 10 | step 11 | step 12 | step 13 | step 14 | step 15 | step 16 | step 17 | step 18 | step 19 | step 20 | median (2–20) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| rollout | 606.9 | 132.1 | 218.9 | 135.6 | 205.0 | 140.3 | 167.3 | 229.0 | 141.8 | 142.8 | 146.6 | 145.5 | 144.6 | 147.2 | 143.1 | 148.1 | 142.7 | 145.1 | 149.0 | 150.0 | **145.5** |
+| rewards+advantage | 45.6 | 31.0 | 13.5 | 27.7 | 12.6 | 11.2 | 4.3 | 103.6 | 4.8 | 39.7 | 4.5 | 18.6 | 42.7 | 12.2 | 33.2 | 6.0 | 5.3 | 6.9 | 4.6 | 38.6 | **12.6** |
+| train+weight sync | 955.7 | 107.6 | 106.5 | 107.9 | 108.2 | 108.1 | 105.9 | 108.4 | 108.3 | 108.9 | 108.1 | 107.3 | 108.4 | 106.9 | 108.1 | 106.7 | 105.8 | 110.9 | 105.2 | 105.3 | **107.9** |
+| GLOBAL STEP | 1608.2 | 270.7 | 338.9 | 271.2 | 325.8 | 259.6 | 277.5 | 441.0 | 254.8 | 291.4 | 259.2 | 271.3 | 295.7 | 266.3 | 284.3 | 260.8 | 253.8 | 262.9 | 258.8 | 293.9 | **271.2** |
+
+Phase mapping vs the qwen3 ladder tables: our `rollout` = engine_generate
+(vLLM call incl. detokenize); `rewards+advantage` = generate_and_advantage −
+engine_generate (math_verify + advantage + marshal — the ladder folds this
+into its "idle" row); `train+weight sync` = global − generate_and_advantage.
+Step 1 is the cold step (compiles), excluded from the median.
+
+| distribution (steps 2–20 pooled, n=38,912) | mean | p50 | p90 | p99 | max |
+|---|---|---|---|---|---|
+| ISL (prompt tokens) | 132.8 | 118 | 170 | 389 | 2691 |
+| OSL (generated tokens) | 3332.1 | 4096 | 4096 | 4096 | 4096 |
+
+OSL p50 already at the 4096 cap (~81% truncation) — deep decode-heavy regime,
+vs the qwen3 ladder's 8192-cap runs (OSL p50 2576, ~23–26% truncation): per
+generated token our regime is denser, per step qwen generates ~11% more tokens.
+
 ### Getting it to run at all: Fixes #23–#24 (three attempts died at the same spot)
 
 - **Fix #23 (eviction guard)**: ClusterAutoscaler deleted the NAP 4x4x4 pool
