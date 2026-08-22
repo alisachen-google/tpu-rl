@@ -196,6 +196,32 @@ rollout-side (92.1→105.4 s), train unchanged (24.8→25.1 s).** Matches the
 pre-registered DMA-bandwidth risk; ladder keeps `1,16384,1,4096`.
 Artifacts: `gs://ubench-logs/tianyu-rl-17a/`.
 
+## Trainer microbatch sweep (2026-08-22) — Fix #21 wall demolished
+
+Single-variable tmbs scouts on the R0 stack config (8 steps each, medians
+steps>=3; rollout is tmbs-independent, so trainer segment is the read):
+
+| tmbs | trainer segment | scout global median | run |
+|---|---|---|---|
+| 1 | 108.1 s | 271.2 s (20-step champion) | g4r1c |
+| 2 | 55.5 s | 234.3 s | g4s2b |
+| 4 | 29.7 s | 199.0 s | g4s4b |
+| **8** | **15.8 s** | **182.9 s** | g4s8 |
+
+Perfect halving per doubling, zero trainer OOMs — Fix #21's "tmbs=1
+mandatory" was config-stale (measured pre-stack; the pretrain recipe's
+per_device_batch_size=2 @ 8192 was the tell). Also swept and REJECTED:
+CD window 128 + EOS-interval 8 (g4s1: 441-563 s — gemma's rollout is not
+dispatch-bound; window 64 suffices). Champion rerun at tmbs=8 (g4r2, 20
+steps) in flight for the official number. Remaining variance: rollout
+long-batch mode (~140 vs ~230 s alternation) and math_verify fallback
+spikes (one 501 s step in g4s8).
+
+Scout-failure notes: g4s2 attempt 1 died of the chart-c RM 16G OOM (Fix #24
+applied to chart-c too); g4s4 attempt 1 died of a vpod webhook race then a
+tensorboardX GCS 412 collision between jobset attempts (fresh release name
+is the workaround).
+
 ## Tuning probe ladder (in progress)
 
 - **RPA block-size forwarding proven live** (#3395 path): probe g4p2's tuple
