@@ -79,6 +79,36 @@ Validity: both runs 20/20 steps, exit 0, zero restarts; qwen rewards in the
 0.13–0.16 band; gemma rewards rising 0.017→0.027 with textbook grad-norm
 decay (337→6) and kl=0 at β=0.
 
+## Native-route investigation (2026-08-22) — TP>1 enabled; generation quality gap found
+
+Mechanics COMPLETE: shard-interleaved qkv/gate_up fusion (matching
+tpu_inference's merged-linear layout law; `GEMMA4_QKV_N_SHARDS`/
+`GEMMA4_NATIVE_TP` = rollout TP) runs e2e at TP=4 with 0 unmapped keys and
+clean exits (g4ns). Fork carries the same fix (35b790363).
+
+QUALITY GAP: native-route generations are fluent but base-model-like
+(instruction-ignoring, prompt echoes) while the MaxText route answers
+correctly on identical prompts. Single-variable elimination (all smokes
+batch 8, gemma4-e2b):
+
+| Variable | Test | Verdict |
+|---|---|---|
+| TP interleave layout | TP=4 vs TP=1 (g4ns vs g4ns1) | identical output — exonerated |
+| Chat template | vs coherent g4dlv2, same `<turn|>` markers | exonerated |
+| HF weights | both routes load_format=dummy + push | exonerated |
+| Continue-decode | CD off (g4ns2b) | still rambles — exonerated |
+| Sharded sampling | SHARDED_SAMPLING=0 (g4ns3) | still rambles — exonerated |
+| Mapping dst coverage | audit: all linears mapped; unmapped norm scales identity-init | exonerated |
+| Embedding scales | token (÷√hidden hook) + per-layer (raw/runtime-scale both sides) | exonerated |
+| Final logit softcap | native applies tanh cap | exonerated |
+
+Remaining hypothesis: semantic gap inside tpu_inference's Gemma4 attention
+implementation itself (e.g. `self.scaling = 1.0` marked "Assuming ..." in
+source) — t6gn8's earlier "coherent" grade likely over-generous. Next step
+if pursued: logit-parity harness (push weights, compare per-token logits vs
+MaxText forward on identical input). Until then the MaxText route remains
+the production/benchmark path.
+
 ## Run log archive (gs://alisachen/tpu_rl/ironwood/logs/)
 
 Full head-pod logs for every 2026-08-17/18 gemma4-e2b bring-up run:
