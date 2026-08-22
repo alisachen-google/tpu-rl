@@ -1,0 +1,351 @@
+# yamllint disable
+{{$timestamp := now | date "2006-01-02-15-04-05"}}
+{{$jobSuffix := randAlphaNum 4 | lower}}
+{{$jobuuid := uuidv4}}
+{{$defaultChipsPerNode := .Values.workload.chipsPerNode | default 4}}
+{{$nodes := div .Values.workload.tpus $defaultChipsPerNode | max 1}}
+{{$numSlices := .Values.pathways.numSlices | default 1 | int}}
+{{$nodesPerSlice := div $nodes $numSlices | max 1}}
+{{$chipsPerNode := min .Values.workload.tpus $defaultChipsPerNode}}
+{{- $root := . -}}
+
+apiVersion: jobset.x-k8s.io/v1alpha2
+kind: JobSet
+metadata:
+  name: "{{ .Release.Name }}"
+  namespace: default
+  labels:
+    {{- if .Values.queue }}
+    kueue.x-k8s.io/queue-name: {{ .Values.queue | quote }}
+    {{- end }}
+spec:
+  coordinator:
+    replicatedJob: pathways-head
+  network:
+    enableDNSHostnames: true
+    publishNotReadyAddresses: true
+  failurePolicy:
+    # restartStrategy: Recreate not supported by this cluster's JobSet CRD
+    # (older controller than the v6e cluster); leoch convention:
+    maxRestarts: {{ .Values.maxRestarts | default 0 }}
+  startupPolicy:
+    startupPolicyOrder: InOrder
+  successPolicy:
+    operator: All
+    targetReplicatedJobs:
+    - pathways-head
+  replicatedJobs:
+# ----------------------------------------------------
+# 1. Pathways-Head Replicated Job
+# ----------------------------------------------------
+  - name: pathways-head
+    replicas: 1
+    template:
+      spec:
+        parallelism: 1
+        completions: 1
+        backoffLimit: 0
+        template:
+          metadata:
+            annotations:
+              cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+            labels:
+              kueue.x-k8s.io/podset: pathways-head
+            annotations:
+              kubectl.kubernetes.io/default-container: jax-tpu
+              gke-gcsfuse/volumes: "true"
+          spec:
+            restartPolicy: OnFailure
+            {{- if .Values.kueue_priority_class }}
+            priorityClassName: {{ .Values.kueue_priority_class | quote }}
+            {{- end }}
+            hostNetwork: true
+            hostIPC: true
+            dnsPolicy: ClusterFirstWithHostNet
+            {{- if .Values.k8s_service_account }}
+            serviceAccountName: {{ .Values.k8s_service_account | quote }}
+            {{- end }}
+            nodeSelector:
+              cloud.google.com/gke-nodepool: {{ .Values.pathways.nodepool | default "cpu-np" | quote }}
+            tolerations:
+            - key: cloud.google.com/gke-nodepool
+              operator: Exists
+              effect: NoSchedule
+            containers:
+            - name: jax-tpu
+              image: {{ .Values.workload.image | quote }}
+              command:
+              - bash
+              - -c
+              - |
+                echo Pathways Helm Start: $(date);
+                _sigterm() (kill -SIGTERM $! 2>/dev/null;);
+                trap _sigterm SIGTERM;
+
+                echo "Executing payload from /workload/launcher/launch-workload.sh..."
+                ( bash /workload/launcher/launch-workload.sh ) & PID=$!;
+
+                while kill -0 $PID 2>/dev/null;
+                    do sleep 5;
+                done;
+                wait $PID;
+                EXIT_CODE=$?;
+
+                echo Pathways Helm End: $(date);
+                echo EXIT_CODE=$EXIT_CODE;
+                exit $EXIT_CODE
+              env:
+              - name: JAX_PLATFORMS
+                value: proxy
+              - name: PATHWAYS_HEAD
+                value: "{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}"
+              - name: JAX_BACKEND_TARGET
+                value: grpc://{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:29200
+              - name: JOB_IDENTIFIER
+                value: "{{ .Release.Name }}"
+              {{- range .Values.workload.envs }}
+              - name: {{ .name }}
+                value: {{ .value | quote }}
+              {{- end }}
+              resources:
+                requests:
+                  cpu: "10"
+                  memory: 40G
+                limits:
+                  cpu: "44"
+                  memory: 170G
+              securityContext:
+                privileged: true
+
+              volumeMounts:
+              - name: workload-launcher
+                mountPath: /workload/launcher
+              {{- if .Values.workload_patches }}
+              - name: workload-patches
+                mountPath: /workload/patches
+              {{- end }}
+              - name: shared-tmp
+                mountPath: /tmp
+              {{- if .Values.workload.configFile }}
+              - name: workload-configuration
+                mountPath: {{ .Values.workload.configPath | default "/workload/configs" }}
+              {{- end }}
+              {{- if .Values.volumes }}
+              {{- if .Values.volumes.gcsMounts }}
+              - name: gcs-job-logs
+                mountPath: {{ (index .Values.volumes.gcsMounts 0).mountPath | quote }}
+              {{- end }}
+              {{- end }}
+            initContainers:
+            # Native Sidecar Pattern: restartPolicy Always prevents pod hangs
+            - name: pathways-rm
+              image: {{ .Values.pathways.serverImage | quote }}
+              restartPolicy: Always
+              env:
+              - name: HOST_ADDRESS
+                value: "{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}"
+              {{- with .Values.pathways.extraEnv.resourceManager }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+              args:
+              - --server_port=29201
+              - --node_type=resource_manager
+              - --gcs_scratch_location={{ .Values.pathways.gcsLocation }}/{{ $jobuuid }}
+              - --instance_count={{ .Values.pathways.numSlices | default 1 }}
+              - --instance_type={{ .Values.pathways.instanceType }}
+              {{- with .Values.pathways.serverExtraArgs }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+              resources:
+                requests:
+                  cpu: "2"
+                  memory: 8G
+                limits:
+                  cpu: "8"
+                  # Fix #24: RM hosts the train-step compile; gemma4's 262k-vocab
+                  # HLO peaks >15.5G -- 16G OOMKilled g4r1/g4r1b/g4s2 attempt 1.
+                  memory: 48G
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            - name: pathways-proxy
+              image: {{ .Values.pathways.proxyServerImage | quote }}
+              restartPolicy: Always
+              env:
+              - name: PATHWAYS_HEAD
+                value: "{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}"
+              {{- with .Values.pathways.extraEnv.proxy }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+              args:
+              - --server_port=29200
+              - --resource_manager_address={{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:29201
+              - --gcs_scratch_location={{ .Values.pathways.gcsLocation }}/{{ $jobuuid }}
+              {{- range .Values.pathways.proxyXlaFlags }}
+              - {{ . | quote }}
+              {{- end }}
+              {{- with .Values.pathways.proxyExtraArgs }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+              resources:
+                requests:
+                  cpu: "6"
+                  memory: 24G
+                limits:
+                  cpu: "16"
+                  memory: 64G
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            volumes:
+            - name: shared-tmp
+              emptyDir: {}   # was hostPath /tmp — leaked pathways state across pods on reused nodes
+            - name: workload-launcher
+              configMap:
+                name: "{{.Release.Name}}-launcher"
+            {{- if .Values.workload_patches }}
+            - name: workload-patches
+              configMap:
+                name: "{{ .Release.Name }}-patches"
+            {{- end }}
+            {{- if .Values.workload.configFile }}
+            - name: workload-configuration
+              configMap:
+                name: "{{.Release.Name}}-config"
+                items:
+                - key: workload-configuration
+                  path: {{ .Values.workload.configFile | default "workload-configuration" }}
+            {{- end }}
+            {{- if .Values.volumes }}
+            {{- if .Values.volumes.gcsMounts }}
+            - name: gcs-job-logs
+              csi:
+                driver: gcsfuse.csi.storage.gke.io
+                volumeAttributes:
+                  bucketName: {{ (index .Values.volumes.gcsMounts 0).bucketName }}
+                  mountOptions: "implicit-dirs"
+            {{- end }}
+            {{- end }}
+
+# ----------------------------------------------------
+# 2. Worker Replicated Job
+# ----------------------------------------------------
+  - name: worker
+    replicas: {{ .Values.pathways.numSlices }}
+    template:
+      spec:
+        parallelism: {{ $nodesPerSlice }}
+        completions: {{ $nodesPerSlice }}
+        backoffLimit: 32
+        completionMode: Indexed
+        template:
+          metadata:
+            annotations:
+              cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+              alpha.jobset.sigs.k8s.io/exclusive-topology: cloud.google.com/gke-nodepool
+            labels:
+              kueue.x-k8s.io/podset: worker
+          spec:
+            restartPolicy: OnFailure
+            {{- if .Values.kueue_priority_class }}
+            priorityClassName: {{ .Values.kueue_priority_class | quote }}
+            {{- end }}
+            hostNetwork: true
+            hostIPC: true
+            dnsPolicy: ClusterFirstWithHostNet
+            tolerations:
+            - key: google.com/tpu
+              operator: Exists
+            {{- if .Values.k8s_service_account }}
+            serviceAccountName: {{ .Values.k8s_service_account | quote }}
+            {{- end }}
+            nodeSelector:
+              cloud.google.com/gke-tpu-topology: {{ .Values.targetTopology | quote }}
+              {{- with .Values.targetNodeSelector }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+            containers:
+            - name: pathways-worker
+              image: {{ .Values.pathways.serverImage | quote }}
+              env:
+              - name: PATHWAYS_HEAD
+                value: "{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}"
+              - name: MEGASCALE_SLICE_ID
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/job-index']
+              - name: MEGASCALE_NUM_SLICES
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/replicatedjob-replicas']
+              - name: JOBSET_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/jobset-name']
+              - name: MEGASCALE_COORDINATOR_ADDRESS
+                value: "{{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}"
+              {{- with .Values.pathways.extraEnv.server }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+              args:
+              - --server_port=29005
+              - --resource_manager_address={{ .Release.Name }}-pathways-head-0-0.{{ .Release.Name }}:29201
+              - --gcs_scratch_location={{ .Values.pathways.gcsLocation }}/{{ $jobuuid }}
+              - --enable_metrics_collection=true
+              - --xla_tpu_use_enhanced_launch_barrier=true
+              {{- with .Values.pathways.workerExtraArgs }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+              ports:
+              - containerPort: 29005
+                protocol: TCP
+              - containerPort: 29006
+                protocol: TCP
+              - containerPort: 8471
+                protocol: TCP
+              - containerPort: 8080
+                protocol: TCP
+              resources:
+                limits:
+                  {{ .Values.acceleratorResourceKey }}: {{ .Values.acceleratorResourceValue | quote }}
+                requests:
+                  {{ .Values.acceleratorResourceKey }}: {{ .Values.acceleratorResourceValue | quote }}
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+              {{- if .Values.pathways.colocatedPythonSidecarImage }}
+              - name: sidecar-shared-memory
+                mountPath: /tmp/sidecar
+              {{- end }}
+              {{- with .Values.pathways.extraVolumeMounts }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+            initContainers:
+            {{- if .Values.pathways.colocatedPythonSidecarImage }}
+            - name: colocated-python-sidecar
+              image: {{ .Values.pathways.colocatedPythonSidecarImage | quote }}
+              restartPolicy: Always
+              {{- with .Values.pathways.extraEnv.colocatedPythonSidecar }}
+              env:
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+              - name: sidecar-shared-memory
+                mountPath: /tmp/sidecar
+              {{- with .Values.pathways.extraVolumeMounts }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+            {{- end }}
+            volumes:
+            - name: shared-tmp
+              emptyDir: {}   # was hostPath /tmp — leaked pathways state across pods on reused nodes
+            {{- if .Values.pathways.colocatedPythonSidecarImage }}
+            - name: sidecar-shared-memory
+              emptyDir:
+                medium: Memory
+            {{- end }}
+            {{- with .Values.pathways.extraVolumes }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
