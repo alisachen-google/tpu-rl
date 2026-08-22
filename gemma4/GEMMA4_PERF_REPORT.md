@@ -196,6 +196,28 @@ rollout-side (92.1→105.4 s), train unchanged (24.8→25.1 s).** Matches the
 pre-registered DMA-bandwidth risk; ladder keeps `1,16384,1,4096`.
 Artifacts: `gs://ubench-logs/tianyu-rl-17a/`.
 
+## NEW CHAMPION — `g4r2` (2026-08-22): full stack + tmbs=8 on the R0 shape
+
+20/20 steps, exit 0, zero restarts. Same config as g4r1c except
+`train_micro_batch_size=8` (the sweep's winner).
+
+| Metric (median, steps ≥3, n=17) | g4r2 | g4r1c | g4r0a baseline |
+|---|---|---|---|
+| **Global step time** | **169.2 s** (floor 163.1) | 271.2 s | 490 s |
+| Rollout | 146.8 s | 145.5 s | 357 s |
+| Rewards+advantage | 6.0 s | 12.6 s | — |
+| Train+weight sync | **16.4 s** | 107.9 s | ~131 s |
+| **vs baseline** | **2.90×** | 1.81× | — |
+
+Per-step globals (step 1 cold 1512 s excluded): 180 248 169 230 163 188 258
+169 165 168 181 193 185 173 168 168 169 168 169 — steady-state band
+163–193 s with two long-rollout excursions (230/258 s).
+
+Cross-model context: qwen3-0.6b on the same stack and chips runs 133.6 s;
+gemma4-e2b — a ~3–4× costlier model per token — is now within 27% of it.
+The cycle is rollout-bound (87% of the median step); remaining rungs are
+rollout-side (RPA tile sweep, dp32×tp4) and reward-spike smoothing.
+
 ## Trainer microbatch sweep (2026-08-22) — Fix #21 wall demolished
 
 Single-variable tmbs scouts on the R0 stack config (8 steps each, medians
