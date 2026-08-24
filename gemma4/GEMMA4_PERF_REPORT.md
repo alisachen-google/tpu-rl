@@ -309,9 +309,15 @@ steps>=3; rollout is tmbs-independent, so trainer segment is the read):
 | 4 | 29.7 s | 199.0 s | g4s4b |
 | **8** | **15.8 s** | **182.9 s** | g4s8 |
 
-Perfect halving per doubling, zero trainer OOMs — Fix #21's "tmbs=1
-mandatory" was config-stale (measured pre-stack; the pretrain recipe's
-per_device_batch_size=2 @ 8192 was the tell). Also swept and REJECTED:
+Perfect halving per doubling through tmbs=8. The wall (probed 2026-08-24,
+scouts g4s16/g4s32): **tmbs=16 OOMs by 0.78 G** (95.52 G needed vs 94.74 G
+per-device HBM) and tmbs=32 needs 120.64 G — so **tmbs=8 is optimal and
+final** for this trainer path. Fix #21's "tmbs=1 mandatory" was
+config-stale (the old config needed 130 G at tmbs=4; the current stack fits
+tmbs=8 and made tmbs=32 cost what tmbs=4 used to). Matching qwen's tmbs=32
+microbatching requires the structural fix: fused/chunked logprob
+computation that never materializes the (tmbs, seq, 262144) tensor —
+worth ~8 s more; upstream candidate. Also swept and REJECTED:
 CD window 128 + EOS-interval 8 (g4s1: 441-563 s — gemma's rollout is not
 dispatch-bound; window 64 suffices). Champion rerun at tmbs=8 (g4r2, 20
 steps) in flight for the official number. Remaining variance: rollout
