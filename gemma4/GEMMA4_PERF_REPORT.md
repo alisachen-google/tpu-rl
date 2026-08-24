@@ -218,6 +218,86 @@ gemma4-e2b — a ~3–4× costlier model per token — is now within 27% of it.
 The cycle is rollout-bound (87% of the median step); remaining rungs are
 rollout-side (RPA tile sweep, dp32×tp4) and reward-spike smoothing.
 
+### 1. Exact change list — g4r2 vs g4r1c (the previous champion)
+
+**One workload change and nothing else**: `train_micro_batch_size` 1 → **8**
+(env `DL_TMBS=8`; 256-sequence batch now runs as 32 grad-acc microbatches
+instead of 256). Byte-identical between the two runs:
+
+- Image: `gcr.io/supercomputer-testing/maxtext-rl-ironwood:head-612fcd2e-gemma4c-perf`
+- Launcher: `gemma4_e2b_r1_launcher.sh` (same file; tmbs is env-parametrized)
+- Runtime patches: patch_vllm_sampler, patch_cd_proper, patch_lendist,
+  patch_phasetime, patch_sharded_sampling (+ patch_dump_completions mounted)
+- Rollout config: DL_TP=8 (dp16×tp8), `RPA_V3_DECODE_BLOCK_SIZES=1,8704,1,2176`,
+  CD window 64 (EOS-check interval default 1), `async_scheduling=False`,
+  hbm 0.6, max_num_batched_tokens 8448, max_num_seqs 256
+- Workload: batch 256×8 = 2,048 completions, 4096+4096, format-weight rewards
+  (math_verify executes), lr 1e-6, 20 steps, `checkpoint_period=100`,
+  same JAX compile cache dir
+- Pathways: 27 proxy XLA flags @ scoped_vmem 65536, RM 48G/8cpu (Fix #24),
+  eviction guard (Fix #23)
+
+Non-measurement infra deltas: ran on chart-c (ports 29200s) instead of
+chart-b — both charts carry Fixes #23/#24 — under a fresh release name
+(avoids the tensorboardX GCS-412 collision between jobset attempts).
+
+Evidence licensing tmbs=8 (scouts, 8 steps each, single-variable):
+g4s2b tmbs=2 → trainer 55.5 s; g4s4b tmbs=4 → 29.7 s; g4s8 tmbs=8 → 15.8 s;
+zero trainer OOMs — perfect halving per doubling; prior: the tpu-recipes
+gemma4-2b pretrain recipe fits per_device_batch_size=2 @ seq 8192 on the
+same hardware.
+
+Launch command:
+
+```bash
+helm install g4r2 recipe-tpu7x-c/ \
+  -f recipe-tpu7x-c/values.yaml -f recipe-tpu7x/values-4x4x4.yaml -f recipe-tpu7x-c/values-dl.yaml \
+  --set workload.image=gcr.io/supercomputer-testing/maxtext-rl-ironwood:head-612fcd2e-gemma4c-perf \
+  --set workload.envs[4].name=DL_STEPS --set workload.envs[4].value=20 \
+  --set workload.envs[5].name=DL_TP    --set workload.envs[5].value=8 \
+  --set workload.envs[6].name=DL_RPA   --set workload.envs[6].value=1\,8704\,1\,2176 \
+  --set workload.envs[7].name=DL_TMBS  --set workload.envs[7].value=8 \
+  <5 runtime patches via --set-file workload_patches.*> \
+  --set-file workload_launcher=gemma4_e2b_r1_launcher.sh \
+  --set-file workload_config=recipe-tpu7x-c/config.yml
+```
+
+### 2. g4r2 per-step phase table (step 1 = cold, excluded from medians)
+
+| phase (seconds) | step 1 | step 2 | step 3 | step 4 | step 5 | step 6 | step 7 | step 8 | step 9 | step 10 | step 11 | step 12 | step 13 | step 14 | step 15 | step 16 | step 17 | step 18 | step 19 | step 20 | median (2–20) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| rollout | 626.7 | 132.0 | 222.1 | 137.4 | 207.5 | 142.4 | 167.1 | 234.3 | 146.8 | 144.1 | 146.1 | 144.1 | 148.1 | 148.2 | 150.5 | 148.8 | 146.1 | 145.8 | 145.6 | 147.3 | **146.8** |
+| rewards+advantage | 47.1 | 32.7 | 8.7 | 15.3 | 5.6 | 4.4 | 4.7 | 7.8 | 6.1 | 4.0 | 4.7 | 18.7 | 28.5 | 20.4 | 6.0 | 3.8 | 5.4 | 7.8 | 5.8 | 5.8 | **6.0** |
+| train+weight sync | 838.6 | 15.8 | 17.4 | 16.4 | 16.8 | 16.2 | 16.1 | 16.2 | 16.2 | 17.2 | 17.4 | 18.2 | 16.6 | 16.6 | 16.2 | 15.8 | 16.5 | 15.9 | 16.4 | 16.1 | **16.4** |
+| GLOBAL STEP | 1512.5 | 180.5 | 248.3 | 169.1 | 229.9 | 163.1 | 187.9 | 258.2 | 169.2 | 165.3 | 168.2 | 181.0 | 193.2 | 185.2 | 172.7 | 168.5 | 167.9 | 169.4 | 167.7 | 169.1 | **169.4** |
+
+Official read (protocol: steps ≥3, n=17): **global median 169.2 s · floor
+163.1 · mean 181.5**. Trainer segment is metronomic (15.8–18.2 s across all
+warm steps). Rollout alternates the usual two modes (~146 s vs 208–234 s on
+4 of 19 warm steps). Rewards stayed tame this run (median 6.0 s, worst 33 s
+— no 100 s+ fallback spike). LENDIST: truncation 63.7→84.1% (cap 4096),
+osl_mean 2730→3523 — the standard within-run completion-length drift as
+training progresses, matching g4r1c's regime.
+
+### 3. Run logs and artifacts — links
+
+| Run | Head log | Per-step records (phasetime / lendist / tensorboard / ckpts) |
+|---|---|---|
+| **g4r2 (champion)** | `gs://alisachen/tpu_rl/ironwood/logs/g4r2-head.log` | `gs://ubench-logs/alisachen-tpu7x/runs/g4r2/` |
+| g4r1c (prev champion) | `gs://alisachen/tpu_rl/ironwood/logs/g4r1c-head.log` (recovered from Cloud Logging) | `gs://ubench-logs/alisachen-tpu7x/runs/g4r1c/` |
+| g4s2b (tmbs=2 scout) | `gs://alisachen/tpu_rl/ironwood/logs/g4s2b-head.log` * | `gs://ubench-logs/alisachen-tpu7x/runs/g4s2b/` |
+| g4s4b (tmbs=4 scout) | `gs://alisachen/tpu_rl/ironwood/logs/g4s4b-head.log` * | `gs://ubench-logs/alisachen-tpu7x/runs/g4s4b/` |
+| g4s8 (tmbs=8 scout) | `gs://alisachen/tpu_rl/ironwood/logs/g4s8-head.log` * | `gs://ubench-logs/alisachen-tpu7x/runs/g4s8/` |
+| g4s1 (CD-128 regression) | `gs://alisachen/tpu_rl/ironwood/logs/g4s1-head.log` * | `gs://ubench-logs/alisachen-tpu7x/runs/g4s1/` |
+| g4r0a (baseline) | `gs://alisachen/tpu_rl/ironwood/logs/g4r0a-head.log` | `gs://ubench-logs/alisachen-tpu7x/runs/g4r0a/` |
+
+\* scout head logs are held locally and queued for GCS upload on the next
+ADC refresh; until then any pod's full log is recoverable from Cloud
+Logging: `resource.type="k8s_container" AND resource.labels.pod_name="<pod>"
+AND resource.labels.container_name="jax-tpu"` in project
+cloud-tpu-shared-capacity. Launch bundle + launchers + charts:
+github.com/alisachen-google/tpu-rl (`gemma4/`, `chart/`).
+
 ## Trainer microbatch sweep (2026-08-22) — Fix #21 wall demolished
 
 Single-variable tmbs scouts on the R0 stack config (8 steps each, medians
