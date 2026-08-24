@@ -285,15 +285,14 @@ training progresses, matching g4r1c's regime.
 |---|---|---|
 | **g4r2 (champion)** | `gs://alisachen/tpu_rl/ironwood/logs/g4r2-head.log` | `gs://ubench-logs/alisachen-tpu7x/runs/g4r2/` |
 | g4r1c (prev champion) | `gs://alisachen/tpu_rl/ironwood/logs/g4r1c-head.log` (recovered from Cloud Logging) | `gs://ubench-logs/alisachen-tpu7x/runs/g4r1c/` |
-| g4s2b (tmbs=2 scout) | `gs://alisachen/tpu_rl/ironwood/logs/g4s2b-head.log` * | `gs://ubench-logs/alisachen-tpu7x/runs/g4s2b/` |
-| g4s4b (tmbs=4 scout) | `gs://alisachen/tpu_rl/ironwood/logs/g4s4b-head.log` * | `gs://ubench-logs/alisachen-tpu7x/runs/g4s4b/` |
-| g4s8 (tmbs=8 scout) | `gs://alisachen/tpu_rl/ironwood/logs/g4s8-head.log` * | `gs://ubench-logs/alisachen-tpu7x/runs/g4s8/` |
-| g4s1 (CD-128 regression) | `gs://alisachen/tpu_rl/ironwood/logs/g4s1-head.log` * | `gs://ubench-logs/alisachen-tpu7x/runs/g4s1/` |
+| g4s2b (tmbs=2 scout) | `gs://alisachen/tpu_rl/ironwood/logs/g4s2b-head.log` | `gs://ubench-logs/alisachen-tpu7x/runs/g4s2b/` |
+| g4s4b (tmbs=4 scout) | `gs://alisachen/tpu_rl/ironwood/logs/g4s4b-head.log` | `gs://ubench-logs/alisachen-tpu7x/runs/g4s4b/` |
+| g4s8 (tmbs=8 scout) | `gs://alisachen/tpu_rl/ironwood/logs/g4s8-head.log` | `gs://ubench-logs/alisachen-tpu7x/runs/g4s8/` |
+| g4s1 (CD-128 regression) | `gs://alisachen/tpu_rl/ironwood/logs/g4s1-head.log` | `gs://ubench-logs/alisachen-tpu7x/runs/g4s1/` |
 | g4r0a (baseline) | `gs://alisachen/tpu_rl/ironwood/logs/g4r0a-head.log` | `gs://ubench-logs/alisachen-tpu7x/runs/g4r0a/` |
 
-\* scout head logs are held locally and queued for GCS upload on the next
-ADC refresh; until then any pod's full log is recoverable from Cloud
-Logging: `resource.type="k8s_container" AND resource.labels.pod_name="<pod>"
+All links live (scout logs uploaded 2026-08-24). Any reaped pod's full log
+is also recoverable from Cloud Logging: `resource.type="k8s_container" AND resource.labels.pod_name="<pod>"
 AND resource.labels.container_name="jax-tpu"` in project
 cloud-tpu-shared-capacity. Launch bundle + launchers + charts:
 github.com/alisachen-google/tpu-rl (`gemma4/`, `chart/`).
