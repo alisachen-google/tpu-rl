@@ -317,6 +317,20 @@ now runs FASTER per step than qwen3-0.6b (133.6 s) on the same stack and
 chips — the 4096-vs-8192 completion cap outweighs the 3–4× model cost once
 both are fully tuned.
 
+### g4r4 per-step phase table (step 1 = cold; steps 2–3 = dp32-mesh decode warmup)
+
+| phase (seconds) | step 1 | step 2 | step 3 | step 4 | step 5 | step 6 | step 7 | step 8 | step 9 | step 10 | step 11 | step 12 | step 13 | step 14 | step 15 | step 16 | step 17 | step 18 | step 19 | step 20 | median (4–20) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| rollout | 604.6 | 250.2 | 194.9 | 93.0 | 95.3 | 100.6 | 99.4 | 99.4 | 96.2 | 102.9 | 101.1 | 99.6 | 99.9 | 97.2 | 100.4 | 98.5 | 96.6 | 98.6 | 101.1 | 100.5 | **99.4** |
+| rewards+advantage | 36.3 | 7.5 | 127.0 | 35.0 | 35.0 | 38.3 | 45.1 | 8.3 | 7.1 | 8.4 | 13.0 | 8.4 | 40.2 | 65.1 | 8.7 | 8.4 | 16.4 | 8.1 | 6.0 | 8.2 | **8.7** |
+| train+weight sync | 939.8 | 17.3 | 19.7 | 16.4 | 16.4 | 17.2 | 16.8 | 17.5 | 16.8 | 17.4 | 16.7 | 17.1 | 16.8 | 18.6 | 16.7 | 18.6 | 17.8 | 17.4 | 16.5 | 19.6 | **17.1** |
+| GLOBAL STEP | 1580.7 | 274.9 | 341.6 | 144.4 | 146.7 | 156.1 | 161.3 | 125.2 | 120.1 | 128.7 | 130.8 | 125.0 | 156.8 | 180.9 | 125.9 | 125.6 | 130.9 | 124.2 | 123.6 | 128.3 | **128.7** |
+
+Reading: trainer locked at 16.6–18.1 s; rollout locks at 96–104 s from
+step 4; rewards mostly 4–9 s with three mild spikes (26–35 s) — the
+math_verify fallback path remains the top variance source and the next
+median lever (~5 s).
+
 ### Packing verdict (`g4r3`, same day) — double negative, rejected
 
 2026-08-24-packing image + tunix sequence packing (MAX_SEQ_TOKEN_PER_TPU=
