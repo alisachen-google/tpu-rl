@@ -71,7 +71,7 @@ for needle, where in (("class RLLearner", "rl_learner.py"),
 for needle in ("class GRPOLearner", "def _generate_and_compute_advantage"):
     if needle not in gl_src:
         fail(f"'{needle}' not present in grpo_learner.py")
-for needle in ("class RLCluster", "def generate"):
+for needle in ("RLCluster", "def generate"):  # _PT_ANCHOR: tunix>=408ca1d9 renamed class RLEngine, keeps alias RLCluster = RLEngine
     if needle not in rc_src:
         fail(f"'{needle}' not present in rl_cluster.py")
 

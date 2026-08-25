@@ -13,7 +13,7 @@ MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
 # Ironwood bring-up fixes (from smoke ladder):
 
 # --- tianyu-rl-14 stack: runtime patches (self-verifying, fail-open) ---
-for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_phasetime patch_sharded_sampling; do
+for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_phasetime patch_sharded_sampling patch_dump_completions patch_profiler_fix patch_gc_sync patch_packing_knob patch_packer_fast; do
   if [ -f /workload/patches/$P ]; then
     python3 /workload/patches/$P
   fi
@@ -58,6 +58,25 @@ if [ "maxtext.trainers.post_train.rl.train_rl" = "maxtext.trainers.post_train.rl
   export NEW_MODEL_DESIGN=1
   export JAX_BACKEND_TARGET="${JAX_BACKEND_TARGET:-grpc://127.0.0.1:29000}"
 fi
+
+export MAX_SEQ_TOKEN_PER_TPU="${DL_PACK:-0}"
+# RLConfig multimodal-default shim (use_mrope) -- new images validate these attrs
+for TYPES in /deps/src/maxtext/src/maxtext/configs/types.py /deps/src/maxtext/configs/types.py; do
+  if [ -f "$TYPES" ] && ! grep -q "Auto-patch RLConfig with Multimodal defaults" "$TYPES"; then
+    cat << 'MROPE_EOF' >> "$TYPES"
+
+# --- Auto-patch RLConfig with Multimodal defaults ---
+if 'RLConfig' in globals():
+  if not hasattr(RLConfig, 'use_mrope'):
+    RLConfig.use_mrope = False
+  if not hasattr(RLConfig, 'mrope_section'):
+    RLConfig.mrope_section = [24, 20, 20]
+  if not hasattr(RLConfig, 'position_id_per_seconds'):
+    RLConfig.position_id_per_seconds = 25
+MROPE_EOF
+    echo "MROPE-SHIM: applied to $TYPES"
+  fi
+done
 
 # --- Main Execution ---
 # The python process is run in the background (&)
