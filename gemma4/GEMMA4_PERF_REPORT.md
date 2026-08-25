@@ -309,6 +309,40 @@ rollout dp32×tp4 instead of dp16×tp8; checkpointing off as scout hygiene):
 | Global median | 156.3 s | 169.2 s |
 | Clean-step floor | **125.7 s** | 163.1 s |
 
+### Per-step phase table (g4stp4b, step 1 = cold, all seconds)
+
+| phase | step 1 | step 2 | step 3 | step 4 | step 5 | step 6 | step 7 | step 8 | median (4–8) |
+|---|---|---|---|---|---|---|---|---|---|
+| rollout | 581.2 | 237.9 | 200.8 | 100.3 | 96.9 | 102.6 | 102.5 | 102.4 | **102.4** |
+| rewards+advantage | 33.6 | 27.6 | 5.8 | 9.1 | 92.0 | 37.7 | 35.9 | 6.3 | 35.9 |
+| train+weight sync | 853.6 | 16.7 | 16.9 | 17.2 | 17.3 | 16.9 | 17.9 | 17.1 | **17.1** |
+| GLOBAL STEP | 1468.3 | 282.1 | 223.6 | 126.7 | 206.2 | 157.2 | 156.3 | 125.7 | 156.3 |
+
+### Where the optimization comes from
+
+The rollout win is a pure decode-mesh effect; nothing else moved (trainer
+16.7–17.9 s every step; same kernels, image, patches, workload):
+
+1. **4× fewer TP collective participants per decode iteration.** At tp=8
+   every per-token matmul reduce spans 8 devices; at tp=4 it spans 4 — lower
+   collective latency on the critical path of all ~4,096 fused decode
+   iterations per rollout. Decode is latency-bound per iteration, so
+   collective latency multiplies across the whole generation.
+2. **2× more independent decode replicas (dp16→dp32)** — 8 sequences per
+   replica instead of 16. Smaller per-replica batches shorten the straggler
+   tail within each CD window round.
+3. **Better weight-read amortization was the tp=8 argument — and it loses.**
+   tp=8 halves per-device weight residency vs tp=4, but gemma4-e2b is small
+   (~2 GB effective per replica-shard) — HBM capacity was never the
+   constraint, so tp=8's collective tax bought nothing.
+4. **Cost: a longer warmup** — two full steps (238/201 s) of decode-graph
+   compilation at the new mesh vs one at tp8; irrelevant to steady state.
+
+Two caveats recorded: (a) reward spikes (92/38/36 s) now dominate step
+variance — the math_verify serial-fallback path, unchanged by the mesh, is
+the top remaining variance target; (b) scout is n=5 warm steps — the
+combined 20-step run re-measures at full protocol length.
+
 Steps 1–2 (238/201 s rollouts) are extended decode-graph warmup at the new
 mesh — excluded. Aysu's serving-side tp=4 evidence transfers to RL decode.
 Remaining variance: math_verify spikes (92/38/36 s on 3 of 5 warm steps).
