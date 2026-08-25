@@ -297,6 +297,49 @@ AND resource.labels.container_name="jax-tpu"` in project
 cloud-tpu-shared-capacity. Launch bundle + launchers + charts:
 github.com/alisachen-google/tpu-rl (`gemma4/`, `chart/`).
 
+## 🏆 CHAMPION — `g4r4` (2026-08-25): dp32×tp4 + tmbs=8, 128.7 s
+
+Both sweep winners composed on the full 20-step protocol (perf image,
+owned-quota lane after the cohort-preemption migration). 20/20 steps.
+
+| Metric (median, steps ≥3, n=17) | g4r4 | g4r2 | g4r1c | g4r0a |
+|---|---|---|---|---|
+| **Global step** | **128.7 s** (floor 120.1) | 169.2 | 271.2 | 490 |
+| Rollout | **99.4 s** | 146.8 | 145.5 | 357 |
+| Rewards+advantage | 8.7 s | 6.0 | 12.6 | — |
+| Trainer | 17.1 s | 16.4 | 107.9 | ~131 |
+| vs baseline | **3.81×** | 2.90× | 1.81× | — |
+
+Per-step globals (step 1 cold 1581 excluded): 275 342 144 147 156 161 125
+120 129 131 125 157 181 126 126 131 124 124 128 — steps 2–3 carry the
+dp32-mesh decode warmup; steady state 120–131 s. Cross-model: gemma4-e2b
+now runs FASTER per step than qwen3-0.6b (133.6 s) on the same stack and
+chips — the 4096-vs-8192 completion cap outweighs the 3–4× model cost once
+both are fully tuned.
+
+### Packing verdict (`g4r3`, same day) — double negative, rejected
+
+2026-08-24-packing image + tunix sequence packing (MAX_SEQ_TOKEN_PER_TPU=
+8192) at dp16×tp8/tmbs=8: global median 222.8 s. (a) Packing does not help
+gemma's trainer (18.6 s packed vs 16.4 unpacked — 81%-at-cap uniform
+lengths leave nothing to pack; packer overhead eats the remainder);
+(b) the packing image's rollout stack is ~46 s/step slower for gemma
+(192.6 vs 146.8 at identical mesh). Stay on the perf image; packing
+remains a qwen-only win (23% truncation regime). tianyu-44 patches that DO
+transfer and are now in our tree: phasetime re-anchor (RLEngine),
+profiler_fix, gc_sync, packing_knob, packer_fast.
+
+### Infra note — cohort preemption + owned-quota migration
+
+Our `default`-namespace ClusterQueue owns ZERO tpu quota (everything
+borrowed from /tpu-shared-cohort); the ubench CI (`cloud-tpu-gu-ubench-*`,
+ubench-regression-tests ns) reclaimed capacity and Kueue evicted our runs
+mid-flight regardless of priorityClass. Fix: charts now template
+`{{ .Release.Namespace }}` and `tools/queue_hunt.sh` detects lanes with
+owned quota + our RBAC and migrates the jobs; g4r3/g4r4 completed in
+`ubench-regression-tests/multislice-queue` (owned 256 chips; our
+priority-500 outranks CI's 100 within the queue).
+
 ## Rollout mesh sweep (2026-08-25) — dp32×tp4 is a 30% rollout win
 
 Single-variable scout g4stp4b (8 steps, champion config except `DL_TP=4` →
