@@ -297,6 +297,26 @@ AND resource.labels.container_name="jax-tpu"` in project
 cloud-tpu-shared-capacity. Launch bundle + launchers + charts:
 github.com/alisachen-google/tpu-rl (`gemma4/`, `chart/`).
 
+## Rollout mesh sweep (2026-08-25) — dp32×tp4 is a 30% rollout win
+
+Single-variable scout g4stp4b (8 steps, champion config except `DL_TP=4` →
+rollout dp32×tp4 instead of dp16×tp8; checkpointing off as scout hygiene):
+
+| | dp32×tp4 (g4stp4b) | dp16×tp8 (g4r2 champion) |
+|---|---|---|
+| Rollout median (steps≥3) | **102.4 s** (steady 97–103) | 146.8 s |
+| Trainer | 17.1 s (unchanged — trainer mesh untouched) | 16.4 s |
+| Global median | 156.3 s | 169.2 s |
+| Clean-step floor | **125.7 s** | 163.1 s |
+
+Steps 1–2 (238/201 s rollouts) are extended decode-graph warmup at the new
+mesh — excluded. Aysu's serving-side tp=4 evidence transfers to RL decode.
+Remaining variance: math_verify spikes (92/38/36 s on 3 of 5 warm steps).
+Scout attempt 1 (g4stp4) was killed twice by the tensorboardX/orbax GCS-412
+write race at the step-0 checkpoint flush; disabling checkpointing for scouts
+is the workaround. Next: combined run dp32×tp4 + tmbs=8 + sequence packing
+(g4r3 validating packing on the 2026-08-24-packing image now).
+
 ## Trainer microbatch sweep (2026-08-22) — Fix #21 wall demolished
 
 Single-variable tmbs scouts on the R0 stack config (8 steps each, medians
