@@ -312,7 +312,10 @@ steps>=3; rollout is tmbs-independent, so trainer segment is the read):
 Perfect halving per doubling through tmbs=8. The wall (probed 2026-08-24,
 scouts g4s16/g4s32): **tmbs=16 OOMs by 0.78 G** (95.52 G needed vs 94.74 G
 per-device HBM) and tmbs=32 needs 120.64 G — so **tmbs=8 is optimal and
-final** for this trainer path. Fix #21's "tmbs=1 mandatory" was
+final** for this trainer path. Confirmed twice: `remat_policy=full`
+(g4s16r, 2026-08-25) produced the byte-identical 95.52 G OOM — the dominant
+temporaries are the loss-layer 262k-vocab logprob tensors, which
+rematerialization cannot reduce. Fix #21's "tmbs=1 mandatory" was
 config-stale (the old config needed 130 G at tmbs=4; the current stack fits
 tmbs=8 and made tmbs=32 cost what tmbs=4 used to). Matching qwen's tmbs=32
 microbatching requires the structural fix: fused/chunked logprob
