@@ -354,6 +354,29 @@ owned quota + our RBAC and migrates the jobs; g4r3/g4r4 completed in
 `ubench-regression-tests/multislice-queue` (owned 256 chips; our
 priority-500 outranks CI's 100 within the queue).
 
+## tp-sweep completion + GPU-comparable reference (`g4stp1`/`g4r5`, 2026-08-25/26)
+
+Full tensor-parallelism sweep on the champion config (rollout medians):
+**tp=8 → 146.8 s · tp=4 → 102.4 s · tp=1 → 95.4 s** — every tp reduction
+won; zero-collective decode is optimal for a model this small (Ironwood HBM
+bandwidth absorbs the 4× per-device weight traffic; tp=1 also suppresses
+the bimodal long-batch rollout mode: 18 of 19 warm rollouts within
+90–100 s).
+
+`g4r5` (20 steps, tp=1×dp128, tmbs=8, 20/20 exit 0): **global median
+131.3 s, floor 122.7** — rollout 95.4 / trainer 16.8 / rewards 17.3.
+Global per step: 129 116 131 127 132 123 276 149 129 131 187 132 128 126
+226 257 128 128 177 (cold 1910 excluded). The median trails g4r4's 128.7
+purely on reward luck: five math_verify spikes (35–144 s) landed in this
+draw vs g4r4's 8.7 s median rewards. Configs are statistically equivalent
+on global step; **g4r4 (tp=4) retains the champion title by protocol;
+g4r5 (tp=1) is the GPU-comparable reference** — replica-per-accelerator,
+the GB200 baseline's topology.
+
+Decisive implication: with clean-reward steps at 122–132 s in BOTH
+configs, math_verify spike smoothing (procs 32→64 / verify-input cap /
+zero-weight skip) is the last lever to ~118–122 s.
+
 ## Rollout mesh sweep (2026-08-25) — dp32×tp4 is a 30% rollout win
 
 Single-variable scout g4stp4b (8 steps, champion config except `DL_TP=4` →
