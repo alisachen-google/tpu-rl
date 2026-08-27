@@ -13,7 +13,7 @@ MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
 # Ironwood bring-up fixes (from smoke ladder):
 
 # --- tianyu-rl-14 stack: runtime patches (self-verifying, fail-open) ---
-for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_rpa_blocks patch_cd_masking patch_cd_report patch_phasetime patch_reward_parallel patch_sharded_sampling patch_profiler_fix patch_gc_sync patch_packing_knob patch_packer_fast patch_dump_completions; do
+for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_rpa_blocks patch_cd_masking patch_cd_report patch_phasetime patch_reward_parallel patch_sharded_sampling patch_profiler_fix patch_gc_sync patch_packing_knob patch_packer_fast patch_log_stats patch_perf_v2 patch_dump_completions; do
   if [ -f /workload/patches/$P ]; then
     python3 /workload/patches/$P
   fi
