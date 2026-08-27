@@ -336,10 +336,15 @@ median lever (~5 s).
 2026-08-24-packing image + tunix sequence packing (MAX_SEQ_TOKEN_PER_TPU=
 8192) at dp16×tp8/tmbs=8: global median 222.8 s. (a) Packing does not help
 gemma's trainer (18.6 s packed vs 16.4 unpacked — 81%-at-cap uniform
-lengths leave nothing to pack; packer overhead eats the remainder);
-(b) the packing image's rollout stack is ~46 s/step slower for gemma
-(192.6 vs 146.8 at identical mesh). Stay on the perf image; packing
-remains a qwen-only win (23% truncation regime). tianyu-44 patches that DO
+lengths leave nothing to pack; packer overhead eats the remainder).
+(b) CORRECTED 2026-08-26: the "packing image rollout is 46 s slower"
+reading was OUR patch omission, not the image — image inspection proved
+the packing image does NOT bake PRs #3395/#3401/#1904 (unlike our -perf
+image, where they are merged), and g4r3 was not mounted with
+rpa_blocks/cd_masking/cd_report — so its rollout ran with an inert RPA env
+and stock (EOS-early-exit) CD windows. A fair packing-image test requires
+the full tianyu-44 11-patch roster. Verdict stands on trainer-side only;
+packing remains unattractive for gemma's 81%-truncation regime. tianyu-44 patches that DO
 transfer and are now in our tree: phasetime re-anchor (RLEngine),
 profiler_fix, gc_sync, packing_knob, packer_fast.
 
