@@ -377,6 +377,42 @@ Decisive implication: with clean-reward steps at 122–132 s in BOTH
 configs, math_verify spike smoothing (procs 32→64 / verify-input cap /
 zero-weight skip) is the last lever to ~118–122 s.
 
+### g4r5 detailed update vs g4r4 (the previous run)
+
+**One workload change and nothing else**: rollout mesh `DL_TP` 4 → **1**
+(dp128×tp1 — full model replica per core-device, 2 sequences each; the
+GB200 baseline's replica-per-accelerator topology). Byte-identical
+otherwise: perf image `head-612fcd2e-gemma4c-perf`, launcher
+`gemma4_e2b_r1_launcher.sh`, tmbs=8, RPA `1,8704,1,2176`, CD window 64,
+same 6 runtime patches, same workload (256×8 @ 4096+4096, format-weight
+rewards, 20 steps), owned-quota lane `ubench-regression-tests`.
+
+Generation-contract check across the whole tp sweep (LENDIST, warm
+medians): tp8 82.0% trunc / osl 3447 / 7.06 M tok · tp4 80.4% / 3400 /
+6.96 M · tp1 81.1% / 3413 / 6.99 M — within ~1.5%, so the rollout ladder
+(146.8 → 102.4 → 95.4 s) is a true per-token speedup. (Contrast: the qwen
+ladder's tp4 run tianyu-rl-23b was PARKED because the auto-picked KV page
+size changed 128→64 at tp4 and shifted its contract +16% tokens; gemma's
+attention geometry lands the heuristic on the same page size at every
+mesh. Defensive adoption of their `patch_block_size` + `VLLM_BLOCK_SIZE`
+pin is queued for future engine-shape experiments.)
+
+### g4r5 per-step phase table (step 1 = cold; steps 2–3 residual warmup)
+
+| phase (seconds) | step 1 | step 2 | step 3 | step 4 | step 5 | step 6 | step 7 | step 8 | step 9 | step 10 | step 11 | step 12 | step 13 | step 14 | step 15 | step 16 | step 17 | step 18 | step 19 | step 20 | median (4–20) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| rollout | 740.0 | 95.6 | 89.7 | 93.2 | 92.8 | 93.2 | 93.3 | 243.4 | 97.1 | 95.4 | 97.4 | 94.4 | 96.3 | 96.5 | 94.5 | 94.4 | 96.1 | 94.5 | 96.3 | 99.9 | **95.4** |
+| rewards+advantage | 59.8 | 16.3 | 9.6 | 21.3 | 17.3 | 22.0 | 11.9 | 16.0 | 34.7 | 16.5 | 16.6 | 74.6 | 18.8 | 14.5 | 15.2 | 114.6 | 144.5 | 16.0 | 15.5 | 60.8 | **17.3** |
+| train+weight sync | 1110.3 | 16.8 | 17.0 | 16.7 | 16.8 | 16.6 | 17.5 | 17.0 | 17.1 | 16.8 | 16.7 | 17.8 | 16.7 | 17.3 | 16.8 | 17.0 | 16.7 | 17.3 | 16.3 | 16.1 | **16.8** |
+| GLOBAL STEP | 1910.1 | 128.6 | 116.3 | 131.3 | 126.8 | 131.8 | 122.7 | 276.4 | 148.9 | 128.7 | 130.7 | 186.9 | 131.8 | 128.4 | 126.5 | 226.1 | 257.3 | 127.8 | 128.1 | 176.8 | **131.3** |
+
+Reading: rollout is the most stable ever measured — 90–100 s on 18 of 19
+warm steps (single 243 s long-batch excursion at step 8); trainer
+16.4–18.1 s throughout. The five reward spikes (35/75/115/144/61 s,
+clustered late as completion drift feeds math_verify's fallback path) are
+the entire gap between the 131.3 s median and the ~122 s clean-step level.
+
+
 ## Rollout mesh sweep (2026-08-25) — dp32×tp4 is a 30% rollout win
 
 Single-variable scout g4stp4b (8 steps, champion config except `DL_TP=4` →
