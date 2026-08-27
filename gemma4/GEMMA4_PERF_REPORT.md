@@ -359,6 +359,44 @@ owned quota + our RBAC and migrates the jobs; g4r3/g4r4 completed in
 `ubench-regression-tests/multislice-queue` (owned 256 chips; our
 priority-500 outranks CI's 100 within the queue).
 
+## 🏆 CHAMPION — `g4r7b` (2026-08-27): packing image + full roster + tp=1, 125.8 s
+
+New stack generation validated as the champion: image `2026-08-24-packing`
+(tunix 408ca1d9) + the FULL 16-patch runtime roster (incl. rpa_blocks /
+cd_masking / cd_report / reward_parallel, which this image does not bake) +
+rollout tp=1×dp128 + tmbs=8 + sequence packing ON + observability
+(Perfetto perf-v2, KV gauge, phasetime). 20/20 steps, exit 0; run survived
+one mid-run Kueue preemption (attempt 2 rode attempt 1's compile cache:
+cold step only 493 s). Contract in band (82.9% trunc / osl 3482).
+
+| Metric (median, steps ≥3, n=17) | g4r7b | g4r4 | g4r5 | g4r0a |
+|---|---|---|---|---|
+| **Global step** | **125.8 s** (floor 121.6) | 128.7 | 131.3 | 490 |
+| Rollout | 96.7 s | 99.4 | 95.4 | 357 |
+| Rewards+advantage | 11.7 s | 8.7 | 17.3 | — |
+| Trainer | 17.9 s | 17.1 | 16.8 | ~131 |
+| vs baseline | **3.90×** | 3.81× | 3.74× | — |
+
+Attribution: tp=1 rollout (≈96 s, confirming g4r5) + newer-stack parity
+(the earlier "packing image is slower" was our patch omission — with the
+full roster it matches the perf image) + a moderate reward-spike draw.
+Packing itself stays ~neutral on gemma (trainer 17.9 packed vs 16.8
+unpacked; gc_sync offsets); its value here is being on the newer tunix
+that the team's future images build on. Perfetto timeline:
+`gs://ubench-logs/alisachen-tpu7x/runs/g4r7b/perf_traces/`.
+
+### g4r7b per-step phase table (step 1 = cold @ warm cache; step 2 warmup)
+
+| phase (seconds) | step 1 | step 2 | step 3 | step 4 | step 5 | step 6 | step 7 | step 8 | step 9 | step 10 | step 11 | step 12 | step 13 | step 14 | step 15 | step 16 | step 17 | step 18 | step 19 | step 20 | median (4–20) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| rollout | 392.9 | 93.0 | 92.0 | 93.3 | 94.2 | 92.9 | 96.3 | 139.1 | 95.3 | 96.9 | 98.1 | 96.7 | 95.8 | 98.4 | 97.4 | 96.7 | 95.4 | 97.0 | 97.3 | 95.0 | **96.7** |
+| rewards+advantage | 54.2 | 10.6 | 10.8 | 11.9 | 11.7 | 13.3 | 11.7 | 9.8 | 27.5 | 10.6 | 36.3 | 35.5 | 13.1 | 11.2 | 9.0 | 9.2 | 30.2 | 9.7 | 7.9 | 15.9 | **11.7** |
+| train+weight sync | 46.0 | 23.2 | 15.0 | 16.4 | 16.4 | 17.1 | 17.8 | 17.7 | 17.9 | 17.5 | 17.7 | 18.2 | 18.2 | 18.6 | 18.0 | 18.1 | 17.8 | 18.8 | 18.7 | 18.1 | **17.9** |
+| GLOBAL STEP | 493.0 | 126.8 | 117.8 | 121.6 | 122.3 | 123.3 | 125.8 | 166.6 | 140.8 | 125.0 | 152.2 | 150.4 | 127.0 | 128.2 | 124.5 | 124.0 | 143.4 | 125.5 | 123.9 | 129.0 | **125.8** |
+
+Reward spikes (28–36 s on 4 steps) remain the gap between the 125.8 median
+and the ~122–124 clean-step level — still the top remaining lever.
+
 ## tp-sweep completion + GPU-comparable reference (`g4stp1`/`g4r5`, 2026-08-25/26)
 
 Full tensor-parallelism sweep on the champion config (rollout medians):
