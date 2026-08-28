@@ -297,6 +297,45 @@ AND resource.labels.container_name="jax-tpu"` in project
 cloud-tpu-shared-capacity. Launch bundle + launchers + charts:
 github.com/alisachen-google/tpu-rl (`gemma4/`, `chart/`).
 
+## Gap-B experiments (2026-08-28): async_scheduling VOID; window-128 running
+
+Decode-phase trace analysis (g4r7b phased_profile) found rollout's per-window
+anatomy: 780 ms host wall containing a 546 ms BLOCKING jax.device_get
+completion-wait around 15 ms of TPU compute (~2% device utilization during
+decode; full derivation + span stacks in the g4r8 explainer artifact).
+Two levers follow ("Gap B" = per-window host tax; "Gap A" = cross-engine
+packing on the shared head, unproven pending a head-wide capture).
+
+### g4r8 — async_scheduling=True: VOID (contract violation) + no win
+
+The image's tpu_runner has a complete async continue_decode path
+(copy_to_host_async + deferred collection in _modify_prev_results), gated by
+vLLM scheduler_config.async_scheduling; maxtext plumbs it as CLI knob
+`async_scheduling` (was hardcoded False in the launcher). Flipping it:
+
+- LENDIST out of band FROM STEP 0: truncation 32-49% (band 80-84%),
+  osl_mean 1864-2511 (band ~3480). Async generation is ~29% shorter --
+  the path is NOT workload-transparent (suspect: per-window RNG handling
+  `rng_params_for_sampling = final_rng` differs from the sync path,
+  changing the sampling stream). Run stopped at step 7, VOID.
+- Even ignoring validity: clean-step rollout 91.7-92.7 s vs 96.7 baseline
+  while generating 29% fewer tokens = no per-token win, plus instability
+  spikes (rollout 271 s at step 7).
+- Verdict: do NOT use async_scheduling with continue_decode until the
+  sampling-stream divergence is root-caused. Log: logs/g4r8-async-void.log.
+- Collateral fix now in the launcher (297bd6c): the patches configmap keys
+  keep `.py` but the roster loop probed extension-less paths -- all 16
+  patches silently skipped (fail-open). Loop now accepts both; monitor
+  gates on `patches=15` banner lines.
+
+### g4r8b — window 64->128 (sync, semantics-preserving): RUNNING
+
+Same champion config, DL_CD=128: halves host round-trips per rollout
+(64 -> 32 windows), paying the 546 ms wait half as often. Correctness rests
+on patch_cd_masking + patch_cd_report, whose documented purpose is making
+long windows safe; tianyu's cd=128 runs sit in the same LENDIST band.
+Expected: rollout ~75-85 s, global ~105-115 s. Results below when complete.
+
 ## 🏆 CHAMPION — `g4r4` (2026-08-25): dp32×tp4 + tmbs=8, 128.7 s
 
 Both sweep winners composed on the full 20-step protocol (perf image,
