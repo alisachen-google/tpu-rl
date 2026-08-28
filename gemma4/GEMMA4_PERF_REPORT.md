@@ -328,13 +328,37 @@ vLLM scheduler_config.async_scheduling; maxtext plumbs it as CLI knob
   patches silently skipped (fail-open). Loop now accepts both; monitor
   gates on `patches=15` banner lines.
 
-### g4r8b — window 64->128 (sync, semantics-preserving): RUNNING
+### g4r8b — window 64->128 (sync): COMPLETE, NEUTRAL. Champion stands.
 
-Same champion config, DL_CD=128: halves host round-trips per rollout
-(64 -> 32 windows), paying the 546 ms wait half as often. Correctness rests
-on patch_cd_masking + patch_cd_report, whose documented purpose is making
-long windows safe; tianyu's cd=128 runs sit in the same LENDIST band.
-Expected: rollout ~75-85 s, global ~105-115 s. Results below when complete.
+Same champion config, DL_CD=128 (64 -> 32 windows/rollout). Valid run:
+jobset Completed, LENDIST on the champion trajectory throughout
+(65.5% -> 83.2% / osl 2849 -> 3498). Result (medians, steps>=3, n=16):
+global 135.9 (floor 127.0), rollout 99.5, rewards 21.5 (unlucky spike
+draw), trainer 18.1. Rollout is ~3 s WORSE than cd=64's 96.7 despite half
+the round-trips -- round-trip count is not the binding constraint.
+Log: logs/g4r8b-head.log.
+
+### Gap A confirmed: the head runs rollout on 1-2 cores of 44
+
+kubectl top on the live head during g4r8b: rollout-phase usage 0.9-2.1
+cores (vs 16.9 cores during the rewards burst -- the 32-proc math-verify
+pool parallelizes fine) on a node with 63.7 allocatable cores and a
+44-core pod limit. With VLLM_ENABLE_V1_MULTIPROCESSING=0 ("required under
+Pathways", launcher line 28), all 128 engine drivers share one Python
+process; rollout wall time ~= total host work / 1 core. This single fact
+explains the whole Gap-B null series: the 546 ms per-window "wait" is
+mostly queueing for the one loop's attention, so neither overlapping it
+(g4r8) nor halving round-trips (g4r8b) moves the total.
+
+Rollout-optimization priority, revised:
+1. Parallelize per-window host work (process-pool
+   _process_continue_decode_outputs; ~30 idle cores available).
+2. Revisit VLLM_ENABLE_V1_MULTIPROCESSING=0 under Pathways -- even 4-8
+   engine-driver processes with their own proxy clients would multiply
+   rollout throughput.
+3. Multi-head client sharding (structural).
+Kernel/tile work stays pointless until the head parallelizes.
+Applies identically to the qwen3 stack (dp16, same uniproc head).
 
 ## 🏆 CHAMPION — `g4r4` (2026-08-25): dp32×tp4 + tmbs=8, 128.7 s
 
