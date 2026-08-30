@@ -297,6 +297,32 @@ AND resource.labels.container_name="jax-tpu"` in project
 cloud-tpu-shared-capacity. Launch bundle + launchers + charts:
 github.com/alisachen-google/tpu-rl (`gemma4/`, `chart/`).
 
+## Roadmap after the qwen3-transfer ladder (agreed 2026-08-30)
+
+Queue: g4r9p1 (host bundle + bucket fix, 10-step probe; preempt-cycling under
+the ubench-regression cohort, maxRestarts=50) -> g4r9p2 (p1 + cd_noeos +
+flash trainer attention q1024/kv2048) -> 20-step confirm of the winning
+stack. Then the three Meta-recipe adoptions, in order:
+
+1. Threefry replay-exact graft (from tpu-inference PR #3100, unmerged):
+   regenerate Gumbel noise at candidate GLOBAL vocab indices inside
+   patch_sharded_sampling -> bit-exact sampling vs jax.random.categorical.
+   Payoff is methodological: byte-identical A/B gates for all future
+   sampler/mesh/async experiments (g4r8's verdict would have been instant).
+2. Stop-token hygiene (zero-risk launcher default): rollout stop tokens
+   eos=[1,106,50] + skip_special_tokens=True for gemma free-text rewards.
+3. OPD / split-pool overlap probe (tunix AgenticGRPOLearner): overlap
+   rollout with train at one-step off-policyness. Our 0.5/0.5 mesh already
+   matches the OPD topology. NOTE: changes the algorithm contract
+   (one-step off-policy) -- run as an explicitly-labeled variant, not a
+   drop-in champion candidate, and gate on reward-curve equivalence.
+
+Warnings owed to the Meta/gemma4 recipe authors: async_scheduling=true is
+in their launch command (our g4r8: VOID, sampling-stream change under
+continue-decode); the prefill-bucket corruption (they are safe only because
+8192x8 lands on a power of two); "262k vocab forces TP=8" is
+shape-dependent, not fundamental (our TP=1 champion).
+
 ## Gap-B experiments (2026-08-28): async_scheduling VOID; window-128 running
 
 Decode-phase trace analysis (g4r7b phased_profile) found rollout's per-window
