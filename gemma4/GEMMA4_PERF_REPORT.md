@@ -297,6 +297,33 @@ AND resource.labels.container_name="jax-tpu"` in project
 cloud-tpu-shared-capacity. Launch bundle + launchers + charts:
 github.com/alisachen-google/tpu-rl (`gemma4/`, `chart/`).
 
+## Device vs Host vs Collective time — per decode window, by mesh (measured)
+
+Per-window profile breakdown (host trace start-to-start + device xplane), showing
+rollout is host-bound at every mesh; the mesh win is host-side (fewer engines).
+
+| | tp=1 (g4r7b, dp64) | tp=2 (g4r10d, dp32) | tp=4 (g4r4, dp32) |
+|---|---|---|---|
+| Host window (wall) | 780 ms | 993 ms | 1014 ms |
+| Device (jit__decode_core_impl) | 14.9 ms | 31.6 ms | 34.8 ms |
+| -- collectives | 7.8 ms (52% of device) | 13.5 ms (43%) | 14.6 ms (42%) |
+| -- composition | permute 7.35 | all-reduce 7.8 + all-gather 4.6 | all-reduce 10.8 + all-gather 3.7 |
+| Device / host util | 1.9% | 3.2% | 3.4% |
+| Collectives / host wall | 1.0% | 1.4% | 1.4% |
+
+Reading: host dominates (97-98% of wall) everywhere. tp=1 pays `collective-permute`
+(sharded-path index shuffles); tp>=2 pays real TP `all-reduce` + `all-gather` (the
+latter is the full-vocab FALLBACK sampler -> padfix target, ~4.6ms at tp=2).
+Collectives are ~1.4% of wall, so padfix trims device not wall. NOTE g4r4 is the
+old perf-image/corrupted-gen tp=4 (device/collective SHAPE reference only; its 128.7s
+end-to-end is a different regime from the recent g4r10f tp=4 ~280s/step).
+
+Profile files (xprof/perfetto double-check), under
+gs://ubench-logs/alisachen-tpu7x/runs/<run>/phased_profile/decode_only/dp_rank_0/plugins/profile/<ts>/:
+- tp=1 g4r7b 2026_08_27_12_05_59: host gke-...mg47.trace.json.gz ; device server-...rppc.0.0.xplane.pb
+- tp=2 g4r10d 2026_08_31_01_20_16: host gke-...ounk.trace.json.gz ; device server-...1sw8.0.0.xplane.pb
+- tp=4 g4r4 2026_08_25_08_32_00: host gke-...mg47.trace.json.gz ; device server-...rjsg.0.0.xplane.pb
+
 ## BREAKTHROUGH: tp sweep on corrected generation (2026-08-31)
 
 The bisect's env knobs only trimmed edges; the MESH is the real lever. On the
