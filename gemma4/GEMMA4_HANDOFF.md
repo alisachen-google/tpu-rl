@@ -152,6 +152,16 @@ LENDIST unchanged across the fix (content changed, not length) — so the perf l
 - Slice = 128 devices (2 cores/chip x 64 chips); sampler_fraction=0.5 -> our sweep was on 64 devices.
   DL_SFRAC knob added; g4r12 = tp4 + full-slice (TFRAC=SFRAC=1.0) -> dp32, queued.
 
+## SWEEP RESULTS (2026-08-31 evening)
+- **g4r16a jit_unroll: WIN, ADOPT.** All 8 steps, exit 0. Clean warm steps 113.5/114.2/117.6/123.8
+  (median 123.8) vs same base without = 117-128.6 (median 128.6). ~-4s from sync dispatch collapse.
+  113.5 = best clean step ever. Tails unchanged (2 KV spikes, 1 reward spike 128.8). ADD DL_JITU=1 TO BASE.
+- **g4r12r2 tp4xdp32 full-slice: FAILED post-step-0, 3 attempts.** Step 0 completes (memory fix works for
+  the train program) but dies at the step-1 boundary with error 0101/pjrt.OOM -- hypothesis: weight-sync
+  reshard transients on shared devices tip HBM over. Retry staged as g4r12r3 (HBM=0.2 TMBS=2).
+- ADC died again ~10:30Z (invalid_rapt), restored 22:30Z via bucket handoff. g4r12r2/g4r16a jobsets were
+  uninstalled during the blind window (other agent, presumably).
+
 ## QUEUED RUNS — detailed specs for the next agent
 
 All are 8-step probes on OWNED quota. **Base = the optimized tp2×dp32 stack** unless noted:
