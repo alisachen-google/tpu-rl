@@ -193,8 +193,21 @@ try:
     logits = logits.astype(jnp.float32)
     if not meta.do_sampling:
       return _ss_sample(rng, mesh, logits, meta)
-    safe = jnp.all((meta.top_k > 0) & (meta.top_k <= _SS_CAND)
-                   & (meta.top_p > 0.0))
+    # _SS_PADFIX (SS_PADFIX=1): at tp>1 padded rows carry top_k=0, which fails
+    # the whole-batch guard and silently forces the full-vocab fallback for the
+    # ENTIRE batch (tianyu qwen3 item 3, -9.5s). The sharded sampler already
+    # masks top_k<=0 rows correctly internally (their outputs are discarded
+    # padding anyway), so it is safe to let the guard IGNORE those rows and keep
+    # the vocab-sharded fast path for the real rows. Default off preserves the
+    # original fallback for genuine liberal-top_k (e.g. eval top_k=2000).
+    if _ss_os.environ.get("SS_PADFIX", "0") == "1":
+      _ss_valid = jnp.where(meta.top_k > 0,
+                            (meta.top_k <= _SS_CAND) & (meta.top_p > 0.0),
+                            True)
+      safe = jnp.all(_ss_valid)
+    else:
+      safe = jnp.all((meta.top_k > 0) & (meta.top_k <= _SS_CAND)
+                     & (meta.top_p > 0.0))
     return _ss_cond_sample(safe, rng, mesh, logits, meta)
 
   def _ss_cond_sample(safe, rng, mesh, logits, meta):

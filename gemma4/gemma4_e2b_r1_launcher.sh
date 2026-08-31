@@ -27,6 +27,7 @@ export SYNC_KEEPKV="${DL_KEEPKV:-0}"
 if [ -n "${DL_ENGKW:-}" ]; then export RL_VLLM_ENGINE_KWARGS="$DL_ENGKW"; fi
 export CD_NO_EOS_REDUCE="${DL_NOEOS:-0}"
 export JIT_UNROLL="${DL_JITU:-0}"
+export SS_PADFIX="${DL_PADFIX:-0}"
 if [ -n "${DL_SAQ:-}" ]; then export SA_BLOCK_Q="$DL_SAQ"; fi
 if [ -n "${DL_SAKV:-}" ]; then export SA_BLOCK_KV="$DL_SAKV"; fi
 if [ -n "${DL_RPA:-}" ]; then export RPA_V3_DECODE_BLOCK_SIZES="$DL_RPA"; fi
