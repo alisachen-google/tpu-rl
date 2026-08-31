@@ -1,0 +1,38 @@
+workload:
+  envs:
+  - name: BENCH_PROFILE
+    value: tp2-dp32
+  - name: ARTIFACT_DIR
+    value: gs://ubench-logs/alisachen-tpu7x/runs
+  - name: JAX_COMPILATION_CACHE_DIR
+    value: gs://ubench-logs/alisachen-tpu7x/compilation_cache/gemma4-e2b-dl
+  - name: SKIP_JAX_PRECOMPILE
+    value: '1'
+  - name: DL_TP
+    value: '2'
+  - name: DL_DP
+    value: '-1'
+  - name: DL_TMBS
+    value: '8'
+  - name: DL_PACK
+    value: '8192'
+  - name: DL_STEPS
+    value: '20'
+  - name: DL_BUCKET_GAP
+    value: '32768'
+  - name: DL_CKPT
+    value: 'False'
+  - name: DL_KEEPKV
+    value: '1'
+  - name: DL_MVPROCS
+    value: '64'
+  - name: DL_NOEOS
+    value: '1'
+  - name: DL_PADFIX
+    value: '1'
+  - name: DL_VTMO
+    value: '5'
+  - name: DL_TFRAC
+    value: '0.5'
+  - name: DL_SFRAC
+    value: '0.5'

@@ -49,11 +49,10 @@ spec:
           metadata:
             annotations:
               cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
-            labels:
-              kueue.x-k8s.io/podset: pathways-head
-            annotations:
               kubectl.kubernetes.io/default-container: jax-tpu
               gke-gcsfuse/volumes: "true"
+            labels:
+              kueue.x-k8s.io/podset: pathways-head
           spec:
             restartPolicy: OnFailure
             {{- if .Values.kueue_priority_class }}

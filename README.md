@@ -12,6 +12,8 @@ TPU v7x (Ironwood) RL benchmarking — runbooks, launchers, and command referenc
 - [RUNBOOK.md](RUNBOOK.md) — Fix Catalog #1–21
 
 ## Launchers
+- [gemma4/benchmarks/README.md](gemma4/benchmarks/README.md) — reproducible one-command TP1/DP64,
+  TP2/DP32, and full-slice TP4/DP32 benchmarks with the complete pinned patch bundle and result summary
 - [smoke/gemma4_e2b_smoke_maxtext_route.sh](smoke/gemma4_e2b_smoke_maxtext_route.sh) — smoke (2 steps, batch 8, 2x2x1), MaxText sampler route — **VALIDATED** (exit 0, 2/2 steps, ckpts, 39/39 math-verified)
 - [smoke/gemma4_e2b_smoke_native_route.sh](smoke/gemma4_e2b_smoke_native_route.sh) — smoke, NATIVE tpu_inference `Gemma4ForCausalLM` sampler (exercises the gemma4 weight mapping)
 - [gemma4/gemma4_e2b_benchmark_4x4x4_maxtext_route.sh](gemma4/gemma4_e2b_benchmark_4x4x4_maxtext_route.sh) — real benchmark run (30 steps, batch 256, 4x4x4)
