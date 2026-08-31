@@ -145,6 +145,34 @@ LENDIST unchanged across the fix (content changed, not length) — so the perf l
 - Slice = 128 devices (2 cores/chip x 64 chips); sampler_fraction=0.5 -> our sweep was on 64 devices.
   DL_SFRAC knob added; g4r12 = tp4 + full-slice (TFRAC=SFRAC=1.0) -> dp32, queued.
 
+## QUEUED RUNS — detailed specs for the next agent
+
+All are 8-step probes on OWNED quota. **Base = the optimized tp2×dp32 stack** unless noted:
+`DL_TP=2 DL_TMBS=8 DL_PACK=8192 DL_STEPS=8 DL_BUCKET_GAP=32768 DL_CKPT=False DL_KEEPKV=1
+DL_MVPROCS=64 DL_NOEOS=1 DL_PADFIX=1 DL_VTMO=5` (env file `gemma4/g4r14b-envs.yaml`).
+Launch each with the §1 template (`helm install <run> ... -f gemma4/<run>-envs.yaml`), sequential
+(one at a time — good-tenant on the shared owned lane). Fast-fail: drop if not beating current best
+(tp2×dp32 optimized ~global median 125 / and check MEAN for tails). Judge on median AND mean.
+
+| Run | Env file | Delta vs base | Tests / hypothesis | Success = |
+|---|---|---|---|---|
+| **g4r12** | g4r12-envs.yaml | DL_TP=4 DL_DP=-1 DL_TFRAC=1.0 DL_SFRAC=1.0 | tp4×dp32 on FULL 128-dev slice (= g4r4/tianyu mesh). Same 32 rollout engines as base, but trainer on 128 vs 64 devices → maybe ~2x faster trainer. | global < base; esp. trainer < ~17s |
+| **g4r16a** | g4r16a-envs.yaml | +DL_JITU=1 | jit_unroll: one jitted slice-all in weight sync vs ~290 per-layer proxy dispatches (tianyu #7, ~-4s sync). Workload-independent → should transfer. | trainer+sync median drops ~2-4s |
+| **g4r16b** | g4r16b-envs.yaml | +DL_ATTN=flash DL_SAQ=1024 DL_SAKV=2048 | flash/splash trainer attention vs dense dot-product on 8192-tok packed rows (tianyu #8). Our trainer 17.7s (2x tianyu's). Shim fixed (local_* fields). | trainer median drops ~2-3s; WATCH init crash (splash asserts) |
+| **g4r16e** | g4r16e-envs.yaml | +DL_CD=256 | CD window 64→256: 4x fewer head round-trips/rollout. Was neutral at 128 pre-host-understanding; retest. | rollout median drops |
+
+DROPPED/moot: g4r10a/b/c/e (old tp=1 6-step base, superseded by g4r16*). g4r10c (mesh-fraction at tp2 →
+dp64 = more engines = worse; the fraction question is answered by g4r12 at tp4→dp32 instead).
+
+DO NOT RERUN (verdicts final): fp8 KV (silent flax_nnx non-support), TPU_MULTIPROCESS_DP=1 (Pathways
+hard-gated), async_scheduling (VOID), prefix-off (KV spikes), rr-routing (2x), tp4×dp16 (collapse),
+window-128 (neutral). Details in each patch docstring + the report.
+
+THE STRATEGIC ITEM (not an env probe): head parallelization = the ~2-3x lever. Precisely scoped now:
+either make TPU_MULTIPROCESS_DP Pathways-compatible upstream, OR process-pool
+_process_continue_decode_outputs (tpu_runner.py; plain-array picklable), OR run single-turn under
+tunix AgenticRLLearner's ThreadPoolExecutor(max_concurrency) (verify it accepts a 1-turn/no-tool task).
+
 ## 5. Open queue / next experiments (priority order)
 
 1. **g4r13 (RUNNING)** — tp=2 + fp8 KV + verify-timeout. If verify-timeout kills the reward tail (mean→median)
