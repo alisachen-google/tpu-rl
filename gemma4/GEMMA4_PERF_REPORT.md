@@ -1,5 +1,12 @@
 # Gemma4-E2B RL Performance Report — TPU v7x (Ironwood) 4x4x4
 
+> **G4R4 MESH CORRECTION (2026-08-31).** g4r4's log (`api_utils` line) shows `data_parallel_size: 16`,
+> devices 64-127 (half slice): g4r4 was **tp4×dp16**, NOT tp4×dp32 as recorded below. Same mesh as
+> g4r10f. Its good rollout vs g4r10f's collapse = corrupted-era short generations (light KV), not mesh.
+> True tp4×dp32 first runs as g4r12r2 (full slice + DL_HBM=0.25 DL_TMBS=4). Also: full-slice serial
+> OOMs the train step at default HBM (vLLM's 0.6 reservation leaves 36.7G < 80.3G needed; g4r12r1) --
+> half-slice never hits this because trainer devices are disjoint from vLLM's.
+
 Recorded 2026-08-18. All runs: gemma4-e2b (`google/gemma-4-E2B-it` lineage),
 GRPO, MaxText+tunix+Pathways, 64-chip / 128-core-device 4x4x4 slice,
 bf16 (no quantization), OpenMathInstruct-2. Full head logs:
