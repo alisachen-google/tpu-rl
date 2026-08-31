@@ -131,6 +131,20 @@ LENDIST unchanged across the fix (content changed, not length) — so the perf l
 
 ---
 
+### Probe results (2026-08-31, post-handoff-write)
+- **fp8 KV: REJECT for RL stack.** vLLM config accepts it but our flax_nnx/RPA path doesn't implement
+  fp8 quantize/dequant -> SILENT failure: hollow 22s steps, no completions/LENDIST/FIRSTTOK (the detection
+  fingerprint). aysu's serving fp8 works because it's the NATIVE vllm-tpu path (no MaxText/RL weight-sync
+  constraint). Bringing fp8 to RL = implement it in RPA + MaxText KV (upstream).
+- **TPU_MULTIPROCESS_DP=1: HARD-GATED.** Explicit validator: "not supported with attention DP or on
+  Pathways." The built-in multiproc-DP (one engine-core process per DP rank = the Gap-A mechanism) exists
+  but requires upstream Pathways compatibility OR rollout off-Pathways. This is the precisely-scoped ask
+  for the head-parallelization prize.
+- USE_BATCHED_RPA_KERNEL: untested (DL_BRPA knob wired); aysu uses =1 in native serving.
+- MODEL_IMPL_TYPE=auto resolves to flax_nnx (same as Meta pins). Correct as-is.
+- Slice = 128 devices (2 cores/chip x 64 chips); sampler_fraction=0.5 -> our sweep was on 64 devices.
+  DL_SFRAC knob added; g4r12 = tp4 + full-slice (TFRAC=SFRAC=1.0) -> dp32, queued.
+
 ## 5. Open queue / next experiments (priority order)
 
 1. **g4r13 (RUNNING)** — tp=2 + fp8 KV + verify-timeout. If verify-timeout kills the reward tail (mean→median)
