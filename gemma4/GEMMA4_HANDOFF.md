@@ -1,190 +1,197 @@
-# gemma4-E2B RL Benchmark — Handoff
+# gemma4-E2B RL Benchmark — HANDOFF BOOK
 
-**Last updated:** 2026-08-30 · **Repo:** `tpu-rl` · **Report of record:** `gemma4/GEMMA4_PERF_REPORT.md` (full history + attributions)
+**Updated:** 2026-08-31 · **Repo:** `tpu-rl` (github.com/alisachen-google/tpu-rl) · **Full history:** `gemma4/GEMMA4_PERF_REPORT.md`
 
-This is a self-contained handoff for continuing the gemma4-E2B GRPO rollout-performance
-campaign on TPU v7x. It states (1) the current running script and champion benchmark, and
-(2) the queued experiment candidates. Read `GEMMA4_PERF_REPORT.md` for the evidence behind
-every claim; this file is the actionable summary.
+Self-contained handoff for another agent to continue the gemma4-E2B GRPO rollout-perf
+campaign on TPU v7x. Everything needed to launch, read results, and continue is here.
 
 ---
 
-## 1. Current running script + champion benchmark
+## 0. TL;DR — where we are
 
-### Champion: `g4r7b` — 125.8 s / step (3.90× over 490 s baseline)
+- **Old champion:** g4r7b, global **125.8 s** (tp=1×dp64, 20-step median).
+- **Current best:** tp=2×dp32 + padfix, global median **125.4 s** (g4r11, 20-step) — **statistically TIED
+  with the old champion**, NOT the −11 s the 6-step probe suggested (short probes overstate; the tail
+  dominates). Rollout is marginally better (95 vs 97).
+- **THE REAL PROBLEM IS THE TAILS.** Median ~125 but MEAN ~162. Two tail sources:
+  1. **Reward spikes** (up to 252 s, from unbounded math_verify sympy stragglers) — biggest.
+  2. **Rollout spikes** (up to 300 s, from KV-pool saturation waves).
+- **Root cause of everything:** rollout is HOST-BOUND (device ~2-3% util). The single-core Python head
+  drives N engines; `device_get`/`block_until_ready` waits through the Pathways proxy dominate. Verified
+  on our runs AND tianyu-rl-148 (their `block_until_ready` = 73.5 s dominates their host trace too).
+- **In flight:** g4r13 = tp=2 + fp8 KV + verify-timeout, 8-step (tests both tail fixes).
 
-Model gemma4-E2B-it, GRPO on `nvidia/OpenMathInstruct-2` (train_1M), GSM8K eval split.
-Measured over 20 steps, medians of steps ≥3 (n=17):
+---
 
-| Phase | Median | Notes |
-|---|---|---|
-| **Global step** | **125.8 s** (floor 121.6) | new champion vs g4r4 128.7 |
-| Rollout (`engine_generate`) | 96.7 s | **77% of step — the target** |
-| Rewards + advantage | 11.7 s | spiky (up to 47 s on hard batches) |
-| Trainer + weight sync | 17.9 s | |
+## 1. Launch recipe
 
-Config: packing image + full patch roster + **rollout tp=1 × dp64** (was dp128 pre-migration; 64 chips) + tmbs=8 + sequence packing ON (`MAX_SEQ_TOKEN_PER_TPU=8192`) + CD window 64.
+- **Image:** `gcr.io/supercomputer-testing/maxtext-rl-ironwood:2026-08-24-packing` (tunix 408ca1d9)
+- **Launcher:** `gemma4/gemma4_e2b_r1_launcher.sh` (staged copy `/mnt/disks/scratch/g4r8-stage/g4r8_launcher.sh`)
+- **Chart:** `chart/` (helm; templates a patches-configmap)
+- **Namespace/queue:** `ubench-regression-tests` (OWNED quota, 256 chips) via LocalQueue `multislice-queue`,
+  priority `medium`(500). Access requires membership in `cmcs-ai-ninja-team@twosync.google.com` (granted).
+- **Staging dir:** `/mnt/disks/scratch/g4r8-stage/` (chart + launcher + patches + env overlays)
+- **Topology:** 4x4x4 (64 chips → 64 rollout devices; tp sets dp = 64/tp)
 
-### The launch script
-
-- **Launcher:** `gemma4/gemma4_e2b_r1_launcher.sh` (drives `maxtext.trainers.post_train.rl.train_rl`)
-- **Chart:** `chart/` (helm) — templates a patches-configmap; `workload_patches=true patches.enabled=true`
-- **Image:** `gcr.io/supercomputer-testing/maxtext-rl-ironwood:2026-08-24-packing` (tunix 408ca1d9, vLLM 0.23.1rc1-dev, JAX 0.10.2-pathways)
-- **Topology:** 4×4×4 (64 chips), `chart/values-4x4x4.yaml`
-- **Staging dir used for probes:** `/mnt/disks/scratch/g4r8-stage/` (chart copy + launcher + patches + env overlays)
-
-### Runtime patch roster (24, all self-verifying + fail-open)
-
-Champion 16: `patch_vllm_sampler cd_proper lendist rpa_blocks cd_masking cd_report phasetime reward_parallel sharded_sampling profiler_fix gc_sync packing_knob packer_fast log_stats perf_v2 dump_completions`
-
-Added for qwen3-transfer (8): `firsttok engine_kwargs host_extract fast_detok dp_rr_routing sync_keepkv cd_noeos flash_sa` — all present in `patches/`, all validated inside the image (apply + parse + idempotent). The last two (`cd_noeos`, `flash_sa`) default OFF via env; the rest are active or env-gated.
-
-### Launcher env knobs (set via helm `workload.envs`)
-
-| Knob | Effect | Champion value |
-|---|---|---|
-| `DL_TP` / `DL_TMBS` / `DL_PACK` | rollout tp / train micro-batch / packing tokens | 1 / 8 / 8192 |
-| `DL_CD` | CD window (`max_decode_steps`) | 64 |
-| `DL_STEPS` | num_batches (probe length) | 20 (10 for probes) |
-| `DL_BUCKET_GAP` | `VLLM_TPU_BUCKET_PADDING_GAP` — **corruption fix** | **32768 (ADOPT)** |
-| `DL_DPRR` | `DP_ROUTING=rr` round-robin routing | probe |
-| `DL_KEEPKV` | `SYNC_KEEPKV` keep KV across weight sync | probe |
-| `DL_ENGKW` | `RL_VLLM_ENGINE_KWARGS` (e.g. prefix caching off) | probe |
-| `DL_MVPROCS` | `math_verify_num_procs` | 32 (probe 64) |
-| `DL_NOEOS` | `CD_NO_EOS_REDUCE` drop per-iter cross-DP EOS reduce | probe |
-| `DL_ATTN` / `DL_SAQ` / `DL_SAKV` | trainer attention / splash block q / kv | dot_product (probe: flash 1024/2048) |
-
-### How to launch (default namespace)
-
+### Launch command (template)
 ```
-STAGE=/mnt/disks/scratch/g4r8-stage; CTX=gke_cloud-tpu-shared-capacity_us-central1_bodaborg-tpu7x-nap
-helm --kube-context=$CTX install <name> $STAGE -f $STAGE/values-base.yaml -f $STAGE/values-4x4x4.yaml -f $STAGE/g4r9p1-envs.yaml \
+export CLOUDSDK_AUTH_ACCESS_TOKEN=$(gcloud auth application-default print-access-token)   # ALWAYS first
+CTX=gke_cloud-tpu-shared-capacity_us-central1_bodaborg-tpu7x-nap ; NS=ubench-regression-tests
+STAGE=/mnt/disks/scratch/g4r8-stage
+helm --kube-context=$CTX install <run> $STAGE -f $STAGE/values-base.yaml -f $STAGE/values-4x4x4.yaml -f $STAGE/<run>-envs.yaml \
+  --namespace $NS --set namespace=$NS \
   --set-file workload_launcher=$STAGE/g4r8_launcher.sh \
   --set workload.image=gcr.io/supercomputer-testing/maxtext-rl-ironwood:2026-08-24-packing \
   --set workload_patches=true --set patches.enabled=true --set workload.configFile= \
   --set maxRestarts=50 --set queue=multislice-queue --set kueue_priority_class=medium
 ```
-**Always** `export CLOUDSDK_AUTH_ACCESS_TOKEN=$(gcloud auth application-default print-access-token)` first (the gke-gcloud-auth-plugin path breaks on `invalid_rapt`). Reinstall only AFTER old pods fully terminate (a 20 s race causes a spurious jobset failure). Priority class must be `medium|low|very-low` (not `very-high`).
+- `--namespace` AND `--set namespace=` BOTH needed (jobset uses Release.Namespace; configmaps use .Values.namespace).
+- `--set maxRestarts=50` (default 0 wastes restarts on preemption).
+- Reinstall only AFTER old pods fully terminate (a ~20 s race fails the jobset).
+- Env overlays are `gemma4/g4rXX-envs.yaml` (a `workload.envs` list).
+
+### Env knobs (DL_*), current champion-ish values
+| Knob | Effect | value |
+|---|---|---|
+| DL_TP / DL_DP | rollout tensor / data parallelism (dp=-1 auto = 64/tp) | **2 / -1** (→dp32) |
+| DL_TMBS / DL_PACK | train micro-batch / packing tokens | 8 / 8192 |
+| DL_STEPS | num_batches (probe length) | 8-20 |
+| DL_CKPT | enable_checkpointing (**False for probes** — avoids key<fry> restore crash) | False |
+| DL_BUCKET_GAP | VLLM_TPU_BUCKET_PADDING_GAP — **CORRUPTION FIX, always on** | **32768** |
+| DL_PADFIX | SS_PADFIX — activate vocab-sharded sampler at tp>1 | 1 (tp>1) |
+| DL_KEEPKV | SYNC_KEEPKV keep KV across weight sync | 1 |
+| DL_MVPROCS | math_verify_num_procs | 64 |
+| DL_NOEOS | CD_NO_EOS_REDUCE drop per-iter cross-DP EOS reduce | 1 |
+| DL_VTMO | VERIFY_ITEM_TIMEOUT — **per-item math_verify timeout (reward-tail fix)** | 5 |
+| DL_ENGKW | RL_VLLM_ENGINE_KWARGS json (e.g. fp8 KV, prefix off) | varies |
+| DL_JITU | JIT_UNROLL jitted weight-sync unroll | 0/1 |
+| DL_ATTN/DL_SAQ/DL_SAKV | trainer attention / splash blocks | dot_product |
+| DL_TFRAC | trainer_devices_fraction (Meta main mode=1.0; default 0.5) | 0.5 |
+| DL_CD | max_decode_steps (CD window) | 64 |
+| DL_HBM | hbm_utilization_vllm | 0.6 |
 
 ---
 
-## THE CORRECTNESS FINDING (adopt unconditionally, gates the whole ladder)
+## 2. Every run this campaign — config + result + verdict
 
-**Prefill-bucket corruption.** Token-padding buckets were pure powers of two topping at
-1,048,576; the real prefill budget (8448×64 = 540,672) rounded UP to that bucket = **94%
-padding**, which corrupts each sequence's **first generated token** (same bug tianyu's qwen3
-found; upstream fix tpu-inference PR #3466). Symptom: completions open by echoing the prompt
-instead of answering. Measured via new `patch_firsttok` census on byte-identical prompts:
+Baseline for comparison: old champion g4r7b (tp1×dp64) global 125.8, rollout 96.7.
+All below on OWNED quota, corrected generation (bucket fix), unless noted.
 
-- Champion (no fix): **echo 72%** of openings.
-- With `VLLM_TPU_BUCKET_PADDING_GAP=32768` (max bucket → 557,056, 3% padding): **echo 39%**.
+| Run | Config (delta vs baseline) | Result (global med / mean) | Verdict |
+|---|---|---|---|
+| g4r9r | baseline: tp1 + bucket fix only | ~127 / stable | corrected-gen reference; bucket fix perf-NEUTRAL + correct → ADOPT |
+| g4r9p1 | full host bundle (prefix-off+rr+…) | rollout ~209 | REJECT (net +110s) |
+| g4r9s | +prefix_caching=false only | rollout med 77.6 / mean 120.7 | REJECT (median win, MEAN regression: KV spikes) |
+| g4r9t | +rr-routing only | rollout ~214-219 | REJECT (2x; dp64 load imbalance) |
+| g4r9x | +keepkv+64proc+cd_noeos | 126.7 / 126.9 | NEUTRAL but stable (spike-free) |
+| g4r10d | +tp=2 (dp32) | rollout 93.6 / global 115.1 (6-step) | mesh win (short probe) |
+| g4r10f | +tp=4 (dp16) | rollout 280 (1 warm step) | REJECT (128 seq/eng + 4-chip all-reduce collapse) |
+| g4r11 | tp=2 + padfix, 20-step CONFIRM | **rollout 95.2 / GLOBAL 125.4 / mean 162** | tp=2 ≈ tied w/ champion on median; TAILS dominate mean |
+| g4r13 | tp=2 + fp8 KV + verify-timeout (8-step) | RUNNING | testing tail fixes |
 
-**LENDIST is unchanged across the fix** (66.8% vs 65.5% trunc; osl 2857 vs 2811) — unlike qwen3,
-gemma's corruption changed content but NOT length, so the perf ladder stays comparable and does
-NOT need a full re-baseline; pre-fix runs just carry a correctness asterisk. **All future runs
-must set `DL_BUCKET_GAP=32768`.**
+DECLINED/NULL (don't rerun): async_scheduling (VOID, sampling-stream change); window-128 (neutral);
+tp=4-dp16 (collapse); prefix-off; rr-routing. tp2×dp64 (est. ~127, needs 128 devices, no gain — dp=64
+keeps head fan-out). fp8 was excluded then re-requested (g4r13).
 
----
-
-## 2. Experiment candidates (queued, in priority order)
-
-Every item has an env switch → bisectable one knob at a time. Method (from tianyu, adopted):
-byte-identical step-0 prompts as the gate (LENDIST + FIRSTTOK), one knob per run, 10-step probe,
-20-step confirm on median steps≥3, adopt only if >0.2 s.
-
-### IN FLIGHT — `g4r9p1` host-bundle probe (10-step)
-Champion config + `DL_BUCKET_GAP=32768 DL_DPRR=1 DL_KEEPKV=1 DL_MVPROCS=64 DL_ENGKW='{"enable_prefix_caching":false}'`.
-Bundles qwen3 items 0/1/5/6/9/11/12. **Status: preempt-cycling in `default` (ubench-regression cohort
-holds all 256 physical chips); maxRestarts=50; no warm PHASETIME captured yet.** Env overlay:
-`gemma4/g4r9p1-envs.yaml`. Needs one ~15-min quiet window OR the priority-dev lane (below).
-
-Bundled optimizations & mechanism:
-- **item 9 dp round-robin routing** (`patch_dp_rr_routing`) — likely biggest win; stock router probes
-  all 64 ranks per `add_request` (~13 s/step at dp32 on qwen3; we have dp64 = 2× exposure). Attacks
-  the proven Gap-A bottleneck (head runs rollout on 1–2 of 44 cores, single Python loop).
-- **item 5 vectorized EOS trim** (`patch_host_extract`) — 9.7k np.isin/window → 1 matrix op (~70 ms/win).
-- **item 11 batched detokenize** (`patch_fast_detok`) — 2048 sequential decodes → 1 batch_decode (~4 s).
-- **item 6 keep KV across sync** (`patch_sync_keepkv`) — skip delete/reinit KV (~2 s).
-- **item 1 prefix caching off** (`patch_engine_kwargs`) — no per-request all-rank cache probes.
-- **item 12** verifier procs 32→64.
-
-### NEXT — `g4r9p2` device/trainer rung (staged, validated, NOT yet launched)
-g4r9p1 winners + `DL_NOEOS=1 DL_ATTN=flash DL_SAQ=1024 DL_SAKV=2048`. Two additions separable by phase
-in one run:
-- **item 4 drop cross-DP EOS reduce** (`patch_cd_noeos`) — makes `any_hit_eos` static False; deletes the
-  per-iteration global scalar all-reduce + carried state from the compiled window. (g4r7b device window
-  ≈ 15 ms is ~half small collectives; `EOS_CHECK_INTERVAL=0` already drops it from the loop *condition*
-  but XLA keeps the carried state.) → rollout device time.
-- **item 8 flash/splash trainer attention** (`patch_flash_sa`) — RLConfig class-attr shim providing all
-  28 sa_*/local_sa_* fields (RLConfig doesn't declare them; CLI-set is rejected). Blocks q1024/kv2048.
-  Activated by `attention=flash`. → trainer time (default dot_product materializes dense [B,S,S] on
-  8192-token packed rows).
-
-### THEN — re-tests unlocked by the above
-- **CD window 256** (`DL_CD=256`): tested at 128 = neutral BEFORE host fixes; tianyu's 256 won only after
-  routing/host wins made per-window fixed cost the remaining term. Re-test after g4r9p1/p2 land.
-- **tp re-sweep on corrected generation** (`DL_TP=4` vs 1): our tp choice predates the corruption fix.
-  If it goes to tp>1, WRITE `patch_ss_padfix` first (tianyu item 3): padded rows carry top_k=0 and the
-  whole-batch `all(top_k>0)` guard silently disables the vocab-sharded sampler at tp>1. (Inert at tp=1,
-  which is why we haven't needed it.)
-
-### DECLINED (with reasons) — do not re-run
-- **async_scheduling=true** — VOID: changes the sampling stream under continue-decode (~29% shorter gens,
-  LENDIST out of band from step 0), and no per-token win. Log: `logs/g4r8-async-void.log`.
-- **window 128 alone** — neutral (rollout 99.5 vs 96.7); round-trip count is not the binding constraint.
-- Meta/tianyu nulls already ruled out: bf16 candidate top-k, splash 2048/4096, remat=full, fsdp trainer
-  mesh, KV page 256, static sharded-sampler predicate, async-collective XLA flags, TP2/TP1-for-qwen.
-
-### POST-LADDER — three adoptions from Meta's gemma4 recipe (see report + roadmap)
-1. **Threefry replay-exact graft** (from tpu-inference PR #3100, unmerged): regenerate Gumbel noise at
-   candidate GLOBAL vocab indices inside `patch_sharded_sampling` → bit-exact vs jax.random.categorical.
-   Payoff: byte-identical A/B gates for all future sampler/mesh/async experiments.
-2. **Stop-token hygiene** (zero-risk launcher default): gemma eos=[1,106,50] + skip_special_tokens=True
-   for free-text rewards.
-3. **OPD / split-pool overlap** (tunix `AgenticGRPOLearner`): overlap rollout with train at one-step
-   off-policyness; our 0.5/0.5 mesh already matches OPD topology. CHANGES THE ALGORITHM CONTRACT — run
-   as an explicitly-labeled variant, gate on reward-curve equivalence, not a drop-in champion candidate.
+### Key numbers to know
+- Mesh sweep: tp1×dp64=127 → **tp2×dp32=~125 (best, ~tied)** → tp4×dp16=~328 (collapse). Optimum dp=32.
+- The tp-win mechanism: HOST-bound → fewer engines (dp) = less head fan-out. dp is the real knob; tp is
+  how you reach it on 64 devices. dp=32 = 64 seqs/engine = sweet spot.
+- Device vs host per window (measured): tp1 host 780ms/device 15ms; tp2 host 993ms/device 32ms;
+  tp4(g4r4) host 1014ms/device 35ms. Collectives ~1.4% of wall everywhere. HOST is 97-98%.
 
 ---
 
-## Root bottleneck (why the priorities are what they are)
+## 3. Patch roster (all self-verifying, fail-open, in `patches/`)
 
-Rollout is ~99% host-bound: the decode kernel sits ON the memory roofline (109 TFLOP/s ≈ 100% of the
-AI≈15 ceiling; ~2% device utilization per window because the host blocks 546 ms/window on `device_get`),
-and **`kubectl top` during rollout shows the head pod using 1–2 of its 44 cores** — all 128 engine
-drivers share one Python process (`VLLM_ENABLE_V1_MULTIPROCESSING=0`, "required under Pathways"). So
-rollout wall ≈ total host work / 1 core. Kernel/tile work is closed; the wins are host parallelization
-(routing, per-window host cost) and eventually breaking the single-process head (multi-proc engines /
-multi-head sharding).
+Applied at launch by the launcher's `for P in ...` loop (probes both `patch_X` and `patch_X.py`).
+Champion 16 + qwen3-transfer/new: firsttok, engine_kwargs, host_extract (always-on, neutral),
+fast_detok (always-on, neutral), dp_rr_routing (gated, REJECTED), sync_keepkv (gated), cd_noeos (gated),
+flash_sa (gated, DEFERRED — shim needs local_* splash fields, done), jit_unroll (gated, untested),
+patch_sharded_sampling (+ SS_PADFIX padfix), **patch_verify_timeout (reward-tail fix, DL_VTMO)**.
+
+NEW this session (write-ups in each file's docstring):
+- `patch_verify_timeout.py` — per-item math_verify timeout (the reward-tail fix). Root cause: pool had
+  parsing_timeout/timeout_seconds=None → unbounded sympy. Sets them to VERIFY_ITEM_TIMEOUT=5.
+- `patch_sharded_sampling.py` — added SS_PADFIX guard (ignore top_k<=0 padded rows → sharded fast path
+  active at tp>1; was silently full-vocab fallback).
+- `patch_jit_unroll.py` — jitted weight-sync unroll (tianyu #7, ~-4s sync, UNTESTED, DL_JITU=1).
+- `patch_flash_sa.py` — RLConfig splash-block shim (tianyu #8, trainer flash, DL_ATTN=flash, UNTESTED).
+- `patch_firsttok.py` — first-token corruption census (echo vs reasoning openings).
 
 ---
 
-## Infra / operational notes
+## 4. THE CORRUPTION FIX (gates everything — always on)
 
-- **Cluster contention:** `default` namespace ClusterQueue owns **0** tpu quota; everything is borrowed
-  from the `tpu-shared-cohort`, and `ubench-regression-tests` (owns 256, uses all) reclaims mid-flight.
-  Physical = 256 chips (4× 4×4×4 slices). Only 4×4×4 and 2×2×1 node pools exist — **no 32-chip pool**, so
-  can't shrink to fit.
-- **Priority-dev lane (the real fix):** `priority-dev` ClusterQueue owns 51 idle chips. Submitting there
-  makes our run *reclaim* rather than *be reclaimed*. Requires membership in
-  `tpu-priority-dev-team@twosync.google.com` (human step; RBAC no longer user-creatable per 2026-08-19
-  two-layer model). One-shot script ready: `gemma4/submit_priority_dev.sh` (RBAC preflight refuses until
-  access lands). NOTE: 51 < 64, so a 4×4×4 run still borrows 13 and isn't fully immune; a 4-chip 2×2×1 is
-  too small for meaningful numbers.
-- **ADC:** periodically dies with `invalid_rapt`. Recovery: user runs
-  `gcloud auth application-default login` on a workstation, uploads to `gs://alisachen/tmp/adc.json`;
-  on the VM copy to `~/.config/gcloud/application_default_credentials.json`, verify, then **delete the
-  bucket copy immediately** using an ADC token (`CLOUDSDK_AUTH_ACCESS_TOKEN=... gcloud storage rm` — plain
-  rm uses the scope-limited compute SA and 403s).
-- **kubectl/helm:** always pass `--context=$CTX` (a background process flips context to cmcs-live);
-  export `CLOUDSDK_AUTH_ACCESS_TOKEN` first.
-- **Reinstall race:** uninstall → wait for pods gone → install; otherwise the jobset fails at head start.
-- **Patches configmap keeps `.py` extensions:** the launcher roster loop probes both `patch_X` and
-  `patch_X.py` (fixed in commit 297bd6c) — a silent skip of all patches if this regresses. Monitor gates
-  on the applied-banner count.
+Prefill token-padding buckets were powers of 2 to 1,048,576; real budget 540,672 rounded UP to the
+1,048,576 bucket = 94% padding, which CORRUPTS each sequence's first generated token (echo 72% openings).
+`VLLM_TPU_BUCKET_PADDING_GAP=32768` (DL_BUCKET_GAP) → max bucket 557,056 (3% pad) → echo 39%. Perf-neutral.
+Validity readout: `patch_firsttok` census (echo/reasoning/other) + LENDIST band (65%→83% trunc, osl 2800→3500).
+LENDIST unchanged across the fix (content changed, not length) — so the perf ladder stays comparable.
 
-## Artifacts / logs
-- Report: `gemma4/GEMMA4_PERF_REPORT.md`. Explainer artifact (Gap-B story): claude.ai artifact
-  `57e93c97-a1da-4007-86a9-47f9976d6990`.
-- Logs in `gs://alisachen/tpu_rl/ironwood/logs/`: `g4r7b-head.log` (champion), `g4r8-async-void.log`,
-  `g4r8b-head.log`. Profiles under `gs://ubench-logs/alisachen-tpu7x/runs/<run>/phased_profile/`.
+---
+
+## 5. Open queue / next experiments (priority order)
+
+1. **g4r13 (RUNNING)** — tp=2 + fp8 KV + verify-timeout. If verify-timeout kills the reward tail (mean→median)
+   and fp8 kills the rollout-spike tail, this is the real win (mean 162→~125). WATCH: fp8 may be unsupported
+   on TPU backend (fast-fail); LENDIST band = validity gate for fp8's numeric change.
+2. **jit_unroll (DL_JITU=1)** — untested, ~-4s sync (tianyu #7); workload-independent, should transfer.
+3. **flash trainer attn (DL_ATTN=flash)** — untested, targets trainer 17.7s (2x tianyu's); shim fixed.
+4. **mesh fraction (DL_TFRAC=1.0)** — Meta main mode; we default 0.5/0.5 (OPD split) without OPD — may be
+   leaving half the slice idle per phase. Untested.
+5. **20-step CONFIRM** of the best stack once tails are tamed → declare champion honestly on median AND mean.
+6. **THE BIG ONE (code, not env): head parallelization (Gap A).** Roofline says ~2-3x headroom, all in the
+   single-core head. Options: process-pool `_process_continue_decode_outputs`; revisit
+   VLLM_ENABLE_V1_MULTIPROCESSING=0 under Pathways; OR run single-turn under tunix AgenticRLLearner's
+   ThreadPoolExecutor(max_concurrency) — that thread pool IS the host parallelism we need (verify it accepts
+   a 1-turn/no-tool task first). After the head parallelizes, tp=1 becomes optimal again (fewer collectives).
+
+METHOD (adopted from tianyu): byte-identical step-0 prompts as gate (LENDIST + firsttok), one knob per run,
+6-8 step fast-fail probe, judge on median AND MEAN (tails matter for real training), 20-step confirm the winner.
+
+---
+
+## 6. Logging + profiles
+
+- **PHASETIME log line** (per step): `PHASETIME step=N compute_rewards=.. engine_generate=.. generate_and_advantage=.. run_global_step=..`
+  rollout=engine_generate, rewards=generate_and_advantage-engine_generate, trainer=run_global_step-generate_and_advantage.
+- **LENDIST** (per step): truncation% + osl_mean (validity band). **FIRSTTOK**: echo/reasoning/other census.
+- Head log: `kubectl --context=$CTX logs <run>-pathways-head-0-0-XXXX -n $NS -c jax-tpu`.
+- **Profiles** (xprof/perfetto): `gs://ubench-logs/alisachen-tpu7x/runs/<run>/phased_profile/decode_only/dp_rank_0/plugins/profile/<ts>/`
+  - host trace `gke-...<node>.trace.json.gz` → ui.perfetto.dev (host spans: llm_engine.step window, device_get wait)
+  - device xplane `server-...<node>.0.0.xplane.pb` (the ~130MB one hosts dp_rank_0) → xprof (jit__decode_core_impl, %all-reduce/%all-gather/%collective-permute)
+- Perfetto key spans: `llm_engine.py:296 step` (window wall), `device_get`/`block_until_ready` (host blocked on proxy).
+- Archived head logs: `gs://alisachen/tpu_rl/ironwood/logs/` (g4r7b, g4r8-async-void, g4r8b).
+- Report + this handoff mirrored: `gs://alisachen/tpu_rl/ironwood/GEMMA4_PERF_REPORT.md`.
+
+---
+
+## 7. Operational gotchas
+
+- **ADC dies periodically** (`invalid_rapt`): user runs `gcloud auth application-default login` on workstation,
+  uploads to `gs://alisachen/tmp/adc.json`; on VM copy to `~/.config/gcloud/application_default_credentials.json`,
+  verify, **delete bucket copy immediately** via ADC token (`CLOUDSDK_AUTH_ACCESS_TOKEN=$(gcloud auth
+  application-default print-access-token) gcloud storage rm ...` — plain rm uses scope-limited compute SA, 403s).
+- **Always `export CLOUDSDK_AUTH_ACCESS_TOKEN=...`** before kubectl/helm (gke-gcloud-auth-plugin breaks on invalid_rapt).
+- **Checkpoint bug**: stale checkpoint from a same-run_name preempted attempt crashes orbax restore
+  (`Unsupported dtype: key<fry>`). Probes use `DL_CKPT=False` + fresh run name.
+- **Monitors**: Monitor tool with a poll loop that refreshes the token each cycle and treats empty jobset
+  query as "maybe auth" (sleep+continue), not "gone" (an ADC lapse false-alarmed "JOBSET GONE" once).
+- **Cluster**: `default` ns owns 0 quota (borrowed, gets reclaimed → ~11 preemptions early on). Owned lane is
+  `ubench-regression-tests` (this is why we joined cmcs-ai-ninja-team). Only 4x4x4 + 2x2x1 node pools (no 32-chip).
+- **git push**: rebase if rejected (concurrent pushes from other agents/user happen).
+
+---
+
+## 8. tianyu cross-reference (verified)
+
+tianyu-rl-143 launcher configmap (ground truth): qwen3-0.6b, **nvidia/OpenMathInstruct-2 (SAME dataset as us)**,
+**SINGLE-TURN** (no agentic — earlier "agentic" claim was WRONG, from vaneja recipe misattribution),
+**TP4×DP32**, trainer_devices_fraction=1.0, CD window 128, hbm 0.3, verify procs 64, attention flash.
+Newest run tianyu-rl-148: global ~63s, rollout ~56s, rewards 0.3s (their simpler reward/GSM8K-like vs our
+heavier OpenMathInstruct math_verify). Their host trace `block_until_ready`=73.5s → HOST-BOUND like us.
+Their 12-item ladder = hypotheses, NOT a transferable stack: prefix-off (#1) + rr-routing (#9) REGRESS for us
+(workload/mesh differences); the transferable ones are phase-local (jit_unroll #7, flash #8, verify #12).
+Meta gemma4 recipe: TP=8/remat=full are 16K-prompt artifacts (not us); mesh-fraction=1.0 + stop-token hygiene
++ RPA re-sweep are the takeaways. All 7 Meta upstream PRs present in our image (3 active, rest present/unused).
