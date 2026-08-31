@@ -15,7 +15,7 @@ workload:
   - name: DL_PACK
     value: '8192'
   - name: DL_STEPS
-    value: '6'
+    value: '8'
   - name: DL_BUCKET_GAP
     value: '32768'
   - name: DL_CKPT
