@@ -13,7 +13,7 @@ MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
 # Ironwood bring-up fixes (from smoke ladder):
 
 # --- tianyu-rl-14 stack: runtime patches (self-verifying, fail-open) ---
-for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_rpa_blocks patch_cd_masking patch_cd_report patch_phasetime patch_reward_parallel patch_sharded_sampling patch_profiler_fix patch_gc_sync patch_packing_knob patch_packer_fast patch_log_stats patch_perf_v2 patch_dump_completions patch_firsttok patch_engine_kwargs patch_host_extract patch_fast_detok patch_dp_rr_routing patch_sync_keepkv patch_cd_noeos patch_flash_sa; do
+for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_rpa_blocks patch_cd_masking patch_cd_report patch_phasetime patch_reward_parallel patch_sharded_sampling patch_profiler_fix patch_gc_sync patch_packing_knob patch_packer_fast patch_log_stats patch_perf_v2 patch_dump_completions patch_firsttok patch_engine_kwargs patch_host_extract patch_fast_detok patch_dp_rr_routing patch_sync_keepkv patch_cd_noeos patch_flash_sa patch_jit_unroll; do
   for F in /workload/patches/$P /workload/patches/$P.py; do
     if [ -f "$F" ]; then python3 "$F"; break; fi
   done
@@ -26,6 +26,7 @@ if [ -n "${DL_DPRR:-}" ]; then export DP_ROUTING=rr; fi
 export SYNC_KEEPKV="${DL_KEEPKV:-0}"
 if [ -n "${DL_ENGKW:-}" ]; then export RL_VLLM_ENGINE_KWARGS="$DL_ENGKW"; fi
 export CD_NO_EOS_REDUCE="${DL_NOEOS:-0}"
+export JIT_UNROLL="${DL_JITU:-0}"
 if [ -n "${DL_SAQ:-}" ]; then export SA_BLOCK_Q="$DL_SAQ"; fi
 if [ -n "${DL_SAKV:-}" ]; then export SA_BLOCK_KV="$DL_SAKV"; fi
 if [ -n "${DL_RPA:-}" ]; then export RPA_V3_DECODE_BLOCK_SIZES="$DL_RPA"; fi

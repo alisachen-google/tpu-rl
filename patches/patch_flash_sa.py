@@ -49,6 +49,8 @@ if 'RLConfig' in globals():
       ("local_sa_q_layout", "HEAD_DIM_MINOR"),
       ("local_sa_k_layout", "HEAD_DIM_MINOR"),
       ("local_sa_v_layout", "HEAD_DIM_MINOR"),
+      ("local_use_splash_scheduler", False), ("local_ring_scan_unroll", 1),
+      ("local_sa_fuse_reciprocal", True), ("local_sa_use_base2_exp", True),
       ("use_ragged_attention", False), ("ragged_block_size", 256),
   ]:
     if not hasattr(RLConfig, _sa_f):
