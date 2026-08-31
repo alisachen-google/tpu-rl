@@ -297,6 +297,34 @@ AND resource.labels.container_name="jax-tpu"` in project
 cloud-tpu-shared-capacity. Launch bundle + launchers + charts:
 github.com/alisachen-google/tpu-rl (`gemma4/`, `chart/`).
 
+## BREAKTHROUGH: tp sweep on corrected generation (2026-08-31)
+
+The bisect's env knobs only trimmed edges; the MESH is the real lever. On the
+owned-quota corrected baseline (g4r9x stack, 6-step):
+
+| Mesh | rollout med | global med | vs champion 125.8 |
+|---|---|---|---|
+| tp=1 x dp=64 (our "champion") | 98.6 | 127 | baseline |
+| tp=2 x dp=32 (g4r10d) | 93.6 | **115.1** | **-11 s, NEW BEST** |
+| tp=4 x dp=16 (g4r10f) | RUNNING | -- | -- |
+
+WHY tp=2 wins (contradicts the naive roofline): tp=2 halves the KERNEL (AI 15->7.5
++ adds collectives -> worse compute) BUT halves DP (64->32), so the single-process
+head drives 32 engines instead of 64 -> HALF the head-loop fan-out. Rollout is
+host-bound, so fewer engines beats better kernel. Gap-A win via fewer DP ranks.
+=> tp=1 was NOT optimal; higher TP (fewer engines) helps because the head is the
+bottleneck. Testing tp=4 (dp=16) = tianyu's mesh.
+
+CORRECTION to the divergence analysis: verified tianyu-rl-143 launcher configmap
+(ground truth). tianyu runs qwen3-0.6b on nvidia/OpenMathInstruct-2 (SAME dataset
+as us), SINGLE-TURN (no use_agentic_rollout -- earlier "agentic multi-turn" claim
+was WRONG, sourced from the vaneja recipe misattribution), TP4xDP32,
+trainer_devices_fraction=1.0, CD window 128, hbm 0.3, verify procs 64, attention
+flash. So the real qwen3-vs-us difference is MESH (TP4 vs TP1) + model (qwen3 vs
+gemma4) -- NOT workload style. This is why moving toward their higher-TP mesh helps
+us. At tp>1 the vocab-sharded sampler activates -> padfix (their #3, -9.5s) becomes
+relevant; g4r10d/f run without it, so tp>1 may improve further with padfix.
+
 ## Bisect campaign on corrected generation (2026-08-30/31) — owned-quota lane
 
 ACCESS: unblocked the preemption problem by joining `cmcs-ai-ninja-team@twosync.google.com`
