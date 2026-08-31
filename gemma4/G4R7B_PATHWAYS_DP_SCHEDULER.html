@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Pathways × DPScheduler — G4R7B host-control-plane analysis</title>
+  <style>
+    :root {
+      --ink: #eef5ff;
+      --muted: #9fb1c8;
+      --faint: #71839a;
+      --canvas: #07111f;
+      --panel: rgba(14, 27, 46, .86);
+      --panel-2: rgba(20, 38, 62, .72);
+      --line: rgba(158, 183, 214, .19);
+      --cyan: #53d7ff;
+      --cyan-2: #0aa5cf;
+      --orange: #ffb454;
+      --purple: #b89cff;
+      --green: #73e2a7;
+      --red: #ff6f7f;
+      --yellow: #f4dd75;
+      --shadow: 0 22px 70px rgba(0, 0, 0, .34);
+      --radius: 20px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% -10%, rgba(83, 215, 255, .16), transparent 32rem),
+        radial-gradient(circle at 96% 6%, rgba(184, 156, 255, .13), transparent 30rem),
+        linear-gradient(180deg, #07111f 0%, #091526 45%, #07111f 100%);
+      font-family: var(--sans);
+      line-height: 1.55;
+    }
+
+    a { color: var(--cyan); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: #a9edff; }
+    code, pre { font-family: var(--mono); }
+    code { color: #cdeeff; }
+    .wrap { width: min(1220px, calc(100% - 36px)); margin: 0 auto; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7, 17, 31, .84);
+      backdrop-filter: blur(16px);
+    }
+    .topbar .wrap {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand { font-size: .82rem; font-weight: 760; letter-spacing: .12em; text-transform: uppercase; }
+    nav { display: flex; gap: 18px; overflow-x: auto; }
+    nav a { color: var(--muted); font-size: .82rem; text-decoration: none; white-space: nowrap; }
+    nav a:hover { color: var(--ink); }
+
+    .hero { padding: 86px 0 44px; }
+    .eyebrow {
+      display: inline-flex;
+      gap: 9px;
+      align-items: center;
+      color: var(--cyan);
+      font-size: .76rem;
+      font-weight: 760;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--cyan); }
+    h1 {
+      max-width: 980px;
+      margin: 18px 0 20px;
+      font-size: clamp(2.7rem, 7vw, 6.2rem);
+      line-height: .98;
+      letter-spacing: -.055em;
+      font-weight: 800;
+    }
+    h1 .accent { color: var(--orange); }
+    .lede {
+      max-width: 900px;
+      margin: 0;
+      color: #c8d6e8;
+      font-size: clamp(1.05rem, 2.1vw, 1.35rem);
+    }
+    .verdict {
+      margin-top: 30px;
+      padding: 22px 24px;
+      border: 1px solid rgba(255, 180, 84, .34);
+      border-left: 4px solid var(--orange);
+      border-radius: 4px var(--radius) var(--radius) 4px;
+      background: linear-gradient(90deg, rgba(255, 180, 84, .10), rgba(14, 27, 46, .62));
+      box-shadow: var(--shadow);
+      font-size: 1.04rem;
+    }
+    .verdict strong { color: #ffd39d; }
+
+    .topology-alert {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 16px;
+      align-items: start;
+      margin-top: 20px;
+      padding: 18px 20px;
+      border: 1px solid rgba(115, 226, 167, .30);
+      border-radius: 16px;
+      background: rgba(21, 67, 55, .23);
+    }
+    .alert-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      color: #04150e;
+      background: var(--green);
+      font-weight: 900;
+    }
+    .topology-alert p { margin: 0; color: #cce9db; }
+    .topology-alert strong { color: #96f0bd; }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 28px;
+    }
+    .kpi {
+      min-height: 118px;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(14, 27, 46, .68);
+    }
+    .kpi b { display: block; font-size: 1.62rem; line-height: 1.12; letter-spacing: -.035em; }
+    .kpi span { display: block; margin-top: 8px; color: var(--muted); font-size: .78rem; line-height: 1.35; }
+
+    main { padding-bottom: 80px; }
+    section { padding: 64px 0 10px; scroll-margin-top: 54px; }
+    .section-kicker { color: var(--orange); font-size: .74rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    h2 { margin: 7px 0 12px; font-size: clamp(1.9rem, 4vw, 3.25rem); line-height: 1.08; letter-spacing: -.035em; }
+    h3 { margin: 0 0 9px; font-size: 1.08rem; }
+    .section-lead { max-width: 860px; margin: 0 0 24px; color: var(--muted); font-size: 1rem; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(18, 34, 56, .88), rgba(10, 22, 39, .88));
+      box-shadow: var(--shadow);
+    }
+    .diagram-card { padding: 18px; overflow: hidden; }
+    .diagram-card svg { width: 100%; height: auto; display: block; }
+    .caption {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 22px;
+      padding: 12px 8px 2px;
+      color: var(--muted);
+      font-size: .77rem;
+    }
+    .legend { display: inline-flex; align-items: center; gap: 7px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+
+    .stage { cursor: pointer; outline: none; }
+    .stage rect.stage-box { transition: filter .18s ease, stroke-width .18s ease; }
+    .stage:hover rect.stage-box, .stage:focus rect.stage-box, .stage.active rect.stage-box {
+      filter: brightness(1.22);
+      stroke-width: 3;
+    }
+    .stage-panel {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 16px;
+      align-items: start;
+      margin-top: 14px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-2);
+    }
+    .stage-number { color: var(--orange); font-family: var(--mono); font-size: 1.7rem; font-weight: 800; }
+    .stage-panel p { margin: 0; color: #c8d7e9; }
+
+    .calculator {
+      display: grid;
+      grid-template-columns: 1.1fr 1.9fr;
+      gap: 18px;
+      margin-top: 18px;
+      padding: 22px;
+    }
+    .controls label { display: block; margin-bottom: 8px; color: var(--muted); font-size: .8rem; }
+    .range-row { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; }
+    input[type="range"] { width: 100%; accent-color: var(--cyan); }
+    .dp-readout { min-width: 74px; color: var(--cyan); font-family: var(--mono); font-size: 1.1rem; font-weight: 800; text-align: right; }
+    .check-row { display: flex !important; gap: 9px; align-items: center; margin-top: 18px; color: #d6e3f2 !important; }
+    .calc-results { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .calc-result { padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: rgba(5, 14, 26, .45); }
+    .calc-result b { display: block; color: #ecf8ff; font-family: var(--mono); font-size: 1.06rem; overflow-wrap: anywhere; }
+    .calc-result span { display: block; margin-top: 6px; color: var(--faint); font-size: .72rem; line-height: 1.3; }
+    .calc-note { grid-column: 1 / -1; margin: 8px 0 0; color: var(--faint); font-size: .73rem; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .mini-card { padding: 20px; }
+    .mini-card p { margin: 0; color: var(--muted); font-size: .9rem; }
+    .big-number { display: block; margin-bottom: 6px; color: var(--cyan); font-size: 2rem; font-weight: 800; letter-spacing: -.04em; }
+
+    .topology-card { padding: 24px; }
+    .topology-card svg { display: block; width: 100%; height: auto; }
+    .equation {
+      margin: 18px 0 0;
+      padding: 17px 19px;
+      overflow-x: auto;
+      border: 1px solid rgba(83, 215, 255, .22);
+      border-radius: 14px;
+      background: rgba(5, 14, 26, .62);
+      color: #d9f6ff;
+      font-family: var(--mono);
+      font-size: .83rem;
+      white-space: nowrap;
+    }
+
+    .trace-card { padding: 20px; }
+    .trace-card svg { width: 100%; height: auto; display: block; }
+    .callout {
+      margin-top: 16px;
+      padding: 17px 19px;
+      border-radius: 14px;
+      color: #ffe5e9;
+      background: rgba(255, 111, 127, .09);
+      border: 1px solid rgba(255, 111, 127, .28);
+    }
+    .callout strong { color: #ffadb6; }
+
+    .evidence-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+    .evidence { padding: 17px; border: 1px solid var(--line); border-radius: 15px; background: var(--panel-2); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: .64rem;
+      font-weight: 850;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .measured { color: #061811; background: var(--green); }
+    .derived { color: #07131b; background: var(--cyan); }
+    .inference { color: #1a1002; background: var(--orange); }
+    .proposed { color: #160b2b; background: var(--purple); }
+    .evidence p { margin: 10px 0 0; color: var(--muted); font-size: .82rem; }
+
+    .cycle-bars { padding: 22px; }
+    .timer-row { display: grid; grid-template-columns: 170px 1fr 86px; gap: 12px; align-items: center; margin: 10px 0; font-size: .78rem; }
+    .timer-label { color: var(--muted); }
+    .bar-shell { height: 17px; border-radius: 999px; background: rgba(255,255,255,.055); overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: inherit; }
+    .timer-value { color: #d8e7f7; font-family: var(--mono); text-align: right; }
+
+    .sweep { padding: 20px; }
+    .sweep-row { display: grid; grid-template-columns: 74px 1fr 76px; align-items: center; gap: 12px; margin: 11px 0; }
+    .sweep-label { color: var(--muted); font-family: var(--mono); }
+    .sweep-bar { height: 24px; border-radius: 5px; background: linear-gradient(90deg, var(--purple), var(--cyan)); }
+    .sweep-value { font-family: var(--mono); text-align: right; }
+
+    .trace-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    table { width: 100%; border-collapse: collapse; background: rgba(12, 24, 41, .80); }
+    th, td { padding: 15px 16px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: #bdd0e5; background: rgba(22, 41, 65, .86); font-size: .7rem; letter-spacing: .09em; text-transform: uppercase; }
+    td { color: #c6d5e6; font-size: .82rem; }
+    td:first-child { width: 56px; color: var(--orange); font-family: var(--mono); font-weight: 800; }
+    td:nth-child(2) { min-width: 190px; color: #eef6ff; font-weight: 700; }
+    tr:last-child td { border-bottom: none; }
+    .scale { color: var(--yellow); font-family: var(--mono); font-size: .74rem; }
+
+    .roadmap { display: grid; gap: 12px; }
+    .roadmap-item {
+      display: grid;
+      grid-template-columns: 52px 1.1fr 1.6fr 150px;
+      gap: 16px;
+      align-items: start;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(13, 27, 46, .78);
+    }
+    .roadmap-num { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; color: #06141c; background: var(--cyan); font-family: var(--mono); font-weight: 900; }
+    .roadmap-title { font-weight: 780; }
+    .roadmap-copy { color: var(--muted); font-size: .84rem; }
+    .roadmap-gate { color: #d7e3f1; font-size: .75rem; }
+    .roadmap-gate .badge { margin-bottom: 6px; }
+
+    .do-not { padding: 22px; border-color: rgba(255, 111, 127, .25); }
+    .do-not ul { margin: 10px 0 0; padding-left: 20px; color: var(--muted); }
+    .do-not li { margin: 8px 0; }
+
+    .sources { padding: 22px; }
+    .sources ol { margin: 12px 0 0; padding-left: 22px; }
+    .sources li { margin: 10px 0; color: var(--muted); font-size: .84rem; }
+    .uri { color: #b8c9db; font-family: var(--mono); overflow-wrap: anywhere; }
+    footer { padding: 44px 0 70px; color: var(--faint); font-size: .76rem; }
+
+    @media (max-width: 950px) {
+      .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .calculator { grid-template-columns: 1fr; }
+      .roadmap-item { grid-template-columns: 48px 1fr; }
+      .roadmap-copy, .roadmap-gate { grid-column: 2; }
+    }
+    @media (max-width: 720px) {
+      .wrap { width: min(100% - 24px, 1220px); }
+      nav { display: none; }
+      .hero { padding-top: 56px; }
+      .kpis, .grid-2, .grid-3, .evidence-strip { grid-template-columns: 1fr; }
+      .kpi { min-height: auto; }
+      .calc-results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .timer-row { grid-template-columns: 120px 1fr 72px; }
+      .stage-panel { grid-template-columns: 52px 1fr; }
+    }
+    @media print {
+      :root { --ink: #102030; --muted: #43556a; --faint: #667588; --canvas: white; --panel: white; --panel-2: #f5f8fc; --line: #cbd5e1; }
+      body { background: white; }
+      .topbar { position: static; background: white; }
+      .card, .trace-table-wrap { box-shadow: none; }
+      .stage { cursor: default; }
+      a { color: #075985; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <div class="brand">TPU inference field note</div>
+      <nav aria-label="Page sections">
+        <a href="#mechanism">Mechanism</a>
+        <a href="#case">G4R7B</a>
+        <a href="#trace">Code trace</a>
+        <a href="#plan">Plan</a>
+        <a href="#sources">Sources</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Pathways × vLLM TPU inference</div>
+      <h1>Many DP lanes.<br><span class="accent">One synchronous doorway.</span></h1>
+      <p class="lede">How <code>DPScheduler</code> turns independent request schedulers into one rank-major JAX program—and why the Gemma4-E2B G4R7B rollout migrates from a TPU collective roof to a serialized host/control-plane roof.</p>
+
+      <div class="verdict">
+        <strong>Bottom line:</strong> TP=1 was still the right measured mesh choice: removing tensor-parallel collectives cut rollout time. But Pathways forbids vLLM-native multiprocess DP, so every logical lane still converges through one parent, one JAX proxy client, one global SPMD launch, one blocking host materialization, and one output scatter. At high DP, that serial boundary becomes the next roof.
+      </div>
+
+      <div class="topology-alert">
+        <div class="alert-icon">✓</div>
+        <p><strong>Topology correction from the GCS head log:</strong> G4R7B was not a vLLM <code>DP=128</code> rollout. The job exposed 128 JAX/TensorCore devices, then split them 50/50: 64 trainer + 64 sampler. The runtime records <code>data_parallel_size=64</code>, <code>Mesh('data': 64)</code>, and 64 DPScheduler children. Therefore the measured rollout was <strong>TP=1 × DP=64</strong>. DP=128 below is a what-if/full-slice comparison.</p>
+      </div>
+
+      <div class="kpis" aria-label="Key G4R7B metrics">
+        <div class="kpi"><b>2,048</b><span>completion requests per RL cycle<br>256 prompts × 8 generations</span></div>
+        <div class="kpi"><b>TP1 · DP64</b><span>actual sampler mesh<br>64 logical scheduler lanes</span></div>
+        <div class="kpi"><b>96.7 s</b><span>steady rollout median<br>published warm protocol</span></div>
+        <div class="kpi"><b>125.8 s</b><span>PHASETIME global median<br>n=17 warm steps</span></div>
+        <div class="kpi"><b>≈79%</b><span>completions hit cap 4,096<br>mean OSL ≈3.33k</span></div>
+        <div class="kpi"><b>0.9–2.1</b><span>head CPU cores used of 44<br>follow-up rollout observation</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="mechanism">
+      <div class="wrap">
+        <div class="section-kicker">01 · End-to-end mechanism</div>
+        <h2>One decode window through DPScheduler and Pathways</h2>
+        <p class="section-lead">The scheduler children are real OS processes, but they are CPU-only control-plane helpers. A DP rank is a logical JAX mesh lane—not an independent Pathways client, TPU server, or model engine. Select a numbered stage in the SVG.</p>
+
+        <div class="card diagram-card">
+          <svg viewBox="0 0 1180 620" role="img" aria-labelledby="flow-title flow-desc">
+            <title id="flow-title">Pathways DPScheduler request and decode flow</title>
+            <desc id="flow-desc">Requests enter one parent, fan out to CPU scheduler children, merge into rank-major arrays, execute as one global Pathways operation, then return through a blocking host materialization and split back to scheduler children.</desc>
+            <defs>
+              <linearGradient id="hostGrad" x1="0" x2="1"><stop stop-color="#193654"/><stop offset="1" stop-color="#10253e"/></linearGradient>
+              <linearGradient id="proxyGrad" x1="0" x2="1"><stop stop-color="#5d4ba0"/><stop offset="1" stop-color="#31285b"/></linearGradient>
+              <linearGradient id="tpuGrad" x1="0" x2="1"><stop stop-color="#075f78"/><stop offset="1" stop-color="#0d3b58"/></linearGradient>
+              <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="arrowC" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#53d7ff"/></marker>
+              <marker id="arrowO" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#ffb454"/></marker>
+              <marker id="arrowR" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#ff6f7f"/></marker>
+              <pattern id="mesh" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="18" height="18" rx="3" fill="#0b7894" opacity=".72"/><path d="M18 9h4M9 18v4" stroke="#53d7ff" opacity=".42"/></pattern>
+            </defs>
+
+            <rect x="16" y="55" width="700" height="525" rx="22" fill="url(#hostGrad)" stroke="#41617f" stroke-opacity=".55"/>
+            <text x="38" y="88" fill="#9fb1c8" font-size="14" font-weight="700" letter-spacing="2">ONE VLLM / PYTHON PARENT</text>
+            <rect x="738" y="55" width="128" height="525" rx="22" fill="url(#proxyGrad)" stroke="#b89cff" stroke-opacity=".55"/>
+            <text x="762" y="88" fill="#d7caff" font-size="13" font-weight="700" letter-spacing="1.5">JAX PROXY</text>
+            <rect x="888" y="55" width="276" height="525" rx="22" fill="url(#tpuGrad)" stroke="#53d7ff" stroke-opacity=".45"/>
+            <text x="910" y="88" fill="#9eeaff" font-size="14" font-weight="700" letter-spacing="2">PATHWAYS GLOBAL MESH</text>
+
+            <g class="stage active" data-stage="1" tabindex="0" role="button" aria-label="Stage one, route requests">
+              <rect class="stage-box" x="40" y="118" width="185" height="92" rx="15" fill="#472f19" stroke="#ffb454"/>
+              <circle cx="62" cy="140" r="14" fill="#ffb454"/><text x="62" y="145" text-anchor="middle" fill="#171006" font-size="13" font-weight="900">1</text>
+              <text x="84" y="145" fill="#ffe3bc" font-size="16" font-weight="750">Admit + route</text>
+              <text x="58" y="174" fill="#cfb28c" font-size="12">prefix/load probes</text>
+              <text x="58" y="192" fill="#cfb28c" font-size="12">sticky rank assignment</text>
+            </g>
+
+            <path d="M225 164 H270" stroke="#ffb454" stroke-width="2.4" marker-end="url(#arrowO)"/>
+
+            <g class="stage" data-stage="2" tabindex="0" role="button" aria-label="Stage two, CPU scheduler children">
+              <rect class="stage-box" x="275" y="105" width="225" height="202" rx="15" fill="#233044" stroke="#ffb454"/>
+              <circle cx="298" cy="129" r="14" fill="#ffb454"/><text x="298" y="134" text-anchor="middle" fill="#171006" font-size="13" font-weight="900">2</text>
+              <text x="320" y="134" fill="#ffe3bc" font-size="16" font-weight="750">CPU schedulers × D</text>
+              <g id="laneGrid" fill="#ffb454" opacity=".9">
+                <rect x="298" y="158" width="18" height="18" rx="3"/><rect x="323" y="158" width="18" height="18" rx="3"/><rect x="348" y="158" width="18" height="18" rx="3"/><rect x="373" y="158" width="18" height="18" rx="3"/><rect x="398" y="158" width="18" height="18" rx="3"/><rect x="423" y="158" width="18" height="18" rx="3"/><rect x="448" y="158" width="18" height="18" rx="3"/>
+                <rect x="298" y="183" width="18" height="18" rx="3"/><rect x="323" y="183" width="18" height="18" rx="3"/><rect x="348" y="183" width="18" height="18" rx="3"/><rect x="373" y="183" width="18" height="18" rx="3"/><rect x="398" y="183" width="18" height="18" rx="3"/><rect x="423" y="183" width="18" height="18" rx="3"/><rect x="448" y="183" width="18" height="18" rx="3"/>
+                <rect x="298" y="208" width="18" height="18" rx="3"/><rect x="323" y="208" width="18" height="18" rx="3"/><rect x="348" y="208" width="18" height="18" rx="3"/><rect x="373" y="208" width="18" height="18" rx="3"/><rect x="398" y="208" width="18" height="18" rx="3"/><rect x="423" y="208" width="18" height="18" rx="3"/><rect x="448" y="208" width="18" height="18" rx="3"/>
+              </g>
+              <text x="298" y="257" fill="#c5af8e" font-size="12">rank 0 · rank 1 · … · rank <tspan id="rankLast">63</tspan></text>
+              <text x="298" y="279" fill="#9fb1c8" font-size="11">ordinary Scheduler + logical KV state</text>
+              <text x="298" y="296" fill="#ff9eaa" font-size="11">no model · no JAX · no proxy client</text>
+            </g>
+
+            <path d="M500 205 H535" stroke="#ffb454" stroke-width="2.4" marker-end="url(#arrowO)"/>
+            <g class="stage" data-stage="3" tabindex="0" role="button" aria-label="Stage three, global merge and padding">
+              <rect class="stage-box" x="540" y="118" width="150" height="178" rx="15" fill="#174052" stroke="#53d7ff"/>
+              <circle cx="563" cy="141" r="14" fill="#53d7ff"/><text x="563" y="146" text-anchor="middle" fill="#06131a" font-size="13" font-weight="900">3</text>
+              <text x="584" y="146" fill="#c7f5ff" font-size="15" font-weight="750">Merge + pad</text>
+              <rect x="560" y="167" width="108" height="15" rx="3" fill="#53d7ff"/>
+              <rect x="560" y="187" width="79" height="15" rx="3" fill="#53d7ff"/><rect x="639" y="187" width="29" height="15" rx="3" fill="#406174"/>
+              <rect x="560" y="207" width="93" height="15" rx="3" fill="#53d7ff"/><rect x="653" y="207" width="15" height="15" rx="3" fill="#406174"/>
+              <text x="560" y="247" fill="#a9c4d4" font-size="11">rank-major host arrays</text>
+              <text x="560" y="265" fill="#ff9eaa" font-size="11">barrier: wait for all D</text>
+              <text x="560" y="282" fill="#a9c4d4" font-size="11">pad to busiest lane</text>
+            </g>
+
+            <path d="M690 205 H755" stroke="#53d7ff" stroke-width="2.5" marker-end="url(#arrowC)"/>
+            <g class="stage" data-stage="4" tabindex="0" role="button" aria-label="Stage four, one global JAX operation">
+              <rect class="stage-box" x="758" y="118" width="86" height="178" rx="15" fill="#4a3e80" stroke="#b89cff"/>
+              <circle cx="779" cy="141" r="14" fill="#b89cff"/><text x="779" y="146" text-anchor="middle" fill="#160b2b" font-size="13" font-weight="900">4</text>
+              <text transform="translate(810 178) rotate(90)" fill="#eadfff" font-size="14" font-weight="750">device_put → JIT</text>
+            </g>
+            <path d="M844 205 H920" stroke="#b89cff" stroke-width="2.8" marker-end="url(#arrowC)"/>
+
+            <rect x="925" y="118" width="206" height="190" rx="15" fill="url(#mesh)" stroke="#53d7ff"/>
+            <text x="1028" y="151" text-anchor="middle" fill="#e1faff" font-size="16" font-weight="800">ONE SPMD PROGRAM</text>
+            <text x="1028" y="178" text-anchor="middle" fill="#b4e7f1" font-size="12">continue_decode: up to 64 token steps</text>
+            <text x="1028" y="200" text-anchor="middle" fill="#b4e7f1" font-size="12">weights + KV sharded over data mesh</text>
+            <text x="1028" y="222" text-anchor="middle" fill="#b4e7f1" font-size="12">all logical lanes advance in lockstep</text>
+            <rect x="958" y="245" width="140" height="31" rx="9" fill="#071d2a" stroke="#73e2a7"/>
+            <text x="1028" y="265" text-anchor="middle" fill="#9df1c2" font-size="12" font-weight="700">TPU active interval</text>
+            <text x="1028" y="295" text-anchor="middle" fill="#ffb2bb" font-size="11">not D independent jobs</text>
+
+            <path d="M1028 308 V370 H837" stroke="#ff6f7f" stroke-width="2.8" fill="none" marker-end="url(#arrowR)"/>
+            <g class="stage" data-stage="5" tabindex="0" role="button" aria-label="Stage five, blocking device get">
+              <rect class="stage-box" x="706" y="334" width="138" height="130" rx="15" fill="#512837" stroke="#ff6f7f"/>
+              <circle cx="729" cy="357" r="14" fill="#ff6f7f"/><text x="729" y="362" text-anchor="middle" fill="#1f070a" font-size="13" font-weight="900">5</text>
+              <text x="751" y="362" fill="#ffdbe0" font-size="15" font-weight="750">device_get</text>
+              <text x="725" y="392" fill="#e5adb5" font-size="11">global completion wait</text>
+              <text x="725" y="411" fill="#e5adb5" font-size="11">proxy shard lookups</text>
+              <text x="725" y="430" fill="#e5adb5" font-size="11">host materialization</text>
+              <text x="725" y="451" fill="#ffb5be" font-size="11" font-weight="700">synchronous barrier</text>
+            </g>
+
+            <path d="M706 399 H660" stroke="#ff6f7f" stroke-width="2.5" marker-end="url(#arrowR)"/>
+            <g class="stage" data-stage="6" tabindex="0" role="button" aria-label="Stage six, process and scatter output">
+              <rect class="stage-box" x="420" y="334" width="235" height="156" rx="15" fill="#3b2f24" stroke="#ffb454"/>
+              <circle cx="443" cy="357" r="14" fill="#ffb454"/><text x="443" y="362" text-anchor="middle" fill="#171006" font-size="13" font-weight="900">6</text>
+              <text x="465" y="362" fill="#ffe3bc" font-size="15" font-weight="750">Reorder · trim · scatter</text>
+              <text x="441" y="392" fill="#d0b797" font-size="11">transpose + selector restore</text>
+              <text x="441" y="411" fill="#d0b797" font-size="11">first-EOS scan per request</text>
+              <text x="441" y="430" fill="#d0b797" font-size="11">update host token/KV metadata</text>
+              <text x="441" y="449" fill="#d0b797" font-size="11">split ModelRunnerOutput by rank</text>
+              <text x="441" y="472" fill="#ff9eaa" font-size="11">fan out → wait for every child</text>
+            </g>
+            <path d="M420 411 H365 V307" stroke="#ffb454" stroke-width="2.3" fill="none" marker-end="url(#arrowO)"/>
+
+            <path d="M275 247 H246 V445 H331" stroke="#ffb454" stroke-width="1.5" stroke-dasharray="5 6" fill="none"/>
+            <text x="64" y="432" fill="#aebfd2" font-size="12">next global window only after:</text>
+            <text x="64" y="453" fill="#ffb454" font-size="12" font-weight="700">schedule → launch → wait → split → update</text>
+
+            <g transform="translate(48 522)">
+              <rect width="622" height="38" rx="10" fill="#091827" stroke="#5f7891" stroke-opacity=".5"/>
+              <text x="16" y="24" fill="#9fb1c8" font-size="12">CONTROL PLANE</text>
+              <text x="137" y="24" fill="#ffcf92" font-size="12">Python + Pipes + NumPy</text>
+              <text x="332" y="24" fill="#9fb1c8" font-size="12">DATA PLANE</text>
+              <text x="433" y="24" fill="#9eeaff" font-size="12">one sharded JAX launch</text>
+            </g>
+          </svg>
+
+          <div class="caption">
+            <span class="legend" style="color:var(--orange)"><span class="dot"></span>host control</span>
+            <span class="legend" style="color:var(--cyan)"><span class="dot"></span>JAX data plane</span>
+            <span class="legend" style="color:var(--purple)"><span class="dot"></span>proxy boundary</span>
+            <span class="legend" style="color:var(--red)"><span class="dot"></span>synchronization barrier</span>
+          </div>
+        </div>
+
+        <div class="stage-panel" aria-live="polite">
+          <div class="stage-number" id="stageNumber">01</div>
+          <div><h3 id="stageTitle">Admission is local—and expensive at high DP</h3><p id="stageText">For each new request, stock routing asks every rank about prefix hits, pending prefill, in-flight count, and minimum remaining output. The winning rank becomes sticky because KV and prefix state are rank-local. Batch-prefill buffering currently drains by routing requests one at a time.</p></div>
+        </div>
+
+        <div class="card calculator">
+          <div class="controls">
+            <h3>Scale the code path</h3>
+            <label for="dpSlider">Logical sampler DP lanes (G4R7B actual = 64)</label>
+            <div class="range-row">
+              <input id="dpSlider" type="range" min="0" max="3" step="1" value="2" aria-valuetext="64 lanes">
+              <output id="dpReadout" class="dp-readout">DP 64</output>
+            </div>
+            <label class="check-row"><input id="prefixToggle" type="checkbox" checked> Prefix-cache-aware admission (4 queries/rank)</label>
+          </div>
+          <div class="calc-results">
+            <div class="calc-result"><b id="perLane">32</b><span>completion requests per lane<br>at 2,048 total</span></div>
+            <div class="calc-result"><b id="admissionExchanges">526,336</b><span>request/reply exchanges during admission</span></div>
+            <div class="calc-result"><b id="admissionMessages">1,052,672</b><span>one-way Pipe messages during admission</span></div>
+            <div class="calc-result"><b id="windowMessages">256</b><span>one-way Pipe messages for schedule + update per window</span></div>
+            <p class="calc-note"><span class="badge derived">Code-derived</span> Formula: <code>R × (Q × D + 1)</code> exchanges for admission, then <code>4D</code> one-way messages for schedule+update/window. This is algorithmic exposure, not a trace-measured message count; other commands add more traffic.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="case">
+      <div class="wrap">
+        <div class="section-kicker">02 · What our case actually looks like</div>
+        <h2>G4R7B: 128 job devices, 64 rollout lanes</h2>
+        <p class="section-lead">The GCS log is the source of truth for scheduler topology. The report’s “DP128” shorthand counted the whole allocation, including the training half. For scheduler analysis, that distinction changes every O(DP) estimate by 2×.</p>
+
+        <div class="card topology-card">
+          <svg viewBox="0 0 1120 310" role="img" aria-labelledby="topo-title topo-desc">
+            <title id="topo-title">G4R7B job topology</title>
+            <desc id="topo-desc">The job has 128 JAX devices split into 64 training and 64 sampler devices. The sampler has tensor parallelism one and data parallelism 64.</desc>
+            <defs><pattern id="devA" width="26" height="26" patternUnits="userSpaceOnUse"><rect width="20" height="20" rx="4" fill="#b89cff"/></pattern><pattern id="devB" width="26" height="26" patternUnits="userSpaceOnUse"><rect width="20" height="20" rx="4" fill="#53d7ff"/></pattern></defs>
+            <text x="30" y="32" fill="#9fb1c8" font-size="13" font-weight="700" letter-spacing="2">WHOLE PATHWAYS ALLOCATION</text>
+            <rect x="30" y="54" width="500" height="136" rx="17" fill="#251e42" stroke="#b89cff"/>
+            <rect x="50" y="78" width="460" height="88" rx="12" fill="url(#devA)" opacity=".86"/>
+            <text x="280" y="123" text-anchor="middle" fill="#fff" font-size="31" font-weight="850">128 JAX devices total</text>
+            <path d="M530 122 H570" stroke="#9fb1c8" stroke-width="2"/>
+            <path d="M570 122 C600 122 600 87 626 87" stroke="#b89cff" stroke-width="2.5" fill="none"/>
+            <path d="M570 122 C600 122 600 212 626 212" stroke="#53d7ff" stroke-width="2.5" fill="none"/>
+            <rect x="632" y="42" width="458" height="92" rx="16" fill="#2f2750" stroke="#b89cff"/>
+            <text x="658" y="72" fill="#d8c9ff" font-size="13" font-weight="750">TRAINER HALF</text>
+            <text x="658" y="105" fill="#fff" font-size="25" font-weight="830">64 devices</text>
+            <text x="820" y="105" fill="#a99acb" font-size="13">policy/reference/update</text>
+            <rect x="632" y="162" width="458" height="118" rx="16" fill="#103c50" stroke="#53d7ff"/>
+            <text x="658" y="192" fill="#a8efff" font-size="13" font-weight="750">SAMPLER HALF — ACTUAL DPSCHEDULER</text>
+            <text x="658" y="228" fill="#fff" font-size="25" font-weight="830">TP 1 × DP 64</text>
+            <text x="658" y="254" fill="#9fd5e1" font-size="13">64 data-mesh shards · 64 CPU scheduler children</text>
+            <text x="32" y="228" fill="#c6d3e1" font-size="13">Per sampler lane:</text>
+            <text x="32" y="258" fill="#53d7ff" font-size="24" font-weight="820">32 completions</text>
+            <text x="32" y="282" fill="#9fb1c8" font-size="13">= 4 prompt groups × 8 generations</text>
+          </svg>
+          <div class="equation">2048 completions ÷ 64 DP lanes = 32 completions/lane = 4 prompt groups × 8 sibling generations</div>
+        </div>
+
+        <div class="grid-3" style="margin-top:18px">
+          <div class="card mini-card"><span class="big-number">up to 64</span><h3>decode windows</h3><p>With a 64-token continue-decode window and a 4,096-token cap, a cap-length completion can traverse 64 global scheduler/JAX boundaries. Shorter and finished requests take fewer.</p></div>
+          <div class="card mini-card"><span class="big-number">131,072</span><h3>token slots/window</h3><p>At full occupancy, a fixed output buffer can contain 2,048 requests × 64 token steps before trimming and conversion to Python structures.</p></div>
+          <div class="card mini-card"><span class="big-number">all 64</span><h3>must rendezvous</h3><p>Every global window fans scheduling out to all logical ranks and waits for all outputs before the next combined JAX execution.</p></div>
+        </div>
+
+        <div class="grid-2" style="margin-top:14px">
+          <div class="card mini-card"><span class="big-number">1,404 → 2,048</span><h3>active-to-padded decode snapshot</h3><p>Batch 17 had 1,404 active requests but executed a 2,048-row bucket: 68.55% occupancy and 644 padding rows. That is ≈21.94 active requests per lane versus the initial 32.</p></div>
+          <div class="card mini-card"><span class="big-number">16,384</span><h3>configured global request capacity</h3><p><code>max_num_seqs=256</code> is per rank, so <a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/runner/tpu_runner.py#L1037-L1051">current code derives <code>max_num_reqs=64×256</code></a>. This is capacity/metadata headroom—not proof that every decode result has 16,384 rows—and should be right-sized in an isolated A/B.</p></div>
+        </div>
+
+        <div style="height:28px"></div>
+        <div class="section-kicker">Host-window anatomy</div>
+        <h2 style="font-size:clamp(1.65rem,3vw,2.45rem)">“Host-bound” means serial and synchronization-bound</h2>
+        <p class="section-lead">These are inclusive mean spans from seven host steps in the profiled outer step 0. They overlap and must not be added. The 15.99 ms device interval comes from XProf without a shared host correlation ID, so the ratio is a coverage proxy—not a utilization counter.</p>
+
+        <div class="card trace-card">
+          <svg viewBox="0 0 1120 505" role="img" aria-labelledby="trace-title trace-desc">
+            <title id="trace-title">Nested host trace spans and separate device coverage proxy</title>
+            <desc id="trace-desc">A host engine step lasts 774 milliseconds. Nested spans include execute model, process outputs, blocking device get, output extraction, prepare inputs, scheduler schedule and update. Separately, the captured TPU program lasts about 16 milliseconds.</desc>
+            <defs><pattern id="waitHash" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="#ff6f7f" opacity=".7"/></pattern></defs>
+            <text x="210" y="30" fill="#9fb1c8" font-size="12">0 ms</text><text x="1050" y="30" text-anchor="end" fill="#9fb1c8" font-size="12">774 ms</text>
+            <line x1="210" y1="39" x2="1050" y2="39" stroke="#60758c" stroke-width="1"/>
+            <g stroke="#354b61" stroke-dasharray="3 6"><line x1="420" y1="39" x2="420" y2="396"/><line x1="630" y1="39" x2="630" y2="396"/><line x1="840" y1="39" x2="840" y2="396"/><line x1="1050" y1="39" x2="1050" y2="396"/></g>
+
+            <text x="22" y="79" fill="#d6e4f3" font-size="13">llm_engine.step</text><rect x="210" y="61" width="840" height="28" rx="6" fill="#334a62"/><text x="1038" y="80" text-anchor="end" fill="#fff" font-size="12" font-weight="700">774.10 ms</text>
+            <text x="22" y="124" fill="#d6e4f3" font-size="13">execute_model</text><rect x="210" y="106" width="759" height="28" rx="6" fill="#1f728a"/><text x="957" y="125" text-anchor="end" fill="#fff" font-size="12" font-weight="700">699.67 ms</text>
+            <text x="22" y="169" fill="#d6e4f3" font-size="13">process CD outputs</text><rect x="210" y="151" width="700" height="28" rx="6" fill="#8c6430"/><text x="898" y="170" text-anchor="end" fill="#fff" font-size="12" font-weight="700">644.60 ms</text>
+            <text x="22" y="214" fill="#ffd9de" font-size="13">blocking device_get</text><rect x="210" y="196" width="592" height="28" rx="6" fill="url(#waitHash)" stroke="#ff8f9c"/><text x="790" y="215" text-anchor="end" fill="#fff" font-size="12" font-weight="700">545.22 ms</text>
+            <text x="22" y="259" fill="#d6e4f3" font-size="13">first-EOS extraction</text><rect x="210" y="241" width="73" height="28" rx="6" fill="#ffb454"/><text x="291" y="260" fill="#ffd9aa" font-size="12" font-weight="700">66.95 ms</text>
+            <text x="22" y="304" fill="#d6e4f3" font-size="13">prepare inputs</text><rect x="210" y="286" width="36" height="28" rx="6" fill="#53d7ff"/><text x="255" y="305" fill="#aeefff" font-size="12" font-weight="700">33.53</text>
+            <text x="22" y="349" fill="#d6e4f3" font-size="13">DP schedule / update</text><rect x="210" y="331" width="14" height="28" rx="5" fill="#f4dd75"/><rect x="228" y="331" width="34" height="28" rx="5" fill="#ffb454"/><text x="272" y="350" fill="#ffe7b4" font-size="12">12.54 / 31.76 ms</text>
+            <text x="22" y="394" fill="#d6e4f3" font-size="13">continue_decode submit</text><rect x="210" y="376" width="5" height="28" rx="3" fill="#b89cff"/><text x="224" y="395" fill="#d8c9ff" font-size="12">2.95 ms</text>
+
+            <line x1="16" y1="421" x2="1090" y2="421" stroke="#4b6075"/>
+            <text x="22" y="451" fill="#9eeaff" font-size="13" font-weight="700">SEPARATE XPROF DEVICE INTERVAL</text>
+            <rect x="300" y="435" width="18" height="28" rx="5" fill="#73e2a7" filter="url(#glow)"/><text x="329" y="454" fill="#a7f2c8" font-size="13" font-weight="700">15.99 ms captured program · 99% duty inside this active interval</text>
+            <text x="300" y="485" fill="#ffadb6" font-size="12">15.99 / 774.10 = 2.07% coverage proxy; clocks are not correlated, so do not call this “98% TPU idle.”</text>
+          </svg>
+          <div class="callout"><strong>The red bar is not removable CPU time.</strong> <code>jax.device_get</code> includes Pathways queueing, waiting for global completion, remote shard lookup, transfer, and host materialization. The actionable observation is that this wait is on a single dependency chain; more idle CPU cores do not help unless work or submissions can overlap safely.</div>
+        </div>
+
+        <div class="evidence-strip">
+          <div class="evidence"><span class="badge measured">Measured</span><p>Per profiled host step: 130 <code>HostBufferStore::Lookup</code> events, ≈772 <code>StoreAsync</code> events, and ≈232 DPScheduler <code>_send_command</code> spans. The log also has four 0.89–1.40 s schedule waits and 335 cold/early long-update warnings; one slow lane can stall the rendezvous.</p></div>
+          <div class="evidence"><span class="badge measured">Corroborated</span><p>Follow-up G4R8B used only 0.9–2.1 of 44 head cores during rollout. Doubling the CD window 64→128 halved boundary count but regressed rollout 96.7→99.5 s.</p></div>
+          <div class="evidence"><span class="badge inference">Interpretation</span><p>The roof is not simply “too many dispatch calls.” It is total serial work and waiting around each boundary: admission, Pipes, rank packing, proxy fan-in, extraction, and scatter.</p></div>
+        </div>
+
+        <div class="grid-2" style="margin-top:18px">
+          <div class="card cycle-bars">
+            <h3>Mean logged-wall decomposition</h3>
+            <p style="margin:0 0 14px;color:var(--faint);font-size:.76rem">TensorBoard mean 142.17 s; different scope from the 125.8 s PHASETIME median.</p>
+            <div class="timer-row"><span class="timer-label">engine generation</span><span class="bar-shell"><span class="bar-fill" style="display:block;width:68.9%;background:var(--cyan)"></span></span><span class="timer-value">97.93 s</span></div>
+            <div class="timer-row"><span class="timer-label">reward</span><span class="bar-shell"><span class="bar-fill" style="display:block;width:10.7%;background:var(--orange)"></span></span><span class="timer-value">15.23 s</span></div>
+            <div class="timer-row"><span class="timer-label">actor/update</span><span class="bar-shell"><span class="bar-fill" style="display:block;width:12.3%;background:var(--purple)"></span></span><span class="timer-value">17.52 s</span></div>
+            <div class="timer-row"><span class="timer-label">weight sync</span><span class="bar-shell"><span class="bar-fill" style="display:block;width:7.3%;background:var(--green)"></span></span><span class="timer-value">10.38 s</span></div>
+            <p style="margin:14px 0 0;color:var(--muted);font-size:.8rem">Observed artifact cadence is slower again: 151.10 s mean, including ≈8.93 s dequeue/report/upload gap.</p>
+          </div>
+          <div class="card sweep">
+            <h3>Lower TP removed the old roof</h3>
+            <p style="margin:0 0 14px;color:var(--faint);font-size:.76rem">Historical sweep; labels omit stale/inconsistent DP shorthand in older report sections.</p>
+            <div class="sweep-row"><span class="sweep-label">TP 8</span><span class="sweep-bar" style="width:100%"></span><span class="sweep-value">146.8 s</span></div>
+            <div class="sweep-row"><span class="sweep-label">TP 4</span><span class="sweep-bar" style="width:69.8%"></span><span class="sweep-value">102.4 s</span></div>
+            <div class="sweep-row"><span class="sweep-label">TP 1</span><span class="sweep-bar" style="width:65.0%"></span><span class="sweep-value">95.4 s</span></div>
+            <p style="margin:18px 0 0;color:var(--muted);font-size:.82rem"><strong style="color:#ddecfb">Interpretation:</strong> zero-collective TP1 reduced the old device-side roof and exposed the next Amdahl term—the unsharded parent/control path. This is not a universal TP1 claim: corrected-generation G4R11 TP2×DP32 later tied the medians (95.15 s rollout / 125.43 s global) but suffered a 325.63 s p90.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="trace">
+      <div class="wrap">
+        <div class="section-kicker">03 · Current-code trace</div>
+        <h2>Where the serial scaling enters</h2>
+        <p class="section-lead">Links are pinned to <code>tpu-inference@f6ad5ecb</code> (2026-08-30). The G4R7B image used a nearby but not fully version-stamped build plus runtime patches, so line numbers in its log differ.</p>
+
+        <div class="trace-table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Stage</th><th>Code path</th><th>Scaling / consequence</th></tr></thead>
+            <tbody>
+              <tr><td>01</td><td>Pathways activation</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/__init__.py#L42-L67">initialize <code>pathwaysutils</code> before JAX</a></td><td>Creates the one IFRT proxy client and resolves global topology early.</td></tr>
+              <tr><td>02</td><td>Force SPMD DP</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/platforms/tpu_platform.py#L270-L308"><code>TPU_MULTIPROCESS_DP=1</code> rejected; V1 multiprocessing asserted off</a></td><td>Pathways cannot use normal one-vLLM-engine-per-DP-rank MPMD.</td></tr>
+              <tr><td>03</td><td>Virtualize DP lanes</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/layers/common/sharding.py#L297-L319">retain model DP in sharding; reset upstream vLLM DP to 1</a></td><td>One model/JAX runner owns the global mesh; rank identity moves into tensors.</td></tr>
+              <tr><td>04</td><td>Fork schedulers</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/core/sched/dp_scheduler.py#L463-L514">fork D CPU workers with raw Pipes + cloudpickle</a></td><td><span class="scale">O(D)</span> processes and Pipe endpoints; children do no JAX/model work.</td></tr>
+              <tr><td>05</td><td>Route each request</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/core/sched/dp_scheduler.py#L701-L776">probe every rank, choose minimum score, then ADD</a></td><td><span class="scale">O(R×D)</span>. With prefix cache: four query round-trips/rank/request. Pending batching still drains one request at a time.</td></tr>
+              <tr><td>06</td><td>Schedule barrier</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/core/sched/dp_scheduler.py#L812-L973">send SCHEDULE to all D, wait, merge Python objects</a></td><td><span class="scale">O(D + R)</span> host work and a straggler barrier before every launch.</td></tr>
+              <tr><td>07</td><td>Rank-major packing</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/runner/tpu_runner.py#L2393-L2488">group by rank; pad all lanes to the maximum</a></td><td><span class="scale">O(R + D)</span> metadata; device shape is <code>D × bucket(max lane)</code>.</td></tr>
+              <tr><td>08</td><td>Build host arrays</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/runner/tpu_runner.py#L2655-L2825">Python/NumPy loops over ranks and requests</a>, then <a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/utils.py#L379-L394"><code>device_array</code></a></td><td>One parent constructs every lane’s input, attention metadata, selector, and block tables.</td></tr>
+              <tr><td>09</td><td>One fused decode</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/runner/tpu_runner.py#L1759-L1847"><code>continue_decode</code> JAX loop</a></td><td>One global launch advances all lanes for up to 64 token steps; not D launches.</td></tr>
+              <tr><td>10</td><td>Blocking materialization</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/runner/tpu_runner.py#L191-L349"><code>device_get</code>, transpose, selector, per-request EOS trim + host state update</a></td><td><span class="scale">O(R×W)</span> output processing plus proxy shard fan-in; synchronous parent barrier.</td></tr>
+              <tr><td>11</td><td>Split and update</td><td><a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/core/sched/dp_scheduler.py#L1134-L1208">fan UPDATE to all children</a>, <a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/core/sched/dp_scheduler.py#L1248-L1319">rebuild rank-local outputs</a>, plus <a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/core/sched/dp_scheduler.py#L1094-L1132">grammar</a> and <a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/core/sched/dp_scheduler.py#L1368-L1383">unfinished-count</a> broadcasts</td><td><span class="scale">O(D + R)</span> cloudpickle + reconstruction. The four all-rank command/reply pairs make an ≈8D one-way-message floor/window.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="equation" style="margin-top:18px">Twindow = Tschedule(D) + Tpack(R,D) + Tproxy-submit + Tglobal-wait + TD2H(shards,R,W) + Textract(R,W) + Tsplit/update(D,R)</div>
+        <p style="color:var(--muted);font-size:.84rem">At TP1, useful device work per lane becomes cheap while most terms above remain on one parent and several grow with D. The TPU is busy inside a short launched program; the global system then waits at the host/proxy boundary before it can launch again.</p>
+      </div>
+    </section>
+
+    <section id="plan">
+      <div class="wrap">
+        <div class="section-kicker">04 · Improvement plan</div>
+        <h2>Attack the serial doorway in isolated A/Bs</h2>
+        <p class="section-lead">The later G4R9P1 bundle reached clean engine samples of 64–67 s versus G4R7B’s ≈96.7 s, proving host-path headroom. It is not adoptable as evidence for any single change: it bundled routing, extraction, detokenization, cache/sync, and verifier changes, developed severe tails, and shifted the output contract. The next ladder must change one mechanism at a time.</p>
+
+        <div class="roadmap">
+          <div class="roadmap-item">
+            <div class="roadmap-num">0</div>
+            <div class="roadmap-title">Correlate and version-pin</div>
+            <div class="roadmap-copy">Stamp exact tpu-inference/vLLM/JAX commits. Add stable IDs and timers around batch admission, rank probes, schedule/merge, input prep, proxy submit, completion wait, shard lookup bytes, extraction, split/update, detokenize, and full artifact cadence. Capture CPU samples after ≥5 warm steps.</div>
+            <div class="roadmap-gate"><span class="badge measured">Gate</span><br>DP 8/16/32/64 scaling curve; no profiler-cold extrapolation.</div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-num">1</div>
+            <div class="roadmap-title">Group-aware batched admission</div>
+            <div class="roadmap-copy">Assign each prompt’s eight sibling generations to one sticky rank; stripe the 256 prompt groups evenly (four groups/rank at DP64). Snapshot rank load once, route the batch centrally, and add an <code>ADD_REQUESTS</code> bulk Pipe command. This changes routing from O(R×D) probes toward O(R+D) without sacrificing prefix locality.</div>
+            <div class="roadmap-gate"><span class="badge proposed">High priority</span><br>Same prefix-hit rate, prompt grouping, lengths, RNG, and reward.</div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-num">2</div>
+            <div class="roadmap-title">Vectorize output extraction</div>
+            <div class="roadmap-copy">Replace one <code>np.isin</code> per request with a matrix first-EOS pass, then vectorize host length/state updates. Implement adapter-compatible batched SentencePiece detokenization instead of a fallback loop. The profiled host trace attributes ≈66.95 ms/window to 9,707 extraction calls across seven windows.</div>
+            <div class="roadmap-gate"><span class="badge proposed">Low risk</span><br>Byte-identical token IDs, EOS inclusion, texts, and finish reasons.</div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-num">3</div>
+            <div class="roadmap-title">Right-size metadata + compact IPC</div>
+            <div class="roadmap-copy">First A/B <code>max_num_seqs=40</code>, then 48, at DP64: today the block-table view is ≈16.5 MiB per KV group and <a href="https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/runner/tpu_runner.py#L2980-L3023">current code zero-fills/re-packs the max-sized view each window</a>. Then send packed arrays/deltas instead of D nested <code>ModelRunnerOutput</code> graphs, fast-return unused grammar broadcasts, shadow unfinished counts in the parent, and consider shared memory. The trace sees ≈12.54 ms schedule + 31.76 ms update spans/window.</div>
+            <div class="roadmap-gate"><span class="badge proposed">Medium risk</span><br>Identical KV allocations, finish order, stats, and prefix state.</div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-num">4</div>
+            <div class="roadmap-title">Make Pathways output host-friendly</div>
+            <div class="roadmap-copy">A/B device-side reorder/compaction and a coarser output sharding before <code>device_get</code>. Returning lengths plus packed tokens, or gathering the small token result into fewer proxy buffers, may trade a small on-device collective for fewer host lookups. Measure lookup count, bytes, queue time, and transfer separately.</div>
+            <div class="roadmap-gate"><span class="badge inference">Measure first</span><br>130 lookups/window is suggestive, not yet causally mapped to 2×DP.</div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-num">5</div>
+            <div class="roadmap-title">Repair overlap semantics</div>
+            <div class="roadmap-copy">The code has an async copy/deferred collection path, but G4R8 changed the sampling/length distribution and was void. First make sync and async RNG/state transitions replay-exact; then test whether copy/materialization can overlap useful work or multiple device-side windows without host-visible intermediate state.</div>
+            <div class="roadmap-gate"><span class="badge measured">Currently blocked</span><br>No throughput claim until token stream and LENDIST are equivalent.</div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-num">6</div>
+            <div class="roadmap-title">Parallelize the parent, then shard it</div>
+            <div class="roadmap-copy">First prototype a process pool for pure host-side output extraction with explicit state-delta ownership. Then test 4–8 coordinator partitions or multiple heads, each owning a disjoint submesh and request groups. This is not simply enabling <code>TPU_MULTIPROCESS_DP</code>: Pathways explicitly rejects that mode, so client lifetime, compilation, weight/KV ownership, and failure semantics need a deliberate design.</div>
+            <div class="roadmap-gate"><span class="badge proposed">High risk</span><br>Scale proxy clients gradually; verify no compile or HBM multiplication.</div>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-num">7</div>
+            <div class="roadmap-title">Then tune device work</div>
+            <div class="roadmap-copy">Inside the captured active interval, XProf is HBM-side: 15.71 FLOP/B, 17.76 TFLOP/s, ≈30.7% of the modeled same-intensity HBM roof. Later targets include removing the unused scalar EOS all-reduce when EOS checking is disabled and optimizing two full-vocabulary sampling reductions—but only after host coverage rises.</div>
+            <div class="roadmap-gate"><span class="badge proposed">Later</span><br>Current narrow kernel target projects sub-1% cadence impact under the 2.07% proxy.</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:18px">
+          <div class="card do-not">
+            <h3>Do not infer</h3>
+            <ul>
+              <li><strong>“545 ms device_get = 545 ms CPU.”</strong> It includes remote queue/wait/materialization.</li>
+              <li><strong>“2.07% coverage = 2.07% TPU utilization.”</strong> XProf reports ≈99% duty inside its active interval.</li>
+              <li><strong>“Just set CD=128.”</strong> The controlled run was neutral/slower.</li>
+              <li><strong>“Just enable async.”</strong> G4R8 changed the generated-token contract.</li>
+              <li><strong>“Plain round robin is safe.”</strong> It can scatter eight siblings and destroy within-prompt prefix reuse.</li>
+            </ul>
+          </div>
+          <div class="card do-not" style="border-color:rgba(115,226,167,.25)">
+            <h3>End-to-end work outside DPScheduler</h3>
+            <ul>
+              <li>Reward tails reached 27–36 s on four warm steps; add verifier timeouts and smooth RPC/pool fallback separately.</li>
+              <li>Weight synchronization costs ≈10.38 s mean; instrument bytes, then A/B JIT/unroll and overlap/incremental options.</li>
+              <li>Artifact cadence adds ≈8.93 s beyond logged iteration; pipeline dequeue/report/upload.</li>
+              <li>Use full cadence and useful output tokens/s as adoption metrics, not only PHASETIME median.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <div class="wrap">
+        <div class="section-kicker">Evidence and reproducibility</div>
+        <h2>Sources, scopes, and caveats</h2>
+        <div class="card sources">
+          <ol>
+            <li><a href="https://github.com/alisachen-google/tpu-rl/blob/main/gemma4/GEMMA4_PERF_REPORT.md">Gemma4 performance report</a>, especially the G4R7B, TP sweep, G4R8, and Gap-A sections. The public fetch may require repository access. The corrected, deeper source is <a href="https://github.com/alisachen-google/tpu-rl/blob/main/g4r7b_analysis/perf_headroom.md"><code>g4r7b_analysis/perf_headroom.md</code></a>.</li>
+            <li>Authoritative runtime topology and detailed warnings: <span class="uri">gs://alisachen/tpu_rl/ironwood/logs/g4r7b-head.log</span>. Key runtime facts: first/last 64 device split, vLLM <code>data_parallel_size=64</code>, sharding data=64, and 64 scheduler workers.</li>
+            <li><a href="https://console.cloud.google.com/storage/browser/ubench-logs/alisachen-tpu7x/runs/g4r7b">G4R7B ubench artifacts</a>: <span class="uri">gs://ubench-logs/alisachen-tpu7x/runs/g4r7b/{phasetime,lendist,perf_traces,phased_profile}/</span>.</li>
+            <li>Latest decoded host trace: <span class="uri">.../phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_27_12_05_59/gke-bodaborg-tpu7x-nap-cpu-np-7722bcae-mg47.trace.json.gz</span>. The report’s named TP1 device reference is <span class="uri">server-…-rppc.0.0.xplane.pb</span>; eight ≈133 MB server XPlanes are populated.</li>
+            <li>Local reproducible analyses used for the numerical cross-check: <span class="uri">/home/alisachen_google_com/g4r7b_analysis/perf_headroom.md</span>, <span class="uri">rollout_roofline.md</span>, <span class="uri">metrics/metric_findings.md</span>, and their machine-readable JSON/CSV outputs.</li>
+            <li>Current code trace: <a href="https://github.com/vllm-project/tpu-inference/commit/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e">vllm-project/tpu-inference@f6ad5ecb</a>. The run did not emit a tpu-inference commit stamp, and runtime patches changed selected functions; architecture matches, exact timings remain run-version-specific.</li>
+          </ol>
+          <p style="margin:18px 0 0;color:var(--faint);font-size:.78rem">Confidence: architecture/topology and phase metrics are high-confidence. Host-span anatomy is moderate-confidence because profiling occurred in outer step 0 and lacks correlated host/device IDs. Exact steady attribution among admission, Pathways queueing, shard fan-in, Python extraction, and scheduler IPC remains a hypothesis to resolve with the instrumentation rung.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">Prepared 2026-08-31 from G4R7B GCS artifacts and <code>tpu-inference@f6ad5ecb</code>. Standalone HTML: no external scripts, fonts, or image assets.</div>
+  </footer>
+
+  <script>
+    (() => {
+      const stageCopy = {
+        1: ["Admission is local—and expensive at high DP", "For each new request, stock routing asks every rank about prefix hits, pending prefill, in-flight count, and minimum remaining output. The winning rank becomes sticky because KV and prefix state are rank-local. Batch-prefill buffering currently drains by routing requests one at a time."],
+        2: ["D scheduler processes, but only one model owner", "Each child runs an ordinary vLLM Scheduler and logical KV allocator over raw Pipes. This multiprocessing is distinct from the forbidden vLLM engine multiprocessing: children never touch JAX, IFRT, model weights, or Pathways devices."],
+        3: ["Independent schedules become one static-shaped batch", "The parent waits for all scheduler results, merges Python objects, groups requests by assigned rank, pads every lane to the busiest lane's bucket, and creates selectors that restore original request order after execution."],
+        4: ["One rank-major JAX launch crosses the proxy", "device_array uses NamedSharding and ordinary jax.device_put. With JAX_PLATFORMS=proxy, Pathways handles the global placement and dispatch. There is one SPMD operation over the global mesh—not one remote RPC or model engine per DP rank."],
+        5: ["The synchronous doorway", "jax.device_get blocks until the global result is ready and host-visible. In a proxy deployment this span mixes queueing, remote completion, shard lookup, transfer, and materialization. It is a dependency barrier, not a direct measure of CPU computation."],
+        6: ["One parent rebuilds and scatters dynamic state", "The parent transposes and reorders tokens, scans every request for EOS, updates Python and NumPy state, slices the global output into D rank-local objects, sends UPDATE to every child, and waits again before the next window."],
+      };
+
+      const stages = document.querySelectorAll('.stage[data-stage]');
+      function selectStage(n) {
+        stages.forEach(s => s.classList.toggle('active', s.dataset.stage === String(n)));
+        document.getElementById('stageNumber').textContent = String(n).padStart(2, '0');
+        document.getElementById('stageTitle').textContent = stageCopy[n][0];
+        document.getElementById('stageText').textContent = stageCopy[n][1];
+      }
+      stages.forEach(stage => {
+        stage.addEventListener('click', () => selectStage(Number(stage.dataset.stage)));
+        stage.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectStage(Number(stage.dataset.stage)); }
+        });
+      });
+
+      const options = [8, 32, 64, 128];
+      const slider = document.getElementById('dpSlider');
+      const prefix = document.getElementById('prefixToggle');
+      const fmt = new Intl.NumberFormat('en-US');
+      function updateCalculator() {
+        const dp = options[Number(slider.value)];
+        const q = prefix.checked ? 4 : 3;
+        const requests = 2048;
+        const exchanges = requests * (q * dp + 1);
+        document.getElementById('dpReadout').textContent = `DP ${dp}`;
+        document.getElementById('dpReadout').value = `DP ${dp}`;
+        slider.setAttribute('aria-valuetext', `${dp} lanes`);
+        document.getElementById('perLane').textContent = Number.isInteger(requests / dp) ? fmt.format(requests / dp) : (requests / dp).toFixed(1);
+        document.getElementById('admissionExchanges').textContent = fmt.format(exchanges);
+        document.getElementById('admissionMessages').textContent = fmt.format(exchanges * 2);
+        document.getElementById('windowMessages').textContent = fmt.format(4 * dp);
+        document.getElementById('rankLast').textContent = String(dp - 1);
+      }
+      slider.addEventListener('input', updateCalculator);
+      prefix.addEventListener('change', updateCalculator);
+      updateCalculator();
+    })();
+  </script>
+</body>
+</html>
