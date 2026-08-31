@@ -34,3 +34,5 @@ workload:
     value: '1.0'
   - name: DL_SFRAC
     value: '1.0'
+  - name: DL_VTMO
+    value: '5'
