@@ -1,0 +1,40 @@
+workload:
+  envs:
+  - name: ARTIFACT_DIR
+    value: gs://ubench-logs/alisachen-tpu7x/runs
+  - name: MAXTEXT_CONFIG_PATH
+    value: /workload/configs/qwen3-0.6b.yaml
+  - name: JAX_COMPILATION_CACHE_DIR
+    value: gs://ubench-logs/alisachen-tpu7x/compilation_cache/qwen3-0.6b/jax
+  - name: SKIP_JAX_PRECOMPILE
+    value: '1'
+  - name: DL_TP
+    value: '1'
+  - name: DL_TMBS
+    value: '4'
+  - name: DL_PACK
+    value: '8192'
+  - name: DL_STEPS
+    value: '8'
+  - name: DL_BUCKET_GAP
+    value: '32768'
+  - name: DL_CKPT
+    value: 'False'
+  - name: DL_KEEPKV
+    value: '1'
+  - name: DL_MVPROCS
+    value: '64'
+  - name: DL_NOEOS
+    value: '1'
+  - name: DL_PADFIX
+    value: '1'
+  - name: DL_VTMO
+    value: '5'
+  - name: DL_TFRAC
+    value: '1.0'
+  - name: DL_SFRAC
+    value: '1.0'
+  - name: DL_HBM
+    value: '0.25'
+  - name: DL_JITU
+    value: '1'

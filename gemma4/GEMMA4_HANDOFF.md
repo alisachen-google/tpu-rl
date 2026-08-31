@@ -152,6 +152,15 @@ LENDIST unchanged across the fix (content changed, not length) — so the perf l
 - Slice = 128 devices (2 cores/chip x 64 chips); sampler_fraction=0.5 -> our sweep was on 64 devices.
   DL_SFRAC knob added; g4r12 = tp4 + full-slice (TFRAC=SFRAC=1.0) -> dp32, queued.
 
+## TIANYU GROUND TRUTH UPDATE (2026-08-31 evening)
+- New runs rl-156..159 (all Aug 31, all QWEN3 -- no gemma4 from tianyu). rl-159 warm: global 57.5-59.0,
+  rollout ~51, **compute_rewards 0.5s** (ours: 8-10s median + spikes to 252s, SAME dataset).
+- Their stack now carries OUR phasetime instrumentation (phasetime/step_*.json + PHASETIME lines).
+- **LEAD -> patch_fast_reward:** their 0.5s implies cheap numeric/exact-match grading, not per-item sympy.
+  Proposal: numeric-first grading (fast path for plain-numeric answers, sympy fallback only for the rest).
+  Kills reward median AND spikes at the source. CAVEAT: semantics shift (exact vs symbolic equivalence) --
+  spot-check agreement on ~1k samples before adopting.
+
 ## SWEEP RESULTS (2026-08-31 evening)
 - **g4r16a jit_unroll: WIN, ADOPT.** All 8 steps, exit 0. Clean warm steps 113.5/114.2/117.6/123.8
   (median 123.8) vs same base without = 117-128.6 (median 128.6). ~-4s from sync dispatch collapse.
