@@ -297,6 +297,65 @@ AND resource.labels.container_name="jax-tpu"` in project
 cloud-tpu-shared-capacity. Launch bundle + launchers + charts:
 github.com/alisachen-google/tpu-rl (`gemma4/`, `chart/`).
 
+## Bisect campaign on corrected generation (2026-08-30/31) — owned-quota lane
+
+ACCESS: unblocked the preemption problem by joining `cmcs-ai-ninja-team@twosync.google.com`
+(grants power-users RBAC in ns `ubench-regression-tests`, ClusterQueue owns 256 chips).
+All runs below submit there via `--namespace ubench-regression-tests --set namespace=...`
+at priority 500 (medium) -- unpreemptable, vs the ~11 preempted borrow attempts in `default`.
+CHECKPOINT BUG found + worked around: a stale checkpoint from a preempted same-run_name
+attempt makes orbax restore crash on typed PRNG keys (`ValueError: Unsupported dtype:
+key<fry>`); probes now run `DL_CKPT=False` (fresh run_name also avoids it). Champion loads
+raw params so is unaffected.
+
+METHOD: one variable per run vs a fixed baseline, judge on median AND mean of steps>=3
+(mean matters -- tails dominate real training throughput), fast-fail on a clear regression.
+
+### The reference baseline -- g4r9r (champion + bucket fix only)
+rollout 99.1/98.9/98.6/98.6 (flat, median 98.6), global ~127-132. == champion g4r7b
+(96.7/125.8) with CORRECTED generation. Confirms two things: (1) the prefill-bucket
+corruption fix (VLLM_TPU_BUCKET_PADDING_GAP=32768) is perf-NEUTRAL as well as correct
+(echo 72%->39%) -- ADOPT UNCONDITIONALLY; (2) the always-on patches host_extract
+(vectorized EOS trim) + fast_detok (batched detokenize) are perf-neutral (folded in free).
+Mesh confirmed tp=1 x dp=64 (NOT dp=128 -- prior mislabel; data_parallel_size=64).
+
+### Results
+
+| Run | Change vs baseline | Rollout med / mean | Verdict |
+|---|---|---|---|
+| g4r9p1 | full host bundle (prefix-off + rr + keepkv + trim + detok + 64proc) | ~209 steady | REJECT (net +110s) |
+| g4r9s | + prefix_caching=false ONLY | 77.6 / 120.7 | REJECT: median win, MEAN regression |
+| g4r9t | + rr-routing ONLY | ~214-219 | REJECT: ~2x rollout (the bundle's main regressor) |
+| g4r9w | + keepkv+64proc+noeos+FLASH | crash | flash_sa shim missing local_use_splash_scheduler; flash DEFERRED |
+| g4r9x | + keepkv+64proc+cd_noeos | RUNNING | -- |
+
+WHY prefix-off rejected: removes the DP router's per-request all-rank cache probe (helps
+the single-core head on light batches -> ~76s) BUT the 8 identical generations/group no
+longer share prefix KV, so on some batches the KV pool saturates -> capacity-limited
+wave scheduling -> rollout spikes to ~220s. Median 77.6 (win) but mean 120.7 (loss vs
+99). Not length-correlated (isl/osl flat across spike vs clean steps). Fat tail = net loss
+for real (summed) training time.
+
+WHY rr-routing rejected: round-robin ignores load, packs ranks unevenly; the slowest rank
+straggles and the lockstep-SPMD rollout waits on it. Stock probing router earns its cost by
+keeping ranks balanced. Confirmed on same-seed batches: baseline 99s -> rr 214/219s.
+
+### The reframe: the enemy is TAILS, not steady state
+Clean steps already hit global ~97-102s (BELOW champion 125.8). What inflates the median
+(g4r9s global median 171) is spikes in TWO phases on DIFFERENT steps:
+- rollout spikes (~220s) on heavy/KV-pressured batches (prefix-off makes these worse)
+- REWARD spikes: rewards median 5.6s but steps hit 80s and 211s (math_verify choking on
+  certain completions) -- a NEW, separate, large lever. g4r9x tests 64 verifier procs on it.
+Trainer is a non-issue: 16.8s, zero step-to-step variance.
+
+### Roofline verdict on remaining headroom
+Decode kernel is ON the memory roof (109 TFLOP/s ~= 100% of AI=15 ceiling; ~4.7% MFU is
+all AI permits). Rollout runs at ~1% of that kernel because the head drives 64 engines on
+1-2 of 44 cores (VLLM_ENABLE_V1_MULTIPROCESSING=0). Env-knob bisect is nearly exhausted and
+only trims edges; the real ~2-3x is Gap A -- the single-process head. Next lever (code, not
+env): process-pool _process_continue_decode_outputs and/or revisit multiproc engines under
+Pathways. Kernel/tile and trainer are closed (roofline-proven).
+
 ## Roadmap after the qwen3-transfer ladder (agreed 2026-08-30)
 
 Queue: g4r9p1 (host bundle + bucket fix, 10-step probe; preempt-cycling under
