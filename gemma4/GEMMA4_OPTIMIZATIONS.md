@@ -82,7 +82,7 @@ Legend: ✅ adopted (in our base) · 🏆 win (adopt) · ⚪ neutral (dropped) �
 ## 7. Strategic (not yet engineering-ready)
 
 - **Head parallelization** — multiproc-DP exists but Pathways-gated; g4-003 sidesteps via deep CD windows (fewer round-trips) rather than parallel head.
-- **Vocab-chunked cross-entropy** — would cut the ~69G logits term; unlocks TMBS≥8 without flash dependency.
+- **Chunked per-token logps** (= the vocab-logits memory fix) — PROMOTED to the ladder as E8/g4r28: tunix ships compute_logps_chunk_size (sequence-chunked, reaches the gradient loss via with_loss_fn); MaxText never plumbed it. patch_logps_chunk reads env LOGPS_CHUNK_SIZE (DL_LOGCH). chunk 1024 -> logits peak 34.4G->4.3G at TMBS=8; unlocks TMBS>=8 without flash + restores vLLM HBM headroom.
 - gemma4_prs.diff (multimodal parity stack) — mounted in g4-003 but skipped; not perf.
 
 ## Key composition lesson
