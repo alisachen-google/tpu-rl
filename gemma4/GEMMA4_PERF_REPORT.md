@@ -897,3 +897,16 @@ E5 g4r24 +TMBS=8 — trainer micro-step halving
 E6 g4r25 +XLA proxy-flag ladder (chart-level change)
 E7 (flagged, semantic): gemma-3-style textual prompt — changes the RL problem framing; user call.
 Gate: keep an increment iff clean-step median improves; revert otherwise. Rolling best carried forward.
+
+
+# ═══ G4R30: TIANYU RECIPE REPRODUCED VERBATIM (2026-09-01 ~21:30Z) ═══
+Cloned g4-003 configmaps byte-exact (same image build as ours: tag 2026-08-24-packing == sha f7c957d0),
+jobset reconstructed, run as g4r30 on our namespace/queue. 10/10 steps, EXIT 0.
+
+steps 1-9 global: 55.8, 49.8, 52.3, 50.1, 50.4, 62.4, 49.8, 50.3, 48.9 -> WARM MEDIAN ~50.2 s
+rollout ~38.4-41 (one 51.6), rewards 0.21-0.56 s, cold step 205 s (their compile cache).
+rewards/train/check_numbers 0.011-0.022 == BYTE-IDENTICAL to their g4-003 series (deterministic repro).
+
+=> The ~50 s / step target stack now runs under our control with full logs/TB. Our-launcher best:
+111-125 (tp2 half-slice). Remaining gap to attribute: cd512+cond-fix, async host work, prompt,
+TMBS8, XLA ladder — g4r21c (cd512-fixed + prompt + stop-ids on OUR launcher) running now.
