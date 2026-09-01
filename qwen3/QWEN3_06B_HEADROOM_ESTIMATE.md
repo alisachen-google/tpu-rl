@@ -514,38 +514,88 @@ scheduler children feeding one global program, not 128 model engines.
 #### What one long Qwen host window is waiting for
 
 The host critical path is a sequence of three rendezvous around one global
-device call:
+device call. This is the run-152/same-stack TP1 mental model; read it from left
+to right. Blue is single-parent host work, red diamonds are tail barriers,
+green is device execution, and the orange enclosure is the unresolved
+Pathways-mediated wait rather than a claim of Pathways CPU consumption.
 
-```text
-request admission (outside most profiled engine windows)
-  stock 23b: query many ranks per request; 152: direct round-robin assignment
-        |
-        v
-parent sends SCHEDULE to D CPU scheduler children
-        |
-        v
-barrier 1 = wait for the slowest scheduler child
-        |
-        v
-parent merges outputs, groups requests by sticky rank,
-and builds rank-major D x bucket(busiest_rank) host arrays
-        |
-        v
-device_put + one global JAX/Pathways continue-decode submission
-        |
-        v
-barrier 2 = device_get waits for global completion and host visibility
-        |
-        v
-parent restores request order, trims EOS, updates host state,
-and splits the global output back into D rank-local objects
-        |
-        v
-parent sends UPDATE_FROM_OUTPUT to D scheduler children
-        |
-        v
-barrier 3 = wait for the slowest scheduler update before the next window
+```mermaid
+flowchart LR
+  subgraph HEADIN["ROLLOUT HEAD CPU · one engine and one DP parent"]
+    direction TB
+    REQ["2,048 requests<br/>run 152: direct round robin"]
+    DPS["DPScheduler parent<br/>one global request/rank map"]
+    CHILD["128 CPU scheduler children<br/>logical request + KV state only"]
+    B1{{"BARRIER 1<br/>max schedule-child latency"}}
+    PACK["merge + rank-major pack<br/>DP128 × bucket of busiest lane"]
+    REQ --> DPS --> CHILD --> B1 --> PACK
+  end
+
+  subgraph WAIT["BARRIER 2 · blocking device_get · about 92% of optimized TP1 host window"]
+    direction LR
+    QUEUE["IFRT / Pathways proxy<br/>queue + global launch"]
+    EXEC["one continue-decode SPMD program<br/>TP1 × DP128 · depth 512"]
+    TAIL{{"GLOBAL TAIL<br/>wait for slowest TPU/data lane"}}
+    HBS["HostBufferStore<br/>shard lookup + fan-in + transfer + materialize"]
+    READY["global result becomes<br/>host-visible"]
+    QUEUE --> EXEC --> TAIL --> HBS --> READY
+  end
+
+  subgraph HEADOUT["ROLLOUT HEAD CPU · serial result ownership"]
+    direction TB
+    STATE["restore order + trim EOS<br/>update token/logprob/attention state"]
+    SPLIT["split one global result<br/>into 128 rank-local outputs"]
+    UPDATE["UPDATE_FROM_OUTPUT<br/>to 128 scheduler children"]
+    B3{{"BARRIER 3<br/>max update-child latency"}}
+    STATE --> SPLIT --> UPDATE --> B3
+  end
+
+  PACK --> QUEUE
+  READY --> STATE
+  B3 -. "next global window" .-> DPS
+  CHILD -. "rank IDs define tensor/KV ownership;<br/>children do not call TPUs" .-> EXEC
+
+  SCALE["DP128 amplification<br/>2,048 / 128 = 16 initial requests per rank<br/>captured full window: 256 sends + 256 receives"]
+  PAD["Busiest-lane coupling<br/>one loaded rank widens all 128 rank slices"]
+  UNKNOWN["Still unresolved without correlation IDs<br/>queue vs device vs rank tail vs transfer/finalize"]
+  SCALE -.-> CHILD
+  PAD -.-> PACK
+  UNKNOWN -.-> QUEUE
+  UNKNOWN -.-> TAIL
+  UNKNOWN -.-> HBS
+
+  classDef host fill:#dbeafe,stroke:#2563eb,color:#172554,stroke-width:2px;
+  classDef barrier fill:#fee2e2,stroke:#dc2626,color:#450a0a,stroke-width:3px;
+  classDef device fill:#dcfce7,stroke:#16a34a,color:#052e16,stroke-width:2px;
+  classDef path fill:#ffedd5,stroke:#f97316,color:#431407,stroke-width:2px;
+  classDef note fill:#f3e8ff,stroke:#9333ea,color:#3b0764,stroke-width:2px;
+  class REQ,DPS,CHILD,PACK,STATE,SPLIT,UPDATE host;
+  class B1,B3,TAIL barrier;
+  class EXEC device;
+  class QUEUE,HBS,READY path;
+  class SCALE,PAD,UNKNOWN note;
+  style HEADIN fill:#eff6ff,stroke:#60a5fa,stroke-width:2px
+  style WAIT fill:#fff7ed,stroke:#f97316,stroke-width:3px
+  style HEADOUT fill:#eff6ff,stroke:#60a5fa,stroke-width:2px
 ```
+
+The diagram makes four conclusions visually explicit:
+
+- **DP128 is not 128 independent engines.** The children maintain scheduler/KV
+  state; one parent still merges their work into one Pathways submission and
+  owns the one global result.
+- **The directly measured scheduler wall is secondary.** It is about 2.5% in
+  the optimized TP1 host capture, although its message count and exposure to a
+  slow child grow with DP.
+- **The dominant host-visible span is opaque.** `device_get` is about 92% of
+  the optimized TP1 engine window, but it includes queue/launch, useful TPU
+  execution, slow-rank tail, HostBufferStore fan-in, transfer, and host
+  materialization. It is not evidence that Pathways client CPU is saturated.
+- **Run 152 removed several outer costs, not the rendezvous architecture.**
+  Round robin removes per-request all-rank admission probes, the bucket patch
+  avoids one oversized token bucket, and vector extraction removes repeated
+  EOS scans. Request-axis padding to the busiest rank, global result fan-in,
+  and both scheduler-child barriers remain.
 
 This can be summarized without double-counting overlapping trace spans as:
 
