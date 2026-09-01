@@ -137,29 +137,151 @@ truncation, reward, and token volume—not identical sampled tokens.
 
 ### Baseline-to-current stack
 
-The headroom story compares the supplied 23b manifest with the current TP1
-endpoint. These are the material configuration differences:
+The comparison below is deliberately more explicit than a feature summary.
+There is one provenance limitation: the run-152 GCS directory contains the
+checkpoint, TensorBoard, phasetime, and length artifacts, but not its JobSet or
+launcher ConfigMap. The 152 column therefore uses the versioned champion
+launcher archived for the byte-equivalent 136/149c recipe, plus the declared
+152 topology change to TP1 x DP128. The absence of phased-rollout and Perfetto
+objects in the 152 artifact directory independently confirms its rollout
+profiling policy. The supplied 23b YAML is the direct source for the other
+column.
 
-| Area | `tianyu-rl-23b.yaml` baseline | Current TP1 endpoint | Expected mechanism |
+#### Exact performance-material configuration differences
+
+| Knob | `tianyu-rl-23b` | `tianyu-rl-152` champion recipe | Status / consequence |
 |---|---|---|---|
-| Rollout topology | TP4 x DP32 | TP1 x DP128 | Remove TP model collectives; increase DP fan-out |
-| Continue-decode depth | 128 | 512 | Amortize host/device boundaries over more tokens |
-| Batched-token budget | 16640 | 33280 | Admit more useful work per capacity wave |
-| RPA decode blocks | `1,4096,1,4096` | `1,8192,1,4096` | Increase KV load tile while retaining compute tile |
-| KV page size | Pinned 128 | Pinned 128 | Hold the generation contract constant |
-| DP routing | Stock state-aware/all-rank path | Query-free round robin | Remove per-request rank-state fan-out |
-| Prefix caching | Inherited/default behavior | Disabled | Remove bookkeeping for nonrepeating prompts |
-| Token extraction | Per-request host scans | Vectorized batch extraction | Reduce CPU wall and extraction tails |
-| Detokenization/reward | More critical-path host work | Asynchronous/overlapped | Hide CPU work behind rollout |
-| Actor representation | Dense/padded | Packed real tokens | Avoid padded train work |
-| Trainer attention | General path | Flash-style path | Improve packed attention efficiency |
-| Weight synchronization | Reinitialization and repeated host dispatch | KV retention and compiled transfer loop | Reduce allocations and boundaries |
+| Workload image | `maxtext-rl-ironwood:2026-08-03b` | Packing-enabled image pinned at `sha256:f7c957d0b286e03966fdd6f9b15e7609fae8460a933a9da0b9fbab3e04723c94` | Runtime and source pin changed; this enables the later Tunix/packing patches |
+| Rollout tensor parallelism | `4` | `1` | Removes TP model collectives |
+| Rollout data parallelism | `32` | `128` | Uses the same 128-device sampler fleet as four times as many replicas; increases DP control fan-out |
+| Continue-decode depth | `max_decode_steps=128` | `max_decode_steps=512` | Four times more possible decode iterations per host boundary |
+| Maximum batched tokens | `16640` | `33280` | Doubles the admission/token budget |
+| RPA decode block tuple | `1,4096,1,4096` | `1,8192,1,4096` | Doubles the KV load tile; leaves the compute tile at 4096 |
+| Prefix caching | No explicit override; image/default behavior | `VLLM_PREFIX_CACHING=0` | Explicitly disabled in the later `block_size` patch variant |
+| DP request routing | Stock state-aware `_find_best_rank_for_request` path | `DP_ROUTING=rr` | Selects deterministic round robin and avoids per-request all-rank state queries |
+| Packed-token budget | Unset; packing disabled | `MAX_SEQ_TOKEN_PER_TPU=12288` | Enables packed real-token training |
+| Trainer attention | No explicit `attention` override | `attention='flash'` | Selects the flash-style trainer attention path |
+| Math-verification processes | `32` | `64` | More host-side reward verification capacity |
+| Answer extraction mode | Stock | `FAST_EXTRACT=fast` | Selects the faster balanced-brace extractor |
+| Reward overlap mode | None | `ASYNC_REWARD=on` | Scores completed requests while rollout continues |
+| Logprob overlap mode | None | `ASYNC_LOGPROBS=on` | Extracts finished-request logprobs in the background |
+| Phased rollout profiler | `PHASED_PROFILING_DIR=<run GCS path>` | `PHASED_PROFILING_DIR=""` | Enabled in 23b, disabled in the record recipe |
+| Perfetto v2 exporter | Patch invoked | Patch file present in the champion bundle but not invoked | 23b emits a Perfetto trace; 152 does not |
+| Trainer XPlane | One-step `xplane` request | An early trainer XPlane session exists in GCS, but the reported steady window excludes it | Do not treat the profile-startup span as benchmark steady state |
 
-The 23b manifest already includes corrected continuous-decode semantics,
-reward parallelism, and a sharded candidate sampler. Therefore the improvement
-must not be described as adding those features from zero. Later changes deepen
-and amortize the path, remove remaining fallbacks/control work, and improve the
-training and synchronization sides.
+The performance-relevant launch delta can be summarized as the following
+pseudo-diff. It is a configuration summary, not a claim that 152 was produced
+by editing the supplied 23b file in one step:
+
+```diff
+-workload_image=maxtext-rl-ironwood:2026-08-03b
++workload_image=maxtext-rl-ironwood@sha256:f7c957d0b286e03966fdd6f9b15e7609fae8460a933a9da0b9fbab3e04723c94
+
+-rollout_tensor_parallelism=4
+-rollout_data_parallelism=32
++rollout_tensor_parallelism=1
++rollout_data_parallelism=128
+
+-max_num_batched_tokens=16640
+-vllm_additional_config={"enable_continue_decode":true,"max_decode_steps":128}
++max_num_batched_tokens=33280
++vllm_additional_config={"enable_continue_decode":true,"max_decode_steps":512}
+
+-RPA_V3_DECODE_BLOCK_SIZES=1,4096,1,4096
++RPA_V3_DECODE_BLOCK_SIZES=1,8192,1,4096
+
+-math_verify_num_procs=32
++math_verify_num_procs=64
++attention=flash
++VLLM_PREFIX_CACHING=0
++DP_ROUTING=rr
++MAX_SEQ_TOKEN_PER_TPU=12288
++FAST_EXTRACT=fast
++ASYNC_REWARD=on
++ASYNC_LOGPROBS=on
+
+-PHASED_PROFILING_DIR=<run GCS path>
++PHASED_PROFILING_DIR=""
+```
+
+#### Explicit patch inventory
+
+The following eleven patches are active in both configurations. They are
+controls, not explanations for the 23b-to-152 improvement.
+
+| Patch | 23b | 152 | Relevant version note |
+|---|---|---|---|
+| `patch_vllm_sampler.py` | Applied | Applied | Same Pathways profiling-call compatibility and request-kwargs cap |
+| `patch_cd_proper.py` | Applied | Applied | Same options-free model twin and top-level continue-decode JIT construction |
+| `patch_lendist.py` | Applied | Applied | Instrumentation only: ISL, OSL, and truncation records |
+| `patch_rpa_blocks.py` | Applied | Applied | Same forwarding hook; the configured decode tuple changes separately |
+| `patch_cd_masking.py` | Applied | Applied | Same deep-window no-any-EOS early-exit semantics and inert masked-slot re-feed |
+| `patch_cd_report.py` | Applied | Applied | Same per-sequence last-real-token reporting fix |
+| `patch_phasetime.py` | Applied | Applied | Instrumentation only: phase timers |
+| `patch_reward_parallel.py` | Applied | Applied | Same process-parallel base reward manager; 152 additionally overlaps scoring |
+| `patch_sharded_sampling.py` | Applied | Applied | Same candidate sampler; at TP1 the size-one model axis makes its candidate communication local/degenerate rather than a TP exchange |
+| `patch_block_size.py` | Applied | Applied, extended | Both pin the KV page; the 152 variant also consumes `VLLM_PREFIX_CACHING=0` |
+| `patch_log_stats.py` | Applied | Applied | Observability only: enables engine/KV statistics |
+
+One patch is active only in 23b:
+
+| Patch | 23b | 152 | Difference |
+|---|---|---|---|
+| `patch_perf_v2.py` | Applied by the launcher | Mounted in the champion bundle but not called | Perfetto export is active in 23b and inactive in the 152 record recipe |
+
+The following fifteen patches are additions in the champion recipe used by
+152. “Applied” here means invoked by the archived champion launcher; each
+script still has its own anchor/banner gate at runtime.
+
+| Patch added for 152 | What it changes relative to 23b |
+|---|---|
+| `patch_profiler_fix.py` | Converts an invalid Tunix trainer-profile window into a disabled window instead of a startup failure; compatibility, not speed credit |
+| `patch_gc_sync.py` | Gates unconditional per-step `gc.collect()` calls; default later behavior is collection off |
+| `patch_packing_knob.py` | Plumbs `MAX_SEQ_TOKEN_PER_TPU` into Tunix so packing can be enabled despite the older RLConfig schema |
+| `patch_packer_fast.py` | Replaces per-bin JAX assembly with NumPy-first packed-chunk construction and a small number of array conversions |
+| `patch_async_detok.py` | Decodes finished requests in a background thread pool during the remaining rollout |
+| `patch_async_logprobs.py` | Extracts finished-request token logprobs asynchronously and serves cached results to Tunix |
+| `patch_dp_rr_routing.py` | Adds the `DP_ROUTING=rr` branch that avoids the stock all-rank rank-selection queries |
+| `patch_fast_extract.py` | Adds the linear balanced-brace answer extractor selected by `FAST_EXTRACT=fast` |
+| `patch_async_reward.py` | Scores completions during rollout in a dedicated process pool and consumes the cached scores later |
+| `patch_flash_sa.py` | Supplies missing flash/splash-attention defaults to the older RL config so `attention='flash'` is usable |
+| `patch_jit_unroll.py` | Replaces per-layer weight-sync slicing dispatches with one compiled unroll per scanned parameter |
+| `patch_sync_keepkv.py` | Skips delete/reinitialize of an already-free vLLM KV cache around weight synchronization |
+| `patch_host_extract.py` | Vectorizes EOS discovery and valid-token lengths over the entire continue-decode output matrix |
+| `patch_cd_noglobal.py` | Removes the now-unused per-iteration cross-DP `any_hit_eos` scalar reduction |
+| `patch_padding_bucket.py` | Adds the exact maximum token bucket so a full batch does not round up to the next power-of-two-like padding bucket |
+
+Finally, `patch_fast_detok.py` is present in the champion patch ConfigMap but
+is not invoked by its launcher. The active path is `patch_async_detok.py`; no
+speedup should be attributed to the uninvoked fast-detok file. Together with
+the uninvoked 152 `patch_perf_v2.py`, this distinguishes “mounted in the
+ConfigMap” from “executed by the launch script.” The executed champion order
+contains 26 patches: 11 shared patches plus the 15 additions above.
+
+#### Configuration held constant
+
+| Control | Both 23b and 152 |
+|---|---|
+| Workload | Qwen3-0.6B GRPO on OpenMathInstruct-2 |
+| Global work | Batch 256, eight generations per prompt, 20 global steps |
+| Sampling contract | Temperature 0.8, top-k 50, top-p 0.95 |
+| Length contract | `max_target_length=12288`, prefill 4096, effective output cap 8192, KV buffer 4352 |
+| KV page | `VLLM_BLOCK_SIZE=128` |
+| EOS polling | `CONTINUE_DECODE_EOS_CHECK_INTERVAL=8` |
+| Engine capacity controls | `max_num_seqs=256`, vLLM HBM utilization 0.3 |
+| Microbatches | Train 32, rollout 256 |
+| Scheduler | `async_scheduling=False` |
+| Mesh allocation | Trainer fraction 1.0, sampler fraction 1.0, DP attention disabled |
+| Optimizer controls | Learning rate 1e-6, gradient clipping 1.0 |
+| Pathways/XLA | Same 20260730 JAX 0.10.2 server/proxy pins and proxy XLA flag set |
+
+The attribution consequence is important. Run 23b already had continuous-
+decode correctness, reward parallelism, RPA override forwarding, sharded
+candidate sampling, and the page-size pin. The later result must not be
+described as adding those capabilities from zero. The actual bundle delta is
+deeper/broader rollout configuration, the fifteen host/train/synchronization
+patches, and finally TP1. Only the TP4-to-TP1 portion is isolated by the
+149c/154 matched pair; the rest remains a cumulative bundle comparison.
 
 ### Topology-only control
 
