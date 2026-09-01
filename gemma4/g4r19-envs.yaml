@@ -11,7 +11,7 @@ workload:
   - name: DL_TP
     value: '1'
   - name: DL_TMBS
-    value: '8'
+    value: '4'
   - name: DL_PACK
     value: '8192'
   - name: DL_STEPS
@@ -35,15 +35,15 @@ workload:
   - name: DL_SFRAC
     value: '1.0'
   - name: DL_HBM
-    value: '0.3'
+    value: '0.25'
+  - name: DL_JITU
+    value: '1'
   - name: DL_ATTN
     value: flash
   - name: DL_SAQ
     value: '1024'
   - name: DL_SAKV
     value: '2048'
-  - name: DL_JITU
-    value: '1'
   - name: DL_CPV
     value: '8'
   - name: DL_KVBUF
