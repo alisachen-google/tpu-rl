@@ -41,6 +41,12 @@ approximately 6% of the absolute reduction. The trace supports removal of the
 TP collective tax as a mechanism, but the measured delta cannot be assigned to
 topology alone because the RPA tiles also change.
 
+Two large-looking levers are already inside that current endpoint and are not
+remaining kernel headroom: the continue-decode window is already 512 rather
+than 128, and packed-chunk assembly is already NumPy-first. The former has an
+estimated latency-amortization benefit; the latter has a one-change measured
+control. Their landed credit and residual ceilings are quantified below.
+
 The remaining practical opportunity is much smaller than in the previous
 report:
 
@@ -53,6 +59,11 @@ report:
 These ranges overlap. RPA tuning, sampling-guard removal, topology, and DP
 tail work all shorten the same rollout critical path and must not be added as
 independent wins.
+
+Within that broader budget, TPU-side kernel/collective work alone is currently
+estimated at about 2-5% of the run-152 endpoint. The main terms are the decode
+sampling guard and RPA retuning; trainer-kernel tuning is sub-percent end to
+end.
 
 ## Baseline and median contract
 
@@ -434,6 +445,8 @@ them out of the public report.
 | TP1 phase timeline, run 154 | [Perfetto protobuf](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity) | Whole-cycle TP1 phase attribution |
 | TP1 diagnostic XPlane, run 154 | [decode-only session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity) | Profiler-failure diagnosis only; not valid for kernel shares |
 | Sustained TP1 logs, run 152 | [run artifacts](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152?project=cloud-tpu-shared-capacity) | Current-endpoint phase, length, reward, and TensorBoard distributions |
+| Stock packed-assembly control, run 43c | [TensorBoard artifacts](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-43c/tensorboard?project=cloud-tpu-shared-capacity) | One-change control for the NumPy-first packer |
+| NumPy-first packed-assembly probe, run 44 | [TensorBoard artifacts](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-44/tensorboard?project=cloud-tpu-shared-capacity) | One-change global result and phase cross-check for `patch_packer_fast.py` |
 | DP-scheduler architecture cross-check | [Gemma G4R7B end-to-end study](https://github.com/alisachen-google/tpu-rl/blob/f259b6895cfb641286a189183a3d0e8fb4e61647/gemma4/G4R7B_DP_SCHEDULING_E2E.md) | Explains the shared parent/child scheduler, padding, Pathways, and barrier structure; Gemma timings are not imported into the Qwen budget |
 
 Open the XPlane session by downloading the session directory and pointing
@@ -729,6 +742,30 @@ axis, not the TP axis. Source correlation identifies it as the dynamic
 whole-batch safety check in the sharded sampler. It survives even though the
 benchmark sampling policy is fixed and safe for the candidate path.
 
+#### Code-to-trace anchors for the decode-loop and sampling collectives
+
+The numeric HLO suffix is not a stable code identifier. For example, the same
+logical reduction can appear as `all-reduce.68`, `.125`, or `.127` after a
+different topology, patch set, or compiler schedule. The source expression,
+XLA source annotation, shape, and replica groups are the durable identity. The
+four relevant anchors are:
+
+| Trace operation | Source-level anchor | Run-152 interpretation |
+|---|---|---|
+| Deep-window active-row reduction | The earlier [`patch_cd_masking.py`](../patches/patch_cd_masking.py#L95-L105) generated `jnp.any(_cd_active)` in `_decode_core_impl::cond_fn`. This is patch-introduced behavior, not the current upstream condition. | The exact 152 revision replaces the condition with `return _cd_i < max_decode_steps`; this cross-DP scalar reduction is already removed. |
+| Per-iteration EOS reduction | Upstream [`decode_loop.py::_update_loop_state`](https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/runner/decode_loop.py#L80-L85) computes `any_hit_eos = jnp.any(jnp.logical_and(active_mask, is_eos))`, returns it, and carries it through the while loop. The repository's guarded equivalent rewrite is visible in [`patch_cd_noeos.py`](../patches/patch_cd_noeos.py#L42-L49). | The supplied 152 `patch_cd_noglobal.py` replaces the expression with `jnp.array(False)`. This is valid because the 152 `cond_fn` is fixed-depth and no longer consumes the carried EOS flag. The trace-local `all-reduce.68` attribution refers to this expression when its source annotation and DP replica group agree. |
+| Full-vocabulary logits gather | Stock [`sampling.py::sample`](https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/layers/jax/sample/sampling.py#L118-L123) explicitly constrains sampling logits to `P(ATTN_DATA, None)`. Replicating the vocabulary dimension induces the full-vocabulary all-gather when the stock/fallback branch runs. For 128 rows, Qwen's 151,936-entry vocabulary, and `f32`, the logical slab is `128 * 151936 * 4 = 77,791,232` bytes: 77.8 decimal MB or 74.2 MiB. | This is the source pointer for the pre-`_SS_PADFIX`/fallback `all-gather.5`, not for the small candidate gather. `_SS_PADFIX` should keep run 152 off this branch; seeing the 78 MB gather in a representative 152 hot path would mean the guard selected fallback or the patch did not apply. |
+| Dynamic sampling safety reduction | The sharded wrapper forms a DP-sharded Boolean vector and executes `safe = jnp.all(...)` before `lax.cond`; see [`patch_sharded_sampling.py`](https://github.com/alisachen-google/tpu-rl/blob/634a492658de243a69086cc60df2b7152d31932c/patches/patch_sharded_sampling.py#L196-L211). The exact 152 form applies `_SS_PADFIX` first and then evaluates `jnp.all((_tk <= 64) & (_tp > 0))`. | Reducing the global DP-sharded vector to one scalar produces `while/body/reduce_and`, observed as trace-local `all-reduce.125`. This guard remains in 152 and is the proposed static-plan optimization. |
+
+The candidate path has different, deliberately small collectives: its
+[`_ss_merged_candidates`](https://github.com/alisachen-google/tpu-rl/blob/634a492658de243a69086cc60df2b7152d31932c/patches/patch_sharded_sampling.py#L112-L122)
+all-gathers only the per-TP-shard top-64 values and token IDs. It must not be
+confused with the 78 MB full-vocabulary fallback gather. Consequently, the
+pair “full-vocabulary `all-gather.5` plus dynamic `all-reduce.125`” describes
+the guarded fallback mechanism as seen before `_SS_PADFIX`; the expected 152
+hot path retains the scalar guard and small candidate gathers, but not the
+full-vocabulary transfer.
+
 The remaining model all-reduces are across the TP axis and appear after the
 attention/output projections. TP1 removes those by construction. This is one
 directly observed mechanism behind the measured TP1-package gain; it does not
@@ -756,6 +793,109 @@ end-to-end delta. Even in a pure topology comparison, TP1 would give back part
 of the communication benefit through less local batching/statistical
 multiplexing, different matmul shapes, full-model weight traffic, and greater
 DP fan-out; here the RPA tile change is an additional confound.
+
+#### Boundary-amortization roofline: decode depth 128 to 512
+
+Window depth is not a classical FLOP/byte roofline. It is a latency/Amdahl
+roofline over a fixed cost paid at every host/device boundary. For fixed useful
+token work, model one rollout as:
+
+```text
+T(d) = T_useful_tokens + W(d) * B + M(d)
+
+d     static continue-decode depth
+W(d) number of global windows
+B     fixed schedule/merge/launch/fan-in/update cost per window
+M(d) masked-row, padded-row, and delayed-refill cost at depth d
+```
+
+If long requests make `W(512) ~= W(128) / 4`, define
+`H128 = W(128) * B`, `f = H128 / T(128)`, and
+`m = (M(512) - M(128)) / T(128)`. Then:
+
+```text
+T(512) / T(128) ~= 1 - 0.75 * f + m
+speedup             ~= 1 / (1 - 0.75 * f + m)
+```
+
+Thus “four times deeper” does **not** imply a fourfold rollout speedup. It can
+remove at most three quarters of the old boundary term, and only wins when the
+extra masking/refill tax is smaller than that removal.
+
+The run-23b depth-128 host trace supplies a gross bound. The final column also
+multiplies by the baseline rollout share, so it is expressed in this report's
+100-unit global normalization:
+
+| What is treated as fixed boundary cost | Share of a depth-128 engine window | Ideal engine-window reduction | Approximate gross global credit |
+|---|---:|---:|---:|
+| Schedule/update rendezvous only | 3.2% | 2.4% | About 1.9 baseline units |
+| Rendezvous + input preparation + output-object work | About 6.2% | About 4.7% | About 3.6 baseline units |
+| Add old per-request EOS extraction | About 11.7% | About 8.8% | About 6.8 baseline units, but this overlaps the separate vectorized-extraction patch |
+| Treat every non-`device_get` span as fixed | About 18% | About 13.5% | About 10.5 baseline units; an intentionally loose ceiling |
+
+The defensible depth-only planning credit is therefore about **2-4 baseline
+units gross**, not the loose 10.5-unit envelope. The lower end counts only the
+directly visible scheduler boundary; the upper end adds preparation and output
+construction. EOS extraction is excluded because run 152 separately
+vectorizes it, and the opaque part of `device_get` is excluded because it mixes
+launch/fan-in overhead with useful device execution.
+
+The optimized TP1 host capture gives a consistent reverse check. At depth 512,
+high-level DP schedule/update wall is about 2.5% of one captured window. If the
+same useful 512 iterations were split into four depth-128 calls with unchanged
+per-boundary cost, the scheduler-only gross reduction would be:
+
+```text
+b = B / T512 = 0.025
+reduction from shallow total = 3b / (1 + 3b) ~= 7% of rollout
+global equivalent           ~= 7% * 86% ~= 6% of the current cycle
+```
+
+This is a one-window counterfactual, not an isolated run result. It excludes
+the additional masked-slot work and delayed scheduler refill caused by the
+deeper window. The continuous-decode correctness patches make finished slots
+inert and retirement correct; they do not make masked TPU row-iterations free.
+The shared Gemma scheduler study corroborates exactly where the repeated
+barriers occur, but its absolute timings are not imported into this Qwen
+budget.
+
+The break-even test for any future depth change is therefore:
+
+```text
+boundary time removed > extra masked/padded device time + lost refill value
+```
+
+Record actual iterations, real and padded row-iterations, scheduler wall,
+device-active time, and `engine_generate / generated_tokens` for every window.
+For 512 to 1024, the scheduler-only gross ceiling from the current 2.5% share
+is only about 1.25% of rollout, or about 1.1% of the whole cycle, before the
+masking tax. That is diminishing-return territory rather than a new major
+lever.
+
+#### NumPy packed-chunk assembly: measured host-dispatch credit
+
+The packer has stronger attribution than window depth. Run 44 changes exactly
+one thing relative to run 43c: `patch_packer_fast.py`. The implementation
+replaces per-bin JAX construction with NumPy fills followed by one array
+conversion per feature.
+
+| Packer quantity | Stock packed assembly | NumPy-first assembly | Interpretation |
+|---|---:|---:|---|
+| Host-triggered array operations per step | About 13,900 | About 72 | Approximately 193x fewer dispatches |
+| Estimated packer host cost | About 4.2 baseline units | About 0.5 baseline units | About 3.7 units of causal host work removed |
+| One-change global median | Run 43c control | Run 44 probe | About 4.5 baseline units lower, gross observed |
+
+The gross global delta is slightly larger than the packer-cost delta because
+rollout also moved within normal run noise. A conservative causal credit is
+**3.5-4 baseline units**. Almost none of this is a faster actor TPU kernel: it
+removes thousands of tiny host-triggered JAX dispatches from the dequeue/data
+assembly path. The packed tensors are semantically identical.
+
+This optimization is already active in run 152. Even deleting the recorded
+fast-packer residual would be worth no more than about 0.5 baseline units, and
+a realistic improvement is smaller. Combining the depth model and packer
+control suggests roughly 5.5-8 landed baseline units, but that is a planning
+ledger rather than a clean attribution of the full 23b-to-152 bundle.
 
 ### Optimized host rollout trace
 
@@ -796,11 +936,29 @@ move the same work between overlap and the end-of-rollout tail.
 ### Trainer and phase trace
 
 The direct run-152 trainer XPlane is the primary actor-program record; run 136
-is a TP4 confirmation. The current actor train wall is only about 9% of the
-cycle. Perfetto shows that roughly one-fifth of that train wall is gap between
-successive TPU microbatch envelopes. Even deleting every such gap is only an
-approximately 2% global ceiling; a realistic compiled-dispatch improvement is
-lower.
+is a TP4 confirmation. Across the eight TensorCore `XLA Ops` lines in the
+run-152 profile, event/core time is distributed approximately as follows:
+
+| Trainer device leaf | Share of event/core time |
+|---|---:|
+| Splash-attention custom call | 50.6% |
+| All-gather | 25.1% |
+| Dynamic-update-slice | 15.5% |
+| Other fusions | 7.6% |
+| Copy | 1.2% |
+
+These are overlapping core-time proportions, not additive actor wall shares.
+The active splash call uses query blocks 1024, KV blocks 2048, KV compute
+blocks 2048, the corresponding backward blocks 1024/2048, head-dimension-minor
+layouts, and an unfused backward kernel.
+
+The current actor train wall is only about 9% of the cycle. Even mapping a
+20% splash-attention leaf improvement directly onto actor wall gives a
+generous Amdahl ceiling of `0.09 * 0.506 * 0.20 ~= 0.9%` end to end, before
+accounting for overlap. Perfetto also shows that roughly one-fifth of train
+wall is gap between successive TPU microbatch envelopes. Deleting every such
+gap is only an approximately 2% global ceiling; a realistic compiled-dispatch
+or trainer-kernel improvement is lower.
 
 Advantage/reward and weight synchronization are each below 1% of the current
 cycle. They should remain correctness-monitored but are no longer primary
@@ -837,7 +995,7 @@ the action is proposed headroom rather than a change already present in run
 | 3. Split Pathways wait | [23b baseline decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_22_06_21_47/?project=cloud-tpu-shared-capacity); [149c optimized decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [shared scheduler architecture](https://github.com/alisachen-google/tpu-rl/blob/f259b6895cfb641286a189183a3d0e8fb4e61647/gemma4/G4R7B_DP_SCHEDULING_E2E.md) | **Our measurement patch first; our performance patch second:** add cross-layer wait buckets plus padded-row/host-buffer volume, then change transfer, capacity sizing, or launch behavior only if the corresponding bucket is material. | Config rows **Continue-decode depth** and **Maximum batched tokens**, held row **Engine capacity controls**, and 152-only patches **`patch_host_extract.py`** and **`patch_padding_bucket.py`** explain the changed envelope. Correlation and result compaction are not landed. |
 | 4. DP128 fan-out/tail | [23b baseline decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_22_06_21_47/?project=cloud-tpu-shared-capacity); [149c TP4 decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [154 TP1 diagnostic XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity); [shared scheduler architecture](https://github.com/alisachen-google/tpu-rl/blob/f259b6895cfb641286a189183a3d0e8fb4e61647/gemma4/G4R7B_DP_SCHEDULING_E2E.md) | **Our measurement/performance patch:** instrument child barriers, serialized bytes, rank drain, and busiest-lane padding; then batch/fix-schema messages or test a once-per-window load snapshot. Do not restore per-request all-rank probes. | Config rows **Rollout data parallelism**, **DP request routing**, and **Prefix caching**; 152-only patches **`patch_dp_rr_routing.py`** and the prefix-control extension in **`patch_block_size.py`**. |
 | 5. TP2 crossover scout | [149c TP4 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-149c/perf_traces/perfetto_trace_v2_1788157043.pb?project=cloud-tpu-shared-capacity); [154 TP1 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity) | **Config only:** set TP2 x DP64 while retaining the current VMEM-safe TP1 tile set for the first strict scout. No code patch is proposed. | Config rows **Rollout tensor parallelism**, **Rollout data parallelism**, and the three **RPA** rows. |
-| 6. Actor dispatch gaps | [23b trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/tensorboard/plugins/profile/2026_08_22_06_27_19/?project=cloud-tpu-shared-capacity); [152 direct trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/tensorboard/plugins/profile/2026_08_31_08_55_05/?project=cloud-tpu-shared-capacity) | **Our patch:** compile the microbatch loop or overlap already-compiled dispatches. The first proposal does not change batch flags. | Config rows **Packed-token budget** and **Trainer attention**; held-constant rows **Microbatches** and **Trainer structure**; 152-only patch rows **`patch_packing_knob.py`**, **`patch_packer_fast.py`**, and **`patch_flash_sa.py`**. The new compiled loop has no landed row. |
+| 6. Actor kernels and dispatch gaps | [23b trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/tensorboard/plugins/profile/2026_08_22_06_27_19/?project=cloud-tpu-shared-capacity); [152 direct trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/tensorboard/plugins/profile/2026_08_31_08_55_05/?project=cloud-tpu-shared-capacity) | **Config/our patch:** first A/B the splash fused-backward and block choices one at a time; separately compile the microbatch loop or overlap already-compiled dispatches. | Config rows **Packed-token budget** and **Trainer attention**; held-constant rows **Microbatches** and **Trainer structure**; 152-only patch rows **`patch_packing_knob.py`**, **`patch_packer_fast.py`**, and **`patch_flash_sa.py`**. The new trainer probes and compiled loop have no landed row. |
 | 7. Phase transitions | [149c TP4 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-149c/perf_traces/perfetto_trace_v2_1788157043.pb?project=cloud-tpu-shared-capacity); [154 TP1 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity); [152 phasetime logs](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/phasetime?project=cloud-tpu-shared-capacity) | **Our patch:** tighten future ownership and phase handoffs. Existing async modes remain config-selected implementations. | Config rows **Math-verification processes**, **Answer extraction mode**, **Reward overlap mode**, and **Logprob overlap mode**; patch rows **`patch_reward_parallel.py`**, **`patch_async_detok.py`**, **`patch_async_logprobs.py`**, **`patch_fast_extract.py`**, **`patch_async_reward.py`**, **`patch_gc_sync.py`**, **`patch_jit_unroll.py`**, and **`patch_sync_keepkv.py`**. |
 | 8. Isolated rollout stall | [152 phasetime logs](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/phasetime?project=cloud-tpu-shared-capacity); [152 TensorBoard artifacts](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/tensorboard?project=cloud-tpu-shared-capacity) | **Our measurement patch only:** add a threshold-triggered flight recorder. No mitigation is selected yet. | No landed config or patch row: this is a tail event observed on the complete 152 endpoint. No trace caught the stall, so these phase/TensorBoard logs are the strongest available evidence. |
 | 9. Fix TP1 profiling | [154 failed/diagnostic TP1 XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity); [149c valid TP4 reference XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [152 direct trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/tensorboard/plugins/profile/2026_08_31_08_55_05/?project=cloud-tpu-shared-capacity) | **Profiling config plus our instrumentation patch:** move the phased capture trigger after reshard/setup; patch the profiler only if sequencing cannot express that. No performance credit. | Config row **Phased rollout profiler** and held-constant row **Trainer profile request**; `patch_profiler_fix.py` fixes Tunix trainer-window compatibility but does **not** fix the TP1 phased-capture race. The proposed phased fix has no landed row. |
@@ -926,13 +1084,32 @@ export RPA_V3_PREFILL_BLOCK_SIZES="512,1024,256,512"
 
 # One VMEM-validated decode value per run; order should be randomized.
 export RPA_V3_DECODE_BLOCK_SIZES="1,1024,1,1024"
+export RPA_V3_DECODE_BLOCK_SIZES="1,2048,1,1024"
 export RPA_V3_DECODE_BLOCK_SIZES="1,2048,1,2048"   # exact 152 control
 export RPA_V3_DECODE_BLOCK_SIZES="1,4096,1,2048"
+export RPA_V3_DECODE_BLOCK_SIZES="1,4096,1,4096"
 ```
 
-Reject a candidate before benchmarking if its static VMEM estimate exceeds the
-limit. After the decode winner is known, vary mixed and prefill independently;
-do not collapse all three tile changes into one timing.
+For Qwen TP1's eight KV heads per core, two query heads per KV head, head
+dimension 128, and BF16 query/KV inputs, the kernel's own
+`get_vmem_estimate_bytes` model gives:
+
+| Fetch block `(bq_sz, bkv_sz)` | Pallas scratch estimate | Use in the sweep |
+|---|---:|---|
+| `(1, 1024)` | About 9 MiB | Small decode control |
+| `(1, 2048)` | About 18 MiB | Run-152 decode control; compare compute sizes 1024 and 2048 |
+| `(1, 4096)` | About 36 MiB | Largest decode fetch candidate with useful static margin |
+| `(1, 8192)` | About 72 MiB | Reject before compile against the 64 MiB scoped VMEM limit |
+| `(512, 1024)` | About 29 MiB | Run-152 mixed/prefill control |
+| `(512, 2048)` | About 38 MiB | Mixed/prefill candidate after decode tuning |
+| `(1024, 1024)` | About 49 MiB | Mixed/prefill candidate after decode tuning |
+| `(1024, 2048)` | About 58 MiB | Edge candidate; little margin for compiler/VREG overhead |
+
+The source estimate covers Pallas scratch, not every compiler allocation, so a
+value below 64 MiB still has to compile and profile successfully. Reject a
+candidate before benchmarking if the static estimate exceeds the limit. After
+the decode winner is known, vary mixed and prefill independently; do not
+collapse all three tile changes into one timing.
 
 Why it can improve performance:
 
@@ -950,7 +1127,8 @@ Validation:
 - Require at least several steady observations per rung and repeat the winner.
 
 Public source context:
-[RPA block-size override, TPU Inference PR #3102](https://github.com/vllm-project/tpu-inference/pull/3102).
+[RPA block-size override, TPU Inference PR #3102](https://github.com/vllm-project/tpu-inference/pull/3102) and
+[the source-level VMEM estimator](https://github.com/vllm-project/tpu-inference/blob/f6ad5ecb1ca359c721b01fd0d7edd90b5cf0ac7e/tpu_inference/kernels/ragged_paged_attention/v3/kernel.py#L227-L260).
 
 ### 3. Split the Pathways-mediated wait before tuning Pathways CPU
 
@@ -1187,7 +1365,7 @@ Validation:
 - Profile the actual TP2 collective share.
 - Repeat the winner against a concurrent or interleaved TP1 control.
 
-### 6. Compile or overlap the actor microbatch dispatch gaps
+### 6. Tune actor kernels, then compile or overlap dispatch gaps
 
 Evidence for headroom:
 
@@ -1196,8 +1374,25 @@ Evidence for headroom:
   one-fifth of actor-train wall.
 - The device envelopes themselves are stable across TP1 and TP4, confirming
   that rollout topology is unrelated to this gap.
+- The direct run-152 trainer XPlane assigns about half of event/core time to
+  the splash-attention custom call, but actor wall is only about 9% of the
+  complete cycle.
 
 Proposed solution:
+
+Before changing the training loop, run low-cost, one-change trainer-kernel
+scouts against the exact 1024/2048 block control:
+
+```text
+control: current splash blocks, fused backward off
+probe A: fused backward on
+probe B: one VMEM-safe splash block tuple at a time
+probe C: base-2 exponent path, with an explicit numerical-equivalence gate
+```
+
+Do not combine these flags in the first pass. Compare trainer wall and
+attention leaf time, and reject any candidate that raises compile time, HBM,
+loss drift, or optimizer-state drift.
 
 Where memory permits, move the microbatch loop inside one compiled program:
 
@@ -1221,8 +1416,10 @@ materializing host metrics from the previous one.
 Why it can improve performance:
 
 It converts repeated proxy dispatch and idle gaps into device-side loop work.
-The absolute theoretical ceiling is only about 1 baseline unit; the realistic
-planning range is 0.25-0.5 baseline units.
+The absolute dispatch-gap ceiling is only about 1 baseline unit; the realistic
+planning range is 0.25-0.5 baseline units. A 20% splash-leaf improvement has a
+separate generous ceiling below 1% end to end, so trainer kernel tuning remains
+lower priority than decode RPA and sampling.
 
 Validation:
 
@@ -1360,15 +1557,29 @@ TP1 RPA and sampling estimates remain extrapolations from TP4.
 | P1 | TP2 x DP64 scout | Interleaved TP1 x DP128 | Repeated matched-work win |
 | P1 | DP rank/tail instrumentation | Current TP1 endpoint | Identifies material child-barrier skew, fan-out serialization, or busiest-lane padding |
 | P2 | Batched DP commands or snapshot-based routing | Instrumented TP1 | Lower host critical path without worse tail, prefix locality, or `O(requests * DP)` probes |
+| P2 | Trainer splash one-change scouts | Current 1024/2048 unfused-backward splash control | Lower trainer wall and attention leaf time; HBM and numerical gates pass |
 | P2 | Compiled actor microbatch loop | Current actor loop | Gap reduction, HBM safe, exact update semantics |
 | P2 | Phase-future cleanup | Current synchronous handoffs | Lower transition share, no policy-version drift |
 
 ## Remaining-headroom budget
 
+The following landed-credit ledger prevents historical wins from being added
+to the remaining budget:
+
+| Already-landed lever | Best current estimate of delivered credit | Remaining credit in run 152 |
+|---|---:|---:|
+| Decode depth 128 to 512 | About 2-4 baseline units gross, model-based; no isolated rung | Zero for the already-applied change; 512 to 1024 is only about a 1.1% whole-cycle scheduler-only gross ceiling before masking |
+| NumPy-first packed-chunk assembly | About 3.5-4 baseline units causal; about 4.5 gross observed in the one-change pair | Less than 0.5 baseline units even if the measured residual vanished |
+
+Neither row is TPU-kernel headroom. Window depth amortizes host/device
+boundaries while trading against masked device work; the packer removes host
+dispatches before the compiled actor program.
+
 | Opportunity | Evidence strength | Plausible reduction in 23b-baseline units | Notes |
 |---|---|---:|---|
 | Remove DP sampling guard | Strong TP4 trace/source; TP1 timing missing | 0.5-1.5 baseline units | First code target |
 | TP1 RPA validation/retune | Strong TP4 leaf share; no valid TP1 kernel trace | 0.5-1.5 baseline units | Current TP1 safety tiles are landed; requires profiler fix |
+| Trainer splash/collective tuning | Direct run-152 trainer XPlane; wall mapping is inclusive | 0.1-0.5 baseline units | Actor is only about 9% of the cycle; tune after rollout |
 | Pathways wait split / compact result | Strong opaque-wait evidence; bucket split missing | 0-1.5 baseline units | No credit until transfer/finalize is measured |
 | DP128 fan-out/tail | Strong structural case; instrumentation missing | 0.5-1.5 baseline units | Measure before patching |
 | TP2 crossover | Direct topology model, no TP2 result | 0-1.5 baseline units | Can be negative |
@@ -1379,6 +1590,11 @@ TP1 RPA and sampling estimates remain extrapolations from TP4.
 Do not sum the high ends. A central near-term target is 2.5-5 baseline units
 below the current endpoint. Reaching the stretch case requires both a real
 decode-kernel win and a demonstrated DP-control/tail win.
+
+Restricting the budget to TPU-side decode kernels and collectives gives roughly
+**1-3 baseline units**, or about **2-5% of the current endpoint**: the sampling
+guard plus RPA retuning dominate, while trainer kernel work is sub-percent end
+to end. There is no evidence for another 10-20% kernel-only win.
 
 ## Validity checklist
 
@@ -1417,4 +1633,5 @@ story is:
 7. spend trainer effort only on the measured microbatch gaps.
 
 That supports a credible additional 5-10% target, with 10-15% as a stretch
-case—not another 2x claim.
+case—not another 2x claim. The narrower TPU-kernel-only target is about 2-5%;
+the already-landed 128-to-512 window and NumPy packer must not be counted again.
