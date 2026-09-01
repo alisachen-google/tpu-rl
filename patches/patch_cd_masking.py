@@ -100,8 +100,11 @@ NEW_COND = (
     f"{indent}    _cd = _unpack(carry)\n"
     f"{indent}    _cd_i = _cd[0]\n"
     f"{indent}    _cd_active = _cd[2]\n"
-    f"{indent}    return jnp.logical_and(_cd_i < max_decode_steps,\n"
-    f"{indent}                           jnp.any(_cd_active))\n"
+    f"{indent}    # _CD_NOGLOBAL: no jnp.any(active) here -- it is a cross-DP\n"
+    f"{indent}    # all-reduce every iteration; at window 512 x 128 devices the\n"
+    f"{indent}    # chained collectives crash pathways workers at the sync boundary\n"
+    f"{indent}    # (g4r21, 17 synchronized crashes; tianyu g4-003 runs count-only).\n"
+    f"{indent}    return _cd_i < max_decode_steps\n"
     f"\n")
 src = "".join(lines[:start]) + NEW_COND + "".join(lines[end:])
 
