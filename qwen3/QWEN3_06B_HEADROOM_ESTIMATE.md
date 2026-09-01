@@ -17,11 +17,13 @@ document was introduced by `acc25f7`.
 
 ## Executive verdict
 
-TP1 x DP128 is the best measured rollout topology for this stack. Against
-the matched TP4 x DP32 profiled control, it lowers end-to-end time by about 5%
-and rollout time by about 6%, while actor training is flat. Completion volume
-between the two short profiled replicas differs by less than 0.1%, so this is a
-topology result rather than a shorter-output artifact.
+The current TP1 x DP128 package is the best measured endpoint for this stack.
+Against the closest TP4 x DP32 profiled control, it lowers end-to-end time by
+about 5% and rollout time by about 6%, while actor training is flat. Completion
+volume between the two short profiled replicas differs by less than 0.1%, so
+the gain is not a shorter-output artifact. The pair is not a pure topology
+experiment, however: the TP1 recipe also carries required TP1 RPA decode,
+mixed, and prefill tiles.
 
 Most of the baseline-to-current gain was already delivered before TP1:
 
@@ -29,15 +31,15 @@ Most of the baseline-to-current gain was already delivered before TP1:
 |---|---:|---|
 | **Baseline, run 23b** | **100 units** | `tianyu-rl-23b.yaml`, TP4 x DP32 |
 | Optimized TP4, run 136 | About 56 units | Decode, sampling, host, packing, train, and sync stack |
-| Profiled TP4 replica, run 149c | About 56 units | Usable rollout profile on the champion recipe |
-| Profiled TP1 replica, run 154 | About 52 units | Topology-only attribution point |
-| Current TP1 endpoint, run 152 | About 53 units | Sustained result, profilers off |
+| Profiled TP4 replica, run 149c | About 56 units | Closest TP4 control and usable rollout profile |
+| Profiled TP1 replica, run 154 | About 52 units | Same-as-152 TP1 recipe plus profilers |
+| Current TP1 endpoint, run 152 | About 53 units | Sustained result plus a direct trainer XPlane; rollout/Perfetto capture off |
 
 Approximately 94% of the reduction from the 23b baseline to the current level
-came from the software stack; the TP4-to-TP1 topology change supplied the last
-approximately 6% of the absolute reduction. The story is therefore not
-“TP1 made the run twice as fast.” It is “software nearly closed the large gap,
-then TP1 removed a smaller collective tax.”
+came before the final TP1-plus-tile bundle; that bundle supplied the last
+approximately 6% of the absolute reduction. The trace supports removal of the
+TP collective tax as a mechanism, but the measured delta cannot be assigned to
+topology alone because the RPA tiles also change.
 
 The remaining practical opportunity is much smaller than in the previous
 report:
@@ -107,16 +109,21 @@ instrumentation.
 |---|---|---|---|
 | 23b | **Analysis baseline** | Eighteen steady steps, phase/quality, rollout XPlane, trainer XPlane, Perfetto | Earlier stack and TP4 |
 | 136 | Optimized TP4 trainer reference | Long-run phase/quality and trainer XPlane | No usable rollout XPlane |
-| 149c | Optimized TP4 topology control | Four steady steps, rollout XPlane, Perfetto | Short profiled replica |
-| 152 | Current sustained TP1 endpoint | Eighteen steady steps, phase and semantic logs | Profilers intentionally off |
-| 154 | Profiled TP1 topology endpoint | Four steady steps and Perfetto | TP1 phased XPlane captured the wrong program |
+| 149c | Closest optimized TP4 rollout/device reference | Four steady steps, rollout XPlane, Perfetto | Short profiled replica; uses the 136 TP4 tile set |
+| 152 | Current sustained TP1 endpoint | Eighteen steady steps, phase and semantic logs, and a direct trainer XPlane | No Perfetto; no phased-rollout session |
+| 154 | Same-as-152 TP1 whole-cycle trace surrogate | Four steady steps and Perfetto | TP1 phased XPlane captured the 128-way reshard program rather than steady decode |
 
 This bridge is necessary because no one run contains a clean long benchmark,
-a valid TP1 decode profile, a trainer profile, and a phase timeline.
+a valid TP1 decode profile, a trainer profile, and a whole-cycle timeline.
+Run 152 supplies the sustained endpoint and the direct trainer profile; run
+154 supplies the exact-recipe Perfetto timeline; run 149c supplies the closest
+valid rollout profile at TP4. The last bridge changes topology and RPA tiles,
+so it is suitable for mechanism and package-level attribution, not a numeric
+topology-only claim.
 
 ## Work-equivalence gate
 
-The topology conclusion passes the available workload checks:
+The TP1-package conclusion passes the available workload checks:
 
 - Prompt/ISL arrays are identical step-for-step across the compared runs.
 - The TP4 and TP1 profiled replicas differ in completion-token volume by less
@@ -126,7 +133,7 @@ The topology conclusion passes the available workload checks:
 - Completion-length, cap-truncation, and reward distributions remain inside
   the established control band.
 - Actor training and weight synchronization remain approximately flat in the
-  direct TP4/TP1 profiled comparison.
+  near-matched TP4/TP1 profiled comparison.
 
 TP degree changes reduction order and therefore sampling numerics. Prompt
 identity is exact; generated sequences are not expected to be byte-identical.
@@ -138,14 +145,14 @@ truncation, reward, and token volume—not identical sampled tokens.
 ### Baseline-to-current stack
 
 The comparison below is deliberately more explicit than a feature summary.
-There is one provenance limitation: the run-152 GCS directory contains the
-checkpoint, TensorBoard, phasetime, and length artifacts, but not its JobSet or
-launcher ConfigMap. The 152 column therefore uses the versioned champion
-launcher archived for the byte-equivalent 136/149c recipe, plus the declared
-152 topology change to TP1 x DP128. The absence of phased-rollout and Perfetto
-objects in the 152 artifact directory independently confirms its rollout
-profiling policy. The supplied 23b YAML is the direct source for the other
-column.
+The full `~/rl-repro/tianyu-rl-152-ub.yaml` manifest reproduced by the run
+owner is the direct source for the 152 column; its header identifies
+`tianyu-rl-150-ub.yaml` as the lineage and describes the recipe as run 136 at
+TP1 x DP128 plus tile fixes. Values below come from that exact launch script
+and patch ConfigMap, rather than being inferred from run 136 or from a different
+model's manifest. Run-152 artifacts and the run-154 same-config profiled replica
+cross-check execution and evidence roles. The supplied 23b YAML is the direct
+source for the baseline column.
 
 #### Exact performance-material configuration differences
 
@@ -156,7 +163,9 @@ column.
 | Rollout data parallelism | `32` | `128` | Uses the same 128-device sampler fleet as four times as many replicas; increases DP control fan-out |
 | Continue-decode depth | `max_decode_steps=128` | `max_decode_steps=512` | Four times more possible decode iterations per host boundary |
 | Maximum batched tokens | `16640` | `33280` | Doubles the admission/token budget |
-| RPA decode block tuple | `1,4096,1,4096` | `1,8192,1,4096` | Doubles the KV load tile; leaves the compute tile at 4096 |
+| RPA decode block tuple | `1,4096,1,4096` | `1,2048,1,2048` | TP1-specific decode tiles halve both KV load and compute dimensions relative to 23b |
+| RPA mixed block tuple | Unset; kernel default | `512,1024,256,512` | TP1 safety tile avoids a mixed-attention working set above the 64 MiB VMEM limit |
+| RPA prefill block tuple | Unset; kernel default | `512,1024,256,512` | Applies the matching TP1-safe prefill tile |
 | Prefix caching | No explicit override; image/default behavior | `VLLM_PREFIX_CACHING=0` | Explicitly disabled in the later `block_size` patch variant |
 | DP request routing | Stock state-aware `_find_best_rank_for_request` path | `DP_ROUTING=rr` | Selects deterministic round robin and avoids per-request all-rank state queries |
 | Packed-token budget | Unset; packing disabled | `MAX_SEQ_TOKEN_PER_TPU=12288` | Enables packed real-token training |
@@ -165,9 +174,9 @@ column.
 | Answer extraction mode | Stock | `FAST_EXTRACT=fast` | Selects the faster balanced-brace extractor |
 | Reward overlap mode | None | `ASYNC_REWARD=on` | Scores completed requests while rollout continues |
 | Logprob overlap mode | None | `ASYNC_LOGPROBS=on` | Extracts finished-request logprobs in the background |
+| Pathways-head placement | No pod anti-affinity | Preferred anti-affinity from other `pathways-head` pods on the same host | Measurement-noise control for a run submitted concurrently with another job; no isolated speed credit |
 | Phased rollout profiler | `PHASED_PROFILING_DIR=<run GCS path>` | `PHASED_PROFILING_DIR=""` | Enabled in 23b, disabled in the record recipe |
-| Perfetto v2 exporter | Patch invoked | Patch file present in the champion bundle but not invoked | 23b emits a Perfetto trace; 152 does not |
-| Trainer XPlane | One-step `xplane` request | An early trainer XPlane session exists in GCS, but the reported steady window excludes it | Do not treat the profile-startup span as benchmark steady state |
+| Perfetto v2 exporter | Patch invoked | Patch file present in the 152 bundle but not invoked | 23b emits a Perfetto trace; 152 does not |
 
 The performance-relevant launch delta can be summarized as the following
 pseudo-diff. It is a configuration summary, not a claim that 152 was produced
@@ -188,7 +197,9 @@ by editing the supplied 23b file in one step:
 +vllm_additional_config={"enable_continue_decode":true,"max_decode_steps":512}
 
 -RPA_V3_DECODE_BLOCK_SIZES=1,4096,1,4096
-+RPA_V3_DECODE_BLOCK_SIZES=1,8192,1,4096
++RPA_V3_DECODE_BLOCK_SIZES=1,2048,1,2048
++RPA_V3_MIXED_BLOCK_SIZES=512,1024,256,512
++RPA_V3_PREFILL_BLOCK_SIZES=512,1024,256,512
 
 -math_verify_num_procs=32
 +math_verify_num_procs=64
@@ -204,22 +215,34 @@ by editing the supplied 23b file in one step:
 +PHASED_PROFILING_DIR=""
 ```
 
+After normalizing run names and artifact destinations, the exact manifest
+audit finds one workload-image change, six training-command argument changes,
+ten performance-relevant exported-environment changes, and the preferred
+head-pod anti-affinity addition. TPU allocation, head/proxy CPU and memory
+resources, Pathways images, proxy flags, and the other training arguments are
+unchanged.
+
 #### Explicit patch inventory
 
-The following eleven patches are active in both configurations. They are
-controls, not explanations for the 23b-to-152 improvement.
+The following eleven patch **names** are active in both configurations. Eight
+are behaviorally stable controls. Three carry material later revisions and
+must be credited as version deltas rather than mislabeled as unchanged:
+`patch_cd_masking.py`, `patch_sharded_sampling.py`, and
+`patch_block_size.py`. The first-token addition to `patch_lendist.py` and the
+Tunix class-anchor update to `patch_phasetime.py` are observability or
+compatibility changes only.
 
 | Patch | 23b | 152 | Relevant version note |
 |---|---|---|---|
 | `patch_vllm_sampler.py` | Applied | Applied | Same Pathways profiling-call compatibility and request-kwargs cap |
 | `patch_cd_proper.py` | Applied | Applied | Same options-free model twin and top-level continue-decode JIT construction |
-| `patch_lendist.py` | Applied | Applied | Instrumentation only: ISL, OSL, and truncation records |
+| `patch_lendist.py` | Applied | Applied, extended | Instrumentation only; the later version also records first-token class |
 | `patch_rpa_blocks.py` | Applied | Applied | Same forwarding hook; the configured decode tuple changes separately |
-| `patch_cd_masking.py` | Applied | Applied | Same deep-window no-any-EOS early-exit semantics and inert masked-slot re-feed |
+| `patch_cd_masking.py` | Applied | Applied, extended | Both provide deep-window masking and inert re-feed; the later version also removes `jnp.any(active_mask)` from `cond_fn`, eliminating one per-iteration cross-DP reduction |
 | `patch_cd_report.py` | Applied | Applied | Same per-sequence last-real-token reporting fix |
-| `patch_phasetime.py` | Applied | Applied | Instrumentation only: phase timers |
+| `patch_phasetime.py` | Applied | Applied, re-anchored | Same phase timers; the later source accepts Tunix's `RLEngine` rename through the `RLCluster` alias |
 | `patch_reward_parallel.py` | Applied | Applied | Same process-parallel base reward manager; 152 additionally overlaps scoring |
-| `patch_sharded_sampling.py` | Applied | Applied | Same candidate sampler; at TP1 the size-one model axis makes its candidate communication local/degenerate rather than a TP exchange |
+| `patch_sharded_sampling.py` | Applied | Applied, extended | The later `_SS_PADFIX` rewrites padded `top_k=0` rows so they no longer force the whole batch onto the stock full-vocabulary path; the residual dynamic `jnp.all` guard still remains |
 | `patch_block_size.py` | Applied | Applied, extended | Both pin the KV page; the 152 variant also consumes `VLLM_PREFIX_CACHING=0` |
 | `patch_log_stats.py` | Applied | Applied | Observability only: enables engine/KV statistics |
 
@@ -227,11 +250,11 @@ One patch is active only in 23b:
 
 | Patch | 23b | 152 | Difference |
 |---|---|---|---|
-| `patch_perf_v2.py` | Applied by the launcher | Mounted in the champion bundle but not called | Perfetto export is active in 23b and inactive in the 152 record recipe |
+| `patch_perf_v2.py` | Applied by the launcher | Mounted in the 152 bundle but not called | Perfetto export is active in 23b and inactive in the 152 record recipe |
 
-The following fifteen patches are additions in the champion recipe used by
-152. “Applied” here means invoked by the archived champion launcher; each
-script still has its own anchor/banner gate at runtime.
+The following fifteen patches are additions in run 152. “Applied” here means
+invoked by the exact supplied 152 launcher; each script still has its own
+anchor/banner gate at runtime.
 
 | Patch added for 152 | What it changes relative to 23b |
 |---|---|
@@ -251,12 +274,36 @@ script still has its own anchor/banner gate at runtime.
 | `patch_cd_noglobal.py` | Removes the now-unused per-iteration cross-DP `any_hit_eos` scalar reduction |
 | `patch_padding_bucket.py` | Adds the exact maximum token bucket so a full batch does not round up to the next power-of-two-like padding bucket |
 
-Finally, `patch_fast_detok.py` is present in the champion patch ConfigMap but
-is not invoked by its launcher. The active path is `patch_async_detok.py`; no
-speedup should be attributed to the uninvoked fast-detok file. Together with
-the uninvoked 152 `patch_perf_v2.py`, this distinguishes “mounted in the
-ConfigMap” from “executed by the launch script.” The executed champion order
-contains 26 patches: 11 shared patches plus the 15 additions above.
+Finally, `patch_fast_detok.py` is present in the 152 patch ConfigMap but is not
+invoked by its launcher. The active path is `patch_async_detok.py`; no speedup
+should be attributed to the uninvoked fast-detok file. Together with the
+uninvoked 152 `patch_perf_v2.py`, this distinguishes “mounted in the ConfigMap”
+from “executed by the launch script.” The manifest declares 28 patch files and
+the launcher invokes exactly 26: 11 shared names plus the 15 additions above.
+
+#### Landed run-152 optimization ladder
+
+This is the requested mapping from the exact 152 launcher to the optimization
+story. The stages are functional groupings, not claims that run 152 isolates
+the timing of every patch. Every one of the 26 invoked patch files appears in
+exactly one row; selectors shown in the configuration column are what activate
+optional behavior.
+
+| Landed step | Exact 152 configuration | Invoked patch implementation | What the step contributes; evidence status |
+|---|---|---|---|
+| S0. Runtime and continue-decode prerequisites | `enable_continue_decode=true`; trainer `profiler=xplane` requested | `patch_vllm_sampler.py`, `patch_cd_proper.py`, `patch_profiler_fix.py` | Makes Pathways profiling and the top-level fused-decode JIT runnable on the pinned image. This is primarily compatibility/foundation, not an isolated speed claim. |
+| S1. Amortize decode boundaries and make deep windows correct | `max_decode_steps=512`, `max_num_batched_tokens=33280`, `CONTINUE_DECODE_EOS_CHECK_INTERVAL=8` | `patch_cd_masking.py`, `patch_cd_report.py`, `patch_cd_noglobal.py`, `patch_padding_bucket.py`, `patch_host_extract.py` | Runs a deeper fused window, preserves per-sequence EOS retirement, removes both unused per-iteration global EOS/active reductions, avoids oversize padding buckets, and vectorizes host EOS extraction. The 23b/149c host traces show the boundary and extraction mechanisms; 152 has no valid TP1 rollout XPlane. |
+| S2. TP1 decode kernels and sharded sampling | TP1 x DP128; decode tiles `1,2048,1,2048`; mixed/prefill tiles `512,1024,256,512`; fixed top-k 50/top-p 0.95 | `patch_rpa_blocks.py`, `patch_sharded_sampling.py` | Forwards the three RPA tile families and keeps padded rows on the candidate sampler through `_SS_PADFIX`. TP1 removes TP collectives structurally. The valid 149c TP4 XPlane proves the kernel families and residual sampler guard, but cannot validate the TP1 tile shares. |
+| S3. Admission and DP control | `VLLM_BLOCK_SIZE=128`, `VLLM_PREFIX_CACHING=0`, `DP_ROUTING=rr` | `patch_block_size.py`, `patch_dp_rr_routing.py` | Pins the generation contract, disables unhelpful prefix-cache work, and replaces per-request all-rank rank-selection queries with round robin. Host traces support the control-path mechanism; the cumulative run does not isolate each selector. |
+| S4. Packed/flash actor training | `MAX_SEQ_TOKEN_PER_TPU=12288`, `attention='flash'`, `scan_layers=True` | `patch_packing_knob.py`, `patch_packer_fast.py`, `patch_flash_sa.py` | Enables real-token packing through the older schema, reduces packer dispatches, and supplies missing attention defaults. The direct run-152 trainer XPlane is the primary landed-program evidence. |
+| S5. Move rollout postprocessing and reward work off the serial tail | `math_verify_num_procs=64`, `FAST_EXTRACT=fast`, `ASYNC_REWARD=on`, `ASYNC_LOGPROBS=on` | `patch_reward_parallel.py`, `patch_async_detok.py`, `patch_async_logprobs.py`, `patch_fast_extract.py`, `patch_async_reward.py` | Parallelizes/overlaps detokenization, token-logprob extraction, answer parsing, and reward scoring. Phasetime and run logs establish that these phases are now small; the async implementations retain fallback paths. |
+| S6. Shorten weight synchronization and host pauses | `scan_layers=True`; `TUNIX_GC_COLLECT` unset, so patched default is off | `patch_gc_sync.py`, `patch_jit_unroll.py`, `patch_sync_keepkv.py` | Gates per-step Python GC, batches scanned-layer slicing dispatches, and retains the free KV allocation across sync. Perfetto places the resulting sync phase below 1% of the current cycle. |
+| S7. Validate the contract and expose residuals | XPlane requested; `PHASED_PROFILING_DIR=""`; no Perfetto exporter call | `patch_lendist.py`, `patch_phasetime.py`, `patch_log_stats.py` | Records length/truncation, phase, and KV/engine evidence. These are measurement patches and receive no speed credit. Run 152 has the trainer XPlane; run 154 supplies same-config Perfetto; the valid rollout capture remains the TP4 run 149c. |
+
+The two mounted-but-inactive files do not belong in a landed step:
+`patch_fast_detok.py` is superseded by the invoked async detokenizer, and
+`patch_perf_v2.py` is not called, which is why run 154—not run 152—provides the
+same-config Perfetto timeline.
 
 #### Configuration held constant
 
@@ -270,9 +317,12 @@ contains 26 patches: 11 shared patches plus the 15 additions above.
 | EOS polling | `CONTINUE_DECODE_EOS_CHECK_INTERVAL=8` |
 | Engine capacity controls | `max_num_seqs=256`, vLLM HBM utilization 0.3 |
 | Microbatches | Train 32, rollout 256 |
+| Trainer structure | `scan_layers=True`, physical-axis splitting allowed |
 | Scheduler | `async_scheduling=False` |
 | Mesh allocation | Trainer fraction 1.0, sampler fraction 1.0, DP attention disabled |
 | Optimizer controls | Learning rate 1e-6, gradient clipping 1.0 |
+| Trainer profile request | `profiler=xplane`, skip one step, capture one step |
+| Head and proxy resources | Trainer 28 requested/44 limited CPU; proxy 8 requested/16 limited CPU; identical memory limits |
 | Pathways/XLA | Same 20260730 JAX 0.10.2 server/proxy pins and proxy XLA flag set |
 
 The attribution consequence is important. Run 23b already had continuous-
@@ -280,22 +330,30 @@ decode correctness, reward parallelism, RPA override forwarding, sharded
 candidate sampling, and the page-size pin. The later result must not be
 described as adding those capabilities from zero. The actual bundle delta is
 deeper/broader rollout configuration, the fifteen host/train/synchronization
-patches, and finally TP1. Only the TP4-to-TP1 portion is isolated by the
-149c/154 matched pair; the rest remains a cumulative bundle comparison.
+patches, and finally the TP1-specific topology-and-tile package. The 149c/154
+pair isolates that final package from the earlier software ladder, but it does
+not isolate topology from the tile change. The rest remains a cumulative
+23b-to-152 bundle comparison.
 
-### Topology-only control
+### Near-matched TP4-to-TP1 bridge
 
-The matched run-149c/run-154 topology experiment keeps the fixed device fleet
-and champion recipe constant and changes only rollout partitioning:
+Run 149c uses the 136 TP4 recipe; run 154 uses the exact 152 TP1 recipe with
+profilers. They keep the fixed device fleet and the rest of the champion stack
+constant, but change rollout partitioning **and** the RPA tile set:
 
 ```diff
 -rollout_tensor_parallelism=4
 -rollout_data_parallelism=32
 +rollout_tensor_parallelism=1
 +rollout_data_parallelism=128
+
+-RPA_V3_DECODE_BLOCK_SIZES=1,8192,1,4096
++RPA_V3_DECODE_BLOCK_SIZES=1,2048,1,2048
++RPA_V3_MIXED_BLOCK_SIZES=512,1024,256,512
++RPA_V3_PREFILL_BLOCK_SIZES=512,1024,256,512
 ```
 
-The matched shared recipe includes:
+The near-matched shared recipe includes:
 
 ```text
 model                         = qwen3-0.6b
@@ -307,15 +365,18 @@ KV page size                  = 128
 continue-decode depth         = 512
 EOS check interval            = 8
 max batched-token budget      = 33280
-RPA decode blocks             = 1,8192,1,4096
 prefix caching                = disabled
 DP routing                    = round robin
 trainer attention             = flash-style
 packed-token budget per TPU   = 12288
 ```
 
-Any later topology retuning should be one-factor-at-a-time so that topology,
-page size, RPA tiles, and admission capacity are not confounded.
+The observed delta is therefore a TP1-package result. The disappearance of TP
+model collectives still supplies direct mechanism evidence for TP1, but the
+approximately 5% end-to-end number must not be labeled topology-only. Any
+later strict topology retest should use one VMEM-safe common RPA tuple on both
+sides; otherwise it must continue to be reported as a topology-plus-tiles
+package comparison.
 
 ## Phase comparison
 
@@ -324,21 +385,22 @@ page size, RPA tiles, and admission capacity are not confounded.
 The current TP1 endpoint is approximately 53 baseline units, or about 47%
 below the 23b steady median. The optimized TP4 long run is approximately 56
 baseline units. Thus most of the baseline-to-current improvement predates the
-topology change: TP1 contributes about a 5% incremental end-to-end reduction,
-explained by a roughly 6% rollout reduction while actor training and
-synchronization remain effectively unchanged.
+final TP1-specific package: TP1 plus its required tile fixes contributes about
+a 5% incremental end-to-end reduction, explained by a roughly 6% rollout
+reduction while actor training and synchronization remain effectively
+unchanged. The package delta is measured; a topology-only fraction is not.
 
-### Profiled topology pair
+### Profiled TP1-package bridge
 
 The short, trace-enabled pair reproduces the same result:
 
 | Component | TP4 run 149c | TP1 run 154 | Interpretation |
 |---|---:|---:|---|
-| Complete cycle | About 56 baseline units | About 52 baseline units | Roughly 5% lower |
-| Rollout | About 48 baseline units | About 45 baseline units | Nearly all of the gain |
+| Complete cycle | About 56 baseline units | About 52 baseline units | TP1-plus-tiles package is roughly 5% lower |
+| Rollout | About 48 baseline units | About 45 baseline units | Nearly all of the package gain |
 | Actor training | About 5 baseline units | About 5 baseline units | Flat |
 | Weight sync | Less than 1 baseline unit | Less than 1 baseline unit | Flat/noisy |
-| Other transitions | About 2 baseline units | About 2 baseline units | No material topology win |
+| Other transitions | About 2 baseline units | About 2 baseline units | No material package difference |
 
 The TP1 Perfetto complete-cycle decomposition is approximately:
 
@@ -366,7 +428,8 @@ them out of the public report.
 | Baseline phase timeline, run 23b | [Perfetto protobuf](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-23b/perf_traces/perfetto_trace_v2_1787379652.pb?project=cloud-tpu-shared-capacity) | Baseline whole-cycle phase attribution |
 | Baseline phase and semantic logs, run 23b | [run artifacts](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b?project=cloud-tpu-shared-capacity) | Normalization metric, phasetime, lengths, rewards, and patch banners |
 | TP4 rollout XPlane, run 149c | [decode-only session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity) | Decode program, RPA, collectives, sampling, host engine window |
-| Optimized trainer XPlane, run 136 | [trainer session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-136/tensorboard/plugins/profile/2026_08_30_05_57_04/?project=cloud-tpu-shared-capacity) | Packed/flash train program and collectives |
+| **Current trainer XPlane, run 152** | [trainer session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/tensorboard/plugins/profile/2026_08_31_08_55_05/?project=cloud-tpu-shared-capacity) | Direct evidence for the packed/flash actor program in the sustained endpoint |
+| Optimized TP4 trainer XPlane, run 136 | [trainer session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-136/tensorboard/plugins/profile/2026_08_30_05_57_04/?project=cloud-tpu-shared-capacity) | TP4 confirmation of the packed/flash train program and collectives |
 | TP4 phase timeline, run 149c | [Perfetto protobuf](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-149c/perf_traces/perfetto_trace_v2_1788157043.pb?project=cloud-tpu-shared-capacity) | Whole-cycle TP4 phase attribution |
 | TP1 phase timeline, run 154 | [Perfetto protobuf](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity) | Whole-cycle TP1 phase attribution |
 | TP1 diagnostic XPlane, run 154 | [decode-only session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity) | Profiler-failure diagnosis only; not valid for kernel shares |
@@ -527,8 +590,9 @@ whole-batch safety check in the sharded sampler. It survives even though the
 benchmark sampling policy is fixed and safe for the candidate path.
 
 The remaining model all-reduces are across the TP axis and appear after the
-attention/output projections. TP1 removes those by construction. This is the
-mechanism behind the measured topology gain.
+attention/output projections. TP1 removes those by construction. This is one
+directly observed mechanism behind the measured TP1-package gain; it does not
+quantify the separate contribution of the RPA tile changes.
 
 ### Roofline interpretation
 
@@ -538,18 +602,20 @@ the RPA custom calls consume roughly 45% of device self time but expose zero
 modeled FLOPs and bytes to the report. Consequently, the program-level
 arithmetic intensity and roofline efficiency omit the largest kernel family.
 
-The topology result is still consistent with the roofline:
+The observed package result and the TP mechanism are consistent with the
+roofline:
 
 | Topology | Benefit | Cost | Observed conclusion |
 |---|---|---|---|
-| TP4 x DP32 | Sharded weights and more requests per model replica | About one-fifth of decode leaf time in TP reductions | Slower matched rollout |
-| TP1 x DP128 | No TP model collectives | Full weights per chip, fewer requests per replica, 128-way DP control | About 6% rollout win, not a 20% win |
+| TP4 x DP32 | Sharded weights and more requests per model replica | About one-fifth of decode leaf time in TP reductions | Slower nearest-control rollout |
+| TP1 x DP128 | No TP model collectives | Full weights per chip, fewer requests per replica, 128-way DP control | TP1-plus-tiles package is about 6% lower in rollout, not 20% |
 | TP2 x DP64 | Potential middle point | Retains some TP communication | Worth one controlled scout |
 
-The difference between the TP4 collective share and the much smaller observed
-end-to-end win is expected. TP1 eliminates communication but gives back part
-of the benefit through less local batching/statistical multiplexing, different
-matmul shapes, full-model weight traffic, and greater DP fan-out.
+The TP4 collective share must not be equated to the much smaller package-level
+end-to-end delta. Even in a pure topology comparison, TP1 would give back part
+of the communication benefit through less local batching/statistical
+multiplexing, different matmul shapes, full-model weight traffic, and greater
+DP fan-out; here the RPA tile change is an additional confound.
 
 ### Optimized host rollout trace
 
@@ -588,10 +654,12 @@ move the same work between overlap and the end-of-rollout tail.
 
 ### Trainer and phase trace
 
-The current actor train wall is only about 9% of the cycle. Perfetto shows that
-roughly one-fifth of that train wall is gap between successive TPU microbatch
-envelopes. Even deleting every such gap is only an approximately 2% global
-ceiling; a realistic compiled-dispatch improvement is lower.
+The direct run-152 trainer XPlane is the primary actor-program record; run 136
+is a TP4 confirmation. The current actor train wall is only about 9% of the
+cycle. Perfetto shows that roughly one-fifth of that train wall is gap between
+successive TPU microbatch envelopes. Even deleting every such gap is only an
+approximately 2% global ceiling; a realistic compiled-dispatch improvement is
+lower.
 
 Advantage/reward and weight synchronization are each below 1% of the current
 cycle. They should remain correctness-monitored but are no longer primary
@@ -623,15 +691,15 @@ the action is proposed headroom rather than a change already present in run
 
 | Item | Direct trace or log evidence | Proposed next update mechanism | Mapping to the 23b-versus-152 comparison tables |
 |---:|---|---|---|
-| 1. Remove sampling guard | [149c decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity) | **Our patch:** add a statically selected sampling executable; an optional config selector chooses it. This is not landed in 152. | Held-constant row **Sampling contract**; shared-patch row **`patch_sharded_sampling.py`**. No landed difference row. |
-| 2. Retune TP1 RPA | [149c valid decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [154 diagnostic TP1 XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity) | **Config:** sweep `RPA_V3_DECODE_BLOCK_SIZES`; no new kernel patch if the existing forwarding patch remains active. | Config-difference row **RPA decode block tuple**; held-constant row **KV page**; shared-patch row **`patch_rpa_blocks.py`**. |
+| 1. Remove sampling guard | [149c decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity) | **Our patch:** add a statically selected sampling executable; an optional config selector chooses it. Run 152 lands `_SS_PADFIX`, but not this static-plan change. | Held-constant row **Sampling contract**; revised shared-patch row **`patch_sharded_sampling.py`**. `_SS_PADFIX` is the landed precursor; removal of the residual `jnp.all`/`lax.cond` guard is proposed headroom. |
+| 2. Validate/refine TP1 RPA tiles | [149c valid decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [154 diagnostic TP1 XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity) | **Config:** sweep one of the decode/mixed/prefill RPA tuples at a time; no new kernel patch if forwarding remains active. | Config-difference rows **RPA decode block tuple**, **RPA mixed block tuple**, and **RPA prefill block tuple**; held-constant row **KV page**; shared-patch row **`patch_rpa_blocks.py`**. The TP1-specific tiles are already landed, but lack valid TP1 kernel evidence. |
 | 3. Split Pathways wait | [23b baseline decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_22_06_21_47/?project=cloud-tpu-shared-capacity); [149c optimized decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity) | **Our measurement patch first; our performance patch second:** add cross-layer correlation buckets, then change transfer/launch behavior only if a bucket is material. | Config rows **Continue-decode depth** and **Maximum batched tokens** plus 152-only patch row **`patch_host_extract.py`** explain the changed envelope. The proposed Pathways correlation has no landed row. |
 | 4. DP128 fan-out/tail | [23b baseline decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_22_06_21_47/?project=cloud-tpu-shared-capacity); [149c TP4 decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [154 TP1 diagnostic XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity) | **Our measurement/performance patch:** instrument rank tails and command counts; batch messages or change routing only after attribution. The DP scale itself is config. | Config rows **Rollout data parallelism** and **DP request routing**; 152-only patch row **`patch_dp_rr_routing.py`**. |
-| 5. TP2 crossover scout | [149c TP4 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-149c/perf_traces/perfetto_trace_v2_1788157043.pb?project=cloud-tpu-shared-capacity); [154 TP1 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity) | **Config only:** set TP2 x DP64. No code patch is proposed for the first scout. | Config rows **Rollout tensor parallelism** and **Rollout data parallelism**. |
-| 6. Actor dispatch gaps | [23b trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/tensorboard/plugins/profile/2026_08_22_06_27_19/?project=cloud-tpu-shared-capacity); [136 optimized trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-136/tensorboard/plugins/profile/2026_08_30_05_57_04/?project=cloud-tpu-shared-capacity) | **Our patch:** compile the microbatch loop or overlap already-compiled dispatches. The first proposal does not change batch flags. | Config rows **Packed-token budget** and **Trainer attention**; held-constant row **Microbatches**; 152-only patch rows **`patch_packing_knob.py`**, **`patch_packer_fast.py`**, and **`patch_flash_sa.py`**. The new compiled loop has no landed row. |
-| 7. Phase transitions | [149c TP4 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-149c/perf_traces/perfetto_trace_v2_1788157043.pb?project=cloud-tpu-shared-capacity); [154 TP1 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity); [152 phasetime logs](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/phasetime?project=cloud-tpu-shared-capacity) | **Our patch:** tighten future ownership and phase handoffs. Existing async modes remain config-selected implementations. | Config rows **Reward overlap mode** and **Logprob overlap mode**; 152-only patch rows **`patch_async_detok.py`**, **`patch_async_logprobs.py`**, **`patch_async_reward.py`**, **`patch_jit_unroll.py`**, and **`patch_sync_keepkv.py`**. |
+| 5. TP2 crossover scout | [149c TP4 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-149c/perf_traces/perfetto_trace_v2_1788157043.pb?project=cloud-tpu-shared-capacity); [154 TP1 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity) | **Config only:** set TP2 x DP64 while retaining the current VMEM-safe TP1 tile set for the first strict scout. No code patch is proposed. | Config rows **Rollout tensor parallelism**, **Rollout data parallelism**, and the three **RPA** rows. |
+| 6. Actor dispatch gaps | [23b trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/tensorboard/plugins/profile/2026_08_22_06_27_19/?project=cloud-tpu-shared-capacity); [152 direct trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/tensorboard/plugins/profile/2026_08_31_08_55_05/?project=cloud-tpu-shared-capacity) | **Our patch:** compile the microbatch loop or overlap already-compiled dispatches. The first proposal does not change batch flags. | Config rows **Packed-token budget** and **Trainer attention**; held-constant rows **Microbatches** and **Trainer structure**; 152-only patch rows **`patch_packing_knob.py`**, **`patch_packer_fast.py`**, and **`patch_flash_sa.py`**. The new compiled loop has no landed row. |
+| 7. Phase transitions | [149c TP4 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-149c/perf_traces/perfetto_trace_v2_1788157043.pb?project=cloud-tpu-shared-capacity); [154 TP1 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity); [152 phasetime logs](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/phasetime?project=cloud-tpu-shared-capacity) | **Our patch:** tighten future ownership and phase handoffs. Existing async modes remain config-selected implementations. | Config rows **Math-verification processes**, **Answer extraction mode**, **Reward overlap mode**, and **Logprob overlap mode**; patch rows **`patch_reward_parallel.py`**, **`patch_async_detok.py`**, **`patch_async_logprobs.py`**, **`patch_fast_extract.py`**, **`patch_async_reward.py`**, **`patch_gc_sync.py`**, **`patch_jit_unroll.py`**, and **`patch_sync_keepkv.py`**. |
 | 8. Isolated rollout stall | [152 phasetime logs](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/phasetime?project=cloud-tpu-shared-capacity); [152 TensorBoard artifacts](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/tensorboard?project=cloud-tpu-shared-capacity) | **Our measurement patch only:** add a threshold-triggered flight recorder. No mitigation is selected yet. | No landed config or patch row: this is a tail event observed on the complete 152 endpoint. No trace caught the stall, so these phase/TensorBoard logs are the strongest available evidence. |
-| 9. Fix TP1 profiling | [154 failed/diagnostic TP1 XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity); [149c valid TP4 reference XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity) | **Profiling config plus our instrumentation patch:** move the capture trigger after reshard/setup; patch the profiler only if sequencing cannot express that. No performance credit. | Config rows **Phased rollout profiler** and **Trainer XPlane**; 152-only row **`patch_profiler_fix.py`** is related trainer compatibility but does **not** fix this TP1 phased-capture race. The proposed fix has no landed row. |
+| 9. Fix TP1 profiling | [154 failed/diagnostic TP1 XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity); [149c valid TP4 reference XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [152 direct trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/tensorboard/plugins/profile/2026_08_31_08_55_05/?project=cloud-tpu-shared-capacity) | **Profiling config plus our instrumentation patch:** move the phased capture trigger after reshard/setup; patch the profiler only if sequencing cannot express that. No performance credit. | Config row **Phased rollout profiler** and held-constant row **Trainer profile request**; `patch_profiler_fix.py` fixes Tunix trainer-window compatibility but does **not** fix the TP1 phased-capture race. The proposed phased fix has no landed row. |
 
 ### 1. Remove the per-token cross-DP sampling guard
 
@@ -690,42 +758,52 @@ Validation:
 Public source context:
 [TPU Inference sampling](https://github.com/vllm-project/tpu-inference/blob/a32e183a676cf428cb1cea953f58fdd616accb3e/tpu_inference/layers/jax/sample/sampling.py#L68-L137).
 
-### 2. Retune RPA for TP1 rather than inheriting the TP4 winner
+### 2. Validate and refine the TP1-specific RPA tiles
 
 Evidence for headroom:
 
 - RPA is about 45% of TP4 decode device self time, the largest leaf family.
-- The trace proves that the TP4 winner reaches the kernel.
-- TP1 changes head partitioning, local batch, KV ownership, and model shape.
-  There is no valid TP1 device trace proving that the TP4 tile remains best.
+- The trace proves that the TP4 `1,8192,1,4096` decode tuple reaches its
+  kernel.
+- Run 152 does not inherit that tuple. It deliberately switches decode to
+  `1,2048,1,2048` and adds mixed/prefill `512,1024,256,512`; the manifest
+  records the latter as a TP1 VMEM-safety fix for eight KV heads per core.
+- There is no valid TP1 device trace proving the landed TP1 tuples are active
+  in the intended kernels or locally optimal.
 
 Proposed solution:
 
-Run an isolated, randomized sweep on the exact TP1 stack. Pin every other
-knob, especially KV page size, token budget, and continue-decode depth.
+First obtain a valid profile of the exact TP1 control. Then run an isolated,
+randomized sweep on that stack. Pin every other knob, especially KV page size,
+token budget, and continue-decode depth, and vary only one RPA family at a
+time.
 
 ```bash
 export VLLM_BLOCK_SIZE=128
+export RPA_V3_MIXED_BLOCK_SIZES="512,1024,256,512"
+export RPA_V3_PREFILL_BLOCK_SIZES="512,1024,256,512"
 
-# One value per run; order should be randomized.
-export RPA_V3_DECODE_BLOCK_SIZES="1,4096,1,4096"
-export RPA_V3_DECODE_BLOCK_SIZES="1,8192,1,4096"   # current control
-export RPA_V3_DECODE_BLOCK_SIZES="1,16384,1,4096"
+# One VMEM-validated decode value per run; order should be randomized.
+export RPA_V3_DECODE_BLOCK_SIZES="1,1024,1,1024"
+export RPA_V3_DECODE_BLOCK_SIZES="1,2048,1,2048"   # exact 152 control
+export RPA_V3_DECODE_BLOCK_SIZES="1,4096,1,2048"
 ```
 
-If HBM permits, add a second rung that varies only the compute tile after the
-load-tile winner is known.
+Reject a candidate before benchmarking if its static VMEM estimate exceeds the
+limit. After the decode winner is known, vary mixed and prefill independently;
+do not collapse all three tile changes into one timing.
 
 Why it can improve performance:
 
 A 5-10% RPA improvement is worth roughly 2-5% of decode device time. After
 host/phase dilution, plan for 0.5-1.5 baseline units. The opportunity is
-meaningful because RPA is large; it is not guaranteed because the current tile
-is already tuned for the closest topology.
+meaningful because RPA is large; it is not guaranteed because the current
+values are already deliberate TP1 safety tiles.
 
 Validation:
 
-- Require a valid TP1 profile and read the custom-call name from the trace.
+- Require a valid TP1 profile and read the decode, mixed, and prefill
+  custom-call configurations from the trace.
 - Compare rollout time per generated token, not only time per step.
 - Hold prompt arrays and semantic bands fixed.
 - Require at least several steady observations per rung and repeat the winner.
@@ -889,9 +967,10 @@ Public source context:
 Evidence for headroom:
 
 - TP4 spends about 20% of decode leaf time in TP model/sampling reductions.
-- TP1 removes those collectives but improves rollout by only about 6%, showing
-  that full-weight traffic, smaller per-replica batches, and DP fan-out return
-  much of the theoretical gain.
+- TP1 removes those collectives, while the measured TP1-plus-tiles package is
+  about 6% lower in rollout. The tile confound prevents treating 6% as the
+  pure topology benefit; full-weight traffic, smaller per-replica batches, and
+  DP fan-out are still the expected topology costs.
 - TP2 is the only unmeasured point between the two regimes.
 
 Proposed configuration:
@@ -903,8 +982,9 @@ Proposed configuration:
 +rollout_data_parallelism=64
 ```
 
-Keep sampling, page size, RPA blocks, token budget, and decode depth identical
-for the first scout. Retune RPA only after the topology comparison.
+Keep sampling, page size, token budget, decode depth, and all three current
+TP1 RPA tuples identical for the first scout. Retune RPA only after that strict
+topology comparison.
 
 Why it can improve performance:
 
@@ -1090,7 +1170,7 @@ TP1 RPA and sampling estimates remain extrapolations from TP4.
 | P0 | Static/host-validated sampling plan | Current TP1 endpoint | DP `reduce_and` gone; semantic gates pass |
 | P0 | Pathways wait-bucket correlation | Current TP1 endpoint | Opaque wait closes into queue/device/tail/transfer/finalize buckets |
 | P0 | Valid TP1 decode capture | Same TP1 binary | Steady decode module, not `jit_split`, dominates session |
-| P1 | TP1 RPA load-tile sweep | Current `8192/4096` tile | Repeated per-token rollout win and correct kernel name |
+| P1 | TP1 RPA tile validation/sweep | Current decode `1,2048,1,2048` and mixed/prefill `512,1024,256,512` | Repeated per-token rollout win and correct kernel names |
 | P1 | TP2 x DP64 scout | Interleaved TP1 x DP128 | Repeated matched-work win |
 | P1 | DP rank/tail instrumentation | Current TP1 endpoint | Identifies material skew or fan-out cost |
 | P2 | Batched DP commands or load-aware routing | Instrumented TP1 | Lower host critical path without worse tail |
@@ -1102,7 +1182,7 @@ TP1 RPA and sampling estimates remain extrapolations from TP4.
 | Opportunity | Evidence strength | Plausible reduction in 23b-baseline units | Notes |
 |---|---|---:|---|
 | Remove DP sampling guard | Strong TP4 trace/source; TP1 timing missing | 0.5-1.5 baseline units | First code target |
-| TP1 RPA retune | Strong leaf share; no valid TP1 kernel trace | 0.5-1.5 baseline units | Requires profiler fix |
+| TP1 RPA validation/retune | Strong TP4 leaf share; no valid TP1 kernel trace | 0.5-1.5 baseline units | Current TP1 safety tiles are landed; requires profiler fix |
 | Pathways wait split / compact result | Strong opaque-wait evidence; bucket split missing | 0-1.5 baseline units | No credit until transfer/finalize is measured |
 | DP128 fan-out/tail | Strong structural case; instrumentation missing | 0.5-1.5 baseline units | Measure before patching |
 | TP2 crossover | Direct topology model, no TP2 result | 0-1.5 baseline units | Can be negative |
@@ -1133,18 +1213,19 @@ decode-kernel win and a demonstrated DP-control/tail win.
 
 Run 23b is the baseline, and its steady-step median is the 100-unit reference.
 Run 152 is the sustained current endpoint at approximately 53 baseline units.
-Run 154 explains the topology result at phase level; run 149c explains the
-closest available optimized decode program; run 136 remains the optimized
-trainer reference.
+Run 154 supplies the same-config phase timeline; run 149c explains the closest
+available optimized decode program at TP4. The direct run-152 XPlane is the
+current trainer reference, with run 136 as TP4 corroboration.
 
-TP1 is a real but modest win. The large reduction from the 23b baseline came
-from the software stack. From here, rollout still owns roughly six-sevenths of
-the cycle, and the most defensible next story is:
+The final TP1-plus-tile package is a real but modest win. The large reduction
+from the 23b baseline came from the earlier software stack. From here, rollout
+still owns roughly six-sevenths of the cycle, and the most defensible next
+story is:
 
 1. remove the per-token cross-DP sampling guard;
 2. split the Pathways-mediated wait into queue/device/tail/transfer buckets;
 3. obtain a valid TP1 decode trace;
-4. retune the largest leaf, RPA, for TP1;
+4. validate and refine the already-landed TP1 RPA tiles;
 5. measure and reduce DP128 fan-out/tail behavior;
 6. scout TP2 as the only plausible topology crossover;
 7. spend trainer effort only on the measured microbatch gaps.
