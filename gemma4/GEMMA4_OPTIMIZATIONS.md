@@ -4,6 +4,8 @@
 Reference points: our champion base (tp2×dp32 half-slice) global median ~125 s;
 **tianyu-rl-g4-003 (tp1×dp128 full-slice) global ~51 s warm** — the target stack.
 
+Headroom map: [`GEMMA4_HEADROOM_ANALYSIS.md`](GEMMA4_HEADROOM_ANALYSIS.md) — roofline vs measured, headroom decomposition H1-H8, experiment->headroom ladder.
+
 Control-plane companion: [`PATHWAYS_DP_BOTTLENECK_SUMMARY.md`](PATHWAYS_DP_BOTTLENECK_SUMMARY.md)
 summarizes the DP scheduling and Pathways parent-process bottleneck with diagrams.
 
