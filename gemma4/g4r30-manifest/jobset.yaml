@@ -1,0 +1,270 @@
+apiVersion: jobset.x-k8s.io/v1alpha2
+kind: JobSet
+metadata:
+  name: "g4r30"
+  namespace: ubench-regression-tests
+  labels:
+    kueue.x-k8s.io/queue-name: "multislice-queue"
+spec:
+  coordinator:
+    replicatedJob: pathways-head
+  network:
+    enableDNSHostnames: true
+    publishNotReadyAddresses: true
+  failurePolicy:
+    maxRestarts: 5
+  startupPolicy:
+    startupPolicyOrder: InOrder
+  successPolicy:
+    operator: All
+    targetReplicatedJobs:
+    - pathways-head
+  replicatedJobs:
+  - name: pathways-head
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          kueue.x-k8s.io/queue-name: "multislice-queue"
+      spec:
+        parallelism: 1
+        completions: 1
+        backoffLimit: 0
+        template:
+          metadata:
+            labels:
+              kueue.x-k8s.io/podset: pathways-head
+              kueue.x-k8s.io/queue-name: "multislice-queue"
+            annotations:
+              kubectl.kubernetes.io/default-container: jax-tpu
+              gke-gcsfuse/volumes: "true"
+          spec:
+            restartPolicy: OnFailure
+            priorityClassName: "medium"
+            hostNetwork: true
+            hostIPC: true
+            dnsPolicy: ClusterFirstWithHostNet
+            nodeSelector:
+              cloud.google.com/gke-nodepool: "cpu-np"
+            affinity:
+              podAntiAffinity:
+                preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    topologyKey: kubernetes.io/hostname
+                    labelSelector:
+                      matchExpressions:
+                      - key: jobset.sigs.k8s.io/replicatedjob-name
+                        operator: In
+                        values: ["pathways-head"]
+            containers:
+            - name: jax-tpu
+              image: "gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:f7c957d0b286e03966fdd6f9b15e7609fae8460a933a9da0b9fbab3e04723c94"
+              command:
+              - bash
+              - -c
+              - |
+                echo Pathways Helm Start: $(date);
+                _sigterm() (kill -SIGTERM $! 2>/dev/null;);
+                trap _sigterm SIGTERM;
+                echo "Executing payload from /workload/launcher/launch-workload.sh..."
+                ( bash /workload/launcher/launch-workload.sh ) & PID=$!;
+                while kill -0 $PID 2>/dev/null;
+                    do sleep 5;
+                done;
+                wait $PID;
+                EXIT_CODE=$?;
+                echo Pathways Helm End: $(date);
+                echo EXIT_CODE=$EXIT_CODE;
+                exit $EXIT_CODE
+              env:
+              - name: JAX_PLATFORMS
+                value: "proxy,cpu"
+              - name: PATHWAYS_HEAD
+                value: "g4r30-pathways-head-0-0.g4r30"
+              - name: JAX_BACKEND_TARGET
+                value: grpc://g4r30-pathways-head-0-0.g4r30:29000
+              - name: JOB_IDENTIFIER
+                value: "g4r30"
+              - name: ARTIFACT_DIR
+                value: "gs://ubench-logs"
+              - name: JAX_COMPILATION_CACHE_DIR
+                value: "gs://ubench-logs/compilation_cache/qwen3-0.6b/rl_repro_jax_tpu7x_20260730"
+              - name: SKIP_JAX_PRECOMPILE
+                value: "1"
+              resources:
+                requests:
+                  cpu: "28"
+                  memory: 130G
+                limits:
+                  cpu: "44"
+                  memory: 170G
+              securityContext:
+                privileged: true
+              volumeMounts:
+              - name: workload-launcher
+                mountPath: /workload/launcher
+              - name: workload-patches
+                mountPath: /workload/patches
+              - name: shared-tmp
+                mountPath: /tmp
+            initContainers:
+            - name: pathways-rm
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260730-jax_0.10.2"
+              restartPolicy: Always
+              env:
+              - name: HOST_ADDRESS
+                value: "g4r30-pathways-head-0-0.g4r30"
+              args:
+              - --server_port=29001
+              - --node_type=resource_manager
+              - --gcs_scratch_location=gs://ubench-logs/compilation_cache/qwen3-0.6b/rl_repro_pathways_tpu7x_20260730
+              - --instance_count=1
+              - --instance_type=tpu7x:4x4x4
+              resources:
+                requests:
+                  cpu: "8"
+                  memory: 24G
+                limits:
+                  cpu: "16"
+                  memory: 64G
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            - name: pathways-proxy
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/proxy_server:20260730-jax_0.10.2"
+              restartPolicy: Always
+              env:
+              - name: PATHWAYS_HEAD
+                value: "g4r30-pathways-head-0-0.g4r30"
+              args:
+              - --server_port=29000
+              - --resource_manager_address=g4r30-pathways-head-0-0.g4r30:29001
+              - --gcs_scratch_location=gs://ubench-logs/compilation_cache/qwen3-0.6b/rl_repro_pathways_tpu7x_20260730
+              - --xla_tpu_dvfs_p_state=7
+              - --xla_tpu_scoped_vmem_limit_kib=65536
+              - --xla_tpu_num_sparse_cores_for_gather_offloading=1
+              - --xla_tpu_bf16_emission_mode=NATIVE_EMISSION
+              - --xla_tpu_enable_sparse_core_reduce_scatter_v2=true
+              - --xla_tpu_enable_sparse_core_collective_offload_all_gather=true
+              - --xla_tpu_enable_sparse_core_collective_offload_2d_all_gather=true
+              - --xla_tpu_use_tc_device_shape_on_sc=True
+              - --xla_sc_disable_megacore_partitioning=True
+              - --xla_tpu_enable_async_collective_fusion_fuse_all_gather=false
+              - --xla_enable_async_all_gather=true
+              - --xla_tpu_prefer_async_allgather_to_allreduce=true
+              - --xla_tpu_enable_sparse_core_collective_offload_all_reduce=true
+              - --xla_tpu_enable_sparse_core_collective_offload_reduce_scatter=true
+              - --xla_tpu_enable_sparse_core_collective_offload_3d_all_gather=true
+              - --xla_tpu_use_single_sparse_core_for_all_gather_offload=true
+              - --xla_tpu_enable_concurrent_sparse_core_offloading=true
+              - --xla_tpu_enable_offloading_gather_to_sparsecore=true
+              - --xla_tpu_sparse_core_all_gather_latency_multiplier=1
+              - --xla_tpu_sparse_core_reduce_scatter_latency_multiplier=3
+              - --xla_tpu_enable_sparse_core_collective_aggregator=true
+              - --xla_tpu_enable_latency_hiding_layer_scheduler=true
+              - --xla_tpu_scheduler_percent_shared_memory_limit=150
+              - --xla_tpu_enable_layer_scheduler_for_dependent_collectives=true
+              - --xla_tpu_enable_sparse_core_collective_offload_nd_reduce_scatter=true
+              - --xla_tpu_pcie_bandwidth_multiplier=0.03
+              - --xla_tpu_enable_sparse_core_offload_queuing_in_lhs=true
+              - --xla_tpu_enable_multi_compute_overlap_in_layer_scheduler=false
+              - --xla_tpu_enable_3d_reduce_scatter_decomposer=false
+              resources:
+                requests:
+                  cpu: "8"
+                  memory: 32G
+                limits:
+                  cpu: "16"
+                  memory: 64G
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            volumes:
+            - name: shared-tmp
+              hostPath:
+                path: /tmp
+                type: DirectoryOrCreate
+            - name: workload-launcher
+              configMap:
+                name: "g4r30-launcher"
+            - name: workload-patches
+              configMap:
+                name: "g4r30-patches"
+  - name: worker
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          kueue.x-k8s.io/queue-name: "multislice-queue"
+      spec:
+        parallelism: 16
+        completions: 16
+        backoffLimit: 32
+        completionMode: Indexed
+        template:
+          metadata:
+            annotations:
+              alpha.jobset.sigs.k8s.io/exclusive-topology: cloud.google.com/gke-nodepool
+            labels:
+              kueue.x-k8s.io/podset: worker
+              kueue.x-k8s.io/queue-name: "multislice-queue"
+          spec:
+            restartPolicy: OnFailure
+            priorityClassName: "medium"
+            hostNetwork: true
+            hostIPC: true
+            dnsPolicy: ClusterFirstWithHostNet
+            nodeSelector:
+              cloud.google.com/gke-tpu-topology: "4x4x4"
+              cloud.google.com/gke-tpu-accelerator: tpu7x
+            containers:
+            - name: pathways-worker
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260730-jax_0.10.2"
+              env:
+              - name: PATHWAYS_HEAD
+                value: "g4r30-pathways-head-0-0.g4r30"
+              - name: MEGASCALE_SLICE_ID
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/job-index']
+              - name: MEGASCALE_NUM_SLICES
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/replicatedjob-replicas']
+              - name: JOBSET_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/jobset-name']
+              - name: MEGASCALE_COORDINATOR_ADDRESS
+                value: "g4r30-pathways-head-0-0.g4r30"
+              - name: TPU_SKIP_MDS_QUERY
+                value: "true"
+              args:
+              - --server_port=29005
+              - --resource_manager_address=g4r30-pathways-head-0-0.g4r30:29001
+              - --gcs_scratch_location=gs://ubench-logs/compilation_cache/qwen3-0.6b/rl_repro_pathways_tpu7x_20260730
+              - --enable_metrics_collection=true
+              - --xla_tpu_use_enhanced_launch_barrier=true
+              ports:
+              - containerPort: 29005
+                protocol: TCP
+              - containerPort: 29006
+                protocol: TCP
+              - containerPort: 8471
+                protocol: TCP
+              - containerPort: 8080
+                protocol: TCP
+              resources:
+                limits:
+                  google.com/tpu: "4"
+                requests:
+                  google.com/tpu: "4"
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            volumes:
+            - name: shared-tmp
+              hostPath:
+                path: /tmp
+                type: DirectoryOrCreate
