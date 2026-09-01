@@ -152,6 +152,18 @@ LENDIST unchanged across the fix (content changed, not length) — so the perf l
 - Slice = 128 devices (2 cores/chip x 64 chips); sampler_fraction=0.5 -> our sweep was on 64 devices.
   DL_SFRAC knob added; g4r12 = tp4 + full-slice (TFRAC=SFRAC=1.0) -> dp32, queued.
 
+## SWEEP RESULTS BATCH 2 (2026-09-01 morning)
+- **g4r16b flash trainer: WIN ~-3-6s, adopt (pending composition).** Clean warm 111.0/119.3/119.7 vs
+  base 117-128.6; 111.0 = new best clean step. Shim held (no splash crash). Tails unchanged.
+- **g4r17a remat=minimal: NEUTRAL, drop.** Clean warm 115.4/117.6/122.9 (noise vs base); backward is not
+  recompute-bound. Fit in memory on half-slice. One 504s KV-wave step (worst ever seen) skews its mean.
+- **g4r18 tp1xdp128 full-slice: SAME step-1 sync OOM as tp4 (g4r12r2). 9 restarts over 8h, killed.**
+  => FULL-SLICE SERIAL MODE IS BROKEN GENERALLY (weight-sync transients on shared devices), independent
+  of rollout mesh. Fixing it needs sync transient reduction (or staged sync); g4r12r3 (HBM 0.2 TMBS 2)
+  queued as a last cheap try. The productive path: compose jit_unroll + flash on half-slice.
+- Launched: g4r17c (VTMO=2+256procs), g4r16e (cd256). Remaining: g4r17b, g4r12r3, then composition run
+  (base + JITU + flash = champion candidate g4r19).
+
 ## TIANYU GROUND TRUTH UPDATE (2026-08-31 evening)
 - New runs rl-156..159 (all Aug 31, all QWEN3 -- no gemma4 from tianyu). rl-159 warm: global 57.5-59.0,
   rollout ~51, **compute_rewards 0.5s** (ours: 8-10s median + spikes to 252s, SAME dataset).
