@@ -434,6 +434,7 @@ them out of the public report.
 | TP1 phase timeline, run 154 | [Perfetto protobuf](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity) | Whole-cycle TP1 phase attribution |
 | TP1 diagnostic XPlane, run 154 | [decode-only session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity) | Profiler-failure diagnosis only; not valid for kernel shares |
 | Sustained TP1 logs, run 152 | [run artifacts](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152?project=cloud-tpu-shared-capacity) | Current-endpoint phase, length, reward, and TensorBoard distributions |
+| DP-scheduler architecture cross-check | [Gemma G4R7B end-to-end study](https://github.com/alisachen-google/tpu-rl/blob/f259b6895cfb641286a189183a3d0e8fb4e61647/gemma4/G4R7B_DP_SCHEDULING_E2E.md) | Explains the shared parent/child scheduler, padding, Pathways, and barrier structure; Gemma timings are not imported into the Qwen budget |
 
 Open the XPlane session by downloading the session directory and pointing
 TensorBoard/XProf at its parent:
@@ -474,11 +475,146 @@ was not ready for the caller; it does not say whether the missing time was TPU
 execution, Pathways admission/launch, a slow DP rank, host-buffer transfer, or
 CPU deserialization.
 
-The baseline trace also makes the DP traffic concrete. A full window contains
-128 `_send_command` and 128 `_get_result` calls on the engine thread. With
-DP32, that is four rank-wide command/response rounds per window. The nested
-send/receive spans are already inside scheduler wall and therefore must not be
-summed as an additional cost.
+#### Evidence boundary for the combined host analysis
+
+The [G4R7B DP-scheduling study](https://github.com/alisachen-google/tpu-rl/blob/f259b6895cfb641286a189183a3d0e8fb4e61647/gemma4/G4R7B_DP_SCHEDULING_E2E.md)
+provides a code-level end-to-end model for the same TPU Inference Pathways
+architecture. Its pinned source revision is newer than the run-23b image, so
+it is used as an architectural cross-check, not as proof of byte-identical
+code. The Qwen trace contains the corresponding `DPScheduler`, `_send_command`,
+`_get_result`, `_prepare_inputs`, `_process_continue_decode_outputs`, and
+Pathways host-buffer spans, which corroborates the control flow.
+
+| Evidence class | What may be concluded here |
+|---|---|
+| **Qwen-measured** | Run-23b component shares, 15-window distribution, command/result counts, and the extraction-driven outlier |
+| **Shared architecture, trace-corroborated** | One engine/model-runner parent, one `DPScheduler` parent, one CPU scheduler child per logical DP rank, and one global JAX/Pathways SPMD decode per window |
+| **Gemma-measured only** | G4R7B's absolute window spans, occupancy sample, host-buffer event counts, scheduler stalls, and sampled CPU use; none enter Qwen's normalized budget |
+| **Qwen hypothesis requiring new counters** | How much of Qwen's `device_get` is queueing, slow-rank tail, device execution, lookup, transfer, or host materialization |
+
+The most important correction from the shared architecture is that DP32 does
+not mean 32 independent model engines or 32 Pathways clients. Run 23b has 32
+logical DP scheduler children, but the parent merges their decisions into one
+TP4 x DP32 program over all 128 sampler devices. Likewise, TP1 x DP128 has 128
+scheduler children feeding one global program, not 128 model engines.
+
+#### What one long Qwen host window is waiting for
+
+The host critical path is a sequence of three rendezvous around one global
+device call:
+
+```text
+request admission (outside most profiled engine windows)
+  stock 23b: query many ranks per request; 152: direct round-robin assignment
+        |
+        v
+parent sends SCHEDULE to D CPU scheduler children
+        |
+        v
+barrier 1 = wait for the slowest scheduler child
+        |
+        v
+parent merges outputs, groups requests by sticky rank,
+and builds rank-major D x bucket(busiest_rank) host arrays
+        |
+        v
+device_put + one global JAX/Pathways continue-decode submission
+        |
+        v
+barrier 2 = device_get waits for global completion and host visibility
+        |
+        v
+parent restores request order, trims EOS, updates host state,
+and splits the global output back into D rank-local objects
+        |
+        v
+parent sends UPDATE_FROM_OUTPUT to D scheduler children
+        |
+        v
+barrier 3 = wait for the slowest scheduler update before the next window
+```
+
+This can be summarized without double-counting overlapping trace spans as:
+
+```text
+T_window ~= max(rank schedule)
+          + parent merge/pack/put
+          + Pathways queue/launch
+          + global device completion/tail
+          + host-buffer fan-in/materialization
+          + parent output/state work
+          + max(rank update)
+```
+
+The children schedule and update in parallel, so their durations are not
+summed; each barrier pays the maximum. Conversely, the global `device_get`
+wait is inclusive of several middle terms and must not be added to a sampled
+device interval. This is why a long host-visible window can coexist with no
+large serial Python leaf and without saturating all head CPU cores. G4R7B
+independently observed that low-core-use, long-wall pattern; Qwen still needs
+sampled CPU counters before making the same utilization claim.
+
+| Critical-path stage | Direct run-23b evidence | Architectural interpretation and scaling |
+|---|---|---|
+| Admission before decode windows | The manifest uses the stock state-aware rank finder; the 15-window table does not isolate admission | The stock path performs per-request rank-state probes, exposing approximately `O(requests * DP)` Pipe traffic. Run 152's `DP_ROUTING=rr` removes these all-rank queries. |
+| Schedule and update rendezvous | Scheduler, grammar, and output-update envelopes total about 3.2% of a median window | A parent fans out to DP children and waits for every response twice per steady window; latency follows the slowest child, while serialization/message work grows with DP. |
+| Merge, rank-major packing, and input construction | `_prepare_inputs` is about 2% | One parent groups all requests, finds the busiest rank, and pads every rank to the same supported request bucket before creating global NumPy/JAX metadata. |
+| Global execution and result visibility | `device_get` is about 82% | One SPMD program spans the whole TP4 x DP32 mesh. The wait can include proxy admission, launch, the slowest device/rank, HostBufferStore lookup, transfer, and host materialization. |
+| Parent output processing | First-EOS extraction is about 5.5%; output-object work is about 1% | One parent restores order and mutates global request/token/attention state. This remains serial even though the preceding model rows were data parallel. |
+| Split and child-state update | Included in the scheduler envelope and command/result counts | The parent constructs rank-local output objects, sends one to every child, and cannot begin the next window until the slowest child updates KV/request state. |
+
+The baseline trace also makes the per-window DP traffic concrete. A full
+window contains 128 `_send_command` and 128 `_get_result` calls on the engine
+thread. With DP32, that is four rank-wide command/response rounds per window.
+The shared architecture establishes a minimum steady sequence of `SCHEDULE`
+and `UPDATE_FROM_OUTPUT`; the two extra baseline rounds are consistent with
+the grammar and unfinished-request broadcasts visible in the traced control
+path. The nested send/receive spans are already inside scheduler wall and
+therefore must not be summed as an additional cost.
+
+#### Why higher DP can lengthen host orchestration
+
+For this workload, the configured rollout contains 2,048 requests. The
+average initial work per logical rank falls from 64 requests at DP32 to 16 at
+DP128, but several surrounding structures do not shrink with useful work:
+
+| Host/control term | Scaling model | Qwen implication |
+|---|---|---|
+| Stock admission probes | Approximately `O(requests * DP)` | A potentially material 23b setup cost; removed by 152 round-robin routing, though not isolated in the window shares |
+| Minimum schedule/update messages | `O(DP)` per window | Two mandatory rank-wide command/result rounds remain in 152 and quadruple in count from DP32 to DP128 |
+| Scheduler barriers | `max(child latency)` | More children increase exposure to a slow process, descheduling, pipe backpressure, or uneven KV/request state |
+| Maximum host-batch capacity | `DP x max_num_seqs` | With `max_num_seqs=256`, configured capacity grows from 8,192 slots at DP32 to 32,768 at DP128 for 2,048 real requests; persistent metadata should be audited and right-sized |
+| Executed request rows | `DP x bucket(max active requests on any rank)` | A single busy rank raises the padded shape for every rank; occupancy worsens as completion lengths diverge and ranks drain unevenly |
+| Result dependency | One global sharded result | Host progress waits for all required shards and their materialization, even if most ranks finish early |
+
+The `patch_padding_bucket.py` fix in 152 prevents a full token batch from
+rounding to the next oversized token bucket; it does **not** remove
+request-axis padding to the busiest DP rank. Similarly,
+`patch_host_extract.py` removes repeated first-EOS scans, but it does not
+compact the global result before `device_get` or eliminate the remaining
+single-parent request-state updates.
+
+#### Routing lesson: Qwen and Gemma are deliberately different
+
+The Gemma study found that naive round-robin routing regressed its DP64
+rollout because it discarded useful prefix/load locality. That result must not
+be copied blindly to Qwen. Run 152 combines `DP_ROUTING=rr` with explicitly
+disabled prefix caching and a homogeneous 2,048-request math batch; its patch
+rationale records the avoided all-rank probes as material at Qwen scale. The
+23b-to-152 comparison still cannot assign an isolated gain to routing because
+prefix caching, DP degree, window depth, and the rest of the host stack change
+together.
+
+The transferable rule is therefore conditional:
+
+- keep Qwen's low-overhead round robin as the current control;
+- do not restore per-request all-rank probes;
+- if rank-drain skew is material, test one periodically refreshed parent-side
+  load snapshot with bulk assignment;
+- if prefix caching is re-enabled, route all generations of a prompt as a
+  locality group and measure cache hit rate as well as rank tail;
+- judge routing on rollout median, mean, p90/p99, padded-row occupancy, and
+  completion/reward gates—not on scheduler microbenchmarks alone.
 
 #### What the Pathways planes do and do not prove
 
@@ -498,8 +634,11 @@ was CPU saturated. The defensible conclusions are:
 |---|---|---|
 | Pathways client CPU is the baseline bottleneck | **Not supported** | Native client work is distributed; no serial client leaf explains the engine window |
 | A Pathways-mediated remote wait is the dominant host-visible critical path | **Supported** | `device_get` owns about four-fifths of the baseline engine window |
-| DP scheduling is the primary bottleneck | **Rejected** | High-level DP scheduler wall is only about 3.2% of the baseline window |
+| Per-window DP schedule/update work is the primary bottleneck | **Rejected** | High-level DP scheduler wall is only about 3.2% of the baseline window; request admission occurs outside most profiled engine windows and is a separate term |
 | DP scheduling is meaningful scaling headroom | **Supported** | Rank command count scales with DP degree and remains on the critical thread |
+| DP32 means 32 independently progressing model engines | **Rejected** | The children own logical scheduler/KV state; one parent merges their work into one global Pathways model execution and result |
+| Slowest-rank tail or busiest-rank padding explains most of `device_get` | **Unresolved** | The architecture exposes both mechanisms, but the Qwen trace lacks per-rank completion and real-versus-padded-row counters |
+| Round robin is universally better than state-aware routing | **Rejected** | It avoids Qwen's all-rank admission probes, but the Gemma control shows that lost prefix/load locality can outweigh that saving in a different workload |
 | Host output extraction is meaningful baseline headroom | **Supported** | Median share is about 5.5%; the trace outlier is almost entirely extraction growth |
 | Async detokenization is a median critical-path bottleneck | **Not supported** | Aggregate CPU demand is visible on worker threads but overlaps the engine path |
 
@@ -560,10 +699,11 @@ count, so its two rank-wide rounds become 256 sends and receives. Scheduler
 wall rises versus optimized TP4 but remains secondary; this is a scaling tax
 to measure, not evidence that DP scheduling dominates.
 
-The larger `device_get` *share* in the optimized traces is healthy in context:
-host extraction and repeated control boundaries have been removed, so more of
-each deeper window is intentionally spent waiting for useful remote decode.
-It is not evidence that Pathways regressed.
+The larger `device_get` *share* in the optimized traces is mechanically
+consistent with removing host extraction and repeated control boundaries. It
+is not evidence that Pathways regressed, but it is also not proof that all of
+the wait is useful decode: queueing, rank tail, host-buffer fan-in, and
+materialization remain unresolved inside the inclusive span.
 
 ### TP4 decode device composition
 
@@ -629,7 +769,8 @@ The run-149c/run-154 host traces show:
 - Detokenization runs on asynchronous threads and largely overlaps the engine
   path.
 - The remaining large host risk is scale, not one obvious serial Python leaf:
-  TP1 increases the number of DP engines from 32 to 128.
+  TP1 increases the number of logical DP scheduler children from 32 to 128,
+  while still feeding one global Pathways model execution.
 
 This makes “optimize a random Python function” a weak next strategy. The next
 host profile must measure per-rank fan-out, queue depth, active-sequence
@@ -693,8 +834,8 @@ the action is proposed headroom rather than a change already present in run
 |---:|---|---|---|
 | 1. Remove sampling guard | [149c decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity) | **Our patch:** add a statically selected sampling executable; an optional config selector chooses it. Run 152 lands `_SS_PADFIX`, but not this static-plan change. | Held-constant row **Sampling contract**; revised shared-patch row **`patch_sharded_sampling.py`**. `_SS_PADFIX` is the landed precursor; removal of the residual `jnp.all`/`lax.cond` guard is proposed headroom. |
 | 2. Validate/refine TP1 RPA tiles | [149c valid decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [154 diagnostic TP1 XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity) | **Config:** sweep one of the decode/mixed/prefill RPA tuples at a time; no new kernel patch if forwarding remains active. | Config-difference rows **RPA decode block tuple**, **RPA mixed block tuple**, and **RPA prefill block tuple**; held-constant row **KV page**; shared-patch row **`patch_rpa_blocks.py`**. The TP1-specific tiles are already landed, but lack valid TP1 kernel evidence. |
-| 3. Split Pathways wait | [23b baseline decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_22_06_21_47/?project=cloud-tpu-shared-capacity); [149c optimized decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity) | **Our measurement patch first; our performance patch second:** add cross-layer correlation buckets, then change transfer/launch behavior only if a bucket is material. | Config rows **Continue-decode depth** and **Maximum batched tokens** plus 152-only patch row **`patch_host_extract.py`** explain the changed envelope. The proposed Pathways correlation has no landed row. |
-| 4. DP128 fan-out/tail | [23b baseline decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_22_06_21_47/?project=cloud-tpu-shared-capacity); [149c TP4 decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [154 TP1 diagnostic XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity) | **Our measurement/performance patch:** instrument rank tails and command counts; batch messages or change routing only after attribution. The DP scale itself is config. | Config rows **Rollout data parallelism** and **DP request routing**; 152-only patch row **`patch_dp_rr_routing.py`**. |
+| 3. Split Pathways wait | [23b baseline decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_22_06_21_47/?project=cloud-tpu-shared-capacity); [149c optimized decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [shared scheduler architecture](https://github.com/alisachen-google/tpu-rl/blob/f259b6895cfb641286a189183a3d0e8fb4e61647/gemma4/G4R7B_DP_SCHEDULING_E2E.md) | **Our measurement patch first; our performance patch second:** add cross-layer wait buckets plus padded-row/host-buffer volume, then change transfer, capacity sizing, or launch behavior only if the corresponding bucket is material. | Config rows **Continue-decode depth** and **Maximum batched tokens**, held row **Engine capacity controls**, and 152-only patches **`patch_host_extract.py`** and **`patch_padding_bucket.py`** explain the changed envelope. Correlation and result compaction are not landed. |
+| 4. DP128 fan-out/tail | [23b baseline decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_22_06_21_47/?project=cloud-tpu-shared-capacity); [149c TP4 decode XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity); [154 TP1 diagnostic XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity); [shared scheduler architecture](https://github.com/alisachen-google/tpu-rl/blob/f259b6895cfb641286a189183a3d0e8fb4e61647/gemma4/G4R7B_DP_SCHEDULING_E2E.md) | **Our measurement/performance patch:** instrument child barriers, serialized bytes, rank drain, and busiest-lane padding; then batch/fix-schema messages or test a once-per-window load snapshot. Do not restore per-request all-rank probes. | Config rows **Rollout data parallelism**, **DP request routing**, and **Prefix caching**; 152-only patches **`patch_dp_rr_routing.py`** and the prefix-control extension in **`patch_block_size.py`**. |
 | 5. TP2 crossover scout | [149c TP4 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-149c/perf_traces/perfetto_trace_v2_1788157043.pb?project=cloud-tpu-shared-capacity); [154 TP1 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity) | **Config only:** set TP2 x DP64 while retaining the current VMEM-safe TP1 tile set for the first strict scout. No code patch is proposed. | Config rows **Rollout tensor parallelism**, **Rollout data parallelism**, and the three **RPA** rows. |
 | 6. Actor dispatch gaps | [23b trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/tensorboard/plugins/profile/2026_08_22_06_27_19/?project=cloud-tpu-shared-capacity); [152 direct trainer XPlane](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/tensorboard/plugins/profile/2026_08_31_08_55_05/?project=cloud-tpu-shared-capacity) | **Our patch:** compile the microbatch loop or overlap already-compiled dispatches. The first proposal does not change batch flags. | Config rows **Packed-token budget** and **Trainer attention**; held-constant rows **Microbatches** and **Trainer structure**; 152-only patch rows **`patch_packing_knob.py`**, **`patch_packer_fast.py`**, and **`patch_flash_sa.py`**. The new compiled loop has no landed row. |
 | 7. Phase transitions | [149c TP4 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-149c/perf_traces/perfetto_trace_v2_1788157043.pb?project=cloud-tpu-shared-capacity); [154 TP1 Perfetto](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity); [152 phasetime logs](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152/phasetime?project=cloud-tpu-shared-capacity) | **Our patch:** tighten future ownership and phase handoffs. Existing async modes remain config-selected implementations. | Config rows **Math-verification processes**, **Answer extraction mode**, **Reward overlap mode**, and **Logprob overlap mode**; patch rows **`patch_reward_parallel.py`**, **`patch_async_detok.py`**, **`patch_async_logprobs.py`**, **`patch_fast_extract.py`**, **`patch_async_reward.py`**, **`patch_gc_sync.py`**, **`patch_jit_unroll.py`**, and **`patch_sync_keepkv.py`**. |
@@ -823,6 +964,12 @@ Evidence for headroom:
 - The native client plane shows IFRT dispatch, host-buffer lookup/store, and
   pipe callbacks distributed across worker threads. It does not show one
   serialized Pathways CPU leaf large enough to explain the wait.
+- The shared DP-scheduler architecture explains why: one parent submits one
+  global program and later materializes one global result after two CPU-child
+  barriers; there are not independent model engines that can progress around
+  a slow rank.
+- Rank-major input and output shapes are coupled to the busiest DP lane, but
+  the Qwen trace lacks real-row versus padded-row occupancy counters.
 - No sampled process/core-utilization counter is present, so CPU saturation is
   not established.
 
@@ -849,7 +996,8 @@ mark(trace, "host_materialized")
 emit_decode_latency_breakdown(trace)
 ```
 
-Derive, per window and per rank:
+Record request-shape and host-buffer volume in the same record, then derive per
+window and per rank:
 
 ```text
 admission_queue = rm_admitted - submit
@@ -858,26 +1006,38 @@ device_time     = device_done - device_start
 rank_tail       = max(device_done_by_rank) - median(device_done_by_rank)
 result_transfer = result_ready - max(device_done_by_rank)
 host_finalize   = host_materialized - result_ready
+row_occupancy   = real_request_rows / (DP * request_bucket)
+result_bytes    = tokens + logprobs + metadata materialized on the host
 ```
 
-If result transfer/materialization is large, return only the compact scheduler
-summary instead of a padded token-history payload:
+If result transfer/materialization is large, compact padded rows and masked
+steps before host visibility while preserving every valid generated token and
+logprob needed by GRPO:
 
 ```python
 compact_result = {
-    "slot": slot_ids,
+    "row_ids": live_row_ids,
+    "row_offsets": packed_row_offsets,
+    "valid_lengths": valid_lengths,
+    "tokens": packed_valid_tokens,
+    "logprobs": packed_valid_logprobs,
     "last_token": last_real_token,
-    "generated_count": generated_count,
     "finished": finished_mask,
 }
 copy_to_host_async(compact_result)
 ```
 
+This is not permission to return only a scheduler summary: the learner still
+needs the complete valid token/logprob stream. A viable implementation must
+reduce dummy/padding transfer without dropping that payload.
+
 If admission or launch delay is large, reuse the already-compiled/pre-sharded
 decode executable and keep topology setup outside the profiled loop. If rank
 tail is large, apply the DP instrumentation and routing work in the next item.
-If device time is large, prioritize RPA and sampling. These are distinct fixes
-for distinct buckets; “optimize Pathways” is not a sufficiently specific patch.
+If preparation grows with capacity rather than live rows, right-size
+`max_num_seqs` and make block-table updates persistent/sparse. If device time
+is large, prioritize RPA and sampling. These are distinct fixes for distinct
+buckets; “optimize Pathways” is not a sufficiently specific patch.
 
 Why it can improve performance:
 
@@ -893,6 +1053,10 @@ Validation:
 - Emit one record per window, not per token, to keep overhead negligible.
 - Confirm the sum of disjoint buckets closes against `device_get` wall within
   a small residual.
+- Record real rows, padded rows, request bucket, host-buffer event counts, and
+  bytes transferred for every captured window.
+- Require byte-identical valid token IDs, EOS inclusion, lengths, finish
+  reasons, and selected-token logprobs for any output compaction patch.
 - Add sampled process CPU, runnable threads, executor queue depth, and
   involuntary context switches before making a CPU-saturation claim.
 
@@ -903,14 +1067,23 @@ Public context: [JAX `device_get`](https://docs.jax.dev/en/latest/_autosummary/j
 Evidence for headroom:
 
 - Rollout remains about 86% of the TP1 cycle.
-- TP1 creates four times as many DP engines as TP4 and fewer requests per
-  model replica.
+- TP1 creates four times as many logical DP scheduler children as TP4 and
+  fewer requests per model replica; it does not create 128 independent model
+  engines or Pathways clients.
 - The baseline TP4 trace executes 128 send/receive calls per full depth-128
   window. Optimized TP4 executes 64 per depth-512 window, while optimized TP1
   executes 256 because the same two rank-wide rounds now span DP128.
+- The minimum steady control sequence is two rank-wide request/reply barriers
+  (`SCHEDULE` and `UPDATE_FROM_OUTPUT`). Baseline 23b has two additional
+  rank-wide rounds; these are consistent with grammar and unfinished-request
+  broadcasts rather than additional model executions.
 - High-level scheduler wall is about 3.2% of the baseline engine window, about
   1.8% in optimized TP4, and about 2.5% in the TP1 capture. It is secondary,
   but the TP1 scaling tax is directly visible.
+- `max_num_seqs=256` makes maximum host-batch capacity grow with DP even though
+  the configured 2,048 requests average only 16 per rank at DP128. The trace
+  does not yet show whether capacity-sized metadata or busiest-rank padding is
+  material.
 - Completion lengths are broad and many sequences reach the output cap, so a
   rank can drain materially later than its peers.
 - The TP4 host trace has no single large CPU leaf after `device_get`; queueing,
@@ -927,6 +1100,8 @@ rank_state[rank].active_tokens = reported_once_per_window
 
 emit_histogram("active_sequences_by_rank", rank_state)
 emit_histogram("window_finish_time_by_rank", rank_state)
+emit("request_bucket", request_bucket)
+emit("padded_row_fraction", 1.0 - real_rows / (dp_size * request_bucket))
 ```
 
 If command fan-out is material, batch control messages and result collection:
@@ -937,27 +1112,38 @@ send_many(commands_by_rank)          # one envelope per rank/window
 results = collect_many(expected_ranks)
 ```
 
-If the tail is material, route from host-maintained outstanding work rather
-than an all-rank state probe for every request:
+If the tail is material, compare the current round robin against a parent-side
+load snapshot refreshed once per window. Route a batch from that snapshot
+rather than restoring an all-rank state probe for every request:
 
 ```python
+predicted_outstanding_work = snapshot_rank_work_once_per_window()
 rank = min(eligible_ranks, key=lambda r: predicted_outstanding_work[r])
 predicted_outstanding_work[rank] += request_cost_estimate(request)
 ```
 
+If prefix caching is ever enabled, assign all generations of one prompt as a
+group so the alternative does not discard prefix locality. The Gemma study's
+round-robin regression is the warning: fewer control messages can still lose
+end to end when routing destroys useful locality or increases the drain tail.
+
 Why it can improve performance:
 
-Batched fan-out reduces fixed IPC work at every engine boundary. A lightweight
-central load estimate retains most of round robin's low overhead while
-avoiding pathological DP tails. Plan for roughly 0.5-1.5 baseline units only
-after the new rank histograms prove the mechanism.
+Batched fan-out and fixed-schema messages reduce Pipe/cloudpickle work at
+every engine boundary. A lightweight parent-side load estimate can retain
+most of round robin's low overhead while avoiding pathological DP tails. Plan
+for roughly 0.5-1.5 baseline units only after the new rank histograms prove the
+mechanism.
 
 Validation:
 
 - Compare p50/p90/p99 rank finish skew and queue depth.
-- Count command envelopes and bytes per generated token.
+- Count command envelopes, serialized bytes, real rows, padded rows, and
+  host-buffer bytes per generated token.
 - Monitor head CPU saturation and executor queue latency.
-- Keep a deterministic round-robin fallback.
+- Keep deterministic round robin as the Qwen control; reject any alternative
+  that restores `O(requests * DP)` admission queries.
+- If prefix caching is enabled, report cache-hit/locality changes separately.
 
 Public source context:
 [TPU Inference DP scheduler](https://github.com/vllm-project/tpu-inference/blob/a32e183a676cf428cb1cea953f58fdd616accb3e/tpu_inference/core/sched/dp_scheduler.py#L701-L776).
@@ -1168,12 +1354,12 @@ TP1 RPA and sampling estimates remain extrapolations from TP4.
 | Priority | Experiment | Control | Adoption gate |
 |---:|---|---|---|
 | P0 | Static/host-validated sampling plan | Current TP1 endpoint | DP `reduce_and` gone; semantic gates pass |
-| P0 | Pathways wait-bucket correlation | Current TP1 endpoint | Opaque wait closes into queue/device/tail/transfer/finalize buckets |
+| P0 | Pathways wait-bucket correlation | Current TP1 endpoint | Opaque wait closes into queue/device/tail/transfer/finalize buckets; result bytes and padded-row occupancy are recorded |
 | P0 | Valid TP1 decode capture | Same TP1 binary | Steady decode module, not `jit_split`, dominates session |
 | P1 | TP1 RPA tile validation/sweep | Current decode `1,2048,1,2048` and mixed/prefill `512,1024,256,512` | Repeated per-token rollout win and correct kernel names |
 | P1 | TP2 x DP64 scout | Interleaved TP1 x DP128 | Repeated matched-work win |
-| P1 | DP rank/tail instrumentation | Current TP1 endpoint | Identifies material skew or fan-out cost |
-| P2 | Batched DP commands or load-aware routing | Instrumented TP1 | Lower host critical path without worse tail |
+| P1 | DP rank/tail instrumentation | Current TP1 endpoint | Identifies material child-barrier skew, fan-out serialization, or busiest-lane padding |
+| P2 | Batched DP commands or snapshot-based routing | Instrumented TP1 | Lower host critical path without worse tail, prefix locality, or `O(requests * DP)` probes |
 | P2 | Compiled actor microbatch loop | Current actor loop | Gap reduction, HBM safe, exact update semantics |
 | P2 | Phase-future cleanup | Current synchronous handoffs | Lower transition share, no policy-version drift |
 
