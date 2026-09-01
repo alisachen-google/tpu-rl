@@ -5,6 +5,9 @@ Gemma4-E2B GRPO optimization stack. Each entry point renders a JobSet, verifies
 the mesh and the complete patch ConfigMap, submits it, waits for completion,
 downloads the head log, and prints a phase summary.
 
+For the control-plane bottleneck these runs are meant to test, see
+[`../PATHWAYS_DP_BOTTLENECK_SUMMARY.md`](../PATHWAYS_DP_BOTTLENECK_SUMMARY.md).
+
 | Entry point | Rollout mesh | Device allocation | Purpose |
 |---|---:|---:|---|
 | `run_tp1_dp64.sh` | TP1 x DP64 | trainer gets first 64 and sampler last 64 core-devices | corrected TP1 baseline |

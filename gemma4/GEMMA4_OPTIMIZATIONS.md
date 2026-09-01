@@ -4,6 +4,9 @@
 Reference points: our champion base (tp2×dp32 half-slice) global median ~125 s;
 **tianyu-rl-g4-003 (tp1×dp128 full-slice) global ~51 s warm** — the target stack.
 
+Control-plane companion: [`PATHWAYS_DP_BOTTLENECK_SUMMARY.md`](PATHWAYS_DP_BOTTLENECK_SUMMARY.md)
+summarizes the DP scheduling and Pathways parent-process bottleneck with diagrams.
+
 Legend: ✅ adopted (in our base) · 🏆 win (adopt) · ⚪ neutral (dropped) · ❌ rejected/broken · 🔜 to port from g4-003 · 🧪 in flight
 
 ## 1. Generation correctness (gates all perf numbers)
