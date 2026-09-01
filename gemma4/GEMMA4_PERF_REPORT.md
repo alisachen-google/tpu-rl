@@ -910,3 +910,18 @@ rewards/train/check_numbers 0.011-0.022 == BYTE-IDENTICAL to their g4-003 series
 => The ~50 s / step target stack now runs under our control with full logs/TB. Our-launcher best:
 111-125 (tp2 half-slice). Remaining gap to attribute: cd512+cond-fix, async host work, prompt,
 TMBS8, XLA ladder — g4r21c (cd512-fixed + prompt + stop-ids on OUR launcher) running now.
+
+
+# ═══ G4R21C VERDICT + ATTRIBUTION PIVOT (2026-09-01 23:30Z) ═══
+g4r21c (our launcher: cd512 + FIXED cond + gemma-3 prompt + stop-ids): step 0 now fast and reliable
+(370 s, rollout 224-234 s; prompt reproduces tianyu's generation contract exactly: 81.8%/3462) BUT the
+synchronized worker crash STILL fires ~9-10 min into step 1 (5 restarts, dumps at 23:03:16).
+=> cond all-reduce was a real defect, NOT the whole killer. Remaining launcher deltas vs the working
+recipe: body-reduce patch variant (our cd_noeos vs their cd_noglobal), unpinned VLLM block size,
+max_num_batched_tokens 8448 vs 33280, and the 30-flag XLA proxy ladder (collective-scheduling flags
+possibly load-bearing for 512-deep fused programs).
+PIVOT: attribute from the WORKING side (vary g4r30) instead of patching toward it.
+- g4r31 (launched): g4r30 minus all 27 XLA proxy flags -> tests whether the ladder is required for
+  deep-window stability AND its perf contribution in one run.
+- next candidates: g4r32 = g4r30 @ window 64 (H1 sizing on the working stack); g4r33 = g4r30 with
+  canonical prompt (isolates prompt's perf-vs-correctness split).
