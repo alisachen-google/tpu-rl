@@ -772,6 +772,32 @@ attention/output projections. TP1 removes those by construction. This is one
 directly observed mechanism behind the measured TP1-package gain; it does not
 quantify the separate contribution of the RPA tile changes.
 
+### TP4-to-TP1 kernel-retuning checklist
+
+Run 152 contains the first TP1-safe kernel configuration, not a completed TP1
+tuning campaign. The checklist below separates landed controls from remaining
+work. Landed rows receive no additional headroom credit.
+
+| Order | Device work | Run-152 state | Remaining action |
+|---:|---|---|---|
+| Gate | Obtain a valid TP1 decode profile | Not done: the TP1 phased captures recorded the reshard program rather than steady decode | Capture `jit(_decode_core_impl)` after reshard and verify decode, mixed, and prefill custom-call names before assigning kernel shares |
+| Landed | Remove TP model collectives | Done structurally by TP1 | Verify that size-one TP collectives are eliminated; there is no further tuning credit for their removal |
+| Landed | Install RPA overrides and a TP1-safe control | Done: forwarding patch plus decode `1,2048,1,2048` and mixed/prefill `512,1024,256,512` | Verify the tuples in a valid TP1 trace; do not call the control an optimized winner yet |
+| Landed | Keep padded rows on the candidate sampler | Done through `_SS_PADFIX` | Preserve the semantic gates; this prevents the TP-greater-than-one full-vocabulary fallback but does not remove the DP safety reduction |
+| P0 | Remove the dynamic sampling-plan collective | Not done: `jnp.all(...)` and `lax.cond` remain | Select candidate-top64 or stock once on the host and compile/select the corresponding executable; require `while/body/reduce_and` to disappear |
+| P1 | Retune decode RPA load and compute tiles | Only the `1,2048,1,2048` control ran in 152 | Run the isolated five-rung decode sweep in [the RPA proposal](#2-validate-and-refine-the-tp1-specific-rpa-tiles) |
+| P1 | Retune mixed RPA tiles | Only the VMEM-safe `512,1024,256,512` control ran | Sweep mixed fetch tiles, then compute tiles, while prefill and decode remain fixed |
+| P1 | Retune prefill RPA tiles | Only the same VMEM-safe control ran | Repeat the sweep independently for prefill; combine winners only after each family wins alone |
+| P1, conditional | Specialize the TP1-local candidate sampler | Candidate-top64 code is present, but TP1 code generation is unprofiled | Verify that size-one candidate `all_gather`/`pmax` operations are compiled away. Add a direct local top-64 path without `shard_map` only if they or wrapper overhead survive materially |
+| P2, conditional | Inspect TP1 dense model kernels | TP1 changes QKV, output, MLP, and logits matrix shapes, but there is no valid TP1 leaf attribution | Tune only a model fusion or matmul that is material in the valid TP1 profile; do not launch an unguided compiler-flag sweep |
+| P2, independent | Tune trainer splash attention | The run-152 trainer XPlane identifies splash attention, but rollout TP does not change the trainer sharding | Run the fused-backward, block-size, and base-2 exponent scouts separately; keep this outside TP4-to-TP1 rollout attribution |
+
+The two continue-decode scalar reductions (`jnp.any(active_mask)` and
+`any_hit_eos`) are also already removed in run 152. They are landed collective
+cleanup, not remaining kernel experiments. Likewise, decode depth, NumPy pack
+assembly, DP routing, correlation IDs, and result compaction are host/control
+work and do not belong in this kernel checklist.
+
 ### Roofline interpretation
 
 XProf classifies the captured TP4 decode program on the HBM side of its formal
@@ -1105,6 +1131,29 @@ dimension 128, and BF16 query/KV inputs, the kernel's own
 | `(512, 2048)` | About 38 MiB | Mixed/prefill candidate after decode tuning |
 | `(1024, 1024)` | About 49 MiB | Mixed/prefill candidate after decode tuning |
 | `(1024, 2048)` | About 58 MiB | Edge candidate; little margin for compiler/VREG overhead |
+
+After selecting the decode winner, use this first-pass grid for **one** of
+mixed or prefill while the other two RPA families remain at their controls:
+
+```bash
+# One value per run; shown with MIXED as the family under test.
+export RPA_V3_MIXED_BLOCK_SIZES="512,1024,256,512"    # 152 control
+export RPA_V3_MIXED_BLOCK_SIZES="512,2048,256,512"
+export RPA_V3_MIXED_BLOCK_SIZES="1024,1024,256,512"
+export RPA_V3_MIXED_BLOCK_SIZES="1024,2048,256,512"   # ~58 MiB edge
+```
+
+Then restore the mixed winner and repeat the same one-change grid through
+`RPA_V3_PREFILL_BLOCK_SIZES`. Only after a fetch tuple wins should its compute
+dimensions be swept: test `bq_csz` 256 versus 512 and `bkv_csz` 512 versus
+1024, one dimension at a time. Every tuple must satisfy the kernel's legality
+checks:
+
+```text
+bq_sz  % bq_csz  == 0
+bkv_sz % bkv_csz == 0
+bkv_csz % VLLM_BLOCK_SIZE == 0
+```
 
 The source estimate covers Pallas scratch, not every compiler allocation, so a
 value below 64 MiB still has to compile and profile successfully. Reject a
@@ -1551,13 +1600,14 @@ TP1 RPA and sampling estimates remain extrapolations from TP4.
 
 | Priority | Experiment | Control | Adoption gate |
 |---:|---|---|---|
-| P0 | Static/host-validated sampling plan | Current TP1 endpoint | DP `reduce_and` gone; semantic gates pass |
+| P0 | Static/host-validated sampling plan | Current TP1 endpoint | DP `reduce_and` gone; semantic gates pass; size-one candidate collectives are absent or a direct TP1-local path wins |
 | P0 | Pathways wait-bucket correlation | Current TP1 endpoint | Opaque wait closes into queue/device/tail/transfer/finalize buckets; result bytes and padded-row occupancy are recorded |
 | P0 | Valid TP1 decode capture | Same TP1 binary | Steady decode module, not `jit_split`, dominates session |
 | P1 | TP1 RPA tile validation/sweep | Current decode `1,2048,1,2048` and mixed/prefill `512,1024,256,512` | Repeated per-token rollout win and correct kernel names |
 | P1 | TP2 x DP64 scout | Interleaved TP1 x DP128 | Repeated matched-work win |
 | P1 | DP rank/tail instrumentation | Current TP1 endpoint | Identifies material child-barrier skew, fan-out serialization, or busiest-lane padding |
 | P2 | Batched DP commands or snapshot-based routing | Instrumented TP1 | Lower host critical path without worse tail, prefix locality, or `O(requests * DP)` probes |
+| P2 | Profile-gated TP1 dense-kernel scout | Valid TP1 decode capture | A material QKV/output/MLP/logits leaf is identified first; any change gives a repeated per-token win without numerical drift |
 | P2 | Trainer splash one-change scouts | Current 1024/2048 unfused-backward splash control | Lower trainer wall and attention leaf time; HBM and numerical gates pass |
 | P2 | Compiled actor microbatch loop | Current actor loop | Gap reduction, HBM safe, exact update semantics |
 | P2 | Phase-future cleanup | Current synchronous handoffs | Lower transition share, no policy-version drift |
@@ -1580,6 +1630,7 @@ dispatches before the compiled actor program.
 |---|---|---:|---|
 | Remove DP sampling guard | Strong TP4 trace/source; TP1 timing missing | 0.5-1.5 baseline units | First code target |
 | TP1 RPA validation/retune | Strong TP4 leaf share; no valid TP1 kernel trace | 0.5-1.5 baseline units | Current TP1 safety tiles are landed; requires profiler fix |
+| TP1 dense model kernel/fusion | No valid TP1 leaf attribution | No claim | Profile-gated only; QKV/output/MLP/logits shapes changed with topology |
 | Trainer splash/collective tuning | Direct run-152 trainer XPlane; wall mapping is inclusive | 0.1-0.5 baseline units | Actor is only about 9% of the cycle; tune after rollout |
 | Pathways wait split / compact result | Strong opaque-wait evidence; bucket split missing | 0-1.5 baseline units | No credit until transfer/finalize is measured |
 | DP128 fan-out/tail | Strong structural case; instrumentation missing | 0.5-1.5 baseline units | Measure before patching |
