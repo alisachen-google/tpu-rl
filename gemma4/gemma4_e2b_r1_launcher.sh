@@ -13,7 +13,7 @@ MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
 # Ironwood bring-up fixes (from smoke ladder):
 
 # --- tianyu-rl-14 stack: runtime patches (self-verifying, fail-open) ---
-for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_rpa_blocks patch_cd_masking patch_cd_report patch_phasetime patch_reward_parallel patch_sharded_sampling patch_profiler_fix patch_gc_sync patch_packing_knob patch_packer_fast patch_log_stats patch_perf_v2 patch_dump_completions patch_firsttok patch_engine_kwargs patch_host_extract patch_fast_detok patch_dp_rr_routing patch_sync_keepkv patch_cd_noeos patch_flash_sa patch_jit_unroll patch_verify_timeout; do
+for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_rpa_blocks patch_cd_masking patch_cd_report patch_phasetime patch_reward_parallel patch_sharded_sampling patch_profiler_fix patch_gc_sync patch_packing_knob patch_packer_fast patch_log_stats patch_perf_v2 patch_dump_completions patch_firsttok patch_engine_kwargs patch_host_extract patch_fast_detok patch_dp_rr_routing patch_sync_keepkv patch_cd_noeos patch_flash_sa patch_jit_unroll patch_verify_timeout patch_stop_tokens patch_runner_eos; do
   for F in /workload/patches/$P /workload/patches/$P.py; do
     if [ -f "$F" ]; then python3 "$F"; break; fi
   done
@@ -29,6 +29,7 @@ export CD_NO_EOS_REDUCE="${DL_NOEOS:-0}"
 export JIT_UNROLL="${DL_JITU:-0}"
 export SS_PADFIX="${DL_PADFIX:-0}"
 export VERIFY_ITEM_TIMEOUT="${DL_VTMO:-5}"
+if [ -n "${DL_STOPIDS:-}" ]; then export EXTRA_STOP_TOKEN_IDS="$DL_STOPIDS"; fi
 if [ -n "${DL_MPDP:-}" ]; then export TPU_MULTIPROCESS_DP="$DL_MPDP"; fi
 if [ -n "${DL_BRPA:-}" ]; then export USE_BATCHED_RPA_KERNEL="$DL_BRPA"; fi
 if [ -n "${DL_SAQ:-}" ]; then export SA_BLOCK_Q="$DL_SAQ"; fi

@@ -857,3 +857,43 @@ Caveat recorded: gradients ≈0 after step ~7 (format task solved) — compute p
 step is unchanged, so timing validity holds, but the decode-light benchmark
 measures system throughput, not sustained learning (equally true of the GB200
 spec it mirrors).
+
+# ═══ G4R19 ROOFLINE & BOUND ANALYSIS — tp1×dp128 full-slice (2026-09-01) ═══
+
+## Measured (g4r19, 8 steps, exit 0)
+steps 1-7 global: 367, 176, 153, 155, 149, 427, 350 → median 175.6, clean band 148-155.
+Clean-step split: rollout ~125-130, rewards 8.5-17.5 (spike 128), trainer+rest ~15.
+LENDIST red flag: truncation RISES 64%→78% over 8 steps (osl_mean 2745→3304) — missing gemma
+chat stop ids (106/50); training-on-truncated feedback loop. Fixed in g4r20.
+
+## Roofline (per device: ~2.3 PFLOP/s bf16, ~7.37 TB/s, ridge ~313; 128 devices)
+- Decode: 2048×osl~3200 ≈ 6.55M tokens/step. Per engine-iteration bytes ≈ active weights ~5.2GB
+  + KV ~0.7GB ≈ 6GB → 0.81 ms/iter at the memory roof → ideal device decode ≈ 2.6 s/rollout.
+  MEASURED 125-130 s → **device busy ~2-3%; ~97% host** (head loop + Pathways RPC + collect).
+- Window arithmetic: ~50 windows(64-deep)/rollout; ~2.5 s/window wall vs ~52 ms device.
+  Host cost/window scales with dp: ~0.78 s @dp64 → ~1.0 s @dp32(tp2) → ~2.4 s @dp128.
+- Trainer: ideal ~0.4-1 s (1.06e17 FLOPs / 128 dev) vs measured ~15 s (TMBS=4 micro-step count,
+  small-model MFU).
+- Rewards: pure host python.
+**BOUND: HOST at every phase. Roofline gap ≈ 30-50× (ideal step ~4-6 s vs 148-175 measured).**
+Consistent with all traces (g4r7b/g4r8 xplane+Perfetto device_get 546ms/window; tp2/tp4 host
+97-98%; tianyu-rl-148 block_until_ready-dominated). No new trace capture needed to identify the
+bound; per-increment phasetime is the discriminating instrument.
+
+## Same-mesh gap to tianyu g4-003 (their 51 s vs our 175 median)
+| Phase | ours | theirs | their levers (ordered) |
+|---|---|---|---|
+| rollout | 125-130 | ~40 | CD window 512 (8× fewer round-trips), async detok/logprobs, stop-ids
+(shorter osl), rr routing, prefix off, block pin 128, XLA proxy ladder |
+| rewards | 8.5-17.5 +spikes | 0.3 | async_reward during rollout + fast_extract + format_guard |
+| trainer+rest | ~15-23 | ~11 | TMBS=8 (flash-enabled), same fsdp128 |
+
+## INCREMENTAL LADDER (all 8-step, tp1×dp128 full-slice base = g4r19)
+E1 g4r20 stop-ids [106,50] (RUNNING) — truncation/correctness + osl↓ → rollout↓
+E2 g4r21 +DL_CD=512 — biggest single rollout lever (cd_proper/masking/report already in roster)
+E3 g4r22 +prefix-off +rr-routing (composed re-test at dp128)
+E4 g4r23 +async detok/logprobs/reward (port 3 patches) — rewards → ~1 s
+E5 g4r24 +TMBS=8 — trainer micro-step halving
+E6 g4r25 +XLA proxy-flag ladder (chart-level change)
+E7 (flagged, semantic): gemma-3-style textual prompt — changes the RL problem framing; user call.
+Gate: keep an increment iff clean-step median improves; revert otherwise. Rolling best carried forward.
