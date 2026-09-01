@@ -1,13 +1,14 @@
-# Qwen3-0.6B headroom after the TP1 result
+# Qwen3-0.6B headroom from the tianyu-rl-23b baseline
 
 This is the internal, evidence-backed headroom report. It uses restricted run
 names and trace links, but keeps job performance in normalized units. It does
 not reproduce production wall-clock times, throughput, rewards, token counts,
 or hardware-counter rates.
 
-The current baseline is **run 152 = 100 normalized wall-time units**. The unit
-is defined by the steady-step median below; it is not a second and must not be
-converted into a job timing.
+The analysis baseline is **the `tianyu-rl-23b.yaml` configuration = 100
+normalized wall-time units**. The unit is defined by that run's steady-step
+median below; it is not a second and must not be converted into a job timing.
+The current TP1 endpoint is approximately 53 of these baseline units.
 
 The shareable, estimate-only report remains
 [`QWEN3_06B_HEADROOM_PUBLIC.md`](QWEN3_06B_HEADROOM_PUBLIC.md). The last commit
@@ -16,36 +17,36 @@ document was introduced by `acc25f7`.
 
 ## Executive verdict
 
-TP1 x DP128 is now the best measured rollout topology for this stack. Against
+TP1 x DP128 is the best measured rollout topology for this stack. Against
 the matched TP4 x DP32 profiled control, it lowers end-to-end time by about 5%
 and rollout time by about 6%, while actor training is flat. Completion volume
 between the two short profiled replicas differs by less than 0.1%, so this is a
 topology result rather than a shorter-output artifact.
 
-Most of the historical gain was already delivered before TP1:
+Most of the baseline-to-current gain was already delivered before TP1:
 
 | Milestone | Normalized global time | What changed |
 |---|---:|---|
-| Historical run 23b control | About 189 units | Earlier TP4 software stack |
-| Optimized TP4, run 136 | About 105 units | Decode, sampling, host, packing, train, and sync stack |
-| Profiled TP4 replica, run 149c | About 105 units | Usable rollout profile on the champion recipe |
-| Profiled TP1 replica, run 154 | About 99 units | Topology-only attribution point |
-| **Current baseline, run 152** | **100 units** | Sustained TP1 record, profilers off |
+| **Baseline, run 23b** | **100 units** | `tianyu-rl-23b.yaml`, TP4 x DP32 |
+| Optimized TP4, run 136 | About 56 units | Decode, sampling, host, packing, train, and sync stack |
+| Profiled TP4 replica, run 149c | About 56 units | Usable rollout profile on the champion recipe |
+| Profiled TP1 replica, run 154 | About 52 units | Topology-only attribution point |
+| Current TP1 endpoint, run 152 | About 53 units | Sustained result, profilers off |
 
-Approximately 94% of the reduction from the historical control to the current
-level came from the software stack; the TP4-to-TP1 topology change supplied the
-last approximately 6% of the absolute reduction. The story is therefore not
+Approximately 94% of the reduction from the 23b baseline to the current level
+came from the software stack; the TP4-to-TP1 topology change supplied the last
+approximately 6% of the absolute reduction. The story is therefore not
 “TP1 made the run twice as fast.” It is “software nearly closed the large gap,
 then TP1 removed a smaller collective tax.”
 
 The remaining practical opportunity is much smaller than in the previous
 report:
 
-| Planning case | Estimated remaining normalized time | Incremental speedup |
-|---|---:|---:|
-| Conservative | 95-97 units | About 1.03-1.05x |
-| Central | 90-94 units | About 1.06-1.11x |
-| Stretch | 84-90 units | About 1.11-1.19x |
+| Planning case | Remaining time in 23b-baseline units | Speedup from 23b | Incremental speedup from current |
+|---|---:|---:|---:|
+| Conservative | 50-51 units | About 1.95-2.00x | About 1.03-1.05x |
+| Central | 48-50 units | About 2.00-2.10x | About 1.06-1.11x |
+| Stretch | 44-48 units | About 2.10-2.25x | About 1.11-1.19x |
 
 These ranges overlap. RPA tuning, sampling-guard removal, topology, and DP
 tail work all shorten the same rollout critical path and must not be added as
@@ -53,52 +54,61 @@ independent wins.
 
 ## Baseline and median contract
 
-### Current baseline
+### Analysis baseline
 
-The baseline for all remaining-headroom estimates is **tianyu-rl-152**:
+The baseline for all end-to-end and remaining-headroom estimates is
+**tianyu-rl-23b**, using the supplied `tianyu-rl-23b.yaml` manifest:
 
 - Qwen3-0.6B GRPO on the fixed 128-device fleet.
-- TP1 x DP128 rollout.
-- The champion software recipe.
+- TP4 x DP32 rollout.
+- Global train batch 256, eight generations per prompt, and rollout batch 256.
+- Sampling temperature 0.8, top-k 50, and top-p 0.95.
+- Prompt/prefill limit 4096, target length 12288, and output cap 8192.
+- KV page size 128, HBM allocation fraction 0.3, and maximum 256 sequences.
+- Batched-token budget 16640.
+- Continue-decode depth 128 and EOS-check interval 8.
+- RPA decode blocks `1,4096,1,4096`.
+- Synchronous engine scheduling and no DP attention.
 - Twenty global steps.
-- Rollout and trainer profilers disabled for the benchmark result.
+- Rollout phased profiling and a one-step trainer XPlane enabled.
 
 The baseline statistic is TensorBoard
 `perf/train/global_step_time`, global steps 3 through 20 inclusive. This gives
 18 steady observations after the first two startup/warmup steps. Their median
 is defined as 100 units.
 
-One observation in this window is an approximately 2x rollout-only stall. It
-is deliberately retained in the sample. The median is robust to it; the
-arithmetic mean is not. For reporting:
-
 - Use the 18-step median as the primary benchmark number.
 - Report p10 and p90 over the same 18 steps.
-- Report the one stall separately rather than silently deleting it.
+- Report any stall separately rather than silently deleting it.
 - Use an outlier-excluded mean only as a diagnostic, never as the headline.
+
+The optimized TP1 run 152 is an endpoint, not the normalization baseline. Its
+same-clock steady median is approximately 53 baseline units. It contains one
+rollout-only stall; that observation is retained in its distribution, while
+the median remains the comparison statistic.
 
 ### Clock alignment
 
 The instrumentation uses two step conventions:
 
 - TensorBoard global step `N+1` corresponds to phasetime/lendist step `N`.
-- The baseline median uses TensorBoard steps 3-20.
+- Both the baseline and sustained endpoint medians use TensorBoard steps 3-20.
 - Per-token and phasetime analysis uses the aligned phasetime/lendist steps
   2-19.
 
 Do not mix a phasetime median with a TensorBoard median without stating the
 clock. The profiled TP1 run 154 is a trace surrogate, not the sustained
-baseline: it has only four post-warmup observations and carries profiling
+endpoint: it has only four post-warmup observations and carries profiling
 instrumentation.
 
 ## Measurement roles
 
 | Run | Role in this report | Usable evidence | Limitation |
 |---|---|---|---|
-| 23b | Historical software control | Phase, quality, rollout XPlane, trainer XPlane, Perfetto | Earlier stack and TP4 |
+| 23b | **Analysis baseline** | Eighteen steady steps, phase/quality, rollout XPlane, trainer XPlane, Perfetto | Earlier stack and TP4 |
 | 136 | Optimized TP4 trainer reference | Long-run phase/quality and trainer XPlane | No usable rollout XPlane |
 | 149c | Optimized TP4 topology control | Four steady steps, rollout XPlane, Perfetto | Short profiled replica |
-| 152 | **Current performance baseline** | Eighteen steady steps, phase and semantic logs | Profilers intentionally off |
+| 152 | Current sustained TP1 endpoint | Eighteen steady steps, phase and semantic logs | Profilers intentionally off |
 | 154 | Profiled TP1 topology endpoint | Four steady steps and Perfetto | TP1 phased XPlane captured the wrong program |
 
 This bridge is necessary because no one run contains a clean long benchmark,
@@ -125,8 +135,36 @@ truncation, reward, and token volume—not identical sampled tokens.
 
 ## Configuration comparison
 
-The direct topology experiment keeps the fixed device fleet and champion
-recipe constant and changes only rollout partitioning:
+### Baseline-to-current stack
+
+The headroom story compares the supplied 23b manifest with the current TP1
+endpoint. These are the material configuration differences:
+
+| Area | `tianyu-rl-23b.yaml` baseline | Current TP1 endpoint | Expected mechanism |
+|---|---|---|---|
+| Rollout topology | TP4 x DP32 | TP1 x DP128 | Remove TP model collectives; increase DP fan-out |
+| Continue-decode depth | 128 | 512 | Amortize host/device boundaries over more tokens |
+| Batched-token budget | 16640 | 33280 | Admit more useful work per capacity wave |
+| RPA decode blocks | `1,4096,1,4096` | `1,8192,1,4096` | Increase KV load tile while retaining compute tile |
+| KV page size | Pinned 128 | Pinned 128 | Hold the generation contract constant |
+| DP routing | Stock state-aware/all-rank path | Query-free round robin | Remove per-request rank-state fan-out |
+| Prefix caching | Inherited/default behavior | Disabled | Remove bookkeeping for nonrepeating prompts |
+| Token extraction | Per-request host scans | Vectorized batch extraction | Reduce CPU wall and extraction tails |
+| Detokenization/reward | More critical-path host work | Asynchronous/overlapped | Hide CPU work behind rollout |
+| Actor representation | Dense/padded | Packed real tokens | Avoid padded train work |
+| Trainer attention | General path | Flash-style path | Improve packed attention efficiency |
+| Weight synchronization | Reinitialization and repeated host dispatch | KV retention and compiled transfer loop | Reduce allocations and boundaries |
+
+The 23b manifest already includes corrected continuous-decode semantics,
+reward parallelism, and a sharded candidate sampler. Therefore the improvement
+must not be described as adding those features from zero. Later changes deepen
+and amortize the path, remove remaining fallbacks/control work, and improve the
+training and synchronization sides.
+
+### Topology-only control
+
+The matched run-149c/run-154 topology experiment keeps the fixed device fleet
+and champion recipe constant and changes only rollout partitioning:
 
 ```diff
 -rollout_tensor_parallelism=4
@@ -135,7 +173,7 @@ recipe constant and changes only rollout partitioning:
 +rollout_data_parallelism=128
 ```
 
-The shared recipe includes:
+The matched shared recipe includes:
 
 ```text
 model                         = qwen3-0.6b
@@ -154,17 +192,19 @@ trainer attention             = flash-style
 packed-token budget per TPU   = 12288
 ```
 
-The first TP1 experiment must keep these knobs fixed. Any later TP1 retuning
-should be one-factor-at-a-time so that topology, page size, RPA tiles, and
-admission capacity are not confounded.
+Any later topology retuning should be one-factor-at-a-time so that topology,
+page size, RPA tiles, and admission capacity are not confounded.
 
 ## Phase comparison
 
 ### Sustained endpoint
 
-Relative to the optimized TP4 long run, the TP1 baseline is about 5% lower
-end-to-end. The change is explained by rollout: rollout falls by roughly 6%,
-while actor training and synchronization are effectively unchanged.
+The current TP1 endpoint is approximately 53 baseline units, or about 47%
+below the 23b steady median. The optimized TP4 long run is approximately 56
+baseline units. Thus most of the baseline-to-current improvement predates the
+topology change: TP1 contributes about a 5% incremental end-to-end reduction,
+explained by a roughly 6% rollout reduction while actor training and
+synchronization remain effectively unchanged.
 
 ### Profiled topology pair
 
@@ -172,11 +212,11 @@ The short, trace-enabled pair reproduces the same result:
 
 | Component | TP4 run 149c | TP1 run 154 | Interpretation |
 |---|---:|---:|---|
-| Complete cycle | About 105 units | About 99 units | Roughly 5% lower |
-| Rollout | About 91 units | About 86 units | Nearly all of the gain |
-| Actor training | About 9 units | About 9 units | Flat |
-| Weight sync | Less than 1 unit | Less than 1 unit | Flat/noisy |
-| Other transitions | About 4 units | About 4 units | No material topology win |
+| Complete cycle | About 56 baseline units | About 52 baseline units | Roughly 5% lower |
+| Rollout | About 48 baseline units | About 45 baseline units | Nearly all of the gain |
+| Actor training | About 5 baseline units | About 5 baseline units | Flat |
+| Weight sync | Less than 1 baseline unit | Less than 1 baseline unit | Flat/noisy |
+| Other transitions | About 2 baseline units | About 2 baseline units | No material topology win |
 
 The TP1 Perfetto complete-cycle decomposition is approximately:
 
@@ -199,27 +239,146 @@ them out of the public report.
 
 | Artifact | Internal link | Use |
 |---|---|---|
+| **Baseline rollout XPlane, run 23b** | [decode-only session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_22_06_21_47/?project=cloud-tpu-shared-capacity) | Baseline Python host path, Pathways client/server activity, DP scheduler, and decode program |
+| Baseline trainer XPlane, run 23b | [trainer session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b/tensorboard/plugins/profile/2026_08_22_06_27_19/?project=cloud-tpu-shared-capacity) | Dense/padded trainer and collectives |
+| Baseline phase timeline, run 23b | [Perfetto protobuf](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-23b/perf_traces/perfetto_trace_v2_1787379652.pb?project=cloud-tpu-shared-capacity) | Baseline whole-cycle phase attribution |
+| Baseline phase and semantic logs, run 23b | [run artifacts](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-23b?project=cloud-tpu-shared-capacity) | Normalization metric, phasetime, lengths, rewards, and patch banners |
 | TP4 rollout XPlane, run 149c | [decode-only session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08/?project=cloud-tpu-shared-capacity) | Decode program, RPA, collectives, sampling, host engine window |
 | Optimized trainer XPlane, run 136 | [trainer session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-136/tensorboard/plugins/profile/2026_08_30_05_57_04/?project=cloud-tpu-shared-capacity) | Packed/flash train program and collectives |
 | TP4 phase timeline, run 149c | [Perfetto protobuf](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-149c/perf_traces/perfetto_trace_v2_1788157043.pb?project=cloud-tpu-shared-capacity) | Whole-cycle TP4 phase attribution |
 | TP1 phase timeline, run 154 | [Perfetto protobuf](https://console.cloud.google.com/storage/browser/_details/ubench-logs/tianyu-rl-154/perf_traces/perfetto_trace_v2_1788167363.pb?project=cloud-tpu-shared-capacity) | Whole-cycle TP1 phase attribution |
 | TP1 diagnostic XPlane, run 154 | [decode-only session](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-154/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_09_10_14/?project=cloud-tpu-shared-capacity) | Profiler-failure diagnosis only; not valid for kernel shares |
-| Sustained TP1 logs, run 152 | [run artifacts](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152?project=cloud-tpu-shared-capacity) | Baseline phase, length, reward, and TensorBoard distributions |
+| Sustained TP1 logs, run 152 | [run artifacts](https://console.cloud.google.com/storage/browser/ubench-logs/tianyu-rl-152?project=cloud-tpu-shared-capacity) | Current-endpoint phase, length, reward, and TensorBoard distributions |
 
 Open the XPlane session by downloading the session directory and pointing
 TensorBoard/XProf at its parent:
 
 ```bash
 gcloud storage cp --recursive \
-  'gs://ubench-logs/tianyu-rl-149c/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_31_06_18_08' \
-  ./qwen149c-profile/
-tensorboard --logdir=./qwen149c-profile --port=6006
+  'gs://ubench-logs/tianyu-rl-23b/phased_profile/decode_only/dp_rank_0/plugins/profile/2026_08_22_06_21_47' \
+  ./qwen23b-profile/
+tensorboard --logdir=./qwen23b-profile --port=6006
 ```
 
 Download either Perfetto `.pb` and drag it into
 [ui.perfetto.dev](https://ui.perfetto.dev/).
 
 ## Trace findings
+
+### Baseline CPU, Pathways, and DP-scheduler attribution
+
+The baseline host analysis uses the complete run-23b merged host XPlane, not
+only the capped Chrome JSON export. It takes the median over 15 complete
+decode engine windows and excludes the final profile-stop window, which
+ends during input preparation. The shares below are of one host-visible
+`llm_engine.step`, not of the global RL step and not of total CPU capacity.
+
+| Baseline main-thread component | Median share of engine window | Interpretation |
+|---|---:|---|
+| Blocking `device_get` | About 82% | Main thread waits for a remote result; includes queueing, device execution, rank tail, transfer, and materialization |
+| Per-request valid-token extraction | About 5.5% | Real Python/NumPy postprocessing headroom |
+| DP scheduler: schedule + grammar + output update | About 3.2% | Real but secondary control-plane wall; child send/receive spans are not added again |
+| TPU-runner input preparation | About 2% | Device-put, sharding, metadata, and block-table preparation |
+| vLLM output-object processing | About 1% | Request state and output construction after engine return |
+| Stats/logging | Less than 1% | Visible but not a primary target |
+| Other wrappers/conversion | Remainder | Small leaves and profiler overhead |
+
+This table deliberately does not label the 82% blocked span “Pathways CPU.” A
+Python `device_get` is an inclusive synchronization point. It says the result
+was not ready for the caller; it does not say whether the missing time was TPU
+execution, Pathways admission/launch, a slow DP rank, host-buffer transfer, or
+CPU deserialization.
+
+The baseline trace also makes the DP traffic concrete. A full window contains
+128 `_send_command` and 128 `_get_result` calls on the engine thread. With
+DP32, that is four rank-wide command/response rounds per window. The nested
+send/receive spans are already inside scheduler wall and therefore must not be
+summed as an additional cost.
+
+#### What the Pathways planes do and do not prove
+
+The native Pathways client plane distributes work across the IFRT request
+processor, dispatcher queues, host-buffer store/lookup workers, and pipe
+callbacks. There is no single serialized Pathways client CPU span covering the
+engine window. On one sampled worker, the captured local decode module is much
+shorter than the client-side `device_get` wait. That establishes a large
+remote/control/tail envelope, but one worker cannot represent the slowest rank
+across the fleet.
+
+The profile contains traced function spans, not sampled per-core utilization.
+It therefore cannot prove that the 28-core requested/44-core-limited head pod
+was CPU saturated. The defensible conclusions are:
+
+| Hypothesis | Verdict | Evidence |
+|---|---|---|
+| Pathways client CPU is the baseline bottleneck | **Not supported** | Native client work is distributed; no serial client leaf explains the engine window |
+| A Pathways-mediated remote wait is the dominant host-visible critical path | **Supported** | `device_get` owns about four-fifths of the baseline engine window |
+| DP scheduling is the primary bottleneck | **Rejected** | High-level DP scheduler wall is only about 3.2% of the baseline window |
+| DP scheduling is meaningful scaling headroom | **Supported** | Rank command count scales with DP degree and remains on the critical thread |
+| Host output extraction is meaningful baseline headroom | **Supported** | Median share is about 5.5%; the trace outlier is almost entirely extraction growth |
+| Async detokenization is a median critical-path bottleneck | **Not supported** | Aggregate CPU demand is visible on worker threads but overlaps the engine path |
+
+One baseline capture window is especially useful for causality. Its
+`device_get` duration stays in the normal band while valid-token extraction
+grows by several times and explains almost all of the engine-window excursion.
+That is a host postprocessing tail, not a Pathways or device stall. The current
+stack removes `_extract_valid_tokens_host` from the captured engine thread via
+batch extraction.
+
+Representative delivered transformation:
+
+```python
+# Baseline shape: repeated Python scans and object construction by request.
+host_tokens = np.asarray(jax.device_get(generated_tokens))  # [steps, batch]
+for request_idx, request in enumerate(requests):
+    valid = extract_valid_tokens_host(
+        host_tokens[:, request_idx], request.decode_length
+    )
+    update_request(request, valid)
+
+# Optimized shape: one batch conversion, vectorized last-real-token lookup,
+# then only the unavoidable request-state updates remain in Python.
+host_tokens = np.asarray(jax.device_get(generated_tokens))
+rows = np.arange(host_tokens.shape[0])[:, None]
+real = (host_tokens != pad_token_id) & (rows < generated_count[None, :])
+last_row = np.max(np.where(real, rows, 0), axis=0)
+last_token = host_tokens[last_row, np.arange(host_tokens.shape[1])]
+```
+
+Why this improves performance: it replaces thousands of short Python calls
+with array operations, reduces interpreter/GIL overhead, and removes the
+observed extraction-driven tail. The optimized host traces validate the
+mechanism because the per-request extraction leaf is absent.
+
+#### Baseline versus optimized host path
+
+The engine windows have different static decode depths, so their absolute
+durations must not be compared. Shares and rank-command counts expose the
+structural change:
+
+| Trace | Decode depth | `device_get` share | High-level DP wall | Valid-token extraction | Send/receive calls per captured full window |
+|---|---:|---:|---:|---:|---:|
+| 23b baseline, TP4 x DP32 | 128 | About 82% | About 3.2% | About 5.5% | 128 / 128 |
+| 149c optimized TP4 x DP32 | 512 | About 93% | About 1.8% | Not present | 64 / 64 |
+| 154 optimized TP1 x DP128 | 512 | About 92% | About 2.5% | Not present | 256 / 256 |
+
+The baseline row is a 15-window median. The optimized rows are one complete
+engine window from each capped Chrome export, so they support structural
+attribution and command-count scaling rather than distributional claims. The
+run-154 host window is usable even though its device XPlane captured the wrong
+program.
+
+At fixed TP4, the optimized stack halves rank command/response calls while
+making a window four times deeper. That is roughly an eightfold reduction in
+rank-control calls per maximum decode iteration. TP1 then quadruples the rank
+count, so its two rank-wide rounds become 256 sends and receives. Scheduler
+wall rises versus optimized TP4 but remains secondary; this is a scaling tax
+to measure, not evidence that DP scheduling dominates.
+
+The larger `device_get` *share* in the optimized traces is healthy in context:
+host extraction and repeated control boundaries have been removed, so more of
+each deeper window is intentionally spent waiting for useful remote decode.
+It is not evidence that Pathways regressed.
 
 ### TP4 decode device composition
 
@@ -270,14 +429,15 @@ end-to-end win is expected. TP1 eliminates communication but gives back part
 of the benefit through less local batching/statistical multiplexing, different
 matmul shapes, full-model weight traffic, and greater DP fan-out.
 
-### Host rollout trace
+### Optimized host rollout trace
 
-The run-149c host trace shows:
+The run-149c/run-154 host traces show:
 
 - The blocking output-processing span is mostly an inclusive `device_get`, so
   it must not be counted again as independent host compute.
 - Scheduler send/receive and output-object construction are visible but small
-  relative to the captured engine window.
+  relative to the captured engine window. DP128 raises scheduler wall versus
+  optimized DP32, but not enough to become the primary bottleneck.
 - Detokenization runs on asynchronous threads and largely overlaps the engine
   path.
 - The remaining large host risk is scale, not one obvious serial Python leaf:
@@ -285,7 +445,24 @@ The run-149c host trace shows:
 
 This makes “optimize a random Python function” a weak next strategy. The next
 host profile must measure per-rank fan-out, queue depth, active-sequence
-imbalance, and critical-path waits under TP1.
+imbalance, Pathways wait buckets, sampled CPU utilization, and critical-path
+waits under TP1.
+
+The asynchronous tokenizer pool carries nontrivial aggregate CPU demand, but
+aggregate worker-thread time is not additive to wall time. Treat it as a
+contention/tail hypothesis only. Before changing worker count or affinity,
+record pool queue latency, runnable threads, process CPU, and whether engine
+windows lengthen when the pool is busy. A useful controlled probe is:
+
+```text
+control: current detokenizer worker count
+probe A: half the workers, bounded queue
+probe B: current workers pinned away from Pathways/IFRT service threads
+gate: lower engine p90/p99 with unchanged median tokens and no detokenizer tail
+```
+
+Without that correlation, reducing or increasing tokenizer workers can simply
+move the same work between overlap and the end-of-rollout tail.
 
 ### Trainer and phase trace
 
@@ -355,8 +532,8 @@ Why it can improve performance:
 
 It removes a latency collective from every decode iteration. It also removes
 the `lax.cond` dependency associated with the dynamic predicate. The direct
-TP4 leaf ceiling is about 7%; the global planning estimate is 1-3 units, with
-potentially more value at DP128.
+TP4 leaf ceiling is about 7%; the planning estimate is 0.5-1.5 baseline units,
+with potentially more value at DP128.
 
 Validation:
 
@@ -397,9 +574,9 @@ load-tile winner is known.
 Why it can improve performance:
 
 A 5-10% RPA improvement is worth roughly 2-5% of decode device time. After
-host/phase dilution, plan for 1-3 global units. The opportunity is meaningful
-because RPA is large; it is not guaranteed because the current tile is already
-tuned for the closest topology.
+host/phase dilution, plan for 0.5-1.5 baseline units. The opportunity is
+meaningful because RPA is large; it is not guaranteed because the current tile
+is already tuned for the closest topology.
 
 Validation:
 
@@ -411,13 +588,106 @@ Validation:
 Public source context:
 [RPA block-size override, TPU Inference PR #3102](https://github.com/vllm-project/tpu-inference/pull/3102).
 
-### 3. Measure and reduce DP128 fan-out and tail imbalance
+### 3. Split the Pathways-mediated wait before tuning Pathways CPU
+
+Evidence for headroom:
+
+- Baseline `device_get` owns about 82% of a normal engine window; the optimized
+  TP4 and TP1 captures put the same inclusive wait above 90% of their deeper
+  windows.
+- A sampled worker's local decode module is much shorter than the client wait,
+  so the opaque envelope contains more than local kernel execution.
+- The native client plane shows IFRT dispatch, host-buffer lookup/store, and
+  pipe callbacks distributed across worker threads. It does not show one
+  serialized Pathways CPU leaf large enough to explain the wait.
+- No sampled process/core-utilization counter is present, so CPU saturation is
+  not established.
+
+Proposed solution:
+
+Carry one correlation ID from the engine window through client, scheduler,
+worker, device, and result materialization, then emit one compact record per
+window:
+
+```python
+trace = new_decode_trace_id()
+t_submit = monotonic_ns()
+future = executable.submit(inputs, trace_id=trace)
+
+# Recorded at the owning layers, not synthesized from the caller's wait.
+mark(trace, "rm_admitted")
+mark(trace, "worker_launch")
+mark(trace, "device_start")
+mark(trace, "device_done")
+mark(trace, "result_ready")
+
+result = future.result()
+mark(trace, "host_materialized")
+emit_decode_latency_breakdown(trace)
+```
+
+Derive, per window and per rank:
+
+```text
+admission_queue = rm_admitted - submit
+launch_delay    = device_start - worker_launch
+device_time     = device_done - device_start
+rank_tail       = max(device_done_by_rank) - median(device_done_by_rank)
+result_transfer = result_ready - max(device_done_by_rank)
+host_finalize   = host_materialized - result_ready
+```
+
+If result transfer/materialization is large, return only the compact scheduler
+summary instead of a padded token-history payload:
+
+```python
+compact_result = {
+    "slot": slot_ids,
+    "last_token": last_real_token,
+    "generated_count": generated_count,
+    "finished": finished_mask,
+}
+copy_to_host_async(compact_result)
+```
+
+If admission or launch delay is large, reuse the already-compiled/pre-sharded
+decode executable and keep topology setup outside the profiled loop. If rank
+tail is large, apply the DP instrumentation and routing work in the next item.
+If device time is large, prioritize RPA and sampling. These are distinct fixes
+for distinct buckets; “optimize Pathways” is not a sufficiently specific patch.
+
+Why it can improve performance:
+
+The instrumentation itself is a measurement enabler. It converts the largest
+opaque host-visible span into actionable queue, launch, device, tail, transfer,
+and finalize components. Compact result transfer can directly reduce the
+transfer/finalize buckets, but it receives no headroom credit until those
+buckets are measured. This avoids claiming that a blocked caller consumed CPU.
+
+Validation:
+
+- Check clock alignment or use duration pairs local to each clock domain.
+- Emit one record per window, not per token, to keep overhead negligible.
+- Confirm the sum of disjoint buckets closes against `device_get` wall within
+  a small residual.
+- Add sampled process CPU, runnable threads, executor queue depth, and
+  involuntary context switches before making a CPU-saturation claim.
+
+Public context: [JAX `device_get`](https://docs.jax.dev/en/latest/_autosummary/jax.device_get.html).
+
+### 4. Measure and reduce DP128 fan-out and tail imbalance
 
 Evidence for headroom:
 
 - Rollout remains about 86% of the TP1 cycle.
 - TP1 creates four times as many DP engines as TP4 and fewer requests per
   model replica.
+- The baseline TP4 trace executes 128 send/receive calls per full depth-128
+  window. Optimized TP4 executes 64 per depth-512 window, while optimized TP1
+  executes 256 because the same two rank-wide rounds now span DP128.
+- High-level scheduler wall is about 3.2% of the baseline engine window, about
+  1.8% in optimized TP4, and about 2.5% in the TP1 capture. It is secondary,
+  but the TP1 scaling tax is directly visible.
 - Completion lengths are broad and many sequences reach the output cap, so a
   rank can drain materially later than its peers.
 - The TP4 host trace has no single large CPU leaf after `device_get`; queueing,
@@ -456,8 +726,8 @@ Why it can improve performance:
 
 Batched fan-out reduces fixed IPC work at every engine boundary. A lightweight
 central load estimate retains most of round robin's low overhead while
-avoiding pathological DP tails. Plan for 1-3 global units only after the new
-rank histograms prove the mechanism.
+avoiding pathological DP tails. Plan for roughly 0.5-1.5 baseline units only
+after the new rank histograms prove the mechanism.
 
 Validation:
 
@@ -469,7 +739,7 @@ Validation:
 Public source context:
 [TPU Inference DP scheduler](https://github.com/vllm-project/tpu-inference/blob/a32e183a676cf428cb1cea953f58fdd616accb3e/tpu_inference/core/sched/dp_scheduler.py#L701-L776).
 
-### 4. Scout TP2 x DP64 as a crossover point
+### 5. Scout TP2 x DP64 as a crossover point
 
 Evidence for headroom:
 
@@ -495,8 +765,9 @@ Why it can improve performance:
 
 TP2 halves full-model weight traffic and doubles the requests per model
 replica relative to TP1 while paying smaller TP collectives than TP4. It may
-sit closer to the memory/latency crossover. This is a 0-3-unit experiment,
-not an assumed win; TP1 remains the baseline until TP2 beats it repeatedly.
+sit closer to the memory/latency crossover. This is a 0-1.5-baseline-unit
+experiment, not an assumed win; TP1 remains the current control until TP2
+beats it repeatedly.
 
 Validation:
 
@@ -505,7 +776,7 @@ Validation:
 - Profile the actual TP2 collective share.
 - Repeat the winner against a concurrent or interleaved TP1 control.
 
-### 5. Compile or overlap the actor microbatch dispatch gaps
+### 6. Compile or overlap the actor microbatch dispatch gaps
 
 Evidence for headroom:
 
@@ -539,8 +810,8 @@ materializing host metrics from the previous one.
 Why it can improve performance:
 
 It converts repeated proxy dispatch and idle gaps into device-side loop work.
-The absolute theoretical ceiling is only about 2 global units; the realistic
-planning range is 0.5-1 unit.
+The absolute theoretical ceiling is only about 1 baseline unit; the realistic
+planning range is 0.25-0.5 baseline units.
 
 Validation:
 
@@ -549,7 +820,7 @@ Validation:
 - Check peak HBM and compile time.
 - Verify the inter-envelope gaps shrink in Perfetto.
 
-### 6. Tighten phase transitions, not reward math
+### 7. Tighten phase transitions, not reward math
 
 Evidence for headroom:
 
@@ -581,7 +852,7 @@ with the current update; that would change on-policy semantics.
 Why it can improve performance:
 
 It removes avoidable handoff and future-materialization gaps without changing
-model math. The planning range is 0.5-1.5 global units.
+model math. The planning range is 0.25-0.8 baseline units.
 
 Validation:
 
@@ -590,11 +861,11 @@ Validation:
 - Monitor executor backlog so work is not merely moved to a later tail.
 - Require exact deterministic rewards and packed-token identity.
 
-### 7. Diagnose the isolated rollout stall
+### 8. Diagnose the isolated rollout stall
 
 Evidence for headroom:
 
-- One of the 18 baseline observations is approximately twice the steady
+- One of the 18 current-endpoint observations is approximately twice the steady
   median.
 - The extra time is entirely inside engine generation; actor train and sync
   remain normal.
@@ -630,7 +901,7 @@ Validation:
 - Correlate the next stall across Pathways, host, and rank clocks.
 - Reproduce the identified cause before adopting a mitigation.
 
-### 8. Fix TP1 profiling before making a TP1 kernel claim
+### 9. Fix TP1 profiling before making a TP1 kernel claim
 
 Evidence for headroom:
 
@@ -671,36 +942,38 @@ TP1 RPA and sampling estimates remain extrapolations from TP4.
 
 | Priority | Experiment | Control | Adoption gate |
 |---:|---|---|---|
-| P0 | Static/host-validated sampling plan | TP1 baseline | DP `reduce_and` gone; semantic gates pass |
+| P0 | Static/host-validated sampling plan | Current TP1 endpoint | DP `reduce_and` gone; semantic gates pass |
+| P0 | Pathways wait-bucket correlation | Current TP1 endpoint | Opaque wait closes into queue/device/tail/transfer/finalize buckets |
 | P0 | Valid TP1 decode capture | Same TP1 binary | Steady decode module, not `jit_split`, dominates session |
 | P1 | TP1 RPA load-tile sweep | Current `8192/4096` tile | Repeated per-token rollout win and correct kernel name |
 | P1 | TP2 x DP64 scout | Interleaved TP1 x DP128 | Repeated matched-work win |
-| P1 | DP rank/tail instrumentation | TP1 baseline | Identifies material skew or fan-out cost |
+| P1 | DP rank/tail instrumentation | Current TP1 endpoint | Identifies material skew or fan-out cost |
 | P2 | Batched DP commands or load-aware routing | Instrumented TP1 | Lower host critical path without worse tail |
 | P2 | Compiled actor microbatch loop | Current actor loop | Gap reduction, HBM safe, exact update semantics |
 | P2 | Phase-future cleanup | Current synchronous handoffs | Lower transition share, no policy-version drift |
 
 ## Remaining-headroom budget
 
-| Opportunity | Evidence strength | Plausible global reduction | Notes |
+| Opportunity | Evidence strength | Plausible reduction in 23b-baseline units | Notes |
 |---|---|---:|---|
-| Remove DP sampling guard | Strong TP4 trace/source; TP1 timing missing | 1-3 units | First code target |
-| TP1 RPA retune | Strong leaf share; no valid TP1 kernel trace | 1-3 units | Requires profiler fix |
-| DP128 fan-out/tail | Strong structural case; instrumentation missing | 1-3 units | Measure before patching |
-| TP2 crossover | Direct topology model, no TP2 result | 0-3 units | Can be negative |
-| Actor dispatch gaps | Direct Perfetto evidence | 0.5-1 unit | Small global ceiling |
-| Phase transitions | Direct Perfetto evidence | 0.5-1.5 units | Preserve on-policy order |
+| Remove DP sampling guard | Strong TP4 trace/source; TP1 timing missing | 0.5-1.5 baseline units | First code target |
+| TP1 RPA retune | Strong leaf share; no valid TP1 kernel trace | 0.5-1.5 baseline units | Requires profiler fix |
+| Pathways wait split / compact result | Strong opaque-wait evidence; bucket split missing | 0-1.5 baseline units | No credit until transfer/finalize is measured |
+| DP128 fan-out/tail | Strong structural case; instrumentation missing | 0.5-1.5 baseline units | Measure before patching |
+| TP2 crossover | Direct topology model, no TP2 result | 0-1.5 baseline units | Can be negative |
+| Actor dispatch gaps | Direct Perfetto evidence | 0.25-0.5 baseline units | Small global ceiling |
+| Phase transitions | Direct Perfetto evidence | 0.25-0.8 baseline units | Preserve on-policy order |
 | Isolated stall | Direct event, cause unknown | No median claim | Mean/p99 opportunity |
 
-Do not sum the high ends. A central near-term target is 5-10 normalized units
-below the current baseline. Reaching the stretch case requires both a real
+Do not sum the high ends. A central near-term target is 2.5-5 baseline units
+below the current endpoint. Reaching the stretch case requires both a real
 decode-kernel win and a demonstrated DP-control/tail win.
 
 ## Validity checklist
 
-- Baseline metric is the run-152 TensorBoard median over steps 3-20.
+- Baseline metric is the run-23b TensorBoard median over steps 3-20.
 - Startup steps are excluded by rule, not by observed value.
-- The rollout stall remains in the reported distribution.
+- The run-152 rollout stall remains in the endpoint distribution.
 - Prompt arrays are byte-identical.
 - Report completion-token volume and time per generated token.
 - Predeclare length, truncation, and reward bands.
@@ -713,20 +986,23 @@ decode-kernel win and a demonstrated DP-control/tail win.
 
 ## Bottom line
 
-Run 152 is the baseline, and its steady-step median is the 100-unit reference.
-Run 154 explains the new result at phase level; run 149c explains the closest
-available decode program; run 136 remains the trainer reference.
+Run 23b is the baseline, and its steady-step median is the 100-unit reference.
+Run 152 is the sustained current endpoint at approximately 53 baseline units.
+Run 154 explains the topology result at phase level; run 149c explains the
+closest available optimized decode program; run 136 remains the optimized
+trainer reference.
 
-TP1 is a real but modest win. The large historical reduction came from the
-software stack. From here, rollout still owns roughly six-sevenths of the
-cycle, and the most defensible next story is:
+TP1 is a real but modest win. The large reduction from the 23b baseline came
+from the software stack. From here, rollout still owns roughly six-sevenths of
+the cycle, and the most defensible next story is:
 
 1. remove the per-token cross-DP sampling guard;
-2. obtain a valid TP1 decode trace;
-3. retune the largest leaf, RPA, for TP1;
-4. measure and reduce DP128 fan-out/tail behavior;
-5. scout TP2 as the only plausible topology crossover;
-6. spend trainer effort only on the measured microbatch gaps.
+2. split the Pathways-mediated wait into queue/device/tail/transfer buckets;
+3. obtain a valid TP1 decode trace;
+4. retune the largest leaf, RPA, for TP1;
+5. measure and reduce DP128 fan-out/tail behavior;
+6. scout TP2 as the only plausible topology crossover;
+7. spend trainer effort only on the measured microbatch gaps.
 
 That supports a credible additional 5-10% target, with 10-15% as a stretch
 case—not another 2x claim.
