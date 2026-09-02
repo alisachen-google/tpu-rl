@@ -54,3 +54,5 @@ workload:
     value: '512'
   - name: DL_LOGCH
     value: '1024'
+  - name: DL_RWDUMP
+    value: '4'

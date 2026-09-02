@@ -54,3 +54,5 @@ workload:
     value: '512'
   - name: DL_DSPROC
     value: /workload/patches/gemma_data.py
+  - name: DL_RWDUMP
+    value: '4'
