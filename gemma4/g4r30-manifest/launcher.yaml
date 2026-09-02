@@ -143,6 +143,9 @@ data:
     if [ -f /workload/patches/patch_textual_stop.py ]; then
       python3 /workload/patches/patch_textual_stop.py
     fi
+    if [ -f /workload/patches/patch_verify_timeout.py ]; then
+      python3 /workload/patches/patch_verify_timeout.py
+    fi
     if [ -f /workload/patches/patch_reward_dump.py ]; then
       python3 /workload/patches/patch_reward_dump.py
     fi
@@ -200,6 +203,7 @@ data:
     # RPA tile envs unset for gemma4 (head_dim differs from qwen; kernel defaults)
     export CONTINUE_DECODE_EOS_CHECK_INTERVAL="8"
     export TEXTUAL_STOP=1
+    export VERIFY_ITEM_TIMEOUT=5
     export REWARD_DUMP_N=4
 
     # --- RL Sampler Patches & Env Setup ---
