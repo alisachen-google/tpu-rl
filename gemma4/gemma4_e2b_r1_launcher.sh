@@ -35,7 +35,7 @@ export ASYNC_DETOK="${DL_ADETOK:-0}"
 export ASYNC_LOGPROBS="${DL_ALOGP:-off}"
 export LOGPS_CHUNK_SIZE="${DL_LOGCH:-0}"
 export REWARD_DUMP_N="${DL_RWDUMP:-0}"
-export TEXTUAL_STOP="${DL_TSTOP:-0}"
+export TEXTUAL_STOP="${DL_TSTOP:-1}"
 CHATTMPL="chat_template_path=maxtext/examples/chat_templates/gemma-3-27b-chat_template.json"
 DSPROC_ARG=""
 if [ -n "${DL_DSPROC:-}" ]; then CHATTMPL=""; DSPROC_ARG="dataset_processor_path=${DL_DSPROC}"; fi

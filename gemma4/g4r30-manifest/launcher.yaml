@@ -140,6 +140,12 @@ data:
     if [ -f /workload/patches/patch_log_stats.py ]; then
       python3 /workload/patches/patch_log_stats.py
     fi
+    if [ -f /workload/patches/patch_textual_stop.py ]; then
+      python3 /workload/patches/patch_textual_stop.py
+    fi
+    if [ -f /workload/patches/patch_reward_dump.py ]; then
+      python3 /workload/patches/patch_reward_dump.py
+    fi
 
 
     # --- ROLLOUT PROFILING (the whole point of this run) ---
@@ -193,6 +199,8 @@ data:
     # follow-up is to drop it and target their 327 s rung instead.
     # RPA tile envs unset for gemma4 (head_dim differs from qwen; kernel defaults)
     export CONTINUE_DECODE_EOS_CHECK_INTERVAL="8"
+    export TEXTUAL_STOP=1
+    export REWARD_DUMP_N=4
 
     # --- RL Sampler Patches & Env Setup ---
     export HF_TOKEN=''
