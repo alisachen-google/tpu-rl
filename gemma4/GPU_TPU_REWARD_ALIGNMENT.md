@@ -47,25 +47,43 @@ tokenize as 7 pieces" does **not** explain the TPU quality collapse, and the ear
 "canonical markers are untrained" story needs re-examination: `eos_token_id=[1,106,50]`
 in generation_config is what terminates GPU responses.
 
-## Hypotheses for the TPU-side collapse (ranked)
+## RESOLVED (same day): full pipeline walk — the divergent step found
 
-1. **Checkpoint conversion defect** (HF→MaxText OCDBT→raw TensorStore, 541 arrays):
-   a systematic transform error (scaling, transpose, norm placement) that leaves the
-   model fluent but reliably wrong — the classic signature.
-2. **TPU inference numerics** in the rollout path: RPA attention kernel config,
-   logits dtype, CD fused-loop KV/position handling.
-3. **Token-level prompt delta**: bos handling / trailing `\n` after the model marker
-   (cheap to check, unlikely to explain 20×).
+Every step from dataset to reward, compared with artifacts:
 
-## Proposed diagnostics (in cost order)
+| # | Pipeline step | GPU (verl) | TPU (ours) | Verdict |
+|---|---|---|---|---|
+| 1 | Dataset | OpenMathInstruct-2 (preprocessed parquet, 50k val rows checked) | same dataset, HF stream | ✅ |
+| 2 | System prompt + question | byte-identical text in every parquet row | identical (`gemma_data.py`) | ✅ |
+| 3 | Gold answer | `ground_truth = ["ans","processed"]` | `process_answer` → same shape (`gold='["10","10"]'`) | ✅ |
+| 4 | Inner prompt string | parquet `prompt[0].content` = `<start_of_turn>user\n{SYS}\n\n{Q}<end_of_turn>\n<start_of_turn>model` | same string (ours adds trailing `\n`) | ✅ |
+| 5 | **Final prompt rendering** | **verl applies the model's CANONICAL gemma-4 chat template at load** (their run script says so explicitly; template renders `<bos><|turn>user\n{content}<turn|>\n<|turn>model\n`) → the model sees its **trained turn frame, ids 105/106**, wrapped around the textual content | **no template** — the inner textual string IS the whole prompt; no trained frame anywhere | ❌ **THE DIVERGENT STEP** |
+| 6 | Prompt tokenization | `<|turn>`/`<turn|>` parse as single special ids 105/106 (verified in tokenizer.json added_tokens + vocab) | textual markers → plain multi-BPE pieces | ❌ (consequence of 5) |
+| 7 | Stop criterion | model closes its turn with `<turn|>`=106 ∈ eos ids [1,106,50] → natural stop, 0.1–0.5% truncation | model never emits 106 (no canonical frame in prompt) → textual marker + self-dialog; our patch forces the stop | ❌ (consequence of 5) |
+| 8 | Response cap | 8192 | 4096 | ✗ minor |
+| 9 | Detok → extraction → scoring | `maxtext_math_reward.compute_score` | `utils_rl` (worker-level parity previously verified) | ✅ |
 
-- **D0 (one-line patch):** dump the first request's prompt token ids on TPU; compare
-  against HF `tokenizer(prompt)` — settles bos/marker encoding in minutes.
-- **D1 (one short run):** greedy 20-prompt probe through our rollout stack; compare
-  answers to the GPU dump's for the same questions. Right answers ⇒ blame sampling
-  path; wrong answers ⇒ blame weights/numerics.
-- **D2 (targeted):** teacher-force one fixed GPU completion through the TPU model and
-  compare per-token logprobs vs GPU — localizes a conversion/numerics defect precisely.
+**Root cause: the TPU prompt lacks the canonical `<|turn>`(105)/`<turn|>`(106) trained
+turn frame that the GPU pipeline adds via chat template.** The GPU model answers inside
+its trained contract (≈55% correct, natural termination); the TPU model is prompted
+outside it (2–3%, no termination).
+
+This also **overturns the inherited belief** that "canonical markers are untrained in
+this checkpoint": no TPU run ever tested the true canonical frame — the TPU "canonical"
+attempts used the gemma-3 chat-template *file* (textual markers), and the GPU run proves
+ids 105/106 are trained and load-bearing. (Note the GPU prompt is double-wrapped —
+canonical frame outside, textual noise inside — and works anyway; parity should
+replicate it exactly before simplifying.)
+
+## The probe run: g4r41 (queued)
+
+`g4r41` = g4r20b + `gemma_data_canonical.py`: byte-exact replica of the GPU prompt
+(`<|turn>user\n{inner}<turn|>\n<|turn>model\n`, bos via tokenizer), stop ids [106,50],
+plus a first-call self-check that prints the token ids of `<|turn>`/`<turn|>` (must be
+single ids 105/106 for the probe to be valid). Expected if root cause confirmed:
+`check_numbers` 0.02 → ~0.5, truncation → ~0, natural stops via id 106, OSL ≈ GPU's
+~1900 mean. If output is still broken under the canonical frame, suspicion moves to the
+checkpoint conversion of those token rows (then: teacher-forced logprob parity probe).
 
 ## Consequence if fixed
 
