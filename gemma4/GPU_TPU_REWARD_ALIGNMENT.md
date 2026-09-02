@@ -113,6 +113,27 @@ ladder's quality-sensitive rungs. Expected: TPU `check_numbers` ≈ GPU's ~0.55,
 termination via ids [1,106,50], truncation → ~0 — and likely a large perf gain for free
 (shorter, naturally-stopping completions shrink rollout time).
 
+## FIX EXECUTED (2026-09-02 ~21:5xZ): reconversion complete, audit PASS
+
+Job `g4ckpt-reconv` (CPU pod, pinned image + overlay of the fork's
+`checkpoint_conversion` module with native gemma4-e2b support): HF safetensors →
+`to_maxtext` (541 arrays, 4.63B params) → raw TensorStore at
+**`gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw2/0/items`**. Built-in audit
+against the HF bytes:
+
+| id | HF norm | new norm | ratio | cos vs HF |
+|---|---|---|---|---|
+| 105 `<|turn>` | 1.3342 | 52.289 | 39.192 | **+0.999999** |
+| 106 `<turn|>` | 1.1754 | 46.065 | 39.191 | **+0.999999** |
+| 100 / 887 / 5000 / 236820 | 1.21–1.32 | 47.4–51.8 (varied!) | 39.19 | **+0.999999** |
+
+Directions identical to HF; uniform ×√1536 scale = the documented MaxText store
+convention (undone at runtime by the tunix→tpu_inference push); row norms now *varied*,
+as trained embeddings must be. Contrast with the old `gemma4-e2b-raw`: uniform norms
+39.19 (per-row normalized) and cos 0.61–0.96. **`gemma4-e2b-raw2` is the verified-good
+checkpoint.** Validation run: g4r43 (2×2×1 smoke, canonical prompt, `DL_CKPT_PATH`
+knob) launched on it.
+
 ## The probe run: g4r41 (queued)
 
 `g4r41` = g4r20b + `gemma_data_canonical.py`: byte-exact replica of the GPU prompt
