@@ -7,7 +7,7 @@
 #   - ConfigMap g4r19-patches   : the runtime patch roster (applied by the launcher)
 #   - ConfigMap g4r19-launcher  : launch-workload.sh with the full train command
 #   - JobSet    g4r19           : Pathways head (rm+proxy sidecars) + 16 TPU workers
-# Config identity: image 2026-08-24-packing (= sha f7c957d0, same build as tianyu g4-003);
+# Config identity: image 2026-08-24-packing (= sha f7c957d0, same build as the reference recipe);
 #   flash trainer + chips_per_vm=8 + kv_cache_buffer=4352 (the OOM-fix trio), TMBS=4,
 #   HBM=0.25, textual-stop OFF (DL_TSTOP=0, faithful baseline), reward weights = rl.yml
 #   defaults (+1.0 correct / +0.1 format), per-item REWARD-DUMP on (N=4).
@@ -24,7 +24,7 @@ metadata:
   namespace: ubench-regression-tests
 data:
   gemma_data.py: |-
-    """gemma4: custom process_data (dataset_processor_path hook), ported from tianyu-rl-g4-003.
+    """gemma4: custom process_data (dataset_processor_path hook), ported from the reference gemma4 run.
     EMPIRICAL findings driving this design (theirs):
     (1) the checkpoint outputs garbage under the canonical gemma-4 <|turn> markers (ids 105/106 are
         effectively untrained for it),
@@ -64,7 +64,7 @@ data:
         return {"prompts": prompt, "question": question, "answer": json.dumps(processed_answer)}
     
   patch_async_detok.py: |-
-    """Overlap detokenization with the rollout tail (ported from tianyu-rl-g4-003).
+    """Overlap detokenization with the rollout tail (ported from the reference gemma4 run).
     Wrap vllm LLMEngine.step: each finished RequestOutput is decoded in a thread pool while decode
     continues; tunix VllmSampler.detokenize uses the precomputed text (falls back to synchronous
     decode; prints ASYNC-DETOK hits/misses). NOTE: supersedes patch_fast_detok's batch decode for
@@ -92,7 +92,7 @@ data:
     print("ASYNC-DETOK PATCH: APPLIED", flush=True)
     
   patch_async_logprobs.py: |-
-    """Extract per-token logprobs in the background (ported from tianyu-rl-g4-003, env-gated).
+    """Extract per-token logprobs in the background (ported from the reference gemma4 run, env-gated).
     tunix VllmSampler.detokenize runs get_logprobs_from_vllm_output per completion after generation
     (~9M (token, dict) pairs/step, sequential ~3 s). Wraps LLMEngine.step (after patch_async_detok)
     to extract logprobs of each FINISHED request in the shared thread pool while decode continues.
@@ -273,7 +273,7 @@ data:
         f"{indent}    # _CD_NOGLOBAL: no jnp.any(active) here -- it is a cross-DP\n"
         f"{indent}    # all-reduce every iteration; at window 512 x 128 devices the\n"
         f"{indent}    # chained collectives crash pathways workers at the sync boundary\n"
-        f"{indent}    # (g4r21, 17 synchronized crashes; tianyu g4-003 runs count-only).\n"
+        f"{indent}    # (g4r21, 17 synchronized crashes; the reference recipe runs count-only).\n"
         f"{indent}    return _cd_i < max_decode_steps\n"
         f"\n")
     src = "".join(lines[:start]) + NEW_COND + "".join(lines[end:])
@@ -953,7 +953,7 @@ data:
     """Batched detokenize in tunix VllmSampler (qwen3 item 11).
     
     WHY. detokenize() calls self.tokenizer.decode() once per completion -- 2048
-    sequential HF decodes, ~4 s/step on tianyu's GEN-T timers.
+    sequential HF decodes, ~4 s/step on the reference recipe's GEN-T timers.
     
     WHAT. Collect every output's token_ids and decode them in ONE batch_decode
     call before the loop; the loop then indexes the precomputed list. Falls back
@@ -1022,7 +1022,7 @@ data:
     print("FAST-DETOK PATCH: APPLIED")
     
   patch_fast_extract.py: |-
-    """Fast extract_answer + reward-phase timers (ported from tianyu-rl-g4-003).
+    """Fast extract_answer + reward-phase timers (ported from the reference gemma4 run).
     utils_rl.extract_answer scans every completion char by char and slices content[:op] on every '}'
     -- O(len x braces) per completion, x2048 per step. Replacement: locate each '\\boxed{' with
     str.find and balance braces only inside it. Mode env FAST_EXTRACT=verify8 (default): fast result
@@ -1106,7 +1106,7 @@ data:
   patch_firsttok.py: |-
     """Opening-format census over ALL completions per step (corruption gate).
     
-    WHY. tianyu's qwen3 campaign found prefill steps padded to the oversized max
+    WHY. the reference recipe's qwen3 campaign found prefill steps padded to the oversized max
     token bucket corrupt each sequence's FIRST generated token (their readout:
     first_think=n/n). Our g4r7b buckets are powers of 2 to 1,048,576 while the
     real prefill budget is 540,672 -- full-budget prefill steps pad ~94%. The
@@ -1172,7 +1172,7 @@ data:
     WHY. rl.yml defaults attention='dot_product': the trainer materializes a
     dense [B, S, S] score matrix on 8192-token packed rows. Flash/splash
     attention needs the sa_* block fields, which RLConfig does not declare --
-    setting them on the CLI is rejected. tianyu's sweep on qwen3 adopted
+    setting them on the CLI is rejected. the reference recipe's sweep on qwen3 adopted
     blocks q=1024 / kv=2048 (their nulls: 2048/4096 blocks, fused bwd, base2).
     
     WHAT. Appends class-attribute defaults for every sa_* / local_sa_* field to
@@ -1250,7 +1250,7 @@ data:
           f" SA_BLOCK_KV={os.environ.get('SA_BLOCK_KV', '2048(default)')})")
     
   patch_g4_format_guard.py: |-
-    """G4-FORMAT-GUARD (ported from tianyu-rl-g4-003): replace match_format_exactly's backtracking
+    """G4-FORMAT-GUARD (ported from the reference gemma4 run): replace match_format_exactly's backtracking
     regex with an equivalent ordered find-chain. rs.*?re.*?ss(.+?)se (DOTALL) matches iff the four
     literal tokens appear in order; on gemma echo outputs (~30k chars, repeated tag literals, often
     no closing tag) the regex backtracks catastrophically (793 s / 32 items on their g4-002k step 7).
@@ -1611,7 +1611,7 @@ data:
     
     WHY. The sync CD output path calls _extract_valid_tokens_host per request --
     one np.isin per sequence, ~9.7k calls / ~70 ms per window on the g4r7b host
-    trace (tianyu measured 130 ms at window 128). All of it is one matrix op.
+    trace (the reference author measured 130 ms at window 128). All of it is one matrix op.
     
     WHAT. After `eos_arr = np.atleast_1d(eos_token_id)`, compute the first-EOS
     cut index for every row at once; replace the per-request call with a slice.
@@ -1673,7 +1673,7 @@ data:
     WHY. tunix generate/utils.py _unroll_scanned_layers slices a scanned-layer
     param one layer at a time in a Python loop (`src_val.value[tuple(idx)]`),
     each slice a separate device op dispatched through the Pathways proxy --
-    ~290 remote round-trips per weight sync (tianyu SYNC-T3: 4.6s -> 0.5s once
+    ~290 remote round-trips per weight sync (the reference author SYNC-T3: 4.6s -> 0.5s once
     jitted). Confirmed present in our stack (transfer_state_with_mappings ->
     _unroll_scanned_layers, utils.py:806/464).
     
@@ -2081,7 +2081,7 @@ data:
     by construction -- any init failure prints PERF-V2: DISABLED and the run
     proceeds with v2 off.
     
-    Output: ONE file gs://ubench-logs/tianyu-rl-17a/perf_traces/
+    Output: ONE file gs://ubench-logs/the reference run/perf_traces/
     perfetto_trace_v2_<epoch>.pb, rewritten each step with all steps
     accumulated (writes serialized on a 1-thread executor; epath/gcsfs handle
     the gs:// path; perfetto+etils+gcsfs verified in the image layer).
@@ -2808,7 +2808,7 @@ data:
     get_default_block_sizes(), which for tpu7 DECODE sets BOTH bkv_sz and bkv_csz to
     min(min_bkv_sz_to_peak, max_kv).
     
-    MEASURED, not assumed: the decode_only trace from tianyu-rl-05-profile contains
+    MEASURED, not assumed: the decode_only trace from the reference run-profile contains
     exactly one kernel configuration --
         RPAd-p_64-bq_1_1-bkv_16384_16384      138.4 ms = 74.7% of leaf decode time
     -- i.e. the untouched default, despite RPA_V3_DECODE_BLOCK_SIZES=1,16384,1,4096
@@ -2908,10 +2908,10 @@ data:
   patch_runner_eos.py: |-
     """GEMMA4 stop fix part 2: the continuous-decode DEVICE loop stops rows via runner.eos_token_id
     (runner_utils.get_eos_token_id(model_config)) -- the tunix/vLLM host-side stop_token_ids are
-    irrelevant inside a CD window. tianyu g4-001d proved it: with stop ids [1,50,106] in
+    irrelevant inside a CD window. the reference author g4-001d proved it: with stop ids [1,50,106] in
     sampling_params only, step 0 was still 99.46% capped. Union EXTRA_STOP_TOKEN_IDS into
     runner.eos_token_id (CD masking and host extract accept int-or-list). Ported from
-    tianyu-rl-g4-003. Prints RUNNER-EOS PATCH: APPLIED|FAILED and RUNNER-EOS ids=[...] at init."""
+    the reference gemma4 run. Prints RUNNER-EOS PATCH: APPLIED|FAILED and RUNNER-EOS ids=[...] at init."""
     import sys
     P = "/usr/local/lib/python3.12/site-packages/tpu_inference/runner/tpu_runner.py"
     s = open(P).read()
@@ -3139,7 +3139,7 @@ data:
           return _ss_sample(rng, mesh, logits, meta)
         # _SS_PADFIX (SS_PADFIX=1): at tp>1 padded rows carry top_k=0, which fails
         # the whole-batch guard and silently forces the full-vocab fallback for the
-        # ENTIRE batch (tianyu qwen3 item 3, -9.5s). The sharded sampler already
+        # ENTIRE batch (the reference author qwen3 item 3, -9.5s). The sharded sampler already
         # masks top_k<=0 rows correctly internally (their outputs are discarded
         # padding anyway), so it is safe to let the guard IGNORE those rows and keep
         # the vocab-sharded fast path for the real rows. Default off preserves the
@@ -3255,8 +3255,8 @@ data:
     """GEMMA4: tunix VllmSampler clobbers vLLM's stop set to [tokenizer.eos_id()] -- for
     google/gemma-4-E2B-it that is <eos>=1 only, while the chat model ends turns with ids 106/50
     (generation_config eos_token_id=[1,106,50]) -> most completions run to the 8192 cap
-    (g4r19 measured truncation 64->78% RISING across steps; tianyu g4-001c: 99.4% capped).
-    Union in EXTRA_STOP_TOKEN_IDS from env. Ported from tianyu-rl-g4-003.
+    (g4r19 measured truncation 64->78% RISING across steps; the reference author g4-001c: 99.4% capped).
+    Union in EXTRA_STOP_TOKEN_IDS from env. Ported from the reference gemma4 run.
     Prints STOP-TOKENS PATCH: APPLIED|FAILED and, at runtime, STOP-TOKENS ids=[...] once."""
     import sys
     T = "/usr/local/lib/python3.12/site-packages/tunix/generate/vllm_sampler.py"
@@ -3289,7 +3289,7 @@ data:
     
     WHY. VllmSampler.update_params tears the KV pool down before every weight
     reshard (collective_rpc("delete_kv_cache")) and rebuilds it after
-    (reinitialize_kv_cache) -- ~2 s/step on tianyu's SYNC-T timers. At sync time
+    (reinitialize_kv_cache) -- ~2 s/step on the reference recipe's SYNC-T timers. At sync time
     the pool is empty (all sequences finished) and the resharded weights are
     far smaller than free HBM, so the teardown buys nothing.
     
@@ -3354,7 +3354,7 @@ data:
     WHY. The gemma-3-STYLE prompt contract has no single-token terminator: the model ends its real
     answer (~1000 tok) with the TEXTUAL 7-BPE-piece '<end_of_turn>' = ids
     [236820,643,236779,1340,236779,887,236813], then self-dialogs to the 4096 cap (measured: 49
-    occurrences in one tianyu g4-003 response; 85% cap-truncation; osl_mean ~3550). GPU/verl stops on
+    occurrences in one the reference recipe response; 85% cap-truncation; osl_mean ~3550). GPU/verl stops on
     stop-STRINGS so their OSL is ~1000+. Our CD device loop stops only on token IDS -> ~70% of decode
     is wasted post-answer tokens.
     
@@ -4335,7 +4335,7 @@ data:
     MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
     # Ironwood bring-up fixes (from smoke ladder):
     
-    # --- tianyu-rl-14 stack: runtime patches (self-verifying, fail-open) ---
+    # --- the reference run stack: runtime patches (self-verifying, fail-open) ---
     for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_rpa_blocks patch_cd_masking patch_cd_report patch_phasetime patch_reward_parallel patch_sharded_sampling patch_profiler_fix patch_gc_sync patch_packing_knob patch_packer_fast patch_log_stats patch_perf_v2 patch_dump_completions patch_firsttok patch_engine_kwargs patch_host_extract patch_async_detok patch_async_logprobs patch_fast_detok patch_dp_rr_routing patch_sync_keepkv patch_cd_noeos patch_flash_sa patch_jit_unroll patch_verify_timeout patch_stop_tokens patch_runner_eos patch_fast_extract patch_g4_format_guard patch_logps_chunk patch_reward_dump patch_textual_stop; do
       for F in /workload/patches/$P /workload/patches/$P.py; do
         if [ -f "$F" ]; then python3 "$F"; break; fi
