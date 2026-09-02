@@ -75,6 +75,44 @@ ids 105/106 are trained and load-bearing. (Note the GPU prompt is double-wrapped
 canonical frame outside, textual noise inside — and works anyway; parity should
 replicate it exactly before simplifying.)
 
+## ROOT CAUSE FOUND (2026-09-02, byte-level weights audit): corrupted embedding table
+
+The g4r41 canonical-prompt probe came back **negative** (banner confirmed ids 105/106 reach
+the model as single trained tokens, yet behavior was unchanged: truncation 36%, textual
+`<end_of_turn>` in 64% of completions, 0 correct in dumps). That killed the prompt-contract
+theory and pointed at the weights. A direct byte-level comparison of
+`model.language_model.embed_tokens.weight` (HF safetensors, the file the GPU run loads)
+vs `params.params.token_embedder.embedding` (our raw TensorStore) settles it:
+
+| Token id | HF row norm | our row norm | cos(ours, HF) |
+|---|---|---|---|
+| 1 `<eos>` | 1.143 | 39.189 | **+0.61** |
+| 50 `<|tool_response>` | 1.297 | 39.196 | **+0.63** |
+| **105 `<|turn>`** | 1.334 | 39.179 | **+0.74** |
+| **106 `<turn|>`** | 1.175 | 39.189 | **+0.70** |
+| ordinary ids (17 sampled) | 1.03–1.46 | 39.18–39.20 | +0.69…+0.96 (median 0.81) |
+
+- **Every row of our embedding has norm ≈ √1536 = 39.19** — per-row RMS-normalized.
+  Real trained embeddings never have uniform norms; the HF table's norms vary naturally.
+- Directions also drift (median cos 0.81), **worst on the control/turn tokens** —
+  matching every observed symptom: canonical frame inert, no stop-token emission,
+  fluent-but-wrong math (2–3% vs 55%).
+- **The rest of the network is fine:** the final norm tensor matches HF at cos 1.0000 with
+  only tiny rounding deltas (8.625→8.5625 — a quantization round-trip signature),
+  suggesting the source of our `pathways-compat` checkpoint was a quantized/QAT variant
+  or a conversion that dropped the embedding's per-row dequantization scales.
+
+**Implication:** every TPU run of this campaign — ours AND the reference g4-003 lineage,
+which shares this checkpoint — ran with a damaged embedding. The GPU/TPU reward gap is a
+checkpoint defect, not a framework, prompt, sampling, or reward-stack difference.
+
+**Fix:** reconvert from the verified bf16 HF safetensors
+(`gs://xiaotongyang-bucket/.../models/gemma-4-E2B-it/model.safetensors`, whose bytes this
+audit validated) through the MaxText conversion path → new raw TensorStore → rerun the
+ladder's quality-sensitive rungs. Expected: TPU `check_numbers` ≈ GPU's ~0.55, natural
+termination via ids [1,106,50], truncation → ~0 — and likely a large perf gain for free
+(shorter, naturally-stopping completions shrink rollout time).
+
 ## The probe run: g4r41 (queued)
 
 `g4r41` = g4r20b + `gemma_data_canonical.py`: byte-exact replica of the GPU prompt
