@@ -963,3 +963,13 @@ Replication of g4r32 (byte-identical + fmt-fixed reward_dump): warm 46.4/40.4/40
 (~40-43 median). Reward spike at step 8 REPLICATED (156.2 s, async-reward sync-fallback on a hard
 batch -- reproducible tail, next target). fmt-fixed dumps working: 25/40 samples fmt=0.1, 15 fmt=0.0;
 0/40 correct (consistent ~2-3%). Rewards log: gs://ubench-logs/g4r32b/rewards/g4r32b-rewards.txt
+
+
+# ═══ ATTRIBUTION LADDER RESULTS (goal: split g4r19->g4r32 into measured steps) ═══
+| Lever | Pair | Delta (warm median) | Notes |
+|---|---|---|---|
+| CD window 512 (vs 64) | g4r33(51.7) vs g4r32b(40.7) | **-11.0 s** | rollout 44->34; composes ~additively with stop |
+| Textual <end_of_turn> stop | g4r30(50.2) vs g4r32(43.4) | **-6.8 s** | + OSL -45%, truncation 85->40%, check_numbers +~40% |
+| XLA proxy ladder | g4r31 crash | stability-required at cd512 | unmeasurable marginally |
+| tianyu-base bundle @win64 (prompt+async+TMBS8+...) | g4r19(175.6) vs g4r33(51.7) | -123.9 s aggregate | being decomposed: A3 async-reward (g4r35, RUNNING), then prompt, prefix, rr, TMBS |
+g4r33: no reward spike (hard batch is content-dependent; different stream at win64).
