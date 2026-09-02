@@ -40,8 +40,22 @@ def check_numbers(prompts, completions, answer, tmvp_config, **kargs):  # noqa: 
                     guess = extract_answer(c, tmvp_config)
                 except Exception as _e:
                     guess = "<extract-error:%r>" % (_e,)
+                # compute fmt inline (pool workers hide the wrapped fn's scores)
+                try:
+                    _rs = "" if getattr(tmvp_config, "reasoning_start_token_in_prompt", False) else tmvp_config.reasoning_start_token
+                    _ok = False
+                    _i0 = c.find(_rs) if _rs else 0
+                    if _i0 >= 0:
+                        _j = c.find(tmvp_config.reasoning_end_token, _i0 + len(_rs))
+                        if _j >= 0:
+                            _k = c.find(tmvp_config.solution_start_token, _j)
+                            if _k >= 0 and c.find(tmvp_config.solution_end_token, _k + 1) >= 0:
+                                _ok = True
+                    _fmt_v = round(float(tmvp_config.reward_exact_format_match), 4) if _ok else 0.0
+                except Exception:
+                    _fmt_v = "?"
                 print("REWARD-DUMP i=%d fmt=%s score=%s guess=%r gold=%r n_chars=%d tail=%r" % (
-                    i, (round(fmt[i], 4) if i < len(fmt) else "?"),
+                    i, _fmt_v,
                     round(float(list(r)[i]), 4), str(guess)[:60], str(answer[i])[:60],
                     len(c), c[-40:]), flush=True)
         except Exception as _e:
