@@ -37,6 +37,34 @@ Full e2e manifest (patches configmap + launcher configmap + JobSet): **`gemma4/g
 
 Median (1–9) **40.7**; clean band 38.8–40.7; mean 60.9 (spike-dominated).
 
+## 2b. Detailed per-step phase breakdown
+
+Sources: PHASETIME (rollout=engine_generate, rewards=compute_rewards, global=run_global_step) +
+TensorBoard perf/train/* (weight_sync_time, sum/actor_train_time, actor_dequeue_time; TB step k = phasetime step k-1).
+"other" = global - rollout - rewards - trainer - sync (marshal/advantage/logprobs/packing residual;
+dequeue overlaps the rollout tail so it is informational, not additive).
+
+| step | rollout | rewards | trainer | weight sync | dequeue* | other | GLOBAL |
+|---|---|---|---|---|---|---|---|
+| 0 (cold) | 84.2 | 61.7 | 45.0 | 1.10 | 22.5 | 10.6 | 202.6 |
+| 1 | 34.8 | 1.69 | 8.24 | 0.45 | 6.4 | 1.2 | 46.4 |
+| 2 | 33.5 | 0.22 | 5.05 | 0.46 | 5.0 | 1.2 | 40.4 |
+| 3 | 34.4 | 0.23 | 4.28 | 1.04 | 5.2 | 0.5 | 40.4 |
+| 4 | 33.0 | 0.21 | 4.23 | 0.42 | 4.9 | 0.9 | **38.8** |
+| 5 | 33.6 | 0.19 | 4.21 | 0.46 | 5.0 | 0.8 | 39.3 |
+| 6 | 48.2 | 0.25 | 4.82 | 0.43 | 6.2 | 1.0 | 54.7 |
+| 7 | 33.9 | 0.43 | 4.86 | 0.43 | 4.5 | 1.1 | 40.7 |
+| 8 | 34.4 | **156.2** | 6.64 | 2.49 | 24.1 | ~0 | 199.4 |
+| 9 | 42.0 | 0.20 | 4.36 | 1.35 | 6.2 | ~0 | 47.9 |
+
+Canonical clean-step budget (~40 s): **rollout ~33.5 (84%) · trainer ~4.5 (11%) · sync ~0.45 ·
+rewards ~0.2 · other ~1.0**. The step is still overwhelmingly rollout(host)-bound; trainer at
+TMBS=8/fsdp128/flash is down to ~4.5 s (vs ~15 s on the g4r19 config); weight sync ~0.45 s
+(keep-KV + jit-unroll lineage). The two non-clean steps: step 6 = rollout KV/window wobble (+15 s
+rollout); step 8 = the sympy reward spike (see §4; sync/trainer/dequeue also inflate slightly there
+from contention with the 64-proc sympy pool).
+*dequeue overlaps rollout; listed for visibility.
+
 ## 3. Generation & reward health
 
 - OSL ~1750–2100 (textual stop active), truncation ~37–47% (was 81–85% without the stop)
