@@ -973,3 +973,8 @@ batch -- reproducible tail, next target). fmt-fixed dumps working: 25/40 samples
 | XLA proxy ladder | g4r31 crash | stability-required at cd512 | unmeasurable marginally |
 | tianyu-base bundle @win64 (prompt+async+TMBS8+...) | g4r19(175.6) vs g4r33(51.7) | -123.9 s aggregate | being decomposed: A3 async-reward (g4r35, RUNNING), then prompt, prefix, rr, TMBS |
 g4r33: no reward spike (hard batch is content-dependent; different stream at win64).
+
+A3 MEASURED (g4r35, async-reward OFF + vtmo cap): median 46.3 vs 40.7 -> **async-reward = -5.6 s**.
+Reward phase sync 1.7-2.9 s (max 7.3 on the hard batch) -> **verify-timeout cap VALIDATED under
+worst case** (same batch class cost 156 s uncapped): the reward tail is fixed.
+A5 launched (g4r37: canonical <|turn> chat template, everything else = champion stack).
