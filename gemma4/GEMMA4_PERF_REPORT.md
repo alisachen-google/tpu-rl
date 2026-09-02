@@ -925,3 +925,21 @@ PIVOT: attribute from the WORKING side (vary g4r30) instead of patching toward i
   deep-window stability AND its perf contribution in one run.
 - next candidates: g4r32 = g4r30 @ window 64 (H1 sizing on the working stack); g4r33 = g4r30 with
   canonical prompt (isolates prompt's perf-vs-correctness split).
+
+
+# ═══ 🏆 G4R32: NEW CHAMPION — TEXTUAL-STOP ON THE PROVEN BASE (2026-09-02 01:49Z) ═══
+g4r32 = g4r30 recipe + patch_textual_stop (TEXTUAL_STOP=1) + reward_dump. 10/10 steps, EXIT 0.
+
+warm steps 1-9 global: 46.5, 39.5, 41.7, 40.3, 42.0, 56.2, 43.4, 204.8, 58.9
+-> CLEAN BAND 39.5-43.4, MEDIAN 43.4, BEST 39.5  (g4r30 reference: 48.9-55.8, median 50.2)
+rollout: 33-36 s clean (vs 38-41)  |  cold step: 201 s
+OSL: 3459-3600 -> 1748-2102 (-45%); truncation 81-85% -> 37-47%
+REWARDS IMPROVED: check_numbers 0.019-0.0283 (vs reference 0.011-0.0215) -- ending at the real
+answer instead of self-dialog RAISES correct-answer density. Task healthier AND faster.
+
+Net vs our campaign start: 125.8 -> 43.4 median (2.9x); vs roofline (~4-6 s): ~9x residual (H8).
+Remaining tails: one reward spike 156.6 s (step 8: async-reward fallback to sync on a hard batch);
+rollout wobble 48-53 s on 2 steps. Next increments: window-boundary overshoot trim (cd 256 probe),
+reward-fallback hardening, include-stop-str contract alignment.
+ATTRIBUTION NOTE: the textual-stop is OUR novel lever (not in tianyu's stack) -- first result
+surpassing the reference.
