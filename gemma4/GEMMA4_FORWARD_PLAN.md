@@ -17,20 +17,25 @@ Each step changes ONE thing (or one named bundle) and is measured with an 8-10 s
 | Patch stack | our roster (26) | tianyu 34-patch stack + our stop/dump/vtmo/partial |
 | Reward spike guard | vtmo only | vtmo + _AR_PARTIAL |
 
-## The ladder (F-steps)
+## The ladder (L-rungs, 2026-09-02 revision — one lever per queued run, all on OUR launcher)
 
-| Step | Run | Delta vs previous | Status / expected |
+Revised per direction: g4r19b baseline re-run dropped (L0 anchor = the original g4r19
+measurement); each queued rung adds exactly one optimization bundle on top of the previous,
+ending at the g4r32c champion config. Rungs L2+ auto-launch sequentially via
+`ladder-chain.sh` (next rung installs only when the previous completes; chain stops on failure).
+
+| Rung | Run | Delta vs previous | Status / expected |
 |---|---|---|---|
-| F0 | **g4r19b** (RUNNING) | baseline re-run (stop OFF, fixed reward weights, dumps on) | expect ~175 median |
-| F1 | g4r19c | + textual prompt + stop-ids (env-only: DL_DSPROC, DL_STOPIDS) | prompt term on our launcher; expect osl/quality shift, modest perf |
-| F2 | g4r34 | **platform swap**: reference-lineage manifest @ cd64, textual stop OFF | the base-bundle hop (XLA ladder + TMBS8/HBM0.3 + engine shape + their patch variants + async); internals partially priced (async −5.6 via g4r35) |
-| F3 | g4r33 ✅ | + textual stop @ cd64 | **51.7 measured** |
-| F4 | g4r32b ✅ | + window 512 | **40.7 measured** |
-| F5 | **g4r32c** (RUNNING, priority) | + reward-spike fix (vtmo + _AR_PARTIAL) | median ~40.7, MEAN 60.9→~44; the production config |
+| L0 | g4r19 ✅ | baseline (canonical prompt, cd64, serial host work) | **175.6 measured** |
+| L1 | **g4r20b** (queued) | + end-of-turn/reward fix: gemma-3 textual prompt (`DL_DSPROC`), stop-ids [106,50], textual stop ON | OSL −45%, truncation ↓, first nonzero `check_numbers`; perf gain from shorter decode |
+| L2 | **g4r38** (queued) | + host-work scheduling: async detok (`DL_ADETOK`), async logprobs (`DL_ALOGP`), rr DP routing (`DL_DPRR`), fast extract (`DL_FASTEX`) | shaves serial host time per window |
+| L3 | g4r39 (staged, auto) | + decode-loop shape: CD window 512 (`DL_CD`), eos-interval 8, 29-flag XLA proxy ladder (`values-xla-ladder.yaml`) | 8× fewer head round-trips; KNOWN RISK: this lineage crashed at cd512 before (g4r21d) — this rung is the retest with the full ladder + current patch set |
+| L4 | g4r40 (staged, auto) | + trainer/engine shape: TMBS 8, HBM 0.3 | should land ≈ champion band (~40 s) |
+| L5 | **g4r32c** (queued, priority) | champion reference: g4r32b + spike fix (vtmo + _AR_PARTIAL) | the target: median ~40.7 without the 156 s step-8 spike |
 
-F2 is the one aggregate hop: it cannot decompose on our launcher (cd512 instability without
-the full reference stack — g4r21c/d evidence), so its internals are priced by reference-side
-ablations instead (async-reward −5.6 measured; prefix/rr/TMBS rungs staged).
+If L3 reproduces the cd512 crash on our launcher, the chain stops there and the L3→L5 delta
+stays priced by the reference-side measurements (window 512 −11.0 s via g4r33↔g4r32b; async
+reward −5.6 s via g4r35↔g4r32b), with the launcher-parity gap documented as the open defect.
 
 ## Beyond F5 (the next frontier)
 84% of the F5 step is rollout (33.5 s vs 2.6 s roofline): serial-head removal
