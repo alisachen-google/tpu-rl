@@ -41,7 +41,32 @@ truncation 64→78% rising.
 
 ## L1 — g4r20b: + end-of-turn/reward fix
 
-*(pending — table filled on completion)*
+*(pending — table filled on completion; run is fighting cluster infra crash-loops, 20 restarts)*
+
+## L1-probe — g4r41: canonical `<|turn>` prompt (GPU-parity) ✅ COMPLETED 2026-09-02 20:31Z
+
+g4r20b config + `gemma_data_canonical.py` (byte-exact GPU prompt render, ids 105/106
+verified single-token by the in-run `GEMMA-CANON-IDS` banner). 8 steps, exit 0.
+
+| step | rewards | rollout | global | note |
+|---|---|---|---|---|
+| 0 | 68.7 | 745.8 | 1909.0 | cold (fresh compile + cluster turbulence) |
+| 1 | 3.0 | 120.2 | 138.7 | clean |
+| 2 | 3.1 | 256.5 | 268.1 | infra wobble (worker crash-loops cluster-wide) |
+| 3 | 4.9 | 120.2 | 134.2 | clean |
+| 4 | 3.1 | 120.8 | 133.0 | clean (best) |
+| 5 | 3.2 | 128.6 | 140.6 | clean |
+| 6 | 3.4 | 285.3 | 297.2 | infra wobble |
+| 7 | 3.9 | 282.2 | 295.0 | infra wobble |
+
+**Perf:** clean band ~133–141 s at window 64 — ~10% under g4r19's 148–155 clean band
+(shorter OSL 1650 vs ~2000+, parallel rewards 3–5 s vs 8.5–17.5).
+**Quality: unchanged — the decisive negative result.** 0/33 dump samples correct,
+truncation 35–37%, textual `<end_of_turn>` in ~63–65% of completions, no id-106 stops —
+despite the trained-frame prompt provably reaching the model. This ruled out the prompt
+contract and triggered the byte-level weights audit that found the corrupted embedding
+table (see `GPU_TPU_REWARD_ALIGNMENT.md`, "ROOT CAUSE FOUND"). Quality rungs are capped
+by the checkpoint defect until reconversion; perf rungs remain valid.
 
 ## L2 — g4r38: + host-work scheduling
 
