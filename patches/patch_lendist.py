@@ -72,6 +72,19 @@ INJECT = '''    # --- _LENDIST_DUMP: per-step ISL/OSL/truncation distributions -
             _eos_end += 1
           else:
             _trunc += 1
+      # _OSL_EFF: OSL to end of FIRST textual '<end_of_turn>' marker per sequence
+      _eot = [236820, 643, 236779, 1340, 236779, 887, 236813]
+      _ne = len(_eot)
+      _osl_eff, _n_eot = [], 0
+      for _t in rollout_output.tokens:
+        _tl = list(_np.asarray(_t).tolist()); _pos = -1
+        for _j in range(len(_tl) - _ne + 1):
+          if _tl[_j] == 236820 and _tl[_j:_j + _ne] == _eot:
+            _pos = _j + _ne; break
+        if _pos >= 0:
+          _osl_eff.append(_pos); _n_eot += 1
+        else:
+          _osl_eff.append(int(len(_tl)))
       _p = _np.asarray(rollout_output.left_padded_prompt_tokens)
       _isl = (_p != pad_value).sum(axis=-1).astype(int).tolist()
       _rec = {
@@ -83,15 +96,19 @@ INJECT = '''    # --- _LENDIST_DUMP: per-step ISL/OSL/truncation distributions -
           "isl": _isl,
           "truncated_at_cap": _trunc,
           "eos_exactly_at_cap": _eos_end,
+          "osl_eff": _osl_eff,
+          "n_with_eot": _n_eot,
       }
       _run = _os.environ.get("JOB_IDENTIFIER", "unknown-run")
       _art = _os.environ.get("ARTIFACT_DIR", "")
       _line = _json.dumps(_rec)
       print("LENDIST step=%d n=%d cap=%d truncated=%d (%.2f%%) eos_at_cap=%d "
-            "osl_mean=%.1f isl_mean=%.1f"
+            "osl_mean=%.1f isl_mean=%.1f osl_eff_mean=%.1f with_eot=%d (%.1f%%)"
             % (_rec["step"], _rec["n"], _cap, _trunc,
                100.0 * _trunc / max(1, len(_osl)), _eos_end,
-               sum(_osl) / max(1, len(_osl)), sum(_isl) / max(1, len(_isl))),
+               sum(_osl) / max(1, len(_osl)), sum(_isl) / max(1, len(_isl)),
+               sum(_osl_eff) / max(1, len(_osl_eff)), _n_eot,
+               100.0 * _n_eot / max(1, len(_osl_eff))),
             flush=True)
       if _art.startswith("gs://"):
         from google.cloud import storage as _st
