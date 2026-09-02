@@ -943,3 +943,15 @@ rollout wobble 48-53 s on 2 steps. Next increments: window-boundary overshoot tr
 reward-fallback hardening, include-stop-str contract alignment.
 ATTRIBUTION NOTE: the textual-stop is OUR novel lever (not in tianyu's stack) -- first result
 surpassing the reference.
+
+
+# ═══ REWARD-CONFIG AUDIT (2026-09-02) ═══
+Summer's GPU reward (maxtext_math_reward.py): correct=+1.0 (exact/whitespace/math-verify), format=+0.1.
+rl.yml defaults MATCH exactly (reward_exact_answer=1.0, white_space=1.0, format=0.1, penalties 0.0);
+math-verify success awards reward_exact_answer (math_verify_pool.py:246).
+FINDING: OUR helm launcher passed reward_exact_answer=0.0 + white_space=0.0 since bring-up ->
+in ALL our-launcher runs (g4r7b..g4r21d) CORRECT ANSWERS SCORED 0.0 (format-only RL signal).
+g4r19's zero check_numbers had TWO stacked causes: broken prompt AND zeroed reward. FIXED (overrides
+removed; defaults now apply). The g4r30/g4r32 lineage never had the bug (tianyu launcher does not
+override) -> g4r32's rewards are directly comparable to Summer's GPU scale; its check_numbers
+0.019-0.028 = true ~2-3% accuracy at step 0, temp 0.8.
