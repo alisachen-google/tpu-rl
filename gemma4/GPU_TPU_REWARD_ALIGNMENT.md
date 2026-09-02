@@ -134,6 +134,13 @@ as trained embeddings must be. Contrast with the old `gemma4-e2b-raw`: uniform n
 checkpoint.** Validation run: g4r43 (2×2×1 smoke, canonical prompt, `DL_CKPT_PATH`
 knob) launched on it.
 
+**Formal seal (same day): MaxText's official conversion acceptance test PASSED.**
+`tests/utils/forward_pass_logit_checker` (CPU job `g4ckpt-logitcheck`): MaxText forward
+pass on `gemma4-e2b-raw2` vs HF transformers on the same tokens — max per-token KL
+divergence **1.2e-3 / 4.0e-3 / 5.3e-3**, all under the 0.015 threshold. This validates
+the entire network (attention, norms, MLPs), not just the embedding. Remaining:
+behavioral smoke on TPU (g4r43/g4r44, pending capacity).
+
 ## The probe run: g4r41 (queued)
 
 `g4r41` = g4r20b + `gemma_data_canonical.py`: byte-exact replica of the GPU prompt
