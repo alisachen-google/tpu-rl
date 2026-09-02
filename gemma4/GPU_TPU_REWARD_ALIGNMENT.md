@@ -141,6 +141,14 @@ divergence **1.2e-3 / 4.0e-3 / 5.3e-3**, all under the 0.015 threshold. This val
 the entire network (attention, norms, MLPs), not just the embedding. Remaining:
 behavioral smoke on TPU (g4r43/g4r44, pending capacity).
 
+**BEHAVIORAL CONFIRMATION (2026-09-03 ~00:1xZ, g4r43 step 0 on TPU):** first rollout on
+`gemma4-e2b-raw2` — **8/17 dumped items correct (47%**, GPU call-0 band is 52–70%; old
+checkpoint: 0/33), median completion 1.7k chars, and the model **naturally closes its
+turn with the canonical `<turn|>` (id 106)**:
+`tail='</reasoning>\n<answer>108</answer><turn|>'` — the trained stop behavior no TPU
+run had ever produced. The GPU↔TPU reward gap is closed: found (byte audit) → fixed
+(reconversion) → formally validated (KL 5.3e-3) → behaviorally confirmed on hardware.
+
 ## The probe run: g4r41 (queued)
 
 `g4r41` = g4r20b + `gemma_data_canonical.py`: byte-exact replica of the GPU prompt
