@@ -955,3 +955,11 @@ g4r19's zero check_numbers had TWO stacked causes: broken prompt AND zeroed rewa
 removed; defaults now apply). The g4r30/g4r32 lineage never had the bug (tianyu launcher does not
 override) -> g4r32's rewards are directly comparable to Summer's GPU scale; its check_numbers
 0.019-0.028 = true ~2-3% accuracy at step 0, temp 0.8.
+
+
+# ═══ G4R32B: CHAMPION CONFIRMED (2026-09-02 04:0xZ) ═══
+Replication of g4r32 (byte-identical + fmt-fixed reward_dump): warm 46.4/40.4/40.4/38.8/39.3/54.7/
+40.7/199.4/47.9 -> MEDIAN 40.7, clean band 38.8-40.7, BEST 38.8. Champion band holds across two runs
+(~40-43 median). Reward spike at step 8 REPLICATED (156.2 s, async-reward sync-fallback on a hard
+batch -- reproducible tail, next target). fmt-fixed dumps working: 25/40 samples fmt=0.1, 15 fmt=0.0;
+0/40 correct (consistent ~2-3%). Rewards log: gs://ubench-logs/g4r32b/rewards/g4r32b-rewards.txt
