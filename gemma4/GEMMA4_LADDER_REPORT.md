@@ -15,7 +15,7 @@ Chain control: `ladder-chain.sh` (each rung launches only after the previous com
 | L2 | g4r38 | host-work scheduling | — | queued |
 | L3 | g4r39 | decode-loop shape (cd512 + XLA ladder) | — | staged (auto) |
 | L4 | g4r40 | trainer/engine shape (TMBS8, HBM0.3) | — | staged (auto) |
-| L5 | g4r32c | champion + spike fix (target) | — | queued (priority) |
+| L5 | g4r32c | champion + spike fix (target) | **~40.1 s, spike-free** | ✅ done |
 
 ---
 
@@ -56,6 +56,26 @@ delta stays priced by g4r33↔g4r32b = −11.0 s)*
 
 *(pending)*
 
-## L5 — g4r32c: champion + spike fix (target)
+## L5 — g4r32c: champion + spike fix (target) ✅ COMPLETED 2026-09-02 ~19:5xZ
 
-*(pending — expect ~40.7 s median with step-8 spike ≤ ~15 s)*
+Champion stack (g4r32b) + `patch_verify_timeout` (VERIFY_ITEM_TIMEOUT=5) + `_AR_PARTIAL`
+partial-async rescoring. 10 steps, exit 0.
+
+| step | rewards | rollout | global | note |
+|---|---|---|---|---|
+| 0 | 55.4 | 82.4 | 188.7 | cold (sync scoring, 51 s math-verify — expected) |
+| 3 | 0.22 | 33.1 | 39.6 | clean |
+| 4 | 0.22 | 33.2 | 39.1 | clean (best) |
+| 5 | 0.19 | 34.0 | 40.1 | clean |
+| 6 | 0.24 | 46.5 | 53.9 | rollout wobble (same step as g4r32b's 54.7) |
+| 7 | 0.49 | 34.9 | 41.9 | clean |
+| 8 | **0.26** | 34.5 | **41.1** | **SPIKE GONE** (was 156 s rewards / 199 s global in g4r32 AND g4r32b) |
+| 9 | 0.21 | 34.4 | 40.1 | clean |
+
+(steps 1–2 lost to head-log rotation across an infra restart; pattern identical to g4r32b's.)
+
+**Warm median ~40.1 s; the reproducible step-8 reward spike is eliminated** — async scorer
+healthy every step (`errors=0`, wait ~6 ms, 2048/2048 ready). Mean is no longer
+spike-dominated: the champion config is now production-clean. Health: OSL ~1950–2040,
+truncation 42–45%, reward dumps consistent with the champion band (fmt≈62%, sparse correct —
+the known textual-prompt ceiling that the g4r41/g4r42 canonical-prompt runs address).
