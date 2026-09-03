@@ -39,9 +39,24 @@ flash trainer, chips_per_vm 8, kv_cache_buffer 4352. Manifest: `gemma4/g4r19-all
 `check_numbers` = 0.0 every step (untrained `<|turn>` markers — the defect L1 fixes),
 truncation 64→78% rising.
 
-## L1 — g4r20b: + end-of-turn/reward fix
+## L1 — g4r20b: + end-of-turn/reward fix ✅ MEASURED (2026-09-03, best attempt via TB; job retired amid cluster churn)
 
-*(pending — table filled on completion; run is fighting cluster infra crash-loops, 20 restarts)*
+Baseline config + textual prompt (`gemma_data.py`) + stop ids [106,50] + textual stop,
+checkpoint = gemma4-e2b-raw2, window 64.
+
+| step | global (s) | note |
+|---|---|---|
+| 1 | 689.8 | cold |
+| 2–3 | 160.2 / 163.1 | contention |
+| 4 | 133.0 | clean |
+| 5 | 130.5 | clean |
+| 6 | 127.6 | clean (best) |
+
+**Clean band 127.6–133.0 s** (rollout ~115–123, rewards 2–3, trainer ~5–15).
+`check_numbers` **0.50–0.57** every step — GPU parity at the very first ladder rung.
+L0→L1 on healthy weights: 148–155 → 127–133 clean (−~20 s: shorter healthy completions +
+parallel rewards). L1→L2 (host-work levers): 130 → 56–58 clean (**−~73 s**, the ladder's
+biggest measured mechanical lever at window 64).
 
 ## L1-probe — g4r41: canonical `<|turn>` prompt (GPU-parity) ✅ COMPLETED 2026-09-02 20:31Z
 
