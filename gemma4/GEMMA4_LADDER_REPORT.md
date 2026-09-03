@@ -169,6 +169,33 @@ L2 + TMBS 8 + HBM 0.3, fixed checkpoint. 8 steps, exit 0.
 was already ~4–5 s/step, so TMBS 8 + HBM 0.3 had nothing left to buy (mirrors the
 reference chain's own "TMBS 16: null" probe). Rewards healthy (44% of dumps correct).
 
+## Reproduction series (teammate-chain logic on the fixed checkpoint)
+
+Following the reference chain's paired-submission logic, rerun on healthy weights.
+Controls already measured: TP1×DP128 / cap 4096 = L1 (g4r20b, clean 127–133 s).
+
+### R1 — g4r50: TP4×DP32 (their round-k pair member) ✅ COMPLETED 2026-09-03
+
+| step | rewards | rollout | global | note |
+|---|---|---|---|---|
+| 0 | 80.8 | 839.8 | 1970.0 | cold (fresh TP4 compile) |
+| 1–2 | 3.3 / 2.8 | 191.0 / 127.3 | 210.4 / 137.2 | warmup/contention |
+| 3 | 2.9 | 77.5 | **88.2** | clean (best) |
+| 4 | 2.2 | 79.7 | **89.5** | clean |
+| 5 | 2.5 | 82.2 | **92.2** | clean |
+| 6 | 3.0 | 197.9 | 209.1 | contention |
+| 7 | 3.8 | 82.3 | 97.5 | clean-ish |
+
+**RESULT — the reference chain's topology verdict REVERSES on healthy weights.**
+Their round-k: TP1 beat TP4 by ~70 s (TP4 ~173 vs TP1 91–106) in the never-stopping
+regime, where raw decode throughput ruled. On the fixed checkpoint: **TP4×DP32 = 88–92 s
+clean vs TP1×DP128 = 127–133 s at matched (L1-class) config — TP4 wins by ~40 s**,
+because the binding constraint is now the serial head's round-trips (32 engines to
+service instead of 128), not decode FLOPs. Quality unchanged (54% of dumps correct,
+truncation 2.6% by step 7 — training continuing to tighten lengths).
+
+Follow-up staged: g4r54 = TP4×DP32 + L2 host-work levers (compound of the two winners).
+
 ## Ladder verdict on the fixed checkpoint (window-64 lineage)
 
 **L0 148–155 → L1 127–133 (reward fix, healthy lengths) → L2 56–58 (host-work levers,
