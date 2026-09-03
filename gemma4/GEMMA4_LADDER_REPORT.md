@@ -112,14 +112,36 @@ weights. Perf: clean band ~53–55 s at window 64 (was 133–141 s on the corrup
 natural stopping recovered most of the historical window-512 gain. Noisy steps reflect
 overnight cluster instability; the rerun will set the official warm median.
 
-## L3 — g4r39: + decode-loop shape
+## L3 — g4r39: + decode-loop shape — ❌ CONFIRMED CRASH (2026-09-03)
 
-*(pending — known risk: this lineage crashed at cd512 in g4r21d; crash = chain stops,
-delta stays priced by g4r33↔g4r32b = −11.0 s)*
+Window 512 + 29-flag XLA ladder on our launcher lineage: 4 attempts, 0 steps completed,
+each dying in the first deep-window rollout with the IFRT-proxy-termination signature —
+byte-for-byte the g4r21d failure, now reproduced **on the fixed checkpoint**, ruling out
+weights as the cause. Verdict: a real launcher-lineage defect vs the reference stack's
+deep-window path (their 34-patch variant runs cd512 fine). The window-512 delta stays
+priced by the reference-side pair: **−11.0 s** (g4r33 ↔ g4r32b). Root-causing the parity
+gap is a standing engineering item, not a ladder blocker.
 
-## L4 — g4r40: + trainer/engine shape
+## L2-official — g4r38 rerun (2026-09-03, alongside g4r20b — cross-slice contention noted)
 
-*(pending)*
+| step | rewards | rollout | global | note |
+|---|---|---|---|---|
+| 0 | 61.6 | 607.6 | 718.1 | cold |
+| 1–2 | 2.4 / 2.1 | 200.1 / 162.5 | 215.7 / 170.6 | contention |
+| 3 | 1.8 | 49.5 | **58.1** | clean |
+| 4 | 1.8 | 47.6 | **56.3** | clean (best) |
+| 5 | 1.9 | 83.4 | 92.1 | mid |
+| 6–7 | 2.3 / 3.0 | 206.2 / 216.5 | 232.8 / 226.9 | contention |
+
+`check_numbers` 0.494–0.585 (reproduces the overnight pass exactly). **Training is
+learning:** OSL mean fell 1750 → 1350–1400 and truncation 10% → **3.0%** by steps 6–7 —
+the policy is tightening its reasoning under real reward signal. Clean band **56–58 s**;
+the L1→L2 host-work delta at window 64 on healthy weights ≈ **−73 s** (130 → 57).
+
+## L4 — g4r40: + trainer/engine shape (REBASED)
+
+*(queued — rebased onto L2 (window 64) + TMBS 8 + HBM 0.3, dropping the crashed L3's
+cd512 from its lineage so it measures the trainer/engine lever cleanly)*
 
 ## L5 — g4r32c: champion + spike fix (target) ✅ COMPLETED 2026-09-02 ~19:5xZ
 
