@@ -68,6 +68,25 @@ contract and triggered the byte-level weights audit that found the corrupted emb
 table (see `GPU_TPU_REWARD_ALIGNMENT.md`, "ROOT CAUSE FOUND"). Quality rungs are capped
 by the checkpoint defect until reconversion; perf rungs remain valid.
 
+## L1-fixed — g4r44: canonical prompt on FIXED checkpoint ✅ COMPLETED 2026-09-03
+
+g4r41's exact config (canonical GPU-parity prompt, window 64) with only the checkpoint
+swapped to `gemma4-e2b-raw2` — the single-variable checkpoint A/B. 3 steps, exit 0.
+
+| step | rewards | rollout | global | note |
+|---|---|---|---|---|
+| 0 | 65.7 | 800.8 | 1920.0 | cold (compile + restore) |
+| 1 | 2.9 | 116.5 | **135.8** | clean |
+| 2 | 2.2 | 245.2 | 253.6 | rollout wobble |
+
+**Quality (full population, TB): `check_numbers` = 0.533–0.560 (fmt 0.083–0.090) — GPU
+band, sustained.** Dumps 61/97 correct (63%). Truncation 7.1%, `with_eot`=0, OSL ~1607,
+every completion closing `<answer>X</answer><turn|>`.
+**Perf A/B vs g4r41 (same config, broken ckpt): clean step 135.8 vs 133–141 — the
+checkpoint fix is perf-neutral at the L1 config**, exactly as predicted (mechanics
+unchanged; quality 0 → 0.54). The ~54 s band seen in g4r38's first pass is therefore
+attributable to the L2 host-work levers, not the checkpoint.
+
 ## L2 — g4r38: + host-work scheduling — FIRST PASS ON FIXED CKPT (overnight 09-02/03, harvested from TB after cluster sweep)
 
 Config: L1 (textual prompt + stop ids + textual stop) + async detok/logprobs + rr routing
