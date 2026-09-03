@@ -11,10 +11,10 @@ Chain control: `ladder-chain.sh` (each rung launches only after the previous com
 | Rung | Run | Lever added | Warm median | Status |
 |---|---|---|---|---|
 | L0 | g4r19 | — (baseline) | **175.6 s** | ✅ measured |
-| L1 | g4r20b | end-of-turn/reward fix | — | queued |
-| L2 | g4r38 | host-work scheduling | — | queued |
-| L3 | g4r39 | decode-loop shape (cd512 + XLA ladder) | — | staged (auto) |
-| L4 | g4r40 | trainer/engine shape (TMBS8, HBM0.3) | — | staged (auto) |
+| L1 | g4r20b | end-of-turn/reward fix | 127–133 s clean · rewards 0.50–0.57 | ✅ done |
+| L2 | g4r38 | host-work scheduling | **56–58 s clean** · rewards 0.49–0.59 | ✅ done |
+| L3 | g4r39 | decode-loop shape (cd512 + XLA ladder) | ❌ launcher defect (−11 s via ref pair) | crash-confirmed |
+| L4 | g4r40 | trainer/engine shape (TMBS8, HBM0.3) | 56 s — null lever @win64 | ✅ done |
 | L5 | g4r32c | champion + spike fix (target) | **~40.1 s, spike-free** | ✅ done |
 
 ---
@@ -153,10 +153,29 @@ learning:** OSL mean fell 1750 → 1350–1400 and truncation 10% → **3.0%** b
 the policy is tightening its reasoning under real reward signal. Clean band **56–58 s**;
 the L1→L2 host-work delta at window 64 on healthy weights ≈ **−73 s** (130 → 57).
 
-## L4 — g4r40: + trainer/engine shape (REBASED)
+## L4 — g4r40: + trainer/engine shape (rebased onto L2, window 64) ✅ COMPLETED 2026-09-03
 
-*(queued — rebased onto L2 (window 64) + TMBS 8 + HBM 0.3, dropping the crashed L3's
-cd512 from its lineage so it measures the trainer/engine lever cleanly)*
+L2 + TMBS 8 + HBM 0.3, fixed checkpoint. 8 steps, exit 0.
+
+| step | rewards | rollout | global | note |
+|---|---|---|---|---|
+| 0 | 75.6 | 713.6 | 1814.8 | cold (fresh trainer compile at TMBS 8) |
+| 1–2 | 3.4 / 2.6 | 219.9 / 179.3 | 237.6 / 189.4 | contention |
+| 3 | 1.8 | 48.3 | **56.2** | clean (best) |
+| 4 | 1.9 | 48.4 | **56.4** | clean |
+| 5–7 | 2.5–3.4 | 202–220 | 211.0 / 228.9 / 223.9 | contention |
+
+**Verdict: null lever at window 64** — clean band 56.2–56.4 vs L2's 56.3–58.1. The trainer
+was already ~4–5 s/step, so TMBS 8 + HBM 0.3 had nothing left to buy (mirrors the
+reference chain's own "TMBS 16: null" probe). Rewards healthy (44% of dumps correct).
+
+## Ladder verdict on the fixed checkpoint (window-64 lineage)
+
+**L0 148–155 → L1 127–133 (reward fix, healthy lengths) → L2 56–58 (host-work levers,
+the dominant rung: −73 s) → L4 56 (null)**. L3 (window 512) is blocked by a confirmed
+launcher-lineage defect; its −11 s remains available via the reference stack (whose
+champion config measured 40.1 s in g4r32c). Quality is uniform across all fixed-ckpt
+rungs: `check_numbers` ≈ 0.49–0.59 — GPU parity everywhere.
 
 ## L5 — g4r32c: champion + spike fix (target) ✅ COMPLETED 2026-09-02 ~19:5xZ
 
