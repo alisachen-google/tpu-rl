@@ -196,6 +196,22 @@ truncation 2.6% by step 7 — training continuing to tighten lengths).
 
 Follow-up staged: g4r54 = TP4×DP32 + L2 host-work levers (compound of the two winners).
 
+### R2 — g4r52: response cap 8192 (their 004 analog) ✅ COMPLETED 2026-09-03
+
+L1 config with `max_target_length=12288` (response budget 8192), packing budget 12288,
+protected by verify-timeout + partial-async (their cap-8192 line hung unfixed on item 1128).
+
+Clean band **146–149 s** (steps 3–5) vs **127–133 s** at cap 4096 → the cap lever is
+**≈ −15 s**, less than half the reference chain's −33 s — because the model now stops
+naturally, only the straggler tail uses the extra headroom. **Truncation at cap 8192:
+1/2048 = 0.05%** — exactly the GPU's regime (0.1–0.5%): the truncated-completion tail is
+fully recovered, and dump correctness rose to **22/33 = 67%** (vs ~54% at cap 4096, where
+7–11% of completions were auto-zero). No math-verify hang (their unfixed failure mode):
+the run completed 8/8 steps with rewards 1.9–3.4 s/step.
+
+**Trade summary:** cap 8192 costs ~15 s/step and buys back ~5–10% reward density. For
+training-quality-first work, take cap 8192; for pure step-time benchmarking, cap 4096.
+
 ## Ladder verdict on the fixed checkpoint (window-64 lineage)
 
 **L0 148–155 → L1 127–133 (reward fix, healthy lengths) → L2 56–58 (host-work levers,
