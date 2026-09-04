@@ -88,3 +88,35 @@ Even tianyu's 51 s is ~10× off the 4–6 s roofline — all remaining gap is th
   smoke (39/39) and our LENDIST/reward bands are the acceptance gates.
 - **Deep windows + correctness**: our roster already carries cd_proper/cd_masking/cd_report/cd_noglobal;
   zombie/truncation censuses in LENDIST guard every rung.
+
+
+---
+
+## Roofline v2 (2026-09-04): healthy-model numbers
+
+Recomputed with the fixed checkpoint's measured distributions (OSL mean ~1450 and
+falling, truncation 3–10%, natural stops):
+
+| Component | Roofline | Basis |
+|---|---|---|
+| Decode (straggler-bound) | ~4.4 s | 1.26 ms/iter (9.3 GB weights / 7.37 TB/s per device, TP1 replica) × ~3500 straggler iters |
+| Trainer | ~0.8 s | 6 FLOPs/param/token over 2048×~1600 tokens @128 dev, 40% MFU |
+| Prefill | ~0.02 s | 155-token prompts, compute-bound |
+| Sync + misc | ~0.5 s | measured |
+| **Total** | **≈ 5.7 s/step** | |
+
+Gap: best measured 56.2 s (win64) = **9.9×**; expected ~40 s (win512, g4r55) = **7.0×**.
+The entire gap is serial-head window overhead (~0.75–1 s/window × 23–64 windows @win64).
+
+### Levers ranked (healthy-model era)
+
+| # | Lever | Type | Expected | Status |
+|---|---|---|---|---|
+| 1 | Window 512 on our launcher | code (root-cause the cd512 crash) | −11 s+ and compounds with L2 | standing defect; g4r55 gets it via reference stack |
+| 2 | **Prefill rebalance** MPPL 4096→1024 | env | smaller prefill graph + **response cap 4096→7168 free** (truncation→~0) | **g4r59 staged** |
+| 3 | **Engine batching** mnbt 8448→33280 | env | fewer scheduler iterations per window (champion's value) | **g4r60 staged** |
+| 4 | Window double-buffering (dispatch N+1 during host-process N) | code (tpu_runner) | hides most per-window host cost | next engineering item |
+| 5 | Length-aware prompt bucketing | code | shrinks straggler window count (OSL variance) | backlog |
+| 6 | Natural OSL decay | free | RL training itself shortens completions (1750→1350 in 8 steps) — steps speed up over training | observed |
+
+Experiments g4r59/g4r60 auto-run after the g4r56–58 micro-ladder (roofline-chain.sh).
