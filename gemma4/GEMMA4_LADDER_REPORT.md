@@ -220,6 +220,33 @@ Steps: 1981.6 cold / 130.3 / 258.3 (contention) / 121.7 / **120.5** / 120.6 / 27
 quite their "null": at TMBS 16 the trainer's micro-batch overhead amortizes slightly
 better than at TMBS 4). Rewards healthy: 24/45 dumps correct (53%).
 
+## 🏆 g4r55 — THE SYNTHESIS: champion stack + fixed checkpoint ✅ COMPLETED 2026-09-04
+
+The reference champion config (TP1×DP128, window 512, XLA ladder, async host work, spike
+fix) with only the checkpoint swapped to `gemma4-e2b-raw2`. 10 steps, exit 0.
+
+| step | rewards | rollout | global |
+|---|---|---|---|
+| 0 | 60.3 | 152.6 | 266.0 (cold, cache warm) |
+| 1 | 4.7 | 32.5 | 48.0 |
+| 2 | 0.22 | 30.8 | **34.5** (best) |
+| 3–5 | 0.21–0.23 | 31.5–33.0 | 35.7–37.2 |
+| 6 | 0.26 | 46.2 | 50.5 (wobble) |
+| 7–9 | 0.20–0.40 | 31.4–32.5 | 35.4–37.1 |
+
+**Clean band 34.5–37.2 s (median ~36.2) — the new campaign best, beating g4r32c's 40.1 —
+with `check_numbers` 0.536–0.621 (mean ≈0.58), the highest reward level of any run,
+at/above the GPU band.** The healthy model's shorter completions bought ~4 s below the
+old champion for free. Campaign endpoints: **175.6 → ~36 s (4.9×) · rewards 0.02 → 0.58.**
+This is the production configuration.
+
+## E1 — g4r59: prefill rebalance (MPPL 4096→1024, response cap →7168) ✅ COMPLETED 2026-09-04
+
+L2 base. Clean 71.1–73.2 s vs L2's 56–58 — **the rebalance is a quality lever, not a perf
+lever**: the freed prefill budget raises the response cap, and longer stragglers cost
+~15 s/step (same trade as R2/cap-8192). Rewards 0.50–0.59. Use when reward density
+matters; skip for benchmarking.
+
 ## Ladder verdict on the fixed checkpoint (window-64 lineage)
 
 **L0 148–155 → L1 127–133 (reward fix, healthy lengths) → L2 56–58 (host-work levers,
