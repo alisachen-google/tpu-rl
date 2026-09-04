@@ -120,3 +120,34 @@ The entire gap is serial-head window overhead (~0.75–1 s/window × 23–64 win
 | 6 | Natural OSL decay | free | RL training itself shortens completions (1750→1350 in 8 steps) — steps speed up over training | observed |
 
 Experiments g4r59/g4r60 auto-run after the g4r56–58 micro-ladder (roofline-chain.sh).
+
+---
+
+## Window double-buffering realized via `async_scheduling` (2026-09-04)
+
+**Discovery:** the window double-buffer I proposed to hand-write is already vLLM's
+`async_scheduling=True` (env `DL_ASYNC`) — it dispatches window N+1's device work while
+window N's outputs are still processed on the host. The code carried a warning that
+async-scheduling + continue-decode "degrades generation quality: sequences fail to
+terminate and run to their token limit" (`tpu_runner.py:864`).
+
+**Key insight:** that failure *is* the corrupted-embedding symptom we fixed — a model
+that can't emit its stop token runs to the cap under any scheduler. The warning predates
+the checkpoint fix.
+
+**Unit test (local):** on-device EOS retirement (interval=8>0) makes generated length
+depend only on the true EOS position, not on host-processing lag — so async-scheduling
+cannot cause runaway. PASS.
+
+**Termination verify (g4r61v, 2×2×1, async on, fixed ckpt):** step-0 LENDIST
+`eos_at_cap=0, osl_mean=1372, with_eot=0.6%, truncation 11%` — **indistinguishable from
+the sync baseline; no runaway.** The warning does not survive the checkpoint fix.
+
+**Priority full run (g4r61):** champion win512 stack + `async_scheduling=True`, big slice —
+measures the perf win (rollout 31.5 → target ~8.5 s ⇒ global ~36 → ~13 s), rewards
+expected unchanged. Launched; results pending.
+
+Also fixed a harness bug found here: the launcher's `DEBUG-HOLD` slept 1200 s after every
+failure, turning transient infra crashes into 20-min stalls; now env-gated
+(`DL_DBGHOLD`, default 0 = fast restart). Added a `PHASE-LOG` banner before train_rl to
+localize checkpoint-load vs decode failures.
