@@ -212,6 +212,14 @@ the run completed 8/8 steps with rewards 1.9–3.4 s/step.
 **Trade summary:** cap 8192 costs ~15 s/step and buys back ~5–10% reward density. For
 training-quality-first work, take cap 8192; for pure step-time benchmarking, cap 4096.
 
+### R3 — g4r53: TMBS 16 (their 005 analog) ✅ COMPLETED 2026-09-04
+
+L1 config + `train_micro_batch_size=16`, fixed checkpoint. 8 steps, exit 0.
+Steps: 1981.6 cold / 130.3 / 258.3 (contention) / 121.7 / **120.5** / 120.6 / 271.4 / 290.1 (contention).
+**Clean band 120.5–121.7 s** vs L1's 127–133 — a small ~7–10 s trainer-side gain (not
+quite their "null": at TMBS 16 the trainer's micro-batch overhead amortizes slightly
+better than at TMBS 4). Rewards healthy: 24/45 dumps correct (53%).
+
 ## Ladder verdict on the fixed checkpoint (window-64 lineage)
 
 **L0 148–155 → L1 127–133 (reward fix, healthy lengths) → L2 56–58 (host-work levers,
