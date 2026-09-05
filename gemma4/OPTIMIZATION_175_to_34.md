@@ -7,15 +7,17 @@ contention steps excluded). Full per-step component tables + patch catalog:
 
 ## The ladder
 
-| # | Optimization | Patch / knob | Step time | Δ |
-|---|---|---|---|---|
-| 0 | **Baseline** — tp1×dp128, window 64, serial host work | (OOM trio: flash trainer + chips_per_vm=8 + kv_cache_buffer=4352) | **175.6 s** | — |
-| 1 | **Base bundle** — async host work (detok/logprobs), gemma-3 prompt, deep-window scaffolding, TMBS8 | `patch_async_detok` + `patch_async_logprobs` + `gemma_data.py` + `patch_cd_proper`/`cd_masking`/`cd_report` | ~51.7 s | **−124** |
-| 2 | **CD window 512** — 8× fewer serial host round-trips per step | `DL_CD=512` + `values-xla-ladder.yaml` (29-flag XLA proxy ladder, load-bearing for deep-window stability) | ~43–51 s | **−11.0** |
-| 3 | **Textual `<end_of_turn>` stop** — retire at the marker instead of self-dialoging to the cap | `patch_textual_stop.py` | 43.4 s | **−6.8** |
-| 4 | **Async reward** — score during rollout, off the critical path | `patch_reward_parallel.py` | 40.7 s | **−5.6** |
-| 5 | **Reward-spike fix** — per-item sympy timeout + partial-async rescore | `patch_verify_timeout.py` + `_AR_PARTIAL` | 40.1 s | tail 156→0.26 s |
-| 6 | **Checkpoint fix** — reconvert embedding from verified HF safetensors; model stops naturally → shorter completions | `DL_CKPT_PATH=raw2` (built by `g4ckpt-reconv`, audited cos 0.999999) | **34.5 s** | **−5.5** |
+| # | Optimization | Step time | Δ |
+|---|---|---:|---:|
+| 0 | **Baseline** — tp1×dp128, window 64, serial host work | **175.6 s** | — |
+| 1 | **Base bundle** — async host work (detok / logprobs / rewards off the critical path), deep-window scaffolding, TMBS8, flash trainer | ~51.7 s | **−124** |
+| 2 | **CD window 512** — 8× fewer serial host round-trips per step | ~43–51 s | **−11.0** |
+| 3 | **Textual `<end_of_turn>` stop** — retire at the marker instead of self-dialoging to the cap | 43.4 s | **−6.8** |
+| 4 | **Async reward** — score during rollout, off the critical path | 40.7 s | **−5.6** |
+| 5 | **Reward-spike fix** — per-item sympy timeout + partial-async rescore | 40.1 s | tail 156→0.3 s |
+| 6 | **Checkpoint fix** — reconvert embedding from verified HF safetensors; model stops naturally → ~30% shorter completions | **34.5 s** | **−5.5** |
+
+*Per-optimization patch/knob mapping: see `GEMMA4_PERF_LADDER_COMPLETE.md`.*
 
 **Endpoints: 175.6 → 34.5 s = 5.1× wall-clock. And `check_numbers` 0.02 → 0.58 (GPU parity),
 because step 6 fixed a corrupted checkpoint — see `GEMMA4_REWARD_BUG_REPORT.md`.**
