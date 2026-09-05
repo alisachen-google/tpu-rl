@@ -169,6 +169,27 @@ L2 + TMBS 8 + HBM 0.3, fixed checkpoint. 8 steps, exit 0.
 was already ~4–5 s/step, so TMBS 8 + HBM 0.3 had nothing left to buy (mirrors the
 reference chain's own "TMBS 16: null" probe). Rewards healthy (44% of dumps correct).
 
+## D1 — g4r61: window double-buffer via `async_scheduling` (win512, fixed ckpt) ✅ COMPLETED 2026-09-05
+
+Champion win512 stack + `async_scheduling=True`. 10 steps, exit 0.
+
+| step | rollout | rewards | global |
+|---|---|---|---|
+| 2 | 29.8 | 0.20 | 34.0 (best) |
+| 3 | 30.3 | 0.21 | 34.4 |
+| 9 | 30.1 | 0.20 | 34.1 |
+| 4,5,7,8 | 30.3–31.8 | 0.19–0.37 | 35.4–36.0 |
+| 6 | 44.0 | 0.23 | 48.3 (wobble) |
+| 0 | 96.3 | 55.3 | 201.6 (cold) |
+
+**Clean median 35.6 s (band 34.0–36.0) — statistically identical to g4r55 (34.5–37.2,
+async OFF).** `check_numbers` 0.536–0.621 (mean 0.58) — unchanged, GPU parity.
+**Verdict: `async_scheduling` is accuracy-safe (the documented termination-degradation
+warning was the checkpoint bug) but perf-neutral (~1 s) at win512** — it hides device
+time (~5 s ceiling) but host processing (~3 s/window) dominates and stays on the dispatch
+path. The real double-buffer win (rollout → ~8.5 s) needs the deferred-host-processing
+engine reorder, not the flag. Keep async on (free, safe); headroom is the engine change.
+
 ## Reproduction series (teammate-chain logic on the fixed checkpoint)
 
 Following the reference chain's paired-submission logic, rerun on healthy weights.
