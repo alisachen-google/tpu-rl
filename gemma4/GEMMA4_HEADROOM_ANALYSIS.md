@@ -151,3 +151,26 @@ Also fixed a harness bug found here: the launcher's `DEBUG-HOLD` slept 1200 s af
 failure, turning transient infra crashes into 20-min stalls; now env-gated
 (`DL_DBGHOLD`, default 0 = fast restart). Added a `PHASE-LOG` banner before train_rl to
 localize checkpoint-load vs decode failures.
+
+---
+
+## async_scheduling perf RESULT (g4r61, win512, 2026-09-05)
+
+Measured, clean steps 3/5: global **34.5 / 36.0 s**, rollout 30.3–31.8 s — vs g4r55
+(async OFF) 34.5–37.2 s / rollout 30.8–33.0. **async_scheduling is perf-neutral-to-~1 s
+at win512, NOT the ~20 s double-buffer win.** Termination stayed healthy (the checkpoint
+fix mooted the degradation warning).
+
+**Why it's small — as predicted:** async_scheduling overlaps window N+1's device dispatch
+(~0.65 s/window) with window N's host processing, so its ceiling is the total device time
+(~5 s). But host processing (~3 s/window) dominates and remains on the dispatch critical
+path. Hiding device-under-host saves only the device slice, which at win512's 8 windows is
+within measurement noise.
+
+**The real double-buffer win still requires the deferred-host-processing reorder** (make
+window N's detok/extract/marshal a trailing pipeline so it never gates dispatch of N+1),
+targeting rollout ~8.5 s. That is an engine-core change, not a config flag — the flag was
+the cheap thing to rule in/out first, and it's now ruled: safe, but not sufficient.
+
+**Net recommendation:** keep `async_scheduling=True` (free ~1 s, accuracy-safe) in the
+production config, but the headroom to ~13 s/step lives in the host-pipeline engine change.
