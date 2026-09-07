@@ -19,6 +19,22 @@ contention steps excluded). Full per-step component tables + patch catalog:
 
 *Per-optimization patch/knob mapping: see `GEMMA4_PERF_LADDER_COMPLETE.md`.*
 
+## Base-bundle decomposition — the host-work −73 s is almost entirely ONE lever (measured 2026-09-06)
+
+Splitting the L1→L2 host-work bundle single-lever on the fixed checkpoint (window 64):
+
+| Config | Clean step | Δ vs L1 |
+|---|---|---|
+| L1 (g4r20b) — reward fix, no host-work | 127–133 s | — |
+| + **rr DP routing only** (g4r56) | **58–59 s** | **−~70 s** |
+| + async detok (g4r57) | 59–60 s | ~0 (noise) |
+| + async logprobs + fast-extract (= L2/g4r38) | 56–58 s | ~0 |
+
+**Finding: round-robin DP routing alone is ~96% of the host-work win.** It removes a
+per-request all-rank state query through the Pathways proxy — 2048 IPCs per decode window;
+the other three host-work levers are near-null on top of it. Confirms the step is
+serial-head-IPC-bound, not detok/logprob-bound. Rewards stayed 0.53–0.59 (parity) across all.
+
 **Endpoints: 175.6 → 34.5 s = 5.1× wall-clock. And `check_numbers` 0.02 → 0.58 (GPU parity),
 because step 6 fixed a corrupted checkpoint — see `GEMMA4_REWARD_BUG_REPORT.md`.**
 
