@@ -66,6 +66,25 @@ Clean steps used (contention-excluded): g4r56 = 58.4/59.4, g4r57 = 59.8/60.2, g4
 | **global** | **56.3** | **57.1** |
 *rollout −70 s vs L1 (rr routing); trainer/sync at floor.*
 
+### ★★ g4r68 — BEST config, 20-STEP CONFIRMATION (champion win512 + fixed ckpt, textual stop retired)
+
+Full 20-step run. Clean stats (n=15, contention step 6 excluded): **global median 35.7,
+mean 35.8, min 34.1, max 37.4, std 0.77 s** — exceptionally stable. `check_numbers` median
+0.582, mean 0.579 (0.538–0.620) across all 20 steps.
+
+| component | median | mean |
+|---|---:|---:|
+| rollout | 31.4 | 31.4 |
+| trainer | 3.7 | 3.8 |
+| weight-sync | ~0.45 | ~0.5 |
+| rewards | 0.23 | 0.24 |
+| **global** | **35.7** | **35.8** |
+
+Per-step global (steps 4–19): 35.7 / 35.2 / 48.5(wobble) / 36.3 / 35.7 / 35.5 / 35.8 /
+35.7 / 36.7 / 34.1 / 37.4 / 34.9 / 36.5 / 35.5 / 35.6 / 36.6. Best step 34.1. One wobble
+(step 6, 48.5). This is the authoritative best-config measurement (supersedes the 10-step
+g4r55 numbers): **35.7 s median, rewards 0.58, over 20 steps.**
+
 ### ★ g4r55 — BEST (champion win512 + fixed ckpt)
 | component | median | mean |
 |---|---:|---:|
