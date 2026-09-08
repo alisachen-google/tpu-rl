@@ -13,7 +13,7 @@ MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
 # Ironwood bring-up fixes (from smoke ladder):
 
 # --- tianyu-rl-14 stack: runtime patches (self-verifying, fail-open) ---
-for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_rpa_blocks patch_cd_masking patch_cd_report patch_phasetime patch_reward_parallel patch_sharded_sampling patch_profiler_fix patch_gc_sync patch_packing_knob patch_packer_fast patch_log_stats patch_perf_v2 patch_dump_completions patch_firsttok patch_engine_kwargs patch_host_extract patch_async_detok patch_async_logprobs patch_fast_detok patch_dp_rr_routing patch_sync_keepkv patch_cd_noeos patch_flash_sa patch_jit_unroll patch_verify_timeout patch_stop_tokens patch_runner_eos patch_fast_extract patch_g4_format_guard patch_logps_chunk patch_reward_dump patch_textual_stop; do
+for P in patch_vllm_sampler patch_cd_proper patch_lendist patch_rpa_blocks patch_cd_masking patch_cd_report patch_phasetime patch_reward_parallel patch_sharded_sampling patch_profiler_fix patch_gc_sync patch_packing_knob patch_packer_fast patch_log_stats patch_perf_v2 patch_dump_completions patch_firsttok patch_engine_kwargs patch_host_extract patch_async_detok patch_async_logprobs patch_fast_detok patch_dp_rr_routing patch_sync_keepkv patch_cd_noeos patch_flash_sa patch_jit_unroll patch_verify_timeout patch_stop_tokens patch_runner_eos patch_fast_extract patch_g4_format_guard patch_logps_chunk patch_reward_dump; do
   for F in /workload/patches/$P /workload/patches/$P.py; do
     if [ -f "$F" ]; then python3 "$F"; break; fi
   done
@@ -35,7 +35,7 @@ export ASYNC_DETOK="${DL_ADETOK:-0}"
 export ASYNC_LOGPROBS="${DL_ALOGP:-off}"
 export LOGPS_CHUNK_SIZE="${DL_LOGCH:-0}"
 export REWARD_DUMP_N="${DL_RWDUMP:-0}"
-export TEXTUAL_STOP="${DL_TSTOP:-1}"
+export TEXTUAL_STOP="${DL_TSTOP:-0}"  # textual stop retired: fixed ckpt stops natively on id 106
 CHATTMPL="chat_template_path=maxtext/examples/chat_templates/gemma-3-27b-chat_template.json"
 DSPROC_ARG=""
 if [ -n "${DL_DSPROC:-}" ]; then CHATTMPL=""; DSPROC_ARG="dataset_processor_path=${DL_DSPROC}"; fi
