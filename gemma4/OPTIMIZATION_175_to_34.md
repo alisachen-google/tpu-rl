@@ -65,5 +65,10 @@ host-parallelism, not kernels: window double-buffering with **deferred host-proc
 (the engine reorder, not the `async_scheduling` flag), batched request submission, and
 parallel per-window output processing — targeting ~13 s/step.
 
+**Textual-stop lever retired (validated g4r69, 2026-09-08):** removed from the roster on
+the fixed checkpoint — the model stops natively on trained id 106 (`<turn|>`). Validation:
+clean step 36.6–37.1 s (champion band, perf-neutral), OSL 1568, truncation 3.1%, no runaway.
+The native stop handles ~97%; the textual `<end_of_turn>` safety net is no longer needed.
+
 **Production config: g4r55** — the full stack above on the fixed checkpoint, TP1×DP128,
 window 512.
