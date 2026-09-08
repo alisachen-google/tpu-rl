@@ -174,3 +174,32 @@ the cheap thing to rule in/out first, and it's now ruled: safe, but not sufficie
 
 **Net recommendation:** keep `async_scheduling=True` (free ~1 s, accuracy-safe) in the
 production config, but the headroom to ~13 s/step lives in the host-pipeline engine change.
+
+---
+
+## Roofline gap on the current best (g4r68 20-step, 2026-09-08)
+
+Fresh component medians (clean steps): rollout 31.4 · trainer 3.8 · sync 0.45 · rewards 0.2
+· **global 35.7 s** (best 35.2). Roofline ≈ 5.7 s → **6.3× gap, ~27 of ~30 s is rollout
+host overhead.**
+
+| Phase | measured | roofline | gap | status |
+|---|---:|---:|---:|---|
+| rollout | 31.4 | 4.4 | 7.1× | serial-head per-window IPC — THE opportunity |
+| trainer | 3.8 | 0.8 | 4.7× | small absolute |
+| weight-sync | 0.45 | 0.5 | 1× | at floor |
+| rewards | 0.2 | 0.2 | 1× | at floor |
+
+Rollout = 5.2 s device (8 windows × 646 ms, HBM-bound) + **~26 s serial host** (~3.3 s/window:
+gather → stop-scan → re-pack → 2048 per-request dispatch IPCs).
+
+**Prioritized (only rollout matters — trainer/sync/rewards collectively <4 s):**
+1. **Window double-buffer w/ deferred host-processing** (engine reorder, NOT the
+   async_scheduling flag): rollout 31→~9 s ⇒ **global ~13 s**. Biggest single lever.
+2. Batched request submission (1 bulk add_request vs 2048 IPCs/window).
+3. Parallel per-window output processing (fan the 2048-row scan across 44 cores).
+4. Fewer windows via shorter OSL (free tailwind — RL training shortens completions).
+5. Multiprocess-DP (removes the head; Pathways-gated; touches the roofline itself).
+
+Do NOT spend on trainer/sync/reward levers or more env knobs (TMBS/HBM/mnbt) — all null at
+this window. The entire remaining headroom is host-parallelism in the rollout window driver.
