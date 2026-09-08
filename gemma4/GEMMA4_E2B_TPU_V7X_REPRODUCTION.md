@@ -27,9 +27,9 @@ part of this reproduction (§1.2a).
 Same JAX-0.10.2 client/server alignment discipline as the Qwen3 line.
 
 **Required images:**
-- MaxText workload image: `maxtext-rl-ironwood:2026-08-24-packing` (sha f7c957d0)
-- Pathways server image: `server:20260730-jax_0.10.2`
-- Pathways proxy image: `proxy_server:20260730-jax_0.10.2`
+- MaxText workload image: [`gcr.io/supercomputer-testing/maxtext-rl-ironwood:2026-08-24-packing`](https://gcr.io/supercomputer-testing/maxtext-rl-ironwood) (sha f7c957d0)
+- Pathways server image: [`us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260730-jax_0.10.2`](https://console.cloud.google.com/artifacts/docker/cloud-tpu-v2-images/us/pathways)
+- Pathways proxy image: `us-docker.pkg.dev/cloud-tpu-v2-images/pathways/proxy_server:20260730-jax_0.10.2`
 
 The runtime optimizations ship as **self-verifying start-time patches** applied at pod
 start (not baked into the image), so the pinned image stays fixed across the whole
@@ -39,26 +39,26 @@ optimization ladder and every lever is a single-variable toggle. Full patch cata
 
 ### 1.2 Model & Dataset
 
-- **Model:** gemma-4-E2B-it — `model_name=gemma4-e2b`
-- **Tokenizer:** `google/gemma-4-E2B-it`
-- **Checkpoint:** `gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw2/0/items` (the
+- **Model:** [gemma-4-E2B-it](https://huggingface.co/google/gemma-4-E2B-it) — `model_name=gemma4-e2b`
+- **Tokenizer:** [`google/gemma-4-E2B-it`](https://huggingface.co/google/gemma-4-E2B-it)
+- **Checkpoint:** [`gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw2/0/items`](https://console.cloud.google.com/storage/browser/ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw2) (the
   **verified** conversion — see §1.2a)
-- **Dataset:** OpenMathInstruct-2, `hf://datasets/nvidia/OpenMathInstruct-2/data/train_1M-*.parquet`, split `train_1M`
+- **Dataset:** [OpenMathInstruct-2](https://huggingface.co/datasets/nvidia/OpenMathInstruct-2), `hf://datasets/nvidia/OpenMathInstruct-2/data/train_1M-*.parquet`, split `train_1M`
 
 ### 1.2a Checkpoint conversion — REQUIRED (unique to gemma4)
 
 The gemma4 checkpoint originally in use (`gemma4-e2b-raw`) had a **corrupted embedding
 table**: every row normalized to √1536 and rotated vs. HF, worst on the turn/stop tokens.
 Effect: the model was fluent but reward-blind (`check_numbers` ≈ 0.02) and never emitted its
-stop token (85% cap-truncation). Root cause and fix in `GEMMA4_REWARD_BUG_REPORT.md`.
+stop token (85% cap-truncation). Root cause and fix in [`GEMMA4_REWARD_BUG_REPORT.md`](GEMMA4_REWARD_BUG_REPORT.md).
 
 **Fix:** reconvert from the verified bf16 HF safetensors via MaxText's official
-`checkpoint_conversion/to_maxtext.py` (native `gemma4-e2b` mapping) → `gemma4-e2b-raw2`.
+[`checkpoint_conversion/to_maxtext.py`](https://github.com/AI-Hypercomputer/maxtext/blob/main/src/maxtext/checkpoint_conversion/to_maxtext.py) (native `gemma4-e2b` mapping) → `gemma4-e2b-raw2`.
 Gated by two checks:
 - **Byte audit** — embedding rows vs HF safetensors, require cos ≥ 0.999 (measured 0.999999)
-- **Forward-pass logit check** — `tests/utils/forward_pass_logit_checker.py`, KL < 0.015 vs HF (measured 5.3e-3)
+- **Forward-pass logit check** — [`tests/utils/forward_pass_logit_checker.py`](https://github.com/AI-Hypercomputer/maxtext/blob/main/tests/utils/forward_pass_logit_checker.py), KL < 0.015 vs HF (measured 5.3e-3)
 
-Job: `g4ckpt-reconv-job.yaml`. This is the single highest-impact step in the reproduction —
+Job: [`g4ckpt-reconv-job.yaml`](g4ckpt-reconv-job.yaml). This is the single highest-impact step in the reproduction —
 without it every reward number is invalid.
 
 ### 1.3 Preprocessing
@@ -67,10 +67,10 @@ Native runtime preprocessing in MaxText `train_rl`. Two gemma4-specific requirem
 
 **Prompt formatting:** gemma-4-E2B-it is instruction-tuned inside the canonical turn frame
 (special tokens `<|turn>`=105 / `<turn|>`=106). We render the gemma-3-style textual prompt
-via `gemma_data.py` (`dataset_processor_path` hook). On the **fixed** checkpoint the model
+via [`gemma_data.py`](patches/gemma_data.py) (`dataset_processor_path` hook). On the **fixed** checkpoint the model
 emits the trained stop token **id 106 (`<turn|>`)** natively, retired on-device via
-`patch_runner_eos.py` (stop ids `[1,106,50]`). No textual-marker stop is needed (the
-`patch_textual_stop.py` lever was retired after the checkpoint fix — validated in g4r69).
+[`patch_runner_eos.py`](patches/patch_runner_eos.py) (stop ids `[1,106,50]`). No textual-marker stop is needed (the
+[`patch_textual_stop.py`](patches/patch_textual_stop.py) lever was retired after the checkpoint fix — validated in g4r69).
 
 **Sequence limits:** response cap 4096 = `max_target_length=8192` − `max_prefill_predict_length=4096`.
 (Note: prompts average ~155 tokens, so prefill is heavily oversized — see §4.)
@@ -80,21 +80,21 @@ emits the trained stop token **id 106 (`<turn|>`)** natively, retired on-device 
 `check_numbers` (+1.0 correct via exact / whitespace / math-verify) + `match_format_exactly`
 (+0.1). Cross-validated against the GPU/verl port (`maxtext_math_reward.py`): weights
 identical (+1.0/+0.1), equivalence paths agree at the worker level. Guarded by
-`patch_verify_timeout.py` (per-item sympy timeout, kills a 156 s reward spike the Qwen line
+[`patch_verify_timeout.py`](patches/patch_verify_timeout.py) (per-item sympy timeout, kills a 156 s reward spike the Qwen line
 never fixed).
 
 ---
 
 ## 2. Launching Runs
 
-**Job manifest:** `gemma4/g4r55-best-perf-all-in-one.yaml`
+**Job manifest:** [`gemma4/g4r55-best-perf-all-in-one.yaml`](g4r55-best-perf-all-in-one.yaml)
 **Launch:** `kubectl apply -f gemma4/g4r55-best-perf-all-in-one.yaml`
 
 ### 2.1 Job manifest breakdown
 
 | File section | Functionality |
 |---|---|
-| ConfigMap `g4r55-patches` | 36 start-time patches: continue-decode fix (PR #3374), RPA v3 block sizes (#3102), no-EOS early exit, **rr DP routing** (the −70 s lever), async detok/logprobs/reward, textual stop (retired), verify-timeout spike fix, gemma-3 prompt, + phasetime/lendist/reward-dump instrumentation |
+| ConfigMap `g4r55-patches` | 36 start-time patches: continue-decode fix ([PR #3374](https://github.com/vllm-project/tpu-inference/pull/3374)), RPA v3 block sizes ([#3102](https://github.com/vllm-project/tpu-inference/pull/3102)), no-EOS early exit, **rr DP routing** ([patch_dp_rr_routing.py](patches/patch_dp_rr_routing.py), the −70 s lever), async detok/logprobs/reward, textual stop (retired), verify-timeout spike fix, gemma-3 prompt, + phasetime/lendist/reward-dump instrumentation |
 | ConfigMap `g4r55-launcher` | the launch script (applies the patch roster, then `train_rl`) |
 | JobSet `g4r55` | pathways-head + 16 pathways-workers on one 4×4×4 TPU v7x slice |
 
@@ -156,17 +156,17 @@ All step times are clean-step medians. Two eras: **A** (mechanical, broken ckpt,
 
 | run id | What each run added incrementally | Median step (s) | rollout | train | weight sync | reward+misc | check_numbers | PR / patch |
 |---|---|---:|---:|---:|---:|---:|---:|---|
-| g4r19 | Baseline: tp1×dp128, win64, serial host, canonical prompt | 175.6 | 127 | ~15 | ~1.0 | 12 | 0.00 | OOM trio |
-| g4r30 | Reference recipe: win512 + 29-flag XLA ladder + async host work | 50.2 | — | — | — | — | 0.02 | #3374, ladder |
+| g4r19 | Baseline: tp1×dp128, win64, serial host, canonical prompt | 175.6 | 127 | ~15 | ~1.0 | 12 | 0.00 | [flash_sa](patches/patch_flash_sa.py) |
+| g4r30 | Reference recipe: win512 + 29-flag XLA ladder + async host work | 50.2 | — | — | — | — | 0.02 | [#3374](https://github.com/vllm-project/tpu-inference/pull/3374) |
 | g4r33 | Reference bundle held @ win64 (isolates window) | 51.7 | — | — | — | — | 0.02 | — |
-| g4r32/32b | + textual `<end_of_turn>` stop @ win512 | 43.4 / 40.7 | 33.5 | 4.5 | 0.45 | 0.2 | 0.02 | patch_textual_stop |
-| g4r35 | − async reward (leave-one-out) | 46.3 | — | — | — | — | 0.02 | patch_reward_parallel |
-| g4r32c | + reward-spike fix (per-item sympy timeout) | 40.1 | 33.5 | 4.5 | 0.45 | 0.2 | 0.02 | **patch_verify_timeout** |
-| — | **CHECKPOINT FIX → gemma4-e2b-raw2** (§1.2a) | — | — | — | — | — | **0.02→0.58** | g4ckpt-reconv |
-| g4r20b (L1) | reward fix on fixed ckpt: gemma-3 prompt + stop ids, win64 | 130.5 | 118 | ~8 | 0.5 | 2.0 | 0.53 | patch_stop_tokens/runner_eos |
-| g4r56 | + **rr DP routing** ← the dominant host-work lever | 58.4 | ~50 | 4.0 | 0.45 | 1.9 | 0.54 | **patch_dp_rr_routing** |
-| g4r57 | + async detok | 59.8 | ~51 | — | — | — | 0.54 | patch_async_detok |
-| g4r38 (L2) | + async logprobs + fast-extract | 56.3 | 48.5 | 4.2 | 0.45 | 1.8 | 0.54 | patch_async_logprobs/fast_extract |
+| g4r32/32b | + textual `<end_of_turn>` stop @ win512 | 43.4 / 40.7 | 33.5 | 4.5 | 0.45 | 0.2 | 0.02 | [textual_stop](patches/patch_textual_stop.py) |
+| g4r35 | − async reward (leave-one-out) | 46.3 | — | — | — | — | 0.02 | [reward_parallel](patches/patch_reward_parallel.py) |
+| g4r32c | + reward-spike fix (per-item sympy timeout) | 40.1 | 33.5 | 4.5 | 0.45 | 0.2 | 0.02 | [**verify_timeout**](patches/patch_verify_timeout.py) |
+| — | **CHECKPOINT FIX → gemma4-e2b-raw2** (§1.2a) | — | — | — | — | — | **0.02→0.58** | [g4ckpt-reconv](g4ckpt-reconv-job.yaml) |
+| g4r20b (L1) | reward fix on fixed ckpt: gemma-3 prompt + stop ids, win64 | 130.5 | 118 | ~8 | 0.5 | 2.0 | 0.53 | [stop_tokens](patches/patch_stop_tokens.py)/[runner_eos](patches/patch_runner_eos.py) |
+| g4r56 | + **rr DP routing** ← the dominant host-work lever | 58.4 | ~50 | 4.0 | 0.45 | 1.9 | 0.54 | [**dp_rr_routing**](patches/patch_dp_rr_routing.py) |
+| g4r57 | + async detok | 59.8 | ~51 | — | — | — | 0.54 | [async_detok](patches/patch_async_detok.py) |
+| g4r38 (L2) | + async logprobs + fast-extract | 56.3 | 48.5 | 4.2 | 0.45 | 1.8 | 0.54 | [async_logprobs](patches/patch_async_logprobs.py)/[fast_extract](patches/patch_fast_extract.py) |
 | g4r40 (L4) | + TMBS 8 / HBM 0.3 (null lever) | 56.3 | 48.5 | 4.2 | 0.45 | 1.8 | 0.55 | DL_TMBS/DL_HBM |
 | **g4r55 ★** | **+ CD window 512 + XLA ladder (BEST)** | **35.6** | 31.5 | 4.0 | 0.45 | 0.21 | **0.58** | win512 + ladder |
 | g4r61 | + async_scheduling (double-buffer, perf-neutral) | 35.6 | 31.0 | 4.0 | 0.45 | 0.20 | 0.58 | DL_ASYNC (verified safe, ~0 gain) |
@@ -205,7 +205,7 @@ TMBS/HBM null · async_scheduling null. The checkpoint fix bought ~4–5 s of pe
 
 **Roofline:** ideal ≈ 5.7 s/step (decode 4.4 HBM-bound + trainer 0.8 + sync 0.5); current
 best 35.7 s = **6.3× gap, entirely rollout serial-head IPC**. Full analysis:
-`GEMMA4_HEADROOM_ANALYSIS.md`.
+[`GEMMA4_HEADROOM_ANALYSIS.md`](GEMMA4_HEADROOM_ANALYSIS.md).
 
 **Open questions:** production topology (TP4 vs TP1 on healthy weights), response-cap policy
 (4096 benchmarking vs 8192 training-quality), multiprocess-DP feasibility under Pathways
@@ -216,8 +216,8 @@ best 35.7 s = **6.3× gap, entirely rollout serial-head IPC**. Full analysis:
 ## Artifacts
 
 - Deployable manifest: `gemma4/g4r55-best-perf-all-in-one.yaml`
-- Ladder detail: `GEMMA4_PERF_LADDER_DETAILED.md`, `OPTIMIZATION_175_to_34.md`
-- 20-step best-perf report: `G4R68_20STEP_BEST_PERF.md`
-- Reward bug + fix: `GEMMA4_REWARD_BUG_REPORT.md`, `GPU_TPU_REWARD_ALIGNMENT.md`
-- Roofline: `GEMMA4_HEADROOM_ANALYSIS.md`
+- Ladder detail: [`GEMMA4_PERF_LADDER_DETAILED.md`](GEMMA4_PERF_LADDER_DETAILED.md), [`OPTIMIZATION_175_to_34.md`](OPTIMIZATION_175_to_34.md)
+- 20-step best-perf report: [`G4R68_20STEP_BEST_PERF.md`](G4R68_20STEP_BEST_PERF.md)
+- Reward bug + fix: [`GEMMA4_REWARD_BUG_REPORT.md`](GEMMA4_REWARD_BUG_REPORT.md), [`GPU_TPU_REWARD_ALIGNMENT.md`](GPU_TPU_REWARD_ALIGNMENT.md)
+- Roofline: [`GEMMA4_HEADROOM_ANALYSIS.md`](GEMMA4_HEADROOM_ANALYSIS.md)
 - Patches: `gemma4/patches/` (36 files) · TensorBoard: `gs://ubench-logs/g4r68/tensorboard/`
