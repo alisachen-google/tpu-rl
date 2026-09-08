@@ -17,6 +17,23 @@ Components: **rollout** = engine_generate, **trainer** = actor_train (sum), **we
 | L5 | g4r32c | champion win512, old ckpt | 40.1 | 40.9 | 0.02 |
 | D1 | g4r61 | ★ + async_scheduling | 35.6 | 35.9 | 0.58 |
 
+## Host-work bundle decomposition (L1 → L2, single lever per run, win64, fixed ckpt)
+
+The −73 s L1→L2 host-work jump, split one lever at a time. Each run = the previous + one knob.
+
+| Run | Adds | rollout (med) | global median | global mean | Δ global vs prev |
+|---|---|---:|---:|---:|---:|
+| g4r20b (L1) | (reward fix only) | 118.0 | 130.5 | 130.4 | — |
+| **g4r56** | + **rr DP routing** | ~50 | **58.4** | 58.9 | **−72** |
+| g4r57 | + async detok | ~51 | 59.8 | 60.0 | +1.4 (noise) |
+| g4r38 (L2) | + async logprobs + fast-extract | 48.5 | 56.3 | 57.1 | −3 (noise) |
+
+**Finding: rr DP routing alone = ~96% of the host-work win (130.5 → 58.4 s).** It removes a
+per-request all-rank state query through the Pathways proxy (2048 IPCs per decode window);
+async detok / logprobs / fast-extract are near-null on top of it. The step is
+serial-head-IPC-bound, not detok/logprob-bound. Rewards 0.53–0.59 (parity) across all four.
+Clean steps used (contention-excluded): g4r56 = 58.4/59.4, g4r57 = 59.8/60.2, g4r38 = 56.3/58.1.
+
 ## Per-rung component detail (median | mean, clean steps)
 
 ### L0 — g4r19 (baseline, old ckpt, win64)
@@ -74,6 +91,7 @@ host still dominates). Accuracy-safe (rewards 0.58).*
 |---|---:|---:|---:|---:|---:|
 | L0 | 127.0 | ~15 | ~1.0 | 12.0 | 153.0 |
 | L1 | 118.0 | ~8 | 0.5 | 2.0 | 130.5 |
+| L1+rr (g4r56) | ~50 | ~4 | 0.45 | 1.9 | 58.4 |
 | L2 | 48.5 | 4.2 | 0.45 | 1.8 | 56.3 |
 | ★ g4r55 | 31.5 | 4.0 | 0.45 | 0.21 | **35.6** |
 
