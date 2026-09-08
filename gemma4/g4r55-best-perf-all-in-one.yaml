@@ -6,6 +6,10 @@
 #   clean step 34.5-37.2 s (best 34.5), check_numbers 0.54-0.62 (GPU parity).
 #   Ladder endpoints: 175.6 -> 34.5 s (5.1x) and rewards 0.02 -> 0.58.
 # Self-contained: kubectl apply -f this file. No helm required.
+#   FULLY SELF-CONTAINED: all 36 runtime patch .py files are embedded verbatim in the
+#   g4r55-patches ConfigMap (mounted at /workload/patches) and applied at pod start by
+#   the launcher. No external image layer, git checkout, or file fetch is needed --
+#   `kubectl apply -f g4r55-best-perf-all-in-one.yaml` deploys the complete run.
 #   - ConfigMap g4r55-patches   : the runtime patch roster (applied at pod start)
 #   - ConfigMap g4r55-launcher  : launch-workload.sh (full train command)
 #   - JobSet    g4r55           : Pathways head (rm+proxy sidecars) + 16 TPU workers
