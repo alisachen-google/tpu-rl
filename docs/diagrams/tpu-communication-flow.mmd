@@ -1,0 +1,72 @@
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: '#ffffff'
+    primaryTextColor: '#000000'
+    primaryBorderColor: '#000000'
+    lineColor: '#333333'
+    clusterBkg: '#fafafa'
+    clusterBorder: '#b8b8b8'
+    edgeLabelBackground: '#ffffff'
+    fontFamily: 'Arial, Helvetica, sans-serif'
+  flowchart:
+    curve: linear
+---
+flowchart LR
+    accTitle: TPU communication lowering and routing
+    accDescr: Standard XLA HLO and custom Pallas kernel paths converge at the low-level optimizer, which emits DMA descriptors for routing through the BoardFly interconnect. Routing algorithms populate the on-chip routing tables.
+
+    %% Monochrome palette: grey, white, black
+    classDef whiteBox fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000;
+    classDef lightGreyBox fill:#f4f4f4,stroke:#333333,stroke-width:1.5px,color:#000000;
+    classDef midGreyBox fill:#e0e0e0,stroke:#222222,stroke-width:1.5px,color:#000000;
+    classDef darkGreyBox fill:#4f4f4f,stroke:#111111,stroke-width:2px,color:#ffffff;
+    classDef blackBox fill:#1f1f1f,stroke:#000000,stroke-width:2px,color:#ffffff;
+
+    subgraph Authoring["1. Model Authoring Layer"]
+        direction TB
+        M1["JAX / PyTorch:<br>jax.lax.all_gather, pmean, torch_xla"]:::whiteBox
+        M2["Pallas / Custom Kernel:<br>pl.pallas_call(), pltpu.async_copy"]:::whiteBox
+    end
+
+    subgraph HLOPath["Path 1: Standard XLA HLO Path"]
+        direction TB
+        H1["StableHLO / JAXPR Graph"]:::lightGreyBox
+        H2["XLA HLO Collectives:<br>all-gather, all-reduce, all-to-all"]:::lightGreyBox
+        H3["XLA Backend Emitter:<br>lowering_emitter.cc / LoweringUtil"]:::lightGreyBox
+        H1 --> H2 --> H3
+    end
+
+    subgraph LLOPath["Path 2: Custom Kernel Path (Pallas / LLO)"]
+        direction TB
+        P1["Mosaic MLIR:<br>tpu.enqueue_dma / tpu.wait_dma2"]:::lightGreyBox
+        P2["HLO Wrapper:<br>tpu_custom_call (Bypasses HLO Collectives)"]:::lightGreyBox
+        P3["Mosaic lower_to_llo:<br>Directly calls LLO Region Builder"]:::lightGreyBox
+        P1 --> P2 --> P3
+    end
+
+    subgraph LLOLayer["2. Low-Level Optimizer (LLO)"]
+        direction TB
+        L1["LloRegionBuilder::EnqueueDmaGeneral()"]:::midGreyBox
+        L2["VLIW Bundle Packing &<br>DMA Descriptor State"]:::midGreyBox
+        L1 --> L2
+    end
+
+    subgraph RoutingAndHardware["3. Hardware DMA, Routing & Network"]
+        direction TB
+        HW1["DMA Descriptor:<br>addrs, sync_flags, dma_type, target_chip_id / multicast_id"]:::darkGreyBox
+        RA["Routing Algorithms:<br>• Unicast Routing<br>• Multicast Routing"]:::whiteBox
+        RT["On-Chip Routing Tables:<br>Egress & Link Next-Hop"]:::darkGreyBox
+        NET["Physical BoardFly Interconnect:<br>VC0 -> VC1 Switch -> Dest Memory"]:::blackBox
+
+        HW1 -->|Indexes by ID| RT
+        RA -.->|Populates| RT
+        RT --> NET
+    end
+
+    M1 --> H1
+    M2 --> P1
+    H3 --> L1
+    P3 --> L1
+    L2 --> HW1

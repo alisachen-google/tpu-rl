@@ -7,6 +7,7 @@ TPU v7x (Ironwood) RL benchmarking — runbooks, launchers, and command referenc
   known failure modes. Launchers and the helm chart live in `gemma4/`, `chart/`; helpers in `tools/`.
 
 ### Background
+- [TPU communication lowering and routing](docs/diagrams/README.md) — monochrome architecture diagram: XLA HLO and Pallas / LLO paths through DMA, routing, and the interconnect; SVG, PNG, PDF, and Mermaid source.
 - [gemma4/GEMMA4_E2B_RUN.md](gemma4/GEMMA4_E2B_RUN.md) — commands for running gemma4-e2b GRPO RL
 - [gemma4/GEMMA_BENCH_PLAN.md](gemma4/GEMMA_BENCH_PLAN.md) — benchmark ladder
 - [RUNBOOK.md](RUNBOOK.md) — Fix Catalog #1–21
