@@ -80,3 +80,26 @@ done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden
 2026-10-07T22:44:46Z isl=1024 done in 317 s rc=0
     isl1024_k0 tokens= 1024 finish= length ttft_ms= 280 e2e_ms= 162716 err= None
     isl1024_k1 tokens= 1024 finish= length ttft_ms= 458 e2e_ms= 155008 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[isl8192_k0] tokens=1024 finish=length cached=0 ttft=428.31ms e2e=153737.31ms
+[isl8192_k1] tokens=1024 finish=length cached=0 ttft=539.66ms e2e=156118.89ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1/8192.jsonl
+2026-10-07T22:49:57Z isl=8192 done in 310 s rc=0
+    isl8192_k0 tokens= 1024 finish= length ttft_ms= 428 e2e_ms= 153737 err= None
+    isl8192_k1 tokens= 1024 finish= length ttft_ms= 540 e2e_ms= 156119 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[isl32768_k0] tokens=1024 finish=length cached=0 ttft=1823.97ms e2e=155946.7ms
+[isl32768_k1] tokens=1024 finish=length cached=0 ttft=1905.38ms e2e=155433.83ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1/32768.jsonl
+2026-10-07T22:55:08Z isl=32768 done in 311 s rc=0
+    isl32768_k0 tokens= 1024 finish= length ttft_ms= 1824 e2e_ms= 155947 err= None
+    isl32768_k1 tokens= 1024 finish= length ttft_ms= 1905 e2e_ms= 155434 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[isl131072_k0] tokens=1024 finish=length cached=0 ttft=9820.05ms e2e=163385.71ms
+[isl131072_k1] tokens=1024 finish=length cached=0 ttft=9857.82ms e2e=165872.8ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1/131072.jsonl
+2026-10-07T23:00:38Z isl=131072 done in 330 s rc=0
+    isl131072_k0 tokens= 1024 finish= length ttft_ms= 9820 e2e_ms= 163386 err= None
+    isl131072_k1 tokens= 1024 finish= length ttft_ms= 9858 e2e_ms= 165873 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[isl262144_k0] tokens=1024 finish=length cached=0 ttft=26541.09ms e2e=181407.25ms

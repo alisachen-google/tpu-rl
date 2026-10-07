@@ -1,16 +1,25 @@
-# Bug reports — sglang-torchtpu 1P/1D on TPU v7x
+# Bug reports: sglang-torchtpu, 1 prefill + 1 decode on TPU v7x
 
-Generated 2026-10-07 22:46 UTC from FINDINGS.md.
+The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 style: short sentences, active voice, one instruction per step. Each report has a numbered
+"How to reproduce" section with the exact commands. The tools are in `../../scripts/`. The server recipes are in `../../recipes/`.
 
-| ID | Class | First seen (UTC) | Severity | Area | Status | File |
-|---|---|---|---|---|---|---|
-| F-1 | bug | 2026-10-07 19:35 | Low (env/robustness) | launcher + torch_tpu tier-2 compile cache | observed, repro 1/1, workaround applied | [F-1.md](F-1.md) |
-| F-2 | bug (missing compile policy / perf) | 2026-10-07 19:59 | High (perf / TC-5 scope) | torch.compile coverage, Qwen3-VL-30B-A3B | observed, repro 1/1 | [F-2.md](F-2.md) |
-| F-3 | test-methodology note (not a bug) | 2026-10-07 20:02 | Medium (test-methodology / numerics) | greedy decode reproducibility on TPU (monolithic gpt-oss) | observed 10/10 prompts | [F-3.md](F-3.md) |
-| F-4 | bug candidate (correctness, under isolation) | 2026-10-07 20:20 | **High (correctness, under isolation)** | PD prefill vs monolithic for multi-chunk prompts (gpt-oss) | observed 6/6 long prompts, 0/4 short; isolating | [F-4.md](F-4.md) |
-| F-5 | bug (crash) | 2026-10-07 20:32 | **High (crash: single request kills the prefill engine)** | TPU compiled backend / request validation | observed 1/1, repro queued | [F-5.md](F-5.md) |
-| F-6 | bug candidate (hang, repro pending) | 2026-10-07 20:28 | **High (hang, candidate)** | `n=2` parallel sampling through PD | observed 1/1 (300 s no response), repro queued | [F-6.md](F-6.md) |
-| F-7 | observation (recovered; misleading log line) | 2026-10-07 20:33 | Medium (resource leak after peer death, TC-7) | decode engine after prefill crash | observing | [F-7.md](F-7.md) |
-| F-8 | bug (crash) | 2026-10-07 20:43 | **High (crash: client abort during chunked prefill kills the prefill engine)** | prefill engine, chunk cache (radix off) | observed 1/1 (first abort of TC-7), repro queued | [F-8.md](F-8.md) |
-| F-9 | bug | 2026-10-07 22:10 | Medium (correctness, candidate) | PD prefill vs monolithic for page/chunk-unaligned prompt lengths (both models) | observed 4/4 unaligned prompts; exact check vs c=1 golden queued | [F-9.md](F-9.md) |
-| F-10 | bug | 2026-10-07 22:13 | **High (crash: one large image kills the Qwen prefill engine)** | ViT compile buckets × `fail_on_recompile` stance | observed 1/1, repro queued | [F-10.md](F-10.md) |
+| ID | Title | Type | Severity | Status |
+|---|---|---|---|---|
+| [F-1](F-1.md) | Hard abort when the tier-2 compile cache directory cannot be created | bug (robustness) | low | reproduced, work-around |
+| [F-2](F-2.md) | Qwen3-VL-30B-A3B language model is not compiled on TPU | bug (perf, missing policy) | high for perf tests | reproduced on every start |
+| [F-3](F-3.md) | Greedy decoding is not batch-invariant | test-method note | medium | measured |
+| [F-4](F-4.md) | gpt-oss PD output differs from monolithic for prompts longer than one chunk | bug candidate (correctness) | high | reproduced 6/6, isolation in progress |
+| [F-5](F-5.md) | A prompt-logprob request stops the prefill engine | bug (crash) | high | reproduced 1/1 |
+| [F-6](F-6.md) | `n=2` request gets no response for 300 s | bug candidate (hang) | high if confirmed | observed 1/1 |
+| [F-7](F-7.md) | Decode engine recovers about 2 min after the prefill engine dies | observation | low | observed |
+| [F-8](F-8.md) | Client disconnect during chunked prefill stops the prefill engine | bug (crash) | high | reproduced 1/1 |
+| [F-9](F-9.md) | Unaligned prompt lengths give a different first token in PD mode | bug candidate (correctness) | medium | observed 4/4 |
+| [F-10](F-10.md) | One 1920×1080 image stops the Qwen3-VL prefill engine | bug (crash) | high | reproduced 1/1 |
+
+## Common steps
+
+1. Make sure that no other user holds the TPU: `bash scripts/tpu_free.sh`.
+2. Start a server pair: `bash scripts/pd.sh start recipes/<model>_A_128k.json <run-name>`. Wait 4 to 8 minutes.
+3. Start a single (monolithic) server: `bash scripts/pd.sh golden recipes/<model>_G_128k_fp8_e4m3.json <run-name> a|b`.
+4. Stop all servers that you own: `bash scripts/pd.sh stop`.
+5. Logs are in `results/runs/<run-name>/<role>/server.log` on the host that runs the role. Compressed copies are in `results/logs/`.
