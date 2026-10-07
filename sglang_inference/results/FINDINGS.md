@@ -187,3 +187,44 @@ prompts → chunked prefill in PD mode is numerically identical to monolithic pe
 table) is attributable to the **hybrid sliding-window KV path** in PD prefill (hypothesis (a)); the `--disable-hybrid-swa-memory` run will confirm.
 A second, separate effect exists for **unaligned prompt lengths** (127,999 on both models): PD prefill differs from monolithic when the last
 chunk/page is partial — candidate F-9 (to confirm against the c=1 Qwen golden for 127,999, queued).
+
+| F-9 | 2026-10-07 22:10 | Medium (correctness, candidate) | PD prefill vs monolithic for page/chunk-unaligned prompt lengths (both models) | observed 4/4 unaligned prompts; exact check vs c=1 golden queued |
+| F-10 | 2026-10-07 22:13 | **High (crash: one large image kills the Qwen prefill engine)** | ViT compile buckets × `fail_on_recompile` stance | observed 1/1, repro queued |
+
+## F-9 — Unaligned prompt lengths: PD prefill differs from monolithic (candidate)
+
+For prompt lengths that are not multiples of the page/chunk size (127,999 on both models) the PD first-token logprob differs from the monolithic
+golden (Qwen: Δ 0.011 / 0.228; gpt-oss: Δ 0.0004 / 0.005 — see F-4 tables), whereas every aligned Qwen prompt (1k…128k, up to 16 chunks) is
+bit-identical. Suspects: handling of the partial last page/chunk in PD prefill (padding of the final extend chunk, or transfer/pre-allocation of a
+partially filled page). Exact confirmation against the concurrency-1 Qwen golden for 127,999 and the tiny set (8191/8193/16383/16385) is queued
+(`_phase_goldens_1m_and_F4.sh`).
+
+## F-10 — A single 1920×1080 image crashes the Qwen3-VL prefill engine (ViT recompile vs `fail_on_recompile`)
+
+**Symptom.** Config A Qwen3-VL-30B (default `--mm-process-config`, i.e. no `max_pixels` cap). One `/v1/chat/completions` request with one
+1920×1080 PNG (mm_request.py) → HTTP 500 after 65 s; all 8 prefill schedulers exit; the launcher kills the group; LB down.
+```
+[TP0] ViTTpuCompileRunner: patch count 8160 exceeds the largest precompiled bucket 4900; this image triggers a one-time ViT recompile.
+      Raise SGLANG_TPU_VIT_MAX_PRECOMPILE_PATCHES, or lower max_pixels via --mm-process-config.
+[TP0] Scheduler hit an exception: ... qwen3_vl.py:1801 forward → mm_utils.py:766 general_mm_embed_routine → mm_schedule.py:354 _encode_vision_items
+      → self.visual(pixel_values, grid_thw) → RuntimeError: Detected recompile when torch.compile stance is 'fail_on_recompile'.
+```
+The stance was armed at 21:25:32 ("Warmup complete; froze torch.compile via set_stance('fail_on_recompile')"). The ViT runner announces an
+intended one-time recompile, but the frozen stance turns it into a scheduler crash. 1×448², 4×448², 16×448² (3,198 tokens) and 1×1024² worked.
+
+**Why it matters.** Any client image larger than the precompiled ViT bucket range (default max 4900 patches ≈ 1960×1960 px total area, but the
+non-square 1920×1080 maps to 8160 patches) takes down the prefill engine. Plan TC-5 expects "vision-encoder compiles allowed on first sight of a
+new resolution"; TC-1 expects a clean 400/413 for oversized payloads, never a crash.
+
+**Repro.** `mm_request.py --url LB --model qwen3-vl-30b --num-images 1 --resolution 1920x1080 --max-tokens 48` on Config A Qwen (queued LAST in
+`_phase_A_qwen_redo.sh`, with a second non-square 896×504 case). Mitigations to test: `--mm-process-config '{"image":{"max_pixels":...}}'` (the 8B
+recipe sets 313600) → request should be downscaled; `SGLANG_TPU_VIT_MAX_PRECOMPILE_PATCHES` higher; or exempt the ViT runner from the stance.
+Log: `results/runs/A_qwen_128k_run1/prefill_server.log` (line ~7648 ff).
+
+## Config A Qwen3-VL summary (21:25–22:16 UTC)
+- Cold start 452 s (prefill). TC-1 c=1: 10/10 outputs 1,024 tokens, needles 3/3 on all; text diverges from the c=2 golden after 48–208 tokens (F-3 noise; c=1 golden queued).
+- First-token logprob PD vs golden: bit-identical for all aligned ISLs (1k…128k); differs only at 127,999 (F-9).
+- Tiny boundary sweep (page 128): 35/35 prompts 160 tokens, 0 errors, needle found in all 32 that have one (contrast: gpt-oss 7 misses → model/prompt-format effect, not PD).
+- Multimodal: 1/4/16 × 448², 1 × 1024² OK (TTFT 15–35 s eager); 16 images: needle not echoed in 192 tokens (semantic, not an error); 1920×1080 → F-10 crash; remaining mm/chat/abort items voided → redo queued.
+- Decode compile audit: 0 serving-time decoder recompiles (vacuous, F-2); 8 ViT compile events on decode during serving (new resolutions on the decode side as well — decode re-encodes images for MRoPE).
+- verify_pd_disagg needle probes with raw text returned empty (model emits EOS at once for the terse raw prompt; `ignore_eos` runs retrieve fine) → use `--api chat` for instruct VL models.

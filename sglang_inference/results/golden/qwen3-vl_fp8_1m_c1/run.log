@@ -75,3 +75,8 @@ done: 35 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golde
     tiny16385 tokens= 160 finish= length ttft_ms= 1026 e2e_ms= 24948 err= None
 2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
 [isl1024_k0] tokens=1024 finish=length cached=0 ttft=279.69ms e2e=162715.58ms
+[isl1024_k1] tokens=1024 finish=length cached=0 ttft=458.4ms e2e=155008.2ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1/1024.jsonl
+2026-10-07T22:44:46Z isl=1024 done in 317 s rc=0
+    isl1024_k0 tokens= 1024 finish= length ttft_ms= 280 e2e_ms= 162716 err= None
+    isl1024_k1 tokens= 1024 finish= length ttft_ms= 458 e2e_ms= 155008 err= None
