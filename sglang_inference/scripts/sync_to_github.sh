@@ -13,8 +13,5 @@ rsync -a --delete --exclude 'compile_cache' --exclude '*.log' --exclude 'tpu_log
 # small text logs (phase/driver/run logs) go in as-is; server logs gzipped
 find $SRC/results -name '*.log' -size -2M ! -name 'server*.log' ! -path '*/tpu_logs/*' | while read f; do rel=${f#$SRC/results/}; mkdir -p "$DST/results/$(dirname $rel)"; cp "$f" "$DST/results/$rel"; done
 find $SRC/results/runs -name 'server*.log' | while read f; do rel=${f#$SRC/results/}; mkdir -p "$DST/results/logs/$(dirname $rel)"; gzip -c "$f" > "$DST/results/logs/$rel.gz"; done
-cd $REPO && git add -A sglang_inference && git -c user.name="alisachen-google" -c user.email="alisa888cl@gmail.com" commit -q -m "$MSG
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01WzpS15R17maA4UqTPBUnv6" && git push -q origin HEAD:main && echo "pushed $(git rev-parse --short HEAD): $(git show --stat --oneline HEAD | tail -1)" || echo "nothing to commit or push failed"
+cd $REPO && git add -A sglang_inference && git -c user.name="alisachen-google" -c user.email="alisa888cl@gmail.com" commit -q -m "$MSG" && git push -q origin HEAD:main && echo "pushed $(git rev-parse --short HEAD): $(git show --stat --oneline HEAD | tail -1)" || echo "nothing to commit or push failed"
 du -sh $DST | cut -f1
