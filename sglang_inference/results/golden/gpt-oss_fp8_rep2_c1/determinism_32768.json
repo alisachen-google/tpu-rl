@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8/32768.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1/32768.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl32768_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 11<256",
+    "agreement 0.023<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 64,
+   "token_prefix": 11,
+   "token_agreement": 0.0234375,
+   "first_divergence_token": 11,
+   "first_divergence_char": 64,
+   "context_a": "checkpoint mentioned above, in order. In",
+   "context_b": "checkpoint mentioned. In the massive tex",
+   "first_token_logprob_absdiff": 0.07136613130569458,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl32768_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 53<256",
+    "agreement 0.121<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 262,
+   "token_prefix": 53,
+   "token_agreement": 0.12109375,
+   "first_divergence_token": 53,
+   "first_divergence_char": 262,
+   "context_a": "the text, there are lines: \"The secret c",
+   "context_b": "the text, there are mentions: \"The secre",
+   "first_token_logprob_absdiff": 0.0,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

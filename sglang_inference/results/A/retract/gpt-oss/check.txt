@@ -1,0 +1,2 @@
+isl131072_k0: copies=4 needles/copy=[3, 3, 3, 3] distinct_texts=4 identical_to_c1_run=[False, False, False, False] tokens=[1024, 1024, 1024, 1024] errors=[]
+isl131072_k1: copies=4 needles/copy=[3, 3, 3, 3] distinct_texts=4 identical_to_c1_run=[False, False, False, False] tokens=[1024, 1024, 1024, 1024] errors=[]

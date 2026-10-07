@@ -1,0 +1,35 @@
+=== determinism diff ISL=1024 (c2 run vs c1 run)
+                b: 'oned in the text are as follows:\n\n1. **C'
+isl1024_k1    False     293     59  0.083   0.0000  FAIL  token prefix 59<256; agreement 0.083<0.95
+                a@293: 'ret code words for each checkpoint menti'
+                b: 'ret code words for every checkpoint ment'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1/determinism_1024.json
+=== determinism diff ISL=8192 (c2 run vs c1 run)
+                b: 'e secret code words embedded: "The secre'
+isl8192_k1    False     105     22  0.039   0.0000  FAIL  token prefix 22<256; agreement 0.039<0.95
+                a@105: 'xt, there are three mentions: checkpoint'
+                b: 'xt, there are three code words: checkpoi'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1/determinism_8192.json
+=== determinism diff ISL=32768 (c2 run vs c1 run)
+                b: 'checkpoint mentioned. In the massive tex'
+isl32768_k1   False     262     53  0.121   0.0000  FAIL  token prefix 53<256; agreement 0.121<0.95
+                a@262: 'the text, there are lines: "The secret c'
+                b: 'the text, there are mentions: "The secre'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1/determinism_32768.json
+=== determinism diff ISL=131072 (c2 run vs c1 run)
+                b: '1 is saffron-29fc." Then later: "The sec'
+isl131072_k1  False      11      3  0.015   0.0247  FAIL  token prefix 3<256; agreement 0.015<0.95
+                a@11: 'We need to list secret code wor'
+                b: 'We need to parse the long text.'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1/determinism_131072.json
+=== determinism diff ISL=127999 (c2 run vs c1 run)
+                b: 'We need to list secret code wor'
+isl127999_k1  False     194     39  0.083   0.0000  FAIL  token prefix 39<256; agreement 0.083<0.95
+                a@194: 'thouse keeper."\n\nWe have to find secret '
+                b: 'thouse keeper."\n\nWe need to find secret '
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1/determinism_127999.json

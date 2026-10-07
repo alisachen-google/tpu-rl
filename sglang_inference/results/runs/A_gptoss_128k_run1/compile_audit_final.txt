@@ -1,0 +1,4 @@
+decode_A_final: ready_at_line=1263 total_lines=4309
+  startup : __recompiles=24  Compiling/compile=22  cache_miss=0  InductorError=0
+  serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+  serving-time recompile lines (first 5):

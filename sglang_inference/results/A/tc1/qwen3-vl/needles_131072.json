@@ -1,0 +1,28 @@
+[
+ {
+  "id": "isl131072_k0",
+  "isl": 131071,
+  "needles": 3,
+  "found": 3,
+  "missing": [],
+  "answer_region_chars": 110,
+  "completion_tokens": 1024,
+  "finish_reason": "length",
+  "other_found": 3,
+  "needle_order_identical": true,
+  "common_prefix_chars": 2
+ },
+ {
+  "id": "isl131072_k1",
+  "isl": 131072,
+  "needles": 3,
+  "found": 3,
+  "missing": [],
+  "answer_region_chars": 99,
+  "completion_tokens": 1024,
+  "finish_reason": "length",
+  "other_found": 3,
+  "needle_order_identical": true,
+  "common_prefix_chars": 357
+ }
+]

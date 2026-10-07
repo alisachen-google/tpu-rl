@@ -1,0 +1,519 @@
+{
+ "a": "http://10.128.15.217:8080",
+ "b": null,
+ "prompt_id": "isl8192_k0",
+ "prompt_chars": 43963,
+ "max_new_tokens": 128,
+ "timeout": 300.0,
+ "cases": 17,
+ "failed": 0,
+ "rows": [
+  {
+   "name": "greedy_baseline",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 1.014,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "top_k_1",
+   "sampling_params": {
+    "temperature": 0.7,
+    "max_new_tokens": 128,
+    "top_k": 1
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.971,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "repetition_penalty_1.3",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "repetition_penalty": 1.3
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"secret code word for checkpoint 2 is harbor-99a2.\", then at end near bottom there was \"the secret code word for checkpoint 3 is glacier-bc08.\"\n\nThus we must list them in order (checkpoint numbers). So output:\n\nCheckpoint 1 \u2013 sable\u201181e7\nCheckpoint 2 \u2013 harbour\u201199a2? Wait they wrote 'harbor' not 'Harbour', but it's fine",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"secret code word for checkpoint 2 is harbor-99a2.\", then at end near bottom there was \"the secret code word for checkpoint 3 is glacier-bc08.\"\n\nThus we must list them in order (checkpoint numbers). So output:\n\nCheckpoint 1 \u2013 sable\u201181e7\nCheckpoint 2 \u2013 harbour\u201199a2? Wait they wrote 'harbor' not 'Harbour', but it's fine"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 1.039,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "frequency_penalty_0.8",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "frequency_penalty": 0.8
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\"\n\nWe need to list the secret code words for every checkpoint mentioned above, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer should first list:\n\nCheckpoint 1: sable-81e7\nCheckpoint 2: harbor-99a2",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\"\n\nWe need to list the secret code words for every checkpoint mentioned above, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer should first list:\n\nCheckpoint 1: sable-81e7\nCheckpoint 2: harbor-99a2"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.971,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "presence_penalty_0.8",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "presence_penalty": 0.8
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\"\n\nWe need to list the secret code words for every checkpoint mentioned above, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer should first list:\n\nCheckpoint 1: sable-81e7\nCheckpoint 2: harbor-99a2",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\"\n\nWe need to list the secret code words for every checkpoint mentioned above, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer should first list:\n\nCheckpoint 1: sable-81e7\nCheckpoint 2: harbor-99a2"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.976,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "min_new_tokens_100_ignore_eos_false",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "min_new_tokens": 100,
+    "ignore_eos": false
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 1.038,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "stop_string",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "stop": [
+     "Secret",
+     "\n\n"
+    ]
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper."
+    ],
+    "completion_tokens": 103,
+    "finish_reason": "stop",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.844,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "stop_token_ids",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "stop_token_ids": [
+     13
+    ]
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt",
+    "texts": [
+     "We need to parse the prompt"
+    ],
+    "completion_tokens": 7,
+    "finish_reason": "stop",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.35,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "no_stop_trim",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "stop": [
+     "Secret",
+     "\n\n"
+    ],
+    "no_stop_trim": true
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\n",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\n"
+    ],
+    "completion_tokens": 103,
+    "finish_reason": "stop",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.836,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "logit_bias",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "logit_bias": {
+     "262": -100
+    }
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.957,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "max_new_tokens_1",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 1
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We",
+    "texts": [
+     "We"
+    ],
+    "completion_tokens": 1,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.308,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "max_new_tokens_0",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 0
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "",
+    "texts": [
+     ""
+    ],
+    "completion_tokens": 0,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.313,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "skip_special_tokens_false",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "skip_special_tokens": false
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.952,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "sampling_seed_42_temp0.7",
+   "sampling_params": {
+    "temperature": 0.7,
+    "max_new_tokens": 128,
+    "sampling_seed": 42
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We;\n\n\n\u1ebfn\n\nWe have a massive block of repetitive sentences and some secret code words for_Core checkpoints. The task: \"List the secret code words for every checkpointtof mentioned above, in order, then continue kemur \u062f\u0648\u0631\u0647...\" Actually: \"List the secret code words for every checkpoint mentioned above, in order, then continue writing a detailed story about a lighthouse keeper.\"\n\n \u0578\u057e\u0584\u0565\u0580: Checkpoint 1, 2, 3. We have three code words:\n\n- checkpoint 1: \"sable-81e7\"\n- checkpoint 2: \"harbor-99a2\"\n- checkpoint 3: \"glacier-bc",
+    "texts": [
+     "We;\n\n\n\u1ebfn\n\nWe have a massive block of repetitive sentences and some secret code words for_Core checkpoints. The task: \"List the secret code words for every checkpointtof mentioned above, in order, then continue kemur \u062f\u0648\u0631\u0647...\" Actually: \"List the secret code words for every checkpoint mentioned above, in order, then continue writing a detailed story about a lighthouse keeper.\"\n\n \u0578\u057e\u0584\u0565\u0580: Checkpoint 1, 2, 3. We have three code words:\n\n- checkpoint 1: \"sable-81e7\"\n- checkpoint 2: \"harbor-99a2\"\n- checkpoint 3: \"glacier-bc"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 1.781,
+    "hang": false,
+    "second_text": "We need to parse the user request: \"List the secret code words for every checkpoint mentioned above, in order, then continue writing a detailed story about a lighthouse keeper.\"\n\nWe have a huge block of repeated sentences. Within it, we saw secret code words: \"The secret code word for checkpoint 1 is sable-81e7.\" then later \"The secret coderov for checkpoint 2 is harbor-99a2.\" and \"The secret code word for checkpoint 3 is glacier-bc08.\" (I saw \"The secret code word for checkpoint 3 is glacier-bc08.\") Let's confirm. Search in text: I",
+    "self_identical": false,
+    "notes": [
+     "info: seeded-rerun DIFFERS"
+    ]
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": [
+    "a: info: seeded-rerun DIFFERS"
+   ]
+  },
+  {
+   "name": "json_schema",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "json_schema": "{\"type\": \"object\", \"properties\": {\"a\": {\"type\": \"integer\"}}, \"required\": [\"a\"]}"
+   },
+   "extra": {},
+   "a": {
+    "status": 400,
+    "text": null,
+    "texts": null,
+    "completion_tokens": null,
+    "finish_reason": null,
+    "error": "{\"error\":{\"message\":\"Grammar-based generation (json_schema, regex, ebnf, structural_tag) is not supported when the server is launched with --grammar-backend none\"}}",
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.021,
+    "hang": false,
+    "clean_error": true,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "regex",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "regex": "[A-Z][a-z]+( [a-z]+){0,8}\\."
+   },
+   "extra": {},
+   "a": {
+    "status": 400,
+    "text": null,
+    "texts": null,
+    "completion_tokens": null,
+    "finish_reason": null,
+    "error": "{\"error\":{\"message\":\"Grammar-based generation (json_schema, regex, ebnf, structural_tag) is not supported when the server is launched with --grammar-backend none\"}}",
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.016,
+    "hang": false,
+    "clean_error": true,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "stream_vs_nonstream",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a",
+    "texts": [
+     "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.961,
+    "hang": false,
+    "stream_text": "We need to parse the prompt. The user gave a huge block of repeated sentences, with some secret code words embedded: \"The secret code word for checkpoint 1 is sable-81e7.\" and later \"The secret code word for checkpoint 2 is harbor-99a2.\" and later \"The secret code word for checkpoint 3 is glacier-bc08.\" So we need to list the secret code words for every checkpoint mentioned, in order, then continue writing a detailed story about a lighthouse keeper.\n\nThus answer: list code words: checkpoint 1: sable-81e7; checkpoint 2: harbor-99a",
+    "stream_equal": true,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  }
+ ]
+}

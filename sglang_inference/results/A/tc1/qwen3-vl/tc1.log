@@ -1,0 +1,116 @@
+=== 2026-10-07T21:25:48Z TC-1 model=qwen3-vl url=http://10.128.15.217:8080 lengths=1024,8192,32768,131072,127999 conc=1
+--- (1) verify_pd_disagg (workers, health, smoke, needle 1k/8k/32k)
+[SKIP] workers: mini-LB has no /workers (HTTP 404); only the Rust router exposes it
+[PASS] health: GET /health_generate -> HTTP 200 ('')
+[PASS] smoke: completion_tokens=32 ttft=15088.0ms e2e=15088.0ms text=' The three primary colors are **red**, **blue**, and **yello' err=None
+[FAIL] needle len=1024 depth=0.1: want=oeubhjjb got='' prompt_tokens=685 (est 1013) ttft=5415.3ms e2e=5415.3ms err=None
+[FAIL] needle len=1024 depth=0.5: want=ygmyyxfc got='' prompt_tokens=684 (est 1013) ttft=5408.0ms e2e=5408.0ms err=None
+[PASS] needle len=1024 depth=0.95: want=ctdfvzzj got='ctdfvzzj' prompt_tokens=685 (est 1013) ttft=1142.1ms e2e=1142.1ms err=None
+[FAIL] needle len=8192 depth=0.1: want=cajatqlf got='' prompt_tokens=5468 (est 8176) ttft=9491.8ms e2e=9491.9ms err=None
+[FAIL] needle len=8192 depth=0.5: want=coocdkdf got='' prompt_tokens=5467 (est 8176) ttft=10062.9ms e2e=10062.9ms err=None
+[FAIL] needle len=8192 depth=0.95: want=pvqrvpev got='' prompt_tokens=5468 (est 8176) ttft=314.6ms e2e=314.7ms err=None
+[FAIL] needle len=32768 depth=0.1: want=rwenmbji got='' prompt_tokens=21876 (est 32760) ttft=19895.9ms e2e=19895.9ms err=None
+[FAIL] needle len=32768 depth=0.5: want=vuyejpqc got='' prompt_tokens=21877 (est 32760) ttft=10469.6ms e2e=10469.6ms err=None
+[FAIL] needle len=32768 depth=0.95: want=pzsqrbgb got='' prompt_tokens=21876 (est 32760) ttft=1334.6ms e2e=1334.6ms err=None
+[PASS] warm-cache: second: cached_tokens=0 prompt_tokens=21876 ttft1=1334.6ms ttft2=1317.0ms ratio=0.987
+
+=== summary: 4 passed, 8 failed, 1 skipped ===
+  FAIL needle len=1024 depth=0.1
+  FAIL needle len=1024 depth=0.5
+  FAIL needle len=8192 depth=0.1
+  FAIL needle len=8192 depth=0.5
+  FAIL needle len=8192 depth=0.95
+  FAIL needle len=32768 depth=0.1
+  FAIL needle len=32768 depth=0.5
+  FAIL needle len=32768 depth=0.95
+--- (2) ISL=1024 through LB
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl1024_k0] tokens=1024 finish=length cached=0 ttft=6969.64ms e2e=169471.14ms
+[isl1024_k1] tokens=1024 finish=length cached=0 ttft=242.35ms e2e=160793.65ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/1024.jsonl
+    done in 330 s
+--- (3) diff vs golden ISL=1024
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl1024_k0    False     869    208  0.216   0.0000  FAIL  token prefix 208<256; agreement 0.216<0.95
+                a@869: 'atic: *"The lens is fogged, Elias. I can'
+                b: 'atic: *"The lens is jammed. I can’t—"*—t'
+isl1024_k1    False     147     48  0.075   0.0000  FAIL  token prefix 48<256; agreement 0.075<0.95
+                a@147: 'eper, Elias Thorne, stood at the edge of'
+                b: 'eper, Elias Thorne, had lived on the roc'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/golden_diff_1024.json
+    diff rc=1
+--- (2) ISL=8192 through LB
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl8192_k0] tokens=1024 finish=length cached=0 ttft=544.14ms e2e=159477.12ms
+[isl8192_k1] tokens=1024 finish=length cached=0 ttft=547.14ms e2e=156359.16ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/8192.jsonl
+    done in 316 s
+--- (3) diff vs golden ISL=8192
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl8192_k0    False     319     83  0.108   0.0000  FAIL  token prefix 83<256; agreement 0.108<0.95
+                a@319: 'cient lighthouse of Beacon Point. For ge'
+                b: 'cient lighthouse of Sentinel Point. For '
+isl8192_k1    False     370     89  0.103   0.0000  FAIL  token prefix 89<256; agreement 0.103<0.95
+                a@370: ' the lighthouse had been a beacon of hop'
+                b: ' the lighthouse had guided ships safely '
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/golden_diff_8192.json
+    diff rc=1
+--- (2) ISL=32768 through LB
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl32768_k0] tokens=1024 finish=length cached=0 ttft=2007.4ms e2e=158107.46ms
+[isl32768_k1] tokens=1024 finish=length cached=0 ttft=2000.9ms e2e=156589.38ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/32768.jsonl
+    done in 315 s
+--- (3) diff vs golden ISL=32768
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl32768_k0   False     319     81  0.113   0.0000  FAIL  token prefix 81<256; agreement 0.113<0.95
+                a@319: 'cient lighthouse of Cape Haven. Its ligh'
+                b: 'cient lighthouse of Beacon Point. Its li'
+isl32768_k1   False     314     83  0.106   0.0000  FAIL  token prefix 83<256; agreement 0.106<0.95
+                a@314: 'lt and pine, lived an old lighthouse kee'
+                b: 'lt and pine, lived a lighthouse keeper n'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/golden_diff_32768.json
+    diff rc=1
+--- (2) ISL=131072 through LB
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl131072_k0] tokens=1024 finish=length cached=0 ttft=18965.4ms e2e=173094.45ms
+[isl131072_k1] tokens=1024 finish=length cached=0 ttft=10112.35ms e2e=163826.32ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/131072.jsonl
+    done in 337 s
+--- (3) diff vs golden ISL=131072
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl131072_k0  False       2      4  0.021   0.0000  FAIL  token prefix 4<256; agreement 0.021<0.95
+                a@2: '\n\nThe secret code word'
+                b: '\n\n\nThe secret code wor'
+isl131072_k1  False     357     97  0.109   0.0000  FAIL  token prefix 97<256; agreement 0.109<0.95
+                a@357: 'sturdy stone tower, perched precariously'
+                b: 'sturdy stone tower, the air was thick wi'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/golden_diff_131072.json
+    diff rc=1
+--- (2) ISL=127999 through LB
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl127999_k0] tokens=1024 finish=length cached=0 ttft=18391.94ms e2e=175441.25ms
+[isl127999_k1] tokens=1024 finish=length cached=0 ttft=19061.61ms e2e=176922.95ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/127999.jsonl
+    done in 353 s
+--- (3) diff vs golden ISL=127999
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl127999_k0  False     186     57  0.077   0.0114  FAIL  token prefix 57<256; agreement 0.077<0.95
+                a@186: 'e keeper.\n\n---\n\nThe wind howled like a w'
+                b: 'e keeper.\n\n---\n\nThe salt-laced wind howl'
+isl127999_k1  False      94     38  0.055   0.2278  FAIL  token prefix 38<256; agreement 0.055<0.95
+                a@94: 'a1\n3. thistle-8031\n\n**The Keeper of the '
+                b: "a1\n3. thistle-8031\n\nNow, let's write a d"
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/golden_diff_127999.json
+    diff rc=1
+=== 2026-10-07T21:54:41Z TC-1 finished

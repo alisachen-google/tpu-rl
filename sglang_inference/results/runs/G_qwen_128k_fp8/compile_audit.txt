@@ -1,0 +1,4 @@
+qwen_golden_b: ready_at_line=4877 total_lines=5434
+  startup : __recompiles=224  Compiling/compile=16  cache_miss=0  InductorError=0
+  serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+  serving-time recompile lines (first 5):

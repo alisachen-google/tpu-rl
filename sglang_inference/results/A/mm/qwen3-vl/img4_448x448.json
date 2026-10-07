@@ -1,0 +1,64 @@
+{
+ "text": "Of course. Here is a brief description of each image followed by the secret word.\n\n- **IMAGE 1:** A solid red circle on a light gray background.\n- **IMAGE 2:** A solid green square on a light gray background.\n- **IMAGE 3:** A solid blue triangle on a light gray background.\n- **IMAGE 4:** A solid orange diamond (a square rotated 45 degrees) on a light gray background.\n\nThe secret word is plum-7731.",
+ "usage": {
+  "prompt_tokens": 822,
+  "total_tokens": 924,
+  "completion_tokens": 102,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "image_tokens": 784
+  },
+  "reasoning_tokens": 0
+ },
+ "ttft_ms": 20916.5,
+ "e2e_ms": 20916.5,
+ "status": 200,
+ "error": null,
+ "raw": {
+  "id": "b408b19ad2414d9a802cb43b5c8afe12",
+  "object": "chat.completion",
+  "created": 1791411130,
+  "model": "qwen3-vl-30b",
+  "choices": [
+   {
+    "index": 0,
+    "message": {
+     "role": "assistant",
+     "content": "Of course. Here is a brief description of each image followed by the secret word.\n\n- **IMAGE 1:** A solid red circle on a light gray background.\n- **IMAGE 2:** A solid green square on a light gray background.\n- **IMAGE 3:** A solid blue triangle on a light gray background.\n- **IMAGE 4:** A solid orange diamond (a square rotated 45 degrees) on a light gray background.\n\nThe secret word is plum-7731.",
+     "reasoning_content": null,
+     "tool_calls": null
+    },
+    "logprobs": null,
+    "finish_reason": "stop",
+    "matched_stop": 151645
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 822,
+   "total_tokens": 924,
+   "completion_tokens": 102,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "image_tokens": 784
+   },
+   "reasoning_tokens": 0
+  },
+  "metadata": {
+   "weight_version": "default",
+   "weight_versions": [
+    {
+     "version": "default",
+     "start": 0,
+     "end": 102
+    }
+   ]
+  }
+ },
+ "image_descriptions": [
+  "red circle labeled 'IMAGE 1'",
+  "green square labeled 'IMAGE 2'",
+  "blue triangle labeled 'IMAGE 3'",
+  "orange diamond labeled 'IMAGE 4'"
+ ],
+ "est_prompt_tokens": 281
+}

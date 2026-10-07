@@ -1,0 +1,51 @@
+--- A. software
+sglang         0.5.13.dev7249+g09d1244c2  /home/alisachen_google_com/sglang-torchtpu/python/sglang/__init__.py
+torch          2.11.0+cpu  /home/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/__init__.py
+torch_tpu      ?  /home/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch_tpu/__init__.py
+libtpu         0.0.47  /home/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/libtpu/__init__.py
+jax            0.10.2  /home/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/jax/__init__.py
+transformers   5.8.1  /home/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/transformers/__init__.py
+tpu_sync       ?  None
+sglang_router  0.3.2  /home/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/sglang_router/__init__.py
+jax                       0.10.2
+jaxlib                    0.10.2
+libtpu                    0.0.47
+sentence-transformers     6.1.0
+sglang                    0.5.13.dev7249+g09d1244c2
+sglang-router             0.3.2
+torch                     2.11.0+cpu
+torch_tpu                 0.1.1+release.2026.9.22.20260927223741
+torchao                   0.9.0+cpu
+torchvision               0.26.0+cpu
+tpu_sync_torch            0.0.1.dev20261002213151
+transformers              5.8.1
+sglang-torchtpu commit: 09d1244c2641c3232ec0fcf5dd2d3bd372d5d709 2026-10-07 10:29:05 -0700
+--- B. flags present in this build (from --help)
+OK      --disaggregation-mode
+OK      --disaggregation-transfer-backend
+OK      --disaggregation-bootstrap-port
+OK      --disaggregation-decode-enable-radix-cache
+OK      --disaggregation-decode-enable-offload-kvcache
+OK      --disaggregation-decode-retraction-backup
+OK      --enable-hierarchical-cache
+OK      --hicache-ratio
+OK      --hicache-write-policy
+OK      --hicache-mem-layout
+OK      --hicache-io-backend
+OK      --speculative-algorithm
+OK      --speculative-draft-model-path
+OK      --enable-torch-compile
+OK      --torch-compile-max-bs
+OK      --tpu-compile-tokens
+OK      --tpu-compile-bs
+OK      --tpu-compile-tracer
+OK      --attention-backend
+OK      --ep-size
+OK      --enable-metrics
+OK      --watchdog-timeout
+OK      --kv-cache-dtype
+OK      --page-size
+OK      --swa-full-tokens-ratio
+OK      --disable-hybrid-swa-memory
+OK      --enable-cache-report
+--- C. hardware / OS

@@ -1,0 +1,23 @@
+[SKIP] workers: mini-LB has no /workers (HTTP 404); only the Rust router exposes it
+[PASS] health: GET /health_generate -> HTTP 200 ('')
+[PASS] smoke: completion_tokens=32 ttft=15088.0ms e2e=15088.0ms text=' The three primary colors are **red**, **blue**, and **yello' err=None
+[FAIL] needle len=1024 depth=0.1: want=oeubhjjb got='' prompt_tokens=685 (est 1013) ttft=5415.3ms e2e=5415.3ms err=None
+[FAIL] needle len=1024 depth=0.5: want=ygmyyxfc got='' prompt_tokens=684 (est 1013) ttft=5408.0ms e2e=5408.0ms err=None
+[PASS] needle len=1024 depth=0.95: want=ctdfvzzj got='ctdfvzzj' prompt_tokens=685 (est 1013) ttft=1142.1ms e2e=1142.1ms err=None
+[FAIL] needle len=8192 depth=0.1: want=cajatqlf got='' prompt_tokens=5468 (est 8176) ttft=9491.8ms e2e=9491.9ms err=None
+[FAIL] needle len=8192 depth=0.5: want=coocdkdf got='' prompt_tokens=5467 (est 8176) ttft=10062.9ms e2e=10062.9ms err=None
+[FAIL] needle len=8192 depth=0.95: want=pvqrvpev got='' prompt_tokens=5468 (est 8176) ttft=314.6ms e2e=314.7ms err=None
+[FAIL] needle len=32768 depth=0.1: want=rwenmbji got='' prompt_tokens=21876 (est 32760) ttft=19895.9ms e2e=19895.9ms err=None
+[FAIL] needle len=32768 depth=0.5: want=vuyejpqc got='' prompt_tokens=21877 (est 32760) ttft=10469.6ms e2e=10469.6ms err=None
+[FAIL] needle len=32768 depth=0.95: want=pzsqrbgb got='' prompt_tokens=21876 (est 32760) ttft=1334.6ms e2e=1334.6ms err=None
+[PASS] warm-cache: second: cached_tokens=0 prompt_tokens=21876 ttft1=1334.6ms ttft2=1317.0ms ratio=0.987
+
+=== summary: 4 passed, 8 failed, 1 skipped ===
+  FAIL needle len=1024 depth=0.1
+  FAIL needle len=1024 depth=0.5
+  FAIL needle len=8192 depth=0.1
+  FAIL needle len=8192 depth=0.5
+  FAIL needle len=8192 depth=0.95
+  FAIL needle len=32768 depth=0.1
+  FAIL needle len=32768 depth=0.5
+  FAIL needle len=32768 depth=0.95

@@ -1,0 +1,297 @@
+2026-10-07T19:39:50Z launching gpt-oss golden on a
+2026-10-07 19:46:38 golden(a) /health ready after 406 s
+[2026-10-07T19:46:38+00:00] a_golden_gptoss ok=1 lat=11.8ms run= q= use= thr= crash=-
+[2026-10-07T19:46:48+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T19:46:58+00:00] a_golden_gptoss ok=1 lat=224.0ms run= q= use= thr= crash=-
+[2026-10-07T19:47:08+00:00] a_golden_gptoss ok=1 lat=55.2ms run= q= use= thr= crash=-
+[2026-10-07T19:47:18+00:00] a_golden_gptoss ok=1 lat=318.0ms run= q= use= thr= crash=-
+[2026-10-07T19:47:28+00:00] a_golden_gptoss ok=1 lat=309.0ms run= q= use= thr= crash=-
+[2026-10-07T19:47:38+00:00] a_golden_gptoss ok=1 lat=105.8ms run= q= use= thr= crash=-
+[2026-10-07T19:47:48+00:00] a_golden_gptoss ok=1 lat=12.6ms run= q= use= thr= crash=-
+[2026-10-07T19:47:58+00:00] a_golden_gptoss ok=1 lat=13.7ms run= q= use= thr= crash=-
+[2026-10-07T19:48:08+00:00] a_golden_gptoss ok=1 lat=15.2ms run= q= use= thr= crash=-
+[2026-10-07T19:48:18+00:00] a_golden_gptoss ok=1 lat=12.3ms run= q= use= thr= crash=-
+[2026-10-07T19:48:28+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T19:48:38+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T19:48:48+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T19:48:58+00:00] a_golden_gptoss ok=1 lat=11.9ms run= q= use= thr= crash=-
+[2026-10-07T19:49:08+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T19:49:18+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T19:49:28+00:00] a_golden_gptoss ok=1 lat=12.7ms run= q= use= thr= crash=-
+[2026-10-07T19:49:38+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T19:49:48+00:00] a_golden_gptoss ok=1 lat=11.8ms run= q= use= thr= crash=-
+[2026-10-07T19:49:58+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T19:50:08+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T19:50:18+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T19:50:28+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T19:50:38+00:00] a_golden_gptoss ok=1 lat=10.7ms run= q= use= thr= crash=-
+[2026-10-07T19:50:48+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T19:50:58+00:00] a_golden_gptoss ok=1 lat=11.2ms run= q= use= thr= crash=-
+[2026-10-07T19:51:08+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T19:51:18+00:00] a_golden_gptoss ok=1 lat=12.0ms run= q= use= thr= crash=-
+[2026-10-07T19:51:28+00:00] a_golden_gptoss ok=1 lat=10.6ms run= q= use= thr= crash=-
+[2026-10-07T19:51:38+00:00] a_golden_gptoss ok=1 lat=10.6ms run= q= use= thr= crash=-
+[2026-10-07T19:51:48+00:00] a_golden_gptoss ok=1 lat=10.9ms run= q= use= thr= crash=-
+[2026-10-07T19:51:58+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T19:52:08+00:00] a_golden_gptoss ok=1 lat=10.4ms run= q= use= thr= crash=-
+[2026-10-07T19:52:18+00:00] a_golden_gptoss ok=1 lat=11.2ms run= q= use= thr= crash=-
+[2026-10-07T19:52:28+00:00] a_golden_gptoss ok=1 lat=11.2ms run= q= use= thr= crash=-
+[2026-10-07T19:52:38+00:00] a_golden_gptoss ok=1 lat=11.0ms run= q= use= thr= crash=-
+[2026-10-07T19:52:48+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T19:52:58+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T19:53:08+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T19:53:18+00:00] a_golden_gptoss ok=1 lat=10.9ms run= q= use= thr= crash=-
+[2026-10-07T19:53:28+00:00] a_golden_gptoss ok=1 lat=12.1ms run= q= use= thr= crash=-
+[2026-10-07T19:53:38+00:00] a_golden_gptoss ok=1 lat=11.0ms run= q= use= thr= crash=-
+[2026-10-07T19:53:48+00:00] a_golden_gptoss ok=1 lat=10.7ms run= q= use= thr= crash=-
+[2026-10-07T19:53:58+00:00] a_golden_gptoss ok=1 lat=11.8ms run= q= use= thr= crash=-
+[2026-10-07T19:54:08+00:00] a_golden_gptoss ok=1 lat=12.1ms run= q= use= thr= crash=-
+[2026-10-07T19:54:18+00:00] a_golden_gptoss ok=1 lat=10.7ms run= q= use= thr= crash=-
+[2026-10-07T19:54:28+00:00] a_golden_gptoss ok=1 lat=10.9ms run= q= use= thr= crash=-
+[2026-10-07T19:54:38+00:00] a_golden_gptoss ok=1 lat=11.8ms run= q= use= thr= crash=-
+[2026-10-07T19:54:48+00:00] a_golden_gptoss ok=1 lat=13.7ms run= q= use= thr= crash=-
+[2026-10-07T19:54:58+00:00] a_golden_gptoss ok=1 lat=11.9ms run= q= use= thr= crash=-
+[2026-10-07T19:55:08+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T19:55:18+00:00] a_golden_gptoss ok=1 lat=12.6ms run= q= use= thr= crash=-
+[2026-10-07T19:55:28+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T19:55:38+00:00] a_golden_gptoss ok=1 lat=11.0ms run= q= use= thr= crash=-
+[2026-10-07T19:55:48+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T19:55:58+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T19:56:08+00:00] a_golden_gptoss ok=1 lat=11.2ms run= q= use= thr= crash=-
+[2026-10-07T19:56:18+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T19:56:28+00:00] a_golden_gptoss ok=1 lat=13.0ms run= q= use= thr= crash=-
+[2026-10-07T19:56:38+00:00] a_golden_gptoss ok=1 lat=11.8ms run= q= use= thr= crash=-
+[2026-10-07T19:56:48+00:00] a_golden_gptoss ok=1 lat=12.4ms run= q= use= thr= crash=-
+[2026-10-07T19:56:58+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T19:57:08+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T19:57:18+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T19:57:28+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T19:57:38+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T19:57:48+00:00] a_golden_gptoss ok=1 lat=11.8ms run= q= use= thr= crash=-
+[2026-10-07T19:57:58+00:00] a_golden_gptoss ok=1 lat=11.9ms run= q= use= thr= crash=-
+[2026-10-07T19:58:08+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T19:58:18+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T19:58:28+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T19:58:38+00:00] a_golden_gptoss ok=1 lat=12.2ms run= q= use= thr= crash=-
+[2026-10-07T19:58:48+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T19:58:58+00:00] a_golden_gptoss ok=1 lat=11.2ms run= q= use= thr= crash=-
+[2026-10-07T19:59:08+00:00] a_golden_gptoss ok=1 lat=10.9ms run= q= use= thr= crash=-
+[2026-10-07T19:59:18+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T19:59:28+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T19:59:38+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T19:59:48+00:00] a_golden_gptoss ok=1 lat=12.4ms run= q= use= thr= crash=-
+[2026-10-07T19:59:58+00:00] a_golden_gptoss ok=1 lat=19.9ms run= q= use= thr= crash=-
+[2026-10-07T20:00:08+00:00] a_golden_gptoss ok=1 lat=19.2ms run= q= use= thr= crash=-
+[2026-10-07T20:00:18+00:00] a_golden_gptoss ok=1 lat=18.4ms run= q= use= thr= crash=-
+[2026-10-07T20:00:28+00:00] a_golden_gptoss ok=1 lat=257.3ms run= q= use= thr= crash=-
+[2026-10-07T20:00:38+00:00] a_golden_gptoss ok=1 lat=18.9ms run= q= use= thr= crash=-
+[2026-10-07T20:00:48+00:00] a_golden_gptoss ok=1 lat=21.8ms run= q= use= thr= crash=-
+[2026-10-07T20:00:58+00:00] a_golden_gptoss ok=1 lat=182.0ms run= q= use= thr= crash=-
+[2026-10-07T20:01:08+00:00] a_golden_gptoss ok=1 lat=379.0ms run= q= use= thr= crash=-
+[2026-10-07T20:01:18+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T20:01:28+00:00] a_golden_gptoss ok=1 lat=17.3ms run= q= use= thr= crash=-
+[2026-10-07T20:01:38+00:00] a_golden_gptoss ok=1 lat=31.9ms run= q= use= thr= crash=-
+[2026-10-07T20:01:48+00:00] a_golden_gptoss ok=1 lat=19.7ms run= q= use= thr= crash=-
+[2026-10-07T20:01:58+00:00] a_golden_gptoss ok=1 lat=19.8ms run= q= use= thr= crash=-
+[2026-10-07T20:02:08+00:00] a_golden_gptoss ok=1 lat=20.7ms run= q= use= thr= crash=-
+[2026-10-07T20:02:18+00:00] a_golden_gptoss ok=1 lat=22.0ms run= q= use= thr= crash=-
+[2026-10-07T20:02:28+00:00] a_golden_gptoss ok=1 lat=21.3ms run= q= use= thr= crash=-
+[2026-10-07T20:02:38+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:02:48+00:00] a_golden_gptoss ok=1 lat=12.5ms run= q= use= thr= crash=-
+[2026-10-07T20:02:58+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:02:58+00:00] a_golden_gptoss ok=0 lat=0.9ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:03:08+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:03:08+00:00] a_golden_gptoss ok=0 lat=0.9ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:03:18+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:03:18+00:00] a_golden_gptoss ok=0 lat=1.7ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:03:28+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:03:28+00:00] a_golden_gptoss ok=0 lat=1.0ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:03:38+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:03:38+00:00] a_golden_gptoss ok=0 lat=1.8ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:03:48+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:03:48+00:00] a_golden_gptoss ok=0 lat=1.5ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:03:58+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:03:58+00:00] ALERT a_golden_gptoss: /get_server_info failing for 60s
+[2026-10-07T20:03:58+00:00] a_golden_gptoss ok=0 lat=1.4ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:04:08+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:04:08+00:00] a_golden_gptoss ok=0 lat=4.0ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:04:18+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:04:18+00:00] a_golden_gptoss ok=0 lat=1.5ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:04:28+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:04:28+00:00] a_golden_gptoss ok=0 lat=0.9ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:04:38+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:04:38+00:00] a_golden_gptoss ok=0 lat=1.5ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:04:48+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:04:48+00:00] a_golden_gptoss ok=0 lat=1.8ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:04:58+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:04:58+00:00] a_golden_gptoss ok=0 lat=0.9ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:05:08+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:05:08+00:00] a_golden_gptoss ok=0 lat=1.6ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:05:18+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:05:18+00:00] a_golden_gptoss ok=0 lat=1.7ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:05:28+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:05:28+00:00] a_golden_gptoss ok=0 lat=0.7ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:05:38+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:05:38+00:00] a_golden_gptoss ok=0 lat=1.8ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:05:48+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:05:48+00:00] a_golden_gptoss ok=0 lat=1.7ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:05:58+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:05:58+00:00] a_golden_gptoss ok=0 lat=0.7ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:06:08+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:06:08+00:00] a_golden_gptoss ok=0 lat=1.5ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:06:18+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:06:18+00:00] a_golden_gptoss ok=0 lat=1.4ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:06:28+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:06:28+00:00] a_golden_gptoss ok=0 lat=0.8ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:06:38+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:06:38+00:00] a_golden_gptoss ok=0 lat=1.2ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:06:48+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:06:48+00:00] a_golden_gptoss ok=0 lat=1.4ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:06:58+00:00] WARN a_golden_gptoss: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T20:06:58+00:00] a_golden_gptoss ok=0 lat=0.8ms run=None q=None use=None thr=None crash=-
+[2026-10-07T20:07:08+00:00] a_golden_gptoss ok=1 lat=13.6ms run= q= use= thr= crash=-
+[2026-10-07T20:07:18+00:00] a_golden_gptoss ok=1 lat=14.8ms run= q= use= thr= crash=-
+[2026-10-07T20:07:28+00:00] a_golden_gptoss ok=1 lat=11.9ms run= q= use= thr= crash=-
+[2026-10-07T20:07:38+00:00] a_golden_gptoss ok=1 lat=17.6ms run= q= use= thr= crash=-
+[2026-10-07T20:07:48+00:00] a_golden_gptoss ok=1 lat=12.6ms run= q= use= thr= crash=-
+[2026-10-07T20:07:58+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:08:08+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T20:08:18+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T20:08:28+00:00] a_golden_gptoss ok=1 lat=11.0ms run= q= use= thr= crash=-
+[2026-10-07T20:08:38+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:08:48+00:00] a_golden_gptoss ok=1 lat=13.0ms run= q= use= thr= crash=-
+[2026-10-07T20:08:58+00:00] a_golden_gptoss ok=1 lat=10.7ms run= q= use= thr= crash=-
+[2026-10-07T20:09:08+00:00] a_golden_gptoss ok=1 lat=11.9ms run= q= use= thr= crash=-
+[2026-10-07T20:09:18+00:00] a_golden_gptoss ok=1 lat=13.2ms run= q= use= thr= crash=-
+[2026-10-07T20:09:28+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:09:38+00:00] a_golden_gptoss ok=1 lat=13.9ms run= q= use= thr= crash=-
+[2026-10-07T20:09:48+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:09:58+00:00] a_golden_gptoss ok=1 lat=12.0ms run= q= use= thr= crash=-
+[2026-10-07T20:10:08+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T20:10:18+00:00] a_golden_gptoss ok=1 lat=11.8ms run= q= use= thr= crash=-
+[2026-10-07T20:10:28+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T20:10:38+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T20:10:48+00:00] a_golden_gptoss ok=1 lat=12.4ms run= q= use= thr= crash=-
+[2026-10-07T20:10:58+00:00] a_golden_gptoss ok=1 lat=10.3ms run= q= use= thr= crash=-
+[2026-10-07T20:11:08+00:00] a_golden_gptoss ok=1 lat=10.9ms run= q= use= thr= crash=-
+[2026-10-07T20:11:18+00:00] a_golden_gptoss ok=1 lat=13.0ms run= q= use= thr= crash=-
+[2026-10-07T20:11:28+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:11:38+00:00] a_golden_gptoss ok=1 lat=10.7ms run= q= use= thr= crash=-
+[2026-10-07T20:11:48+00:00] a_golden_gptoss ok=1 lat=11.0ms run= q= use= thr= crash=-
+[2026-10-07T20:11:58+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:12:08+00:00] a_golden_gptoss ok=1 lat=13.1ms run= q= use= thr= crash=-
+[2026-10-07T20:12:18+00:00] a_golden_gptoss ok=1 lat=10.7ms run= q= use= thr= crash=-
+[2026-10-07T20:12:28+00:00] a_golden_gptoss ok=1 lat=10.9ms run= q= use= thr= crash=-
+[2026-10-07T20:12:38+00:00] a_golden_gptoss ok=1 lat=367.9ms run= q= use= thr= crash=-
+[2026-10-07T20:12:48+00:00] a_golden_gptoss ok=1 lat=10.2ms run= q= use= thr= crash=-
+[2026-10-07T20:12:58+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T20:13:08+00:00] a_golden_gptoss ok=1 lat=10.3ms run= q= use= thr= crash=-
+[2026-10-07T20:13:18+00:00] a_golden_gptoss ok=1 lat=10.3ms run= q= use= thr= crash=-
+[2026-10-07T20:13:28+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:13:38+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T20:13:48+00:00] a_golden_gptoss ok=1 lat=10.6ms run= q= use= thr= crash=-
+[2026-10-07T20:13:58+00:00] a_golden_gptoss ok=1 lat=11.9ms run= q= use= thr= crash=-
+[2026-10-07T20:14:08+00:00] a_golden_gptoss ok=1 lat=12.6ms run= q= use= thr= crash=-
+[2026-10-07T20:14:18+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T20:14:28+00:00] a_golden_gptoss ok=1 lat=11.0ms run= q= use= thr= crash=-
+[2026-10-07T20:14:38+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T20:14:48+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T20:14:58+00:00] a_golden_gptoss ok=1 lat=10.6ms run= q= use= thr= crash=-
+[2026-10-07T20:15:08+00:00] a_golden_gptoss ok=1 lat=11.0ms run= q= use= thr= crash=-
+[2026-10-07T20:15:18+00:00] a_golden_gptoss ok=1 lat=10.1ms run= q= use= thr= crash=-
+[2026-10-07T20:15:28+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:15:38+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T20:15:48+00:00] a_golden_gptoss ok=1 lat=10.3ms run= q= use= thr= crash=-
+[2026-10-07T20:15:58+00:00] a_golden_gptoss ok=1 lat=10.3ms run= q= use= thr= crash=-
+[2026-10-07T20:16:08+00:00] a_golden_gptoss ok=1 lat=10.4ms run= q= use= thr= crash=-
+[2026-10-07T20:16:18+00:00] a_golden_gptoss ok=1 lat=11.0ms run= q= use= thr= crash=-
+[2026-10-07T20:16:28+00:00] a_golden_gptoss ok=1 lat=12.2ms run= q= use= thr= crash=-
+[2026-10-07T20:16:38+00:00] a_golden_gptoss ok=1 lat=10.5ms run= q= use= thr= crash=-
+[2026-10-07T20:16:48+00:00] a_golden_gptoss ok=1 lat=221.0ms run= q= use= thr= crash=-
+[2026-10-07T20:16:58+00:00] a_golden_gptoss ok=1 lat=10.5ms run= q= use= thr= crash=-
+[2026-10-07T20:17:08+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T20:17:18+00:00] a_golden_gptoss ok=1 lat=12.3ms run= q= use= thr= crash=-
+[2026-10-07T20:17:28+00:00] a_golden_gptoss ok=1 lat=10.7ms run= q= use= thr= crash=-
+[2026-10-07T20:17:38+00:00] a_golden_gptoss ok=1 lat=10.6ms run= q= use= thr= crash=-
+[2026-10-07T20:17:48+00:00] a_golden_gptoss ok=1 lat=90.4ms run= q= use= thr= crash=-
+[2026-10-07T20:17:58+00:00] a_golden_gptoss ok=1 lat=366.4ms run= q= use= thr= crash=-
+[2026-10-07T20:18:08+00:00] a_golden_gptoss ok=1 lat=32.4ms run= q= use= thr= crash=-
+[2026-10-07T20:18:18+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T20:18:28+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T20:18:38+00:00] a_golden_gptoss ok=1 lat=10.5ms run= q= use= thr= crash=-
+[2026-10-07T20:18:48+00:00] a_golden_gptoss ok=1 lat=12.7ms run= q= use= thr= crash=-
+[2026-10-07T20:18:58+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:19:08+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:19:18+00:00] a_golden_gptoss ok=1 lat=10.5ms run= q= use= thr= crash=-
+[2026-10-07T20:19:28+00:00] a_golden_gptoss ok=1 lat=10.3ms run= q= use= thr= crash=-
+[2026-10-07T20:19:38+00:00] a_golden_gptoss ok=1 lat=10.5ms run= q= use= thr= crash=-
+[2026-10-07T20:19:48+00:00] a_golden_gptoss ok=1 lat=10.1ms run= q= use= thr= crash=-
+[2026-10-07T20:19:58+00:00] a_golden_gptoss ok=1 lat=10.6ms run= q= use= thr= crash=-
+[2026-10-07T20:20:08+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:20:18+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T20:20:28+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T20:20:38+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:20:48+00:00] a_golden_gptoss ok=1 lat=10.3ms run= q= use= thr= crash=-
+[2026-10-07T20:20:58+00:00] a_golden_gptoss ok=1 lat=10.1ms run= q= use= thr= crash=-
+[2026-10-07T20:21:08+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T20:21:18+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T20:21:28+00:00] a_golden_gptoss ok=1 lat=10.0ms run= q= use= thr= crash=-
+[2026-10-07T20:21:38+00:00] a_golden_gptoss ok=1 lat=10.5ms run= q= use= thr= crash=-
+[2026-10-07T20:21:48+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T20:21:58+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:22:08+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:22:18+00:00] a_golden_gptoss ok=1 lat=10.5ms run= q= use= thr= crash=-
+[2026-10-07T20:22:28+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:22:38+00:00] a_golden_gptoss ok=1 lat=10.2ms run= q= use= thr= crash=-
+[2026-10-07T20:22:48+00:00] a_golden_gptoss ok=1 lat=12.4ms run= q= use= thr= crash=-
+[2026-10-07T20:22:58+00:00] a_golden_gptoss ok=1 lat=11.8ms run= q= use= thr= crash=-
+[2026-10-07T20:23:08+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T20:23:18+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T20:23:28+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T20:23:38+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T20:23:48+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:23:58+00:00] a_golden_gptoss ok=1 lat=10.7ms run= q= use= thr= crash=-
+[2026-10-07T20:24:08+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T20:24:18+00:00] a_golden_gptoss ok=1 lat=11.6ms run= q= use= thr= crash=-
+[2026-10-07T20:24:28+00:00] a_golden_gptoss ok=1 lat=10.5ms run= q= use= thr= crash=-
+[2026-10-07T20:24:38+00:00] a_golden_gptoss ok=1 lat=10.2ms run= q= use= thr= crash=-
+[2026-10-07T20:24:48+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T20:24:58+00:00] a_golden_gptoss ok=1 lat=11.9ms run= q= use= thr= crash=-
+[2026-10-07T20:25:08+00:00] a_golden_gptoss ok=1 lat=12.1ms run= q= use= thr= crash=-
+[2026-10-07T20:25:18+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T20:25:28+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T20:25:38+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T20:25:48+00:00] a_golden_gptoss ok=1 lat=10.2ms run= q= use= thr= crash=-
+[2026-10-07T20:25:58+00:00] a_golden_gptoss ok=1 lat=14.7ms run= q= use= thr= crash=-
+[2026-10-07T20:26:08+00:00] a_golden_gptoss ok=1 lat=11.2ms run= q= use= thr= crash=-
+[2026-10-07T20:26:18+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:26:28+00:00] a_golden_gptoss ok=1 lat=142.3ms run= q= use= thr= crash=-
+[2026-10-07T20:26:38+00:00] a_golden_gptoss ok=1 lat=10.6ms run= q= use= thr= crash=-
+[2026-10-07T20:26:48+00:00] a_golden_gptoss ok=1 lat=10.8ms run= q= use= thr= crash=-
+[2026-10-07T20:26:58+00:00] a_golden_gptoss ok=1 lat=13.2ms run= q= use= thr= crash=-
+[2026-10-07T20:27:08+00:00] a_golden_gptoss ok=1 lat=10.9ms run= q= use= thr= crash=-
+[2026-10-07T20:27:18+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T20:27:28+00:00] a_golden_gptoss ok=1 lat=10.6ms run= q= use= thr= crash=-
+[2026-10-07T20:27:38+00:00] a_golden_gptoss ok=1 lat=11.3ms run= q= use= thr= crash=-
+[2026-10-07T20:27:48+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:27:58+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T20:28:08+00:00] a_golden_gptoss ok=1 lat=11.5ms run= q= use= thr= crash=-
+[2026-10-07T20:28:18+00:00] a_golden_gptoss ok=1 lat=11.0ms run= q= use= thr= crash=-
+[2026-10-07T20:28:28+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:28:38+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T20:28:48+00:00] a_golden_gptoss ok=1 lat=10.3ms run= q= use= thr= crash=-
+[2026-10-07T20:28:58+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T20:29:08+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T20:29:18+00:00] a_golden_gptoss ok=1 lat=10.9ms run= q= use= thr= crash=-
+[2026-10-07T20:29:28+00:00] a_golden_gptoss ok=1 lat=10.5ms run= q= use= thr= crash=-
+[2026-10-07T20:29:38+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T20:29:48+00:00] a_golden_gptoss ok=1 lat=10.6ms run= q= use= thr= crash=-
+[2026-10-07T20:29:58+00:00] a_golden_gptoss ok=1 lat=11.4ms run= q= use= thr= crash=-
+[2026-10-07T20:30:08+00:00] a_golden_gptoss ok=1 lat=11.2ms run= q= use= thr= crash=-
+[2026-10-07T20:30:18+00:00] a_golden_gptoss ok=1 lat=11.1ms run= q= use= thr= crash=-
+[2026-10-07T20:30:28+00:00] a_golden_gptoss ok=1 lat=11.7ms run= q= use= thr= crash=-
+[2026-10-07T20:30:38+00:00] a_golden_gptoss ok=1 lat=12.8ms run= q= use= thr= crash=-
+
+=== watchdog summary ===
+elapsed_s=2647 polls=265 failures=25 alerts=1 (crash=0, hang=0)
+csv=/home/alisachen_google_com/pd_disagg/results/runs/G_gptoss_128k_fp8/watchdog.csv

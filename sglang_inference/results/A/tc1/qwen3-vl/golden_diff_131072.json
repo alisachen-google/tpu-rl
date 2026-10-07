@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8/131072.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/131072.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl131072_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 4<256",
+    "agreement 0.021<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 2,
+   "token_prefix": 4,
+   "token_agreement": 0.021484375,
+   "first_divergence_token": 4,
+   "first_divergence_char": 2,
+   "context_a": "\n\nThe secret code word",
+   "context_b": "\n\n\nThe secret code wor",
+   "first_token_logprob_absdiff": 0.0,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl131072_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 97<256",
+    "agreement 0.109<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 357,
+   "token_prefix": 97,
+   "token_agreement": 0.109375,
+   "first_divergence_token": 97,
+   "first_divergence_char": 357,
+   "context_a": "sturdy stone tower, perched precariously",
+   "context_b": "sturdy stone tower, the air was thick wi",
+   "first_token_logprob_absdiff": 0.0,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

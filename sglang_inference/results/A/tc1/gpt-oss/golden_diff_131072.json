@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8/131072.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/131072.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl131072_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 5<256",
+    "agreement 0.085<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 21,
+   "token_prefix": 5,
+   "token_agreement": 0.0849609375,
+   "first_divergence_token": 5,
+   "first_divergence_char": 21,
+   "context_a": "e need to parse the massive text. The se",
+   "context_b": "e need to parse the huge text. The secre",
+   "first_token_logprob_absdiff": 0.03215837478637695,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl131072_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 3<256",
+    "agreement 0.017<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 11,
+   "token_prefix": 3,
+   "token_agreement": 0.0166015625,
+   "first_divergence_token": 3,
+   "first_divergence_char": 11,
+   "context_a": "We need to list secret code wor",
+   "context_b": "We need to parse the long text.",
+   "first_token_logprob_absdiff": 0.05587899684906006,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

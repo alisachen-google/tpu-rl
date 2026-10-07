@@ -1,0 +1,197 @@
+2026-10-07T20:25:55Z baseline state
+http://10.128.15.217:30000 sglang:num_running_reqs{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.15.217:30000 sglang:num_queue_reqs{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.15.217:30000 sglang:token_usage{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.15.217:30000 sglang:num_used_tokens{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  
+http://10.128.0.90:30000 sglang:num_running_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_queue_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:token_usage{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_used_tokens{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  
+2026-10-07T20:25:55Z (0) PD self-determinism: repeat 32768 and 131072 at c=1 and diff against the first PD pass
+   PDvsPD isl32768_k0   True     4663   1024  1.000   0.0000  PASS  
+   PDvsPD isl32768_k1   True     4575   1024  1.000   0.0000  PASS  
+   PDvsPD 2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/rep2/pd_self_32768.json
+   PDvsPD isl131072_k0  True     4401   1024  1.000   0.0000  PASS  
+   PDvsPD isl131072_k1  True     4213   1024  1.000   0.0000  PASS  
+   PDvsPD 2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/rep2/pd_self_131072.json
+2026-10-07T20:26:50Z state after settle:
+http://10.128.15.217:30000 sglang:num_running_reqs{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.15.217:30000 sglang:num_queue_reqs{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.15.217:30000 sglang:token_usage{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.15.217:30000 sglang:num_used_tokens{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  
+http://10.128.0.90:30000 sglang:num_running_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_queue_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:token_usage{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_used_tokens{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  
+2026-10-07T20:26:50Z (1) tiny SWA/page/chunk boundary sweep, c=1, 160 new tokens
+tiny1        isl=     1 tokens=160 finish=length needle=n/a err=None head='^2 + b^2) = 0. So we have:\n\na^2 + b^2 = '
+tiny2        isl=     2 tokens=160 finish=length needle=n/a err=None head='\n\nSure! Here are some ideas for a Linked'
+tiny16       isl=    16 tokens=160 finish=length needle=n/a err=None head="\n\nIt seems like you're describing a scen"
+tiny63       isl=    63 tokens=160 finish=length needle=FOUND err=None head=" 1\n\nIt looks like you're trying to extra"
+tiny64       isl=    64 tokens=160 finish=length needle=FOUND err=None head=" indigo\n\nIt looks like you're trying to "
+tiny65       isl=    65 tokens=160 finish=length needle=FOUND err=None head=" 1\n\nIt looks like you're trying to creat"
+tiny100      isl=   100 tokens=160 finish=length needle=MISSING err=None head=' 2\n\nThe text you provided appears to be '
+tiny127      isl=   127 tokens=160 finish=length needle=FOUND err=None head=' willow\n\nThe text appears to be a random'
+tiny128      isl=   128 tokens=160 finish=length needle=FOUND err=None head=" marble\n\nIt looks like you're describing"
+tiny129      isl=   129 tokens=160 finish=length needle=FOUND err=None head=" dandelion\n\nIt looks like you've provide"
+tiny130      isl=   130 tokens=160 finish=length needle=FOUND err=None head=' 2\n\nThe text you provided appears to be '
+tiny191      isl=   191 tokens=160 finish=length needle=FOUND err=None head=" 1\n\nIt looks like you're trying to extra"
+tiny192      isl=   192 tokens=160 finish=length needle=MISSING err=None head=' Saffron\n\nThe text you provided appears '
+tiny193      isl=   193 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret word is "fennel".\n\nThe**Pro'
+tiny255      isl=   255 tokens=160 finish=length needle=MISSING err=None head=' 1\n\nThe text you provided appears to be '
+tiny256      isl=   256 tokens=160 finish=length needle=MISSING err=None head=' secret\n\nThe text you provided appears t'
+tiny257      isl=   257 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret word is "nutmeg".\n\nThe**Pro'
+tiny383      isl=   383 tokens=160 finish=length needle=MISSING err=None head=' secret\n\nThe text you provided appears t'
+tiny384      isl=   384 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "garnet".\n\n\n\nI'
+tiny385      isl=   385 tokens=160 finish=length needle=MISSING err=None head=' \n\nWe need to extract the secret word. T'
+tiny511      isl=   511 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "anchor".\n\nThe'
+tiny512      isl=   512 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nThe text you provided appears t'
+tiny513      isl=   513 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "sable".\n\nThe*'
+tiny1023     isl=  1023 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nWe need to parse the problem: "'
+tiny1024     isl=  1024 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "kestrel".\n\nTh'
+tiny1025     isl=  1025 tokens=160 finish=length needle=MISSING err=None head=' secret\n\nThe text appears to be a random'
+tiny8191     isl=  8191 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "ember".\n\nThe\n'
+tiny8192     isl=  8192 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nWe need to parse the problem: "'
+tiny8193     isl=  8193 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is meadow.\n\nThe t'
+tiny8255     isl=  8255 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nWe need to parse the problem: "'
+tiny8256     isl=  8256 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "obsidian".\n\nT'
+tiny8257     isl=  8257 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nWe need to parse the problem st'
+tiny16383    isl= 16383 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "lantern".\n\nTh'
+tiny16384    isl= 16384 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "compass".\n\nTh'
+tiny16385    isl= 16385 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nWe have a huge text. The proble'
+tiny: 35 prompts, 7 problems
+2026-10-07T20:27:46Z state after settle:
+http://10.128.15.217:30000 sglang:num_running_reqs{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.15.217:30000 sglang:num_queue_reqs{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.15.217:30000 sglang:token_usage{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.15.217:30000 sglang:num_used_tokens{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  
+http://10.128.0.90:30000 sglang:num_running_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_queue_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:token_usage{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_used_tokens{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  
+2026-10-07T20:27:47Z (2) sampling-params matrix (PD only; compare to golden later)
+2026-10-07T20:33:03Z params rc=1
+2026-10-07T20:33:23Z state after settle:
+
+http://10.128.0.90:30000 sglang:num_running_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=1.0  http://10.128.0.90:30000 sglang:num_queue_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:token_usage{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.06  http://10.128.0.90:30000 sglang:num_used_tokens{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=16512.0  
+2026-10-07T20:33:23Z (3) chat suite (harmony/reasoning/tools/stream) PD only
+2026-10-07T20:33:23Z chat rc=1
+2026-10-07T20:33:43Z state after settle:
+
+http://10.128.0.90:30000 sglang:num_running_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=1.0  http://10.128.0.90:30000 sglang:num_queue_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:token_usage{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.06  http://10.128.0.90:30000 sglang:num_used_tokens{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=16512.0  
+2026-10-07T20:33:44Z (4) concurrency sweep c=1,2,4 at ISL 131072 / OSL 256 (bench_serving random)
+2026-10-07T20:37:13Z prefill + LB back
+   http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-07T20:37:13Z (2b) params matrix without n_2 / return_logprob_top5
+2026-10-07T20:37:29Z params rc=0
+------------------------------------------------------------------------------------------------------------
+greedy_baseline                     200/128/length        -                     -    -    -    PASS    
+top_k_1                             200/128/length        -                     -    -    -    PASS    
+repetition_penalty_1.3              200/128/length        -                     -    -    -    PASS    
+frequency_penalty_0.8               200/128/length        -                     -    -    -    PASS    
+presence_penalty_0.8                200/128/length        -                     -    -    -    PASS    
+min_new_tokens_100_ignore_eos_false 200/128/length        -                     -    -    -    PASS    
+stop_string                         200/103/stop          -                     -    -    -    PASS    
+stop_token_ids                      200/7/stop            -                     -    -    -    PASS    
+no_stop_trim                        200/103/stop          -                     -    -    -    PASS    
+logit_bias                          200/128/length        -                     -    -    -    PASS    
+max_new_tokens_1                    200/1/length          -                     -    -    -    PASS    
+max_new_tokens_0                    200/0/length          -                     -    -    -    PASS    
+skip_special_tokens_false           200/128/length        -                     -    -    -    PASS    
+sampling_seed_42_temp0.7            200/128/length        -                     -    -    -    PASS    a: info: seeded-rerun DIFFERS
+json_schema                         400/None/None         -                     -    -    -    PASS    
+regex                               400/None/None         -                     -    -    -    PASS    
+stream_vs_nonstream                 200/128/length        -                     -    -    -    PASS    
+
+17 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/A/params/gpt-oss/params_pd_A2.json
+2026-10-07T20:37:44Z state after settle:
+   http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-07T20:37:44Z (3) chat suite
+2026-10-07T20:37:45Z chat rc=1
+model=gpt-oss-120b kind=gptoss 11 cases, endpoints: a=http://10.128.15.217:8080
+case                  A st/fin/len                  B st/fin/len                  same  verdict notes
+-----------------------------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alisachen_google_com/pd_disagg/scripts/chat_suite.py", line 314, in <module>
+    main()
+  File "/home/alisachen_google_com/pd_disagg/scripts/chat_suite.py", line 304, in main
+    print(f"{name:<22}{cell(row['a']):<30}{cell(row['b']):<30}{same:<6}{row['verdict']:<8}{'; '.join(row['notes'])}", flush=True)
+                       ^^^^^^^^^^^^^^
+  File "/home/alisachen_google_com/pd_disagg/scripts/chat_suite.py", line 250, in cell
+    return f"{r['status']}/{r['finish_reason']}/{len(r['content'])}c/{r['reasoning_len']}r"
+                                                     ~^^^^^^^^^^^
+KeyError: 'content'
+2026-10-07T20:38:00Z state after settle:
+   http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-07T20:38:01Z (4) concurrency sweep c=1,2,4 at ISL 131072 / OSL 256
+   c=1 Successful requests:                     2         
+   c=1 Output token throughput (tok/s):         30.50     
+   c=1 Mean TTFT (ms):                          7006.34   
+   c=1 P99 TTFT (ms):                           7015.19   
+   c=1 Mean ITL (ms):                           5.37      
+   c=1 P99 ITL (ms):                            7.35      
+2026-10-07T20:38:54Z state after settle:
+   http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   c=2 Successful requests:                     4         
+   c=2 Output token throughput (tok/s):         35.62     
+   c=2 Mean TTFT (ms):                          11209.73  
+   c=2 P99 TTFT (ms):                           13825.21  
+   c=2 Mean ITL (ms):                           5.96      
+   c=2 P99 ITL (ms):                            11.07     
+2026-10-07T20:39:57Z state after settle:
+   http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   c=4 Successful requests:                     8         
+   c=4 Output token throughput (tok/s):         37.12     
+   c=4 Mean TTFT (ms):                          21152.80  
+   c=4 P99 TTFT (ms):                           26997.70  
+   c=4 Mean ITL (ms):                           6.10      
+   c=4 P99 ITL (ms):                            10.63     
+2026-10-07T20:41:26Z state after settle:
+   http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-07T20:41:26Z (5) retraction test: 8 x 131072 at c=8, 1024 new tokens
+done: 8 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/retract/gpt-oss/out8.jsonl
+isl131072_k0: copies=4 needles/copy=[3, 3, 3, 3] distinct_texts=4 identical_to_c1_run=[False, False, False, False] tokens=[1024, 1024, 1024, 1024] errors=[]
+isl131072_k1: copies=4 needles/copy=[3, 3, 3, 3] distinct_texts=4 identical_to_c1_run=[False, False, False, False] tokens=[1024, 1024, 1024, 1024] errors=[]
+   decode retraction gauge: sglang:num_retracted_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pid="2761988",pp_rank="0",tp_rank="0"} 0.0
+   decode log retraction lines: 873
+2026-10-07T20:43:26Z state after settle:
+   http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-07T20:43:26Z (6) client aborts: prefill phase, then decode phase
+2026-10-07T20:44:34Z abort prefill rc=1
+[+   67.67s] follow-up short: FAIL status=None tokens=None cached=None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceede
+[+   67.68s] follow-up identical-prompt: FAIL status=None tokens=None cached=None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retr
+[+   67.68s] server-info[final] http://10.128.15.217:30000: {'error': "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceed
+[+   67.69s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   67.69s] FAIL not back to baseline: http://10.128.15.217:30000: poll error: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retri
+[+   67.69s] FAIL: 3 aborts (1 failed to start), follow-ups short=False identical=False (cached_tokens=None), 1 baseline problem(s) -> /home/alisachen_google_co
+2026-10-07T20:45:34Z abort decode rc=1
+[+   60.06s] follow-up short: FAIL status=None tokens=None cached=None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceede
+[+   60.06s] follow-up identical-prompt: FAIL status=None tokens=None cached=None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retr
+[+   60.06s] server-info[final] http://10.128.15.217:30000: {'error': "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceed
+[+   60.07s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   60.07s] FAIL not back to baseline: http://10.128.15.217:30000: poll error: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retri
+[+   60.07s] FAIL: 6 aborts (6 failed to start), follow-ups short=False identical=False (cached_tokens=None), 1 baseline problem(s) -> /home/alisachen_google_co
+2026-10-07T20:46:04Z state after settle:
+   http://10.128.15.217:30000 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-07T20:46:04Z (8) GSM8K-100 through the LB
+[METRIC] gsm8k_score=0.0 labels={"model": "gpt-oss-120b", "eval": "gsm8k"}
+2026-10-07T21:16:14Z state after settle:
+   http://10.128.15.217:30000 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-07T21:16:15Z (7) compile audit
+decode_A: ready_at_line=1263 total_lines=4278
+  startup : __recompiles=24  Compiling/compile=22  cache_miss=0  InductorError=0
+  serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+  serving-time recompile lines (first 5):
+2026-10-07T21:16:15Z (9) F-6 repro: single n=2 request, 120 s timeout, with state before/after
+   http://10.128.15.217:30000 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   n=2 HTTP 000 in 0.000549s
+head: cannot open '/home/alisachen_google_com/pd_disagg/results/A/params/gpt-oss/n2_repro.json' for reading: No such file or directory
+
+   http://10.128.15.217:30000 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-07T21:16:35Z (9b) n=2 with temperature 0.7 (sampling path)
+   n=2 t=0.7 HTTP 000 in 0.000536s
+head: cannot open '/home/alisachen_google_com/pd_disagg/results/A/params/gpt-oss/n2_repro_t07.json' for reading: No such file or directory
+
+   http://10.128.15.217:30000 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-07T21:16:55Z (10) F-5 repro LAST (expected to kill the prefill engine): prompt logprobs request
+   prompt-logprob HTTP 000 in 0.000497s
+head: cannot open '/home/alisachen_google_com/pd_disagg/results/A/params/gpt-oss/f5_repro.json' for reading: No such file or directory
+
+   prefill /health after F-5 repro: 000
+   http://10.128.15.217:30000 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-07T21:17:10Z phase A edges done

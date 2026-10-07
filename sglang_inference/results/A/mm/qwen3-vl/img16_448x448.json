@@ -1,0 +1,76 @@
+{
+ "text": "Of course. Here is a brief description of each image, followed by the secret word.\n\n- **IMAGE 1:** A red circle.\n- **IMAGE 2:** A green square.\n- **IMAGE 3:** A blue triangle.\n- **IMAGE 4:** An orange diamond.\n- **IMAGE 5:** A purple star.\n- **IMAGE 6:** A teal circle.\n- **IMAGE 7:** A yellow square.\n- **IMAGE 8:** A pink triangle.\n- **IMAGE 9:** A red diamond.\n- **IMAGE 10:** A green star.\n- **IMAGE 11:** A blue circle.\n- **IMAGE 12:** An orange square.\n- **IMAGE 13:** A purple triangle.\n- **IMAGE 14:** A teal diamond.\n- **IMAGE 15:** A yellow star.\n- **IMAGE 16:** A pink circle.\n\nThe secret word is plum-7",
+ "usage": {
+  "prompt_tokens": 3198,
+  "total_tokens": 3390,
+  "completion_tokens": 192,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "image_tokens": 3136
+  },
+  "reasoning_tokens": 0
+ },
+ "ttft_ms": 34865.6,
+ "e2e_ms": 34865.6,
+ "status": 200,
+ "error": null,
+ "raw": {
+  "id": "574bef28efcd4d84a94874e9821895f2",
+  "object": "chat.completion",
+  "created": 1791411165,
+  "model": "qwen3-vl-30b",
+  "choices": [
+   {
+    "index": 0,
+    "message": {
+     "role": "assistant",
+     "content": "Of course. Here is a brief description of each image, followed by the secret word.\n\n- **IMAGE 1:** A red circle.\n- **IMAGE 2:** A green square.\n- **IMAGE 3:** A blue triangle.\n- **IMAGE 4:** An orange diamond.\n- **IMAGE 5:** A purple star.\n- **IMAGE 6:** A teal circle.\n- **IMAGE 7:** A yellow square.\n- **IMAGE 8:** A pink triangle.\n- **IMAGE 9:** A red diamond.\n- **IMAGE 10:** A green star.\n- **IMAGE 11:** A blue circle.\n- **IMAGE 12:** An orange square.\n- **IMAGE 13:** A purple triangle.\n- **IMAGE 14:** A teal diamond.\n- **IMAGE 15:** A yellow star.\n- **IMAGE 16:** A pink circle.\n\nThe secret word is plum-7",
+     "reasoning_content": null,
+     "tool_calls": null
+    },
+    "logprobs": null,
+    "finish_reason": "length",
+    "matched_stop": null
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 3198,
+   "total_tokens": 3390,
+   "completion_tokens": 192,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "image_tokens": 3136
+   },
+   "reasoning_tokens": 0
+  },
+  "metadata": {
+   "weight_version": "default",
+   "weight_versions": [
+    {
+     "version": "default",
+     "start": 0,
+     "end": 192
+    }
+   ]
+  }
+ },
+ "image_descriptions": [
+  "red circle labeled 'IMAGE 1'",
+  "green square labeled 'IMAGE 2'",
+  "blue triangle labeled 'IMAGE 3'",
+  "orange diamond labeled 'IMAGE 4'",
+  "purple star labeled 'IMAGE 5'",
+  "teal circle labeled 'IMAGE 6'",
+  "yellow square labeled 'IMAGE 7'",
+  "pink triangle labeled 'IMAGE 8'",
+  "red diamond labeled 'IMAGE 9'",
+  "green star labeled 'IMAGE 10'",
+  "blue circle labeled 'IMAGE 11'",
+  "orange square labeled 'IMAGE 12'",
+  "purple triangle labeled 'IMAGE 13'",
+  "teal diamond labeled 'IMAGE 14'",
+  "yellow star labeled 'IMAGE 15'",
+  "pink circle labeled 'IMAGE 16'"
+ ],
+ "est_prompt_tokens": 1049
+}

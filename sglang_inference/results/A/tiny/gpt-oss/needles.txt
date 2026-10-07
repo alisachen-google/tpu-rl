@@ -1,0 +1,36 @@
+tiny1        isl=     1 tokens=160 finish=length needle=n/a err=None head='^2 + b^2) = 0. So we have:\n\na^2 + b^2 = '
+tiny2        isl=     2 tokens=160 finish=length needle=n/a err=None head='\n\nSure! Here are some ideas for a Linked'
+tiny16       isl=    16 tokens=160 finish=length needle=n/a err=None head="\n\nIt seems like you're describing a scen"
+tiny63       isl=    63 tokens=160 finish=length needle=FOUND err=None head=" 1\n\nIt looks like you're trying to extra"
+tiny64       isl=    64 tokens=160 finish=length needle=FOUND err=None head=" indigo\n\nIt looks like you're trying to "
+tiny65       isl=    65 tokens=160 finish=length needle=FOUND err=None head=" 1\n\nIt looks like you're trying to creat"
+tiny100      isl=   100 tokens=160 finish=length needle=MISSING err=None head=' 2\n\nThe text you provided appears to be '
+tiny127      isl=   127 tokens=160 finish=length needle=FOUND err=None head=' willow\n\nThe text appears to be a random'
+tiny128      isl=   128 tokens=160 finish=length needle=FOUND err=None head=" marble\n\nIt looks like you're describing"
+tiny129      isl=   129 tokens=160 finish=length needle=FOUND err=None head=" dandelion\n\nIt looks like you've provide"
+tiny130      isl=   130 tokens=160 finish=length needle=FOUND err=None head=' 2\n\nThe text you provided appears to be '
+tiny191      isl=   191 tokens=160 finish=length needle=FOUND err=None head=" 1\n\nIt looks like you're trying to extra"
+tiny192      isl=   192 tokens=160 finish=length needle=MISSING err=None head=' Saffron\n\nThe text you provided appears '
+tiny193      isl=   193 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret word is "fennel".\n\nThe**Pro'
+tiny255      isl=   255 tokens=160 finish=length needle=MISSING err=None head=' 1\n\nThe text you provided appears to be '
+tiny256      isl=   256 tokens=160 finish=length needle=MISSING err=None head=' secret\n\nThe text you provided appears t'
+tiny257      isl=   257 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret word is "nutmeg".\n\nThe**Pro'
+tiny383      isl=   383 tokens=160 finish=length needle=MISSING err=None head=' secret\n\nThe text you provided appears t'
+tiny384      isl=   384 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "garnet".\n\n\n\nI'
+tiny385      isl=   385 tokens=160 finish=length needle=MISSING err=None head=' \n\nWe need to extract the secret word. T'
+tiny511      isl=   511 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "anchor".\n\nThe'
+tiny512      isl=   512 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nThe text you provided appears t'
+tiny513      isl=   513 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "sable".\n\nThe*'
+tiny1023     isl=  1023 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nWe need to parse the problem: "'
+tiny1024     isl=  1024 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "kestrel".\n\nTh'
+tiny1025     isl=  1025 tokens=160 finish=length needle=MISSING err=None head=' secret\n\nThe text appears to be a random'
+tiny8191     isl=  8191 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "ember".\n\nThe\n'
+tiny8192     isl=  8192 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nWe need to parse the problem: "'
+tiny8193     isl=  8193 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is meadow.\n\nThe t'
+tiny8255     isl=  8255 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nWe need to parse the problem: "'
+tiny8256     isl=  8256 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "obsidian".\n\nT'
+tiny8257     isl=  8257 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nWe need to parse the problem st'
+tiny16383    isl= 16383 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "lantern".\n\nTh'
+tiny16384    isl= 16384 tokens=160 finish=length needle=FOUND err=None head='\n\nThe secret code word is "compass".\n\nTh'
+tiny16385    isl= 16385 tokens=160 finish=length needle=FOUND err=None head=' secret\n\nWe have a huge text. The proble'
+tiny: 35 prompts, 7 problems

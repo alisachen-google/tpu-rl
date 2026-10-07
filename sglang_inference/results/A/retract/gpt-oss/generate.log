@@ -1,0 +1,10 @@
+8 prompts -> http://10.128.15.217:8080 (concurrency=8, stream=True)
+[isl131072_k0_dup0] tokens=1024 finish=length cached=0 ttft=7025.99ms e2e=14728.34ms
+[isl131072_k1_dup1] tokens=1024 finish=length cached=0 ttft=13753.83ms e2e=21376.31ms
+[isl131072_k0_dup2] tokens=1024 finish=length cached=0 ttft=20433.71ms e2e=27553.68ms
+[isl131072_k1_dup3] tokens=1024 finish=length cached=0 ttft=27117.81ms e2e=33533.13ms
+[isl131072_k0_dup4] tokens=1024 finish=length cached=0 ttft=40545.25ms e2e=46700.65ms
+[isl131072_k1_dup5] tokens=1024 finish=length cached=0 ttft=33826.03ms e2e=39947.37ms
+[isl131072_k0_dup6] tokens=1024 finish=length cached=0 ttft=47225.66ms e2e=53444.39ms
+[isl131072_k1_dup7] tokens=1024 finish=length cached=0 ttft=53912.82ms e2e=59533.94ms
+done: 8 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/retract/gpt-oss/out8.jsonl

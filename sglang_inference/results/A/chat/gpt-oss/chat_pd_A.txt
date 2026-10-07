@@ -1,0 +1,13 @@
+model=gpt-oss-120b kind=gptoss 11 cases, endpoints: a=http://10.128.15.217:8080
+case                  A st/fin/len                  B st/fin/len                  same  verdict notes
+-----------------------------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alisachen_google_com/pd_disagg/scripts/chat_suite.py", line 314, in <module>
+    main()
+  File "/home/alisachen_google_com/pd_disagg/scripts/chat_suite.py", line 304, in main
+    print(f"{name:<22}{cell(row['a']):<30}{cell(row['b']):<30}{same:<6}{row['verdict']:<8}{'; '.join(row['notes'])}", flush=True)
+                       ^^^^^^^^^^^^^^
+  File "/home/alisachen_google_com/pd_disagg/scripts/chat_suite.py", line 250, in cell
+    return f"{r['status']}/{r['finish_reason']}/{len(r['content'])}c/{r['reasoning_len']}r"
+                                                     ~^^^^^^^^^^^
+KeyError: 'content'

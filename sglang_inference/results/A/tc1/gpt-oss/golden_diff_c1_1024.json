@@ -1,0 +1,41 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1/1024.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/1024.jsonl",
+ "ids": 2,
+ "failed": 0,
+ "identical": 2,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl1024_k0",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 4915,
+   "token_prefix": 1024,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 8.344650268554688e-07,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl1024_k1",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 4484,
+   "token_prefix": 1024,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 1.1920928955078125e-06,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

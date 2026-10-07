@@ -1,0 +1,23 @@
+### host: t1v-n-eb299eb1-w-0  10.128.15.217 169.254.123.1   date: 2026-10-07T19:19:55Z
+--- A. software
+venv python not present: /nonexistent
+--- B. flags present in this build (from --help)
+--- C. hardware / OS
+vfio devices: 8
+host RAM GiB total/free: 944 125
+/dev/root              96G   58G   39G  60% /
+tmpfs                 473G   21M  473G   1% /dev/shm
+10.197.251.130:/data   10T  9.3T  794G  93% /mnt/data
+ulimit -l: unlimited  ulimit -n: 100000  nproc: 224
+TPU in use by: 
+sglang procs: 9
+--- D. network
+rtt min/avg/max/mdev = 0.080/0.224/0.356/0.113 ms
+peer port 30000 closed
+peer port 30001 closed
+peer port 8998 closed
+peer port 31000 closed
+--- E. checkpoints
+models--openai--gpt-oss-120b -> /mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a/ (16 safetensors)
+models--Qwen--Qwen3-VL-30B-A3B-Instruct -> /mnt/data/tt/hf-cache/hub/models--Qwen--Qwen3-VL-30B-A3B-Instruct/snapshots/9c4b90e1e4ba969fd3b5378b57d966d725f1b86c/ (14 safetensors)
+models--lmsys--EAGLE3-gpt-oss-120b-bf16 -> /mnt/data/tt/hf-cache/hub/models--lmsys--EAGLE3-gpt-oss-120b-bf16/snapshots/21e624039fdac60defaaa74344e03da5627a8678/ (1 safetensors)

@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8/32768.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/32768.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl32768_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 81<256",
+    "agreement 0.113<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 319,
+   "token_prefix": 81,
+   "token_agreement": 0.11328125,
+   "first_divergence_token": 81,
+   "first_divergence_char": 319,
+   "context_a": "cient lighthouse of Cape Haven. Its ligh",
+   "context_b": "cient lighthouse of Beacon Point. Its li",
+   "first_token_logprob_absdiff": 0.0,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl32768_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 83<256",
+    "agreement 0.106<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 314,
+   "token_prefix": 83,
+   "token_agreement": 0.1064453125,
+   "first_divergence_token": 83,
+   "first_divergence_char": 314,
+   "context_a": "lt and pine, lived an old lighthouse kee",
+   "context_b": "lt and pine, lived a lighthouse keeper n",
+   "first_token_logprob_absdiff": 0.0,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

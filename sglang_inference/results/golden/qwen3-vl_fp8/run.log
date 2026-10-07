@@ -1,0 +1,38 @@
+=== 2026-10-07T19:37:53Z run_golden model=qwen3-vl url=http://10.128.0.90:30000 lengths=1024,8192,32768,131072,127999 conc=2 max_new_tokens=1024
+2026-10-07T19:47:33Z endpoint healthy
+2 prompts -> http://10.128.0.90:30000 (concurrency=2, stream=True)
+[isl1024_k0] tokens=1024 finish=length cached=0 ttft=5767.07ms e2e=186594.01ms
+[isl1024_k1] tokens=1024 finish=length cached=0 ttft=7853.67ms e2e=186593.04ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8/1024.jsonl
+2026-10-07T19:50:40Z isl=1024 done in 187 s rc=0
+    isl1024_k0 tokens= 1024 finish= length ttft_ms= 5767 e2e_ms= 186594 err= None
+    isl1024_k1 tokens= 1024 finish= length ttft_ms= 7854 e2e_ms= 186593 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=2, stream=True)
+[isl8192_k0] tokens=1024 finish=length cached=0 ttft=10748.93ms e2e=173875.21ms
+[isl8192_k1] tokens=1024 finish=length cached=0 ttft=10161.63ms e2e=173873.11ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8/8192.jsonl
+2026-10-07T19:53:34Z isl=8192 done in 174 s rc=0
+    isl8192_k0 tokens= 1024 finish= length ttft_ms= 10749 e2e_ms= 173875 err= None
+    isl8192_k1 tokens= 1024 finish= length ttft_ms= 10162 e2e_ms= 173873 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=2, stream=True)
+[isl32768_k0] tokens=1024 finish=length cached=0 ttft=1830.84ms e2e=170793.36ms
+[isl32768_k1] tokens=1024 finish=length cached=0 ttft=3731.39ms e2e=170793.45ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8/32768.jsonl
+2026-10-07T19:56:25Z isl=32768 done in 171 s rc=0
+    isl32768_k0 tokens= 1024 finish= length ttft_ms= 1831 e2e_ms= 170793 err= None
+    isl32768_k1 tokens= 1024 finish= length ttft_ms= 3731 e2e_ms= 170793 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=2, stream=True)
+[isl131072_k0] tokens=1024 finish=length cached=0 ttft=28248.86ms e2e=193589.56ms
+[isl131072_k1] tokens=1024 finish=length cached=0 ttft=9839.64ms e2e=193586.08ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8/131072.jsonl
+2026-10-07T19:59:39Z isl=131072 done in 194 s rc=0
+    isl131072_k0 tokens= 1024 finish= length ttft_ms= 28249 e2e_ms= 193590 err= None
+    isl131072_k1 tokens= 1024 finish= length ttft_ms= 9840 e2e_ms= 193586 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=2, stream=True)
+[isl127999_k0] tokens=1024 finish=length cached=0 ttft=18231.26ms e2e=188181.18ms
+[isl127999_k1] tokens=1024 finish=length cached=0 ttft=32087.95ms e2e=188181.44ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8/127999.jsonl
+2026-10-07T20:02:47Z isl=127999 done in 188 s rc=0
+    isl127999_k0 tokens= 1024 finish= length ttft_ms= 18231 e2e_ms= 188181 err= None
+    isl127999_k1 tokens= 1024 finish= length ttft_ms= 32088 e2e_ms= 188181 err= None
+=== 2026-10-07T20:02:47Z run_golden finished

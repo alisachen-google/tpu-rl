@@ -1,0 +1,38 @@
+=== 2026-10-07T19:46:38Z run_golden model=gpt-oss url=http://10.128.15.217:30000 lengths=1024,8192,32768,131072,127999 conc=2 max_new_tokens=1024
+2026-10-07T19:46:38Z endpoint healthy
+2 prompts -> http://10.128.15.217:30000 (concurrency=2, stream=True)
+[isl1024_k0] tokens=1024 finish=length cached=0 ttft=418.11ms e2e=9967.44ms
+[isl1024_k1] tokens=1024 finish=length cached=0 ttft=486.31ms e2e=9913.62ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8/1024.jsonl
+2026-10-07T19:46:48Z isl=1024 done in 10 s rc=0
+    isl1024_k0 tokens= 1024 finish= length ttft_ms= 418 e2e_ms= 9967 err= None
+    isl1024_k1 tokens= 1024 finish= length ttft_ms= 486 e2e_ms= 9914 err= None
+2 prompts -> http://10.128.15.217:30000 (concurrency=2, stream=True)
+[isl8192_k0] tokens=1024 finish=length cached=0 ttft=532.51ms e2e=7073.55ms
+[isl8192_k1] tokens=1024 finish=length cached=0 ttft=282.16ms e2e=7118.29ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8/8192.jsonl
+2026-10-07T19:46:55Z isl=8192 done in 7 s rc=0
+    isl8192_k0 tokens= 1024 finish= length ttft_ms= 533 e2e_ms= 7074 err= None
+    isl8192_k1 tokens= 1024 finish= length ttft_ms= 282 e2e_ms= 7118 err= None
+2 prompts -> http://10.128.15.217:30000 (concurrency=2, stream=True)
+[isl32768_k0] tokens=1024 finish=length cached=0 ttft=2663.11ms e2e=9290.23ms
+[isl32768_k1] tokens=1024 finish=length cached=0 ttft=1291.69ms e2e=9411.43ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8/32768.jsonl
+2026-10-07T19:47:05Z isl=32768 done in 10 s rc=0
+    isl32768_k0 tokens= 1024 finish= length ttft_ms= 2663 e2e_ms= 9290 err= None
+    isl32768_k1 tokens= 1024 finish= length ttft_ms= 1292 e2e_ms= 9411 err= None
+2 prompts -> http://10.128.15.217:30000 (concurrency=2, stream=True)
+[isl131072_k0] tokens=1024 finish=length cached=0 ttft=6964.47ms e2e=20538.54ms
+[isl131072_k1] tokens=1024 finish=length cached=0 ttft=13427.88ms e2e=20583.36ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8/131072.jsonl
+2026-10-07T19:47:26Z isl=131072 done in 21 s rc=0
+    isl131072_k0 tokens= 1024 finish= length ttft_ms= 6964 e2e_ms= 20539 err= None
+    isl131072_k1 tokens= 1024 finish= length ttft_ms= 13428 e2e_ms= 20583 err= None
+2 prompts -> http://10.128.15.217:30000 (concurrency=2, stream=True)
+[isl127999_k0] tokens=1024 finish=length cached=0 ttft=13358.41ms e2e=20747.3ms
+[isl127999_k1] tokens=1024 finish=length cached=0 ttft=6764.5ms e2e=20264.5ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8/127999.jsonl
+2026-10-07T19:47:47Z isl=127999 done in 21 s rc=0
+    isl127999_k0 tokens= 1024 finish= length ttft_ms= 13358 e2e_ms= 20747 err= None
+    isl127999_k1 tokens= 1024 finish= length ttft_ms= 6764 e2e_ms= 20264 err= None
+=== 2026-10-07T19:47:47Z run_golden finished

@@ -1,0 +1,135 @@
+2026-10-07T20:02:51Z qwen golden done
+2026-10-07T20:02:51Z gpt-oss extra (determinism+gsm8k) done
+2026-10-07 20:02:52 stopping ours on a
+[cleanup] remaining sglang procs (all users): 0  TPU holders: 
+2026-10-07 20:02:57 stopping ours on b
+[cleanup] remaining sglang procs (all users): 0  TPU holders: 
+2026-10-07T20:03:06Z a_holders=[] b_holders=[]
+2026-10-07T20:03:06Z starting PD Config A gpt-oss 128k -> A_gptoss_128k_run1
+2026-10-07 20:03:07 starting decode on b (10.128.0.90)
+2759294
+2026-10-07 20:03:07 starting prefill on a (10.128.15.217)
+2026-10-07 20:07:09 prefill /health ready after 241 s
+2026-10-07 20:16:40 decode /health ready after 571 s
+2026-10-07 20:16:41 LB /health_generate ready after 1 s
+a: {'version': '0.5.13.dev7249+g09d1244c2', 'disaggregation_mode': 'prefill', 'disaggregation_transfer_backend': 'raiden', 'model_path': '/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a', 'kv_cache_dtype': 'fp8_e4m3', 'page_size': 64, 'context_length': 140288, 'max_total_num_tokens': 786432, 'max_running_requests': 8, 'chunked_prefill_size': 8192, 'disable_radix_cache': True, 'enable_hierarchical_cache': False, 'hicache_io_backend': 'kernel', 'hicache_ratio': 2.0, 'disaggregation_decode_enable_radix_cache': False, 'speculative_algorithm': None, 'enable_torch_compile': True, 'tpu_compile_bs': [1, 2, 4, 8], 'tpu_compile_tokens': [512, 1024, 2048, 4096, 8192], 'mem_fraction_static': 0.45}
+   state: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None, 'gen_throughput': None, 'avg_spec_accept_length': None}
+b: {'version': '0.5.13.dev7249+g09d1244c2', 'disaggregation_mode': 'decode', 'disaggregation_transfer_backend': 'raiden', 'model_path': '/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a', 'kv_cache_dtype': 'fp8_e4m3', 'page_size': 64, 'context_length': 140288, 'max_total_num_tokens': 786432, 'max_running_requests': 8, 'chunked_prefill_size': 8192, 'disable_radix_cache': True, 'enable_hierarchical_cache': False, 'hicache_io_backend': 'raiden', 'hicache_ratio': None, 'disaggregation_decode_enable_radix_cache': False, 'speculative_algorithm': None, 'enable_torch_compile': True, 'tpu_compile_bs': [1, 2, 4, 8], 'tpu_compile_tokens': [512, 1024, 2048, 4096, 8192], 'mem_fraction_static': 0.45}
+   state: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None, 'gen_throughput': None, 'avg_spec_accept_length': None}
+{"detail":"Not Found"}
+2026-10-07T20:16:41Z TC-1 gpt-oss via LB
+=== 2026-10-07T20:16:41Z TC-1 model=gpt-oss url=http://10.128.15.217:8080 lengths=1024,8192,32768,131072,127999 conc=1
+--- (1) verify_pd_disagg (workers, health, smoke, needle 1k/8k/32k)
+[FAIL] workers: unrecognized /workers shape, raw: {'detail': 'Not Found'}
+[PASS] health: GET /health_generate -> HTTP 200 ('')
+[PASS] smoke: completion_tokens=32 ttft=629.1ms e2e=629.1ms text='\n\nThe three primary colors are red, blue, and yellow. These ' err=None
+[PASS] needle len=1024 depth=0.1: want=yjtmflba got='The secret code word is "yjtmflba".\n\nThe' prompt_tokens=685 (est 1013) ttft=201.4ms e2e=201.4ms err=None
+[PASS] needle len=1024 depth=0.5: want=tjkxgozd got='tjkxgozd\n\nThe user gave a long text with' prompt_tokens=684 (est 1013) ttft=198.2ms e2e=198.2ms err=None
+[PASS] needle len=1024 depth=0.95: want=ysfryobo got='ysfryobo\n\nThe user gave a long text with' prompt_tokens=684 (est 1013) ttft=153.9ms e2e=153.9ms err=None
+[PASS] needle len=8192 depth=0.1: want=cygfztev got='The secret code word is "cygfztev".\n\nThe' prompt_tokens=5467 (est 8176) ttft=438.0ms e2e=438.0ms err=None
+[PASS] needle len=8192 depth=0.5: want=mvdlinty got='The user says: "The secret code word is ' prompt_tokens=5466 (est 8176) ttft=425.8ms e2e=425.8ms err=None
+[PASS] needle len=8192 depth=0.95: want=cjzgojmi got='cjzgojmi\n\n[Assistant]\n\nIt looks like you' prompt_tokens=5468 (est 8176) ttft=425.2ms e2e=425.2ms err=None
+[PASS] needle len=32768 depth=0.1: want=oifvdgle got='The secret code word is "oifvdgle".\n\nThe' prompt_tokens=21876 (est 32760) ttft=948.1ms e2e=948.1ms err=None
+[PASS] needle len=32768 depth=0.5: want=tfaucuze got='The secret code word is tfaucuze.\n\nThe s' prompt_tokens=21876 (est 32760) ttft=935.3ms e2e=935.3ms err=None
+[PASS] needle len=32768 depth=0.95: want=ljzwmoiq got='The secret code word is "ljzwmoiq".\n\nThe' prompt_tokens=21877 (est 32760) ttft=941.9ms e2e=941.9ms err=None
+[PASS] warm-cache: second: cached_tokens=0 prompt_tokens=21877 ttft1=941.9ms ttft2=947.8ms ratio=1.006
+
+=== summary: 12 passed, 1 failed ===
+  FAIL workers
+--- (2) ISL=1024 through LB
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl1024_k0] tokens=1024 finish=length cached=0 ttft=178.41ms e2e=6395.64ms
+[isl1024_k1] tokens=1024 finish=length cached=0 ttft=90.89ms e2e=5843.39ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/1024.jsonl
+    done in 12 s
+--- (3) diff vs golden ISL=1024
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl1024_k0    False      72     14  0.029   0.0000  FAIL  token prefix 14<256; agreement 0.029<0.95
+                a@72: 'oned in the text are:\n1. raven-4021\n2. t'
+                b: 'oned in the text are as follows:\n\n1. **C'
+isl1024_k1    False     293     59  0.083   0.0000  FAIL  token prefix 59<256; agreement 0.083<0.95
+                a@293: 'ret code words for each checkpoint menti'
+                b: 'ret code words for every checkpoint ment'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/golden_diff_1024.json
+    diff rc=1
+--- (2) ISL=8192 through LB
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl8192_k0] tokens=1024 finish=length cached=0 ttft=354.76ms e2e=6072.5ms
+[isl8192_k1] tokens=1024 finish=length cached=0 ttft=343.61ms e2e=5935.16ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/8192.jsonl
+    done in 13 s
+--- (3) diff vs golden ISL=8192
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl8192_k0    False     107     22  0.039   0.0000  FAIL  token prefix 22<256; agreement 0.039<0.95
+                a@107: 'e secret code words for checkpoint 1, 2,'
+                b: 'e secret code words embedded: "The secre'
+isl8192_k1    False     105     22  0.039   0.0000  FAIL  token prefix 22<256; agreement 0.039<0.95
+                a@105: 'xt, there are three mentions: checkpoint'
+                b: 'xt, there are three code words: checkpoi'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/golden_diff_8192.json
+    diff rc=1
+--- (2) ISL=32768 through LB
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl32768_k0] tokens=1024 finish=length cached=0 ttft=1306.77ms e2e=7126.1ms
+[isl32768_k1] tokens=1024 finish=length cached=0 ttft=1315.13ms e2e=7179.96ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/32768.jsonl
+    done in 14 s
+--- (3) diff vs golden ISL=32768
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl32768_k0   False      11      3  0.016   0.1753  FAIL  token prefix 3<256; agreement 0.016<0.95
+                a@11: 'We need to list secret code wor'
+                b: 'We need to parse the prompt. Th'
+isl32768_k1   False      11      3  0.012   0.1559  FAIL  token prefix 3<256; agreement 0.012<0.95
+                a@11: 'We need to parse the huge text.'
+                b: 'We need to list secret code wor'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/golden_diff_32768.json
+    diff rc=1
+--- (2) ISL=131072 through LB
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl131072_k0] tokens=1024 finish=length cached=0 ttft=7038.3ms e2e=12933.54ms
+[isl131072_k1] tokens=1024 finish=length cached=0 ttft=6996.41ms e2e=12884.88ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/131072.jsonl
+    done in 26 s
+--- (3) diff vs golden ISL=131072
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl131072_k0  False      21      5  0.085   0.0322  FAIL  token prefix 5<256; agreement 0.085<0.95
+                a@21: 'e need to parse the massive text. The se'
+                b: 'e need to parse the huge text. The secre'
+isl131072_k1  False      11      3  0.017   0.0559  FAIL  token prefix 3<256; agreement 0.017<0.95
+                a@11: 'We need to list secret code wor'
+                b: 'We need to parse the long text.'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/golden_diff_131072.json
+    diff rc=1
+--- (2) ISL=127999 through LB
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl127999_k0] tokens=1024 finish=length cached=0 ttft=6755.78ms e2e=12592.76ms
+[isl127999_k1] tokens=1024 finish=length cached=0 ttft=6767.61ms e2e=12619.15ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/127999.jsonl
+    done in 25 s
+--- (3) diff vs golden ISL=127999
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl127999_k0  False      11      3  0.013   0.0449  FAIL  token prefix 3<256; agreement 0.013<0.95
+                a@11: 'We need to parse the prompt. Th'
+                b: 'We need to list secret code wor'
+isl127999_k1  False      11      3  0.016   0.0053  FAIL  token prefix 3<256; agreement 0.016<0.95
+                a@11: 'We need to parse the huge text.'
+                b: 'We need to list secret code wor'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/golden_diff_127999.json
+    diff rc=1
+=== 2026-10-07T20:18:20Z TC-1 finished
+a: {'version': '0.5.13.dev7249+g09d1244c2', 'disaggregation_mode': 'prefill', 'disaggregation_transfer_backend': 'raiden', 'model_path': '/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a', 'kv_cache_dtype': 'fp8_e4m3', 'page_size': 64, 'context_length': 140288, 'max_total_num_tokens': 786432, 'max_running_requests': 8, 'chunked_prefill_size': 8192, 'disable_radix_cache': True, 'enable_hierarchical_cache': False, 'hicache_io_backend': 'kernel', 'hicache_ratio': 2.0, 'disaggregation_decode_enable_radix_cache': False, 'speculative_algorithm': None, 'enable_torch_compile': True, 'tpu_compile_bs': [1, 2, 4, 8], 'tpu_compile_tokens': [512, 1024, 2048, 4096, 8192], 'mem_fraction_static': 0.45}
+   state: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None, 'gen_throughput': None, 'avg_spec_accept_length': None}
+b: {'version': '0.5.13.dev7249+g09d1244c2', 'disaggregation_mode': 'decode', 'disaggregation_transfer_backend': 'raiden', 'model_path': '/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a', 'kv_cache_dtype': 'fp8_e4m3', 'page_size': 64, 'context_length': 140288, 'max_total_num_tokens': 786432, 'max_running_requests': 8, 'chunked_prefill_size': 8192, 'disable_radix_cache': True, 'enable_hierarchical_cache': False, 'hicache_io_backend': 'raiden', 'hicache_ratio': None, 'disaggregation_decode_enable_radix_cache': False, 'speculative_algorithm': None, 'enable_torch_compile': True, 'tpu_compile_bs': [1, 2, 4, 8], 'tpu_compile_tokens': [512, 1024, 2048, 4096, 8192], 'mem_fraction_static': 0.45}
+   state: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None, 'gen_throughput': None, 'avg_spec_accept_length': None}
+{"detail":"Not Found"}
+2026-10-07T20:18:20Z phase A gpt-oss TC-1 done

@@ -1,0 +1,58 @@
+### host: t1v-n-eb299eb1-w-1  10.128.0.90 169.254.123.1   date: 2026-10-07T19:19:49Z
+--- A. software
+sglang         MISSING (ModuleNotFoundError: No module named 'sglang')
+torch          MISSING (ModuleNotFoundError: No module named 'torch')
+torch_tpu      MISSING (ModuleNotFoundError: No module named 'torch_tpu')
+libtpu         MISSING (ModuleNotFoundError: No module named 'libtpu')
+jax            MISSING (ModuleNotFoundError: No module named 'jax')
+transformers   MISSING (ModuleNotFoundError: No module named 'transformers')
+tpu_sync       MISSING (ModuleNotFoundError: No module named 'tpu_sync')
+sglang_router  MISSING (ModuleNotFoundError: No module named 'sglang_router')
+sglang-torchtpu commit: 09d1244c2641c3232ec0fcf5dd2d3bd372d5d709 2026-10-07 10:29:05 -0700
+--- B. flags present in this build (from --help)
+MISSING --disaggregation-mode
+MISSING --disaggregation-transfer-backend
+MISSING --disaggregation-bootstrap-port
+MISSING --disaggregation-decode-enable-radix-cache
+MISSING --disaggregation-decode-enable-offload-kvcache
+MISSING --disaggregation-decode-retraction-backup
+MISSING --enable-hierarchical-cache
+MISSING --hicache-ratio
+MISSING --hicache-write-policy
+MISSING --hicache-mem-layout
+MISSING --hicache-io-backend
+MISSING --speculative-algorithm
+MISSING --speculative-draft-model-path
+MISSING --enable-torch-compile
+MISSING --torch-compile-max-bs
+MISSING --tpu-compile-tokens
+MISSING --tpu-compile-bs
+MISSING --tpu-compile-tracer
+MISSING --attention-backend
+MISSING --ep-size
+MISSING --enable-metrics
+MISSING --watchdog-timeout
+MISSING --kv-cache-dtype
+MISSING --page-size
+MISSING --swa-full-tokens-ratio
+MISSING --disable-hybrid-swa-memory
+MISSING --enable-cache-report
+--- C. hardware / OS
+vfio devices: 8
+host RAM GiB total/free: 944 148
+/dev/root              96G   60G   37G  63% /
+tmpfs                 473G   74G  400G  16% /dev/shm
+10.197.251.130:/data   10T  9.3T  794G  93% /mnt/data
+ulimit -l: unlimited  ulimit -n: 100000  nproc: 224
+TPU in use by: 
+sglang procs: 10
+--- D. network
+rtt min/avg/max/mdev = 0.084/0.263/0.620/0.252 ms
+peer port 30000 closed
+peer port 30001 closed
+peer port 8998 closed
+peer port 31000 closed
+--- E. checkpoints
+models--openai--gpt-oss-120b -> /mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a/ (16 safetensors)
+models--Qwen--Qwen3-VL-30B-A3B-Instruct -> /mnt/data/tt/hf-cache/hub/models--Qwen--Qwen3-VL-30B-A3B-Instruct/snapshots/9c4b90e1e4ba969fd3b5378b57d966d725f1b86c/ (14 safetensors)
+models--lmsys--EAGLE3-gpt-oss-120b-bf16 -> /mnt/data/tt/hf-cache/hub/models--lmsys--EAGLE3-gpt-oss-120b-bf16/snapshots/21e624039fdac60defaaa74344e03da5627a8678/ (1 safetensors)

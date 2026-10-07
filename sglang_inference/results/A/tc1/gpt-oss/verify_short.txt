@@ -1,0 +1,16 @@
+[FAIL] workers: unrecognized /workers shape, raw: {'detail': 'Not Found'}
+[PASS] health: GET /health_generate -> HTTP 200 ('')
+[PASS] smoke: completion_tokens=32 ttft=629.1ms e2e=629.1ms text='\n\nThe three primary colors are red, blue, and yellow. These ' err=None
+[PASS] needle len=1024 depth=0.1: want=yjtmflba got='The secret code word is "yjtmflba".\n\nThe' prompt_tokens=685 (est 1013) ttft=201.4ms e2e=201.4ms err=None
+[PASS] needle len=1024 depth=0.5: want=tjkxgozd got='tjkxgozd\n\nThe user gave a long text with' prompt_tokens=684 (est 1013) ttft=198.2ms e2e=198.2ms err=None
+[PASS] needle len=1024 depth=0.95: want=ysfryobo got='ysfryobo\n\nThe user gave a long text with' prompt_tokens=684 (est 1013) ttft=153.9ms e2e=153.9ms err=None
+[PASS] needle len=8192 depth=0.1: want=cygfztev got='The secret code word is "cygfztev".\n\nThe' prompt_tokens=5467 (est 8176) ttft=438.0ms e2e=438.0ms err=None
+[PASS] needle len=8192 depth=0.5: want=mvdlinty got='The user says: "The secret code word is ' prompt_tokens=5466 (est 8176) ttft=425.8ms e2e=425.8ms err=None
+[PASS] needle len=8192 depth=0.95: want=cjzgojmi got='cjzgojmi\n\n[Assistant]\n\nIt looks like you' prompt_tokens=5468 (est 8176) ttft=425.2ms e2e=425.2ms err=None
+[PASS] needle len=32768 depth=0.1: want=oifvdgle got='The secret code word is "oifvdgle".\n\nThe' prompt_tokens=21876 (est 32760) ttft=948.1ms e2e=948.1ms err=None
+[PASS] needle len=32768 depth=0.5: want=tfaucuze got='The secret code word is tfaucuze.\n\nThe s' prompt_tokens=21876 (est 32760) ttft=935.3ms e2e=935.3ms err=None
+[PASS] needle len=32768 depth=0.95: want=ljzwmoiq got='The secret code word is "ljzwmoiq".\n\nThe' prompt_tokens=21877 (est 32760) ttft=941.9ms e2e=941.9ms err=None
+[PASS] warm-cache: second: cached_tokens=0 prompt_tokens=21877 ttft1=941.9ms ttft2=947.8ms ratio=1.006
+
+=== summary: 12 passed, 1 failed ===
+  FAIL workers
