@@ -8,7 +8,7 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-1](F-1.md) | Hard abort when the tier-2 compile cache directory cannot be created | bug (robustness) | low | reproduced, work-around |
 | [F-2](F-2.md) | Qwen3-VL-30B-A3B language model is not compiled on TPU | bug (perf, missing policy) | high for perf tests | reproduced on every start |
 | [F-3](F-3.md) | Greedy decoding is not batch-invariant | test-method note | medium | measured |
-| [F-4](F-4.md) | gpt-oss PD output differs from monolithic for prompts longer than one chunk | bug candidate (correctness) | high | reproduced 6/6, isolation in progress |
+| [F-4](F-4.md) | gpt-oss PD output differs from monolithic for long prompts (chunk schedule differs) | numerical difference | high until accuracy check | reproduced 6/6, cause identified |
 | [F-5](F-5.md) | A prompt-logprob request stops the prefill engine | bug (crash) | high | reproduced 1/1 |
 | [F-6](F-6.md) | `n=2` request gets no response for 300 s | bug candidate (hang) | high if confirmed | observed 1/1 |
 | [F-7](F-7.md) | Decode engine recovers about 2 min after the prefill engine dies | observation | low | observed |

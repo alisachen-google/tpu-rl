@@ -1349,3 +1349,235 @@
 [2026-10-07T23:05:28+00:00] decode ok=1 m=1 lat=111.6ms run=1.0 q=0.0 use=0.24 thr=6.48954022973334 crash=0
 [2026-10-07T23:05:38+00:00] prefill ok=1 m=1 lat=12.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
 [2026-10-07T23:05:38+00:00] decode ok=1 m=1 lat=115.3ms run=1.0 q=0.0 use=0.24 thr=6.932978003134901 crash=0
+[2026-10-07T23:05:48+00:00] prefill ok=1 m=1 lat=11.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:05:48+00:00] decode ok=1 m=1 lat=84.2ms run=1.0 q=0.0 use=0.24 thr=6.517814596398862 crash=0
+[2026-10-07T23:05:58+00:00] prefill ok=1 m=1 lat=11.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:05:58+00:00] decode ok=1 m=1 lat=14.6ms run=1.0 q=0.0 use=0.24 thr=6.739819122382531 crash=0
+[2026-10-07T23:06:08+00:00] prefill ok=1 m=1 lat=11.2ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:06:08+00:00] decode ok=1 m=1 lat=62.3ms run=1.0 q=0.0 use=0.24 thr=7.022182204489428 crash=0
+[2026-10-07T23:06:18+00:00] prefill ok=1 m=1 lat=12.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:06:18+00:00] decode ok=1 m=1 lat=113.0ms run=1.0 q=0.0 use=0.24 thr=6.620308370896281 crash=0
+[2026-10-07T23:06:28+00:00] prefill ok=1 m=1 lat=11.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:06:28+00:00] decode ok=1 m=1 lat=48.0ms run=1.0 q=0.0 use=0.24 thr=6.531092284006743 crash=0
+[2026-10-07T23:06:38+00:00] prefill ok=1 m=1 lat=32.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:06:38+00:00] decode ok=1 m=1 lat=141.6ms run=1.0 q=0.0 use=0.24 thr=6.585276555850647 crash=0
+[2026-10-07T23:06:48+00:00] prefill ok=1 m=1 lat=12.3ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:06:48+00:00] decode ok=1 m=1 lat=538.4ms run=0.0 q=0.0 use=0.12 thr=6.679829919463471 crash=0
+[2026-10-07T23:06:58+00:00] prefill ok=1 m=1 lat=11.3ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:06:58+00:00] decode ok=1 m=1 lat=50.2ms run=0.0 q=0.0 use=0.2 thr=6.679829919463471 crash=0
+[2026-10-07T23:07:08+00:00] prefill ok=1 m=1 lat=11.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:07:08+00:00] decode ok=1 m=1 lat=688.0ms run=0.0 q=0.0 use=0.23 thr=0.0 crash=0
+[2026-10-07T23:07:18+00:00] prefill ok=1 m=1 lat=11.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:07:18+00:00] decode ok=1 m=1 lat=138.9ms run=1.0 q=0.0 use=0.23 thr=1.1102202660850722 crash=0
+[2026-10-07T23:07:28+00:00] prefill ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:07:28+00:00] decode ok=1 m=1 lat=29.2ms run=1.0 q=0.0 use=0.23 thr=6.923580440345924 crash=0
+[2026-10-07T23:07:38+00:00] prefill ok=1 m=1 lat=11.3ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:07:38+00:00] decode ok=1 m=1 lat=127.9ms run=1.0 q=0.0 use=0.23 thr=6.8971358343414835 crash=0
+[2026-10-07T23:07:48+00:00] prefill ok=1 m=1 lat=10.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:07:48+00:00] decode ok=1 m=1 lat=132.3ms run=1.0 q=0.0 use=0.23 thr=6.644330910966042 crash=0
+[2026-10-07T23:07:58+00:00] prefill ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:07:58+00:00] decode ok=1 m=1 lat=189.5ms run=1.0 q=0.0 use=0.23 thr=6.634082696114647 crash=0
+[2026-10-07T23:08:08+00:00] prefill ok=1 m=1 lat=11.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:08:08+00:00] decode ok=1 m=1 lat=91.0ms run=1.0 q=0.0 use=0.23 thr=6.715934606178947 crash=0
+[2026-10-07T23:08:18+00:00] prefill ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:08:18+00:00] decode ok=1 m=1 lat=69.3ms run=1.0 q=0.0 use=0.23 thr=6.479409861099628 crash=0
+[2026-10-07T23:08:28+00:00] prefill ok=1 m=1 lat=10.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:08:28+00:00] decode ok=1 m=1 lat=70.6ms run=1.0 q=0.0 use=0.23 thr=6.798050025787481 crash=0
+[2026-10-07T23:08:38+00:00] prefill ok=1 m=1 lat=10.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:08:38+00:00] decode ok=1 m=1 lat=51.4ms run=1.0 q=0.0 use=0.23 thr=6.934551932753682 crash=0
+[2026-10-07T23:08:48+00:00] prefill ok=1 m=1 lat=11.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:08:48+00:00] decode ok=1 m=1 lat=131.3ms run=1.0 q=0.0 use=0.23 thr=6.863660344316127 crash=0
+[2026-10-07T23:08:58+00:00] prefill ok=1 m=1 lat=11.3ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:08:58+00:00] decode ok=1 m=1 lat=97.6ms run=1.0 q=0.0 use=0.23 thr=6.803482948896136 crash=0
+[2026-10-07T23:09:08+00:00] prefill ok=1 m=1 lat=11.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:09:08+00:00] decode ok=1 m=1 lat=93.0ms run=1.0 q=0.0 use=0.23 thr=6.732373489778027 crash=0
+[2026-10-07T23:09:18+00:00] prefill ok=1 m=1 lat=11.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:09:18+00:00] decode ok=1 m=1 lat=90.6ms run=1.0 q=0.0 use=0.23 thr=6.772596260051621 crash=0
+[2026-10-07T23:09:28+00:00] prefill ok=1 m=1 lat=10.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:09:28+00:00] decode ok=1 m=1 lat=160.5ms run=1.0 q=0.0 use=0.23 thr=6.773134641517774 crash=0
+[2026-10-07T23:09:38+00:00] prefill ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:09:38+00:00] decode ok=1 m=1 lat=73.4ms run=1.0 q=0.0 use=0.23 thr=6.271142890661146 crash=0
+[2026-10-07T23:09:48+00:00] prefill ok=1 m=1 lat=11.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:09:48+00:00] decode ok=1 m=1 lat=398.1ms run=0.0 q=0.0 use=0.1 thr=6.271142890661146 crash=0
+[2026-10-07T23:09:58+00:00] prefill ok=1 m=1 lat=9.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:09:58+00:00] decode ok=1 m=1 lat=863.5ms run=0.0 q=0.0 use=0.18 thr=6.271142890661146 crash=0
+[2026-10-07T23:10:08+00:00] prefill ok=1 m=1 lat=10.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:10:08+00:00] decode ok=1 m=1 lat=105.3ms run=0.0 q=0.0 use=0.23 thr=6.271142890661146 crash=0
+[2026-10-07T23:10:18+00:00] prefill ok=1 m=1 lat=10.6ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:10:18+00:00] decode ok=1 m=1 lat=120.7ms run=1.0 q=0.0 use=0.23 thr=5.76448254422572 crash=0
+[2026-10-07T23:10:28+00:00] prefill ok=1 m=1 lat=11.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:10:28+00:00] decode ok=1 m=1 lat=76.4ms run=1.0 q=0.0 use=0.23 thr=6.7524593182469355 crash=0
+[2026-10-07T23:10:38+00:00] prefill ok=1 m=1 lat=11.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:10:38+00:00] decode ok=1 m=1 lat=138.4ms run=1.0 q=0.0 use=0.23 thr=6.270675745506914 crash=0
+[2026-10-07T23:10:48+00:00] prefill ok=1 m=1 lat=11.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:10:48+00:00] decode ok=1 m=1 lat=213.1ms run=1.0 q=0.0 use=0.23 thr=6.225187987137195 crash=0
+[2026-10-07T23:10:58+00:00] prefill ok=1 m=1 lat=10.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:10:58+00:00] decode ok=1 m=1 lat=63.5ms run=1.0 q=0.0 use=0.23 thr=5.5773157791318315 crash=0
+[2026-10-07T23:11:08+00:00] prefill ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:11:08+00:00] decode ok=1 m=1 lat=65.4ms run=1.0 q=0.0 use=0.23 thr=5.616232053575605 crash=0
+[2026-10-07T23:11:18+00:00] prefill ok=1 m=1 lat=12.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:11:18+00:00] decode ok=1 m=1 lat=124.9ms run=1.0 q=0.0 use=0.23 thr=6.0550407175866 crash=0
+[2026-10-07T23:11:28+00:00] prefill ok=1 m=1 lat=11.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:11:28+00:00] decode ok=1 m=1 lat=255.2ms run=1.0 q=0.0 use=0.23 thr=6.171532462317094 crash=0
+[2026-10-07T23:11:38+00:00] prefill ok=1 m=1 lat=12.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:11:38+00:00] decode ok=1 m=1 lat=77.0ms run=1.0 q=0.0 use=0.23 thr=6.701557555443573 crash=0
+[2026-10-07T23:11:48+00:00] prefill ok=1 m=1 lat=10.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:11:48+00:00] decode ok=1 m=1 lat=187.4ms run=1.0 q=0.0 use=0.23 thr=6.213748916104113 crash=0
+[2026-10-07T23:11:58+00:00] prefill ok=1 m=1 lat=11.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:11:58+00:00] decode ok=1 m=1 lat=152.5ms run=1.0 q=0.0 use=0.23 thr=6.443725478586826 crash=0
+[2026-10-07T23:12:08+00:00] prefill ok=1 m=1 lat=10.6ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:12:08+00:00] decode ok=1 m=1 lat=36.3ms run=1.0 q=0.0 use=0.23 thr=6.757097800952045 crash=0
+[2026-10-07T23:12:18+00:00] prefill ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:12:18+00:00] decode ok=1 m=1 lat=126.5ms run=1.0 q=0.0 use=0.23 thr=6.876191760372044 crash=0
+[2026-10-07T23:12:28+00:00] prefill ok=1 m=1 lat=11.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:12:28+00:00] decode ok=1 m=1 lat=89.3ms run=1.0 q=0.0 use=0.23 thr=6.799391704957954 crash=0
+[2026-10-07T23:12:38+00:00] prefill ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:12:38+00:00] decode ok=1 m=1 lat=76.3ms run=1.0 q=0.0 use=0.23 thr=6.830069179013236 crash=0
+[2026-10-07T23:12:48+00:00] prefill ok=1 m=1 lat=11.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-07T23:12:48+00:00] decode ok=1 m=1 lat=94.3ms run=1.0 q=0.0 use=0.23 thr=6.406771522951956 crash=0
+[2026-10-07T23:12:58+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:12:58+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:12:58+00:00] prefill ok=0 m=0 lat=1.0ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:12:58+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:12:58+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:12:58+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:13:08+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:13:08+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:13:08+00:00] prefill ok=0 m=0 lat=0.9ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:13:08+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:13:08+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:13:08+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:13:18+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:13:18+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:13:18+00:00] prefill ok=0 m=0 lat=1.0ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:13:18+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:13:18+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:13:18+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:13:28+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:13:28+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:13:28+00:00] prefill ok=0 m=0 lat=1.1ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:13:28+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:13:28+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:13:28+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:13:38+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:13:38+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:13:38+00:00] prefill ok=0 m=0 lat=1.3ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:13:38+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:13:38+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:13:38+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:13:48+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:13:48+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:13:48+00:00] prefill ok=0 m=0 lat=1.3ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:13:48+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:13:48+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:13:48+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:13:58+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:13:58+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:13:58+00:00] ALERT prefill: /get_server_info failing for 60s
+[2026-10-07T23:13:58+00:00] prefill ok=0 m=0 lat=1.2ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:13:58+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:13:58+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:13:58+00:00] ALERT decode: /get_server_info failing for 60s
+[2026-10-07T23:13:58+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:14:08+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:14:08+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:14:08+00:00] prefill ok=0 m=0 lat=1.1ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:14:08+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:14:08+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:14:08+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:14:18+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:14:18+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:14:18+00:00] prefill ok=0 m=0 lat=1.3ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:14:18+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:14:18+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:14:18+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:14:28+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:14:28+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:14:28+00:00] prefill ok=0 m=0 lat=0.8ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:14:28+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:14:28+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:14:28+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:14:38+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:14:38+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:14:38+00:00] prefill ok=0 m=0 lat=0.8ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:14:38+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:14:38+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:14:38+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:14:48+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:14:48+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:14:48+00:00] prefill ok=0 m=0 lat=0.8ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:14:48+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:14:48+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:14:48+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:14:58+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:14:58+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:14:58+00:00] prefill ok=0 m=0 lat=0.9ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:14:58+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:14:58+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:14:58+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:15:08+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:15:08+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:15:08+00:00] prefill ok=0 m=0 lat=0.9ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:15:08+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:15:08+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:15:08+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:15:18+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:15:18+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:15:18+00:00] prefill ok=0 m=0 lat=0.7ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:15:18+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:15:18+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:15:18+00:00] decode ok=0 m=0 lat=0.6ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:15:28+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:15:28+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:15:28+00:00] prefill ok=0 m=0 lat=1.0ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:15:28+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:15:28+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:15:28+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:15:38+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:15:38+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:15:38+00:00] prefill ok=0 m=0 lat=1.0ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:15:38+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:15:38+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:15:38+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:15:48+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:15:48+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:15:48+00:00] prefill ok=0 m=0 lat=0.8ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:15:48+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:15:48+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:15:48+00:00] decode ok=0 m=0 lat=0.5ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:15:58+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:15:58+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:15:58+00:00] prefill ok=0 m=0 lat=0.9ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:15:58+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:15:58+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:15:58+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:16:08+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:16:08+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:16:08+00:00] prefill ok=0 m=0 lat=0.8ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:16:08+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:16:08+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:16:08+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:16:18+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:16:18+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:16:18+00:00] prefill ok=0 m=0 lat=0.7ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:16:18+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:16:18+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:16:18+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:16:28+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:16:28+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:16:28+00:00] prefill ok=0 m=0 lat=1.0ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:16:28+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:16:28+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:16:28+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:16:38+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:16:38+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:16:38+00:00] prefill ok=0 m=0 lat=1.0ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:16:38+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:16:38+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:16:38+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0
+[2026-10-07T23:16:48+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-07T23:16:48+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-07T23:16:48+00:00] prefill ok=0 m=0 lat=1.0ms run=None q=None use=None thr=None crash=-
+[2026-10-07T23:16:48+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-07T23:16:48+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-07T23:16:48+00:00] decode ok=0 m=0 lat=0.3ms run=None q=None use=None thr=None crash=0

@@ -228,3 +228,18 @@ Log: `results/runs/A_qwen_128k_run1/prefill_server.log` (line ~7648 ff).
 - Multimodal: 1/4/16 × 448², 1 × 1024² OK (TTFT 15–35 s eager); 16 images: needle not echoed in 192 tokens (semantic, not an error); 1920×1080 → F-10 crash; remaining mm/chat/abort items voided → redo queued.
 - Decode compile audit: 0 serving-time decoder recompiles (vacuous, F-2); 8 ViT compile events on decode during serving (new resolutions on the decode side as well — decode re-encodes images for MRoPE).
 - verify_pd_disagg needle probes with raw text returned empty (model emits EOS at once for the terse raw prompt; `ignore_eos` runs retrieve fine) → use `--api chat` for instruct VL models.
+
+**F-4 / F-9 isolation update (23:20 UTC).**
+- Server shape is not a factor: gpt-oss goldens from the 128k-shape and the 1m-shape servers (both c=1) are token-identical at 32k.
+- Qwen3-VL PD (Config A, c=1) vs Qwen monolithic golden (c=1): **token-identical over 1,024 tokens for 8/8 prompts at 1k, 8k, 32k, 128k**.
+- Tiny boundary set (1…16,385 tokens, 160 new tokens): PD identical to golden for **35/35 lengths on both models**, including gpt-oss 8,193 and 16,385 (2–3 chunks).
+- Prefill chunk schedule differs between modes for gpt-oss only. Histogram of `#new-token` per prefill step for the same 131k prompts:
+  PD prefill engine: 8192 ×239, 2752 ×185, 2880 ×92, 8064 ×83; monolithic (128k shape): 8064 ×85, 1344 ×81, 8192 ×40. Qwen uses 8192 everywhere.
+  The chunk size is capped by free slots in the small hybrid-SWA pool (`token_capacity_swa` = 6,144 tokens at the 128k shape), and the two modes
+  consume that pool differently (the PD prefill holds SWA pages for the transfer). Different chunk boundaries → different accumulation order in
+  bf16/fp8 → different argmax after a few tokens. This explains why only gpt-oss (hybrid SWA) and only long prompts diverge, and why short
+  multi-chunk prompts (8,193 / 16,385) do not.
+- Working classification of F-4: a **numerical** difference caused by a mode-dependent chunk schedule, not a functional KV-transfer bug. The
+  `--disable-hybrid-swa-memory` run (queued) should make both schedules 8192-regular and the outputs identical; GSM8K through PD will show
+  whether accuracy is affected. Severity stays "high" until both checks are in.
+- F-9: the c=1 Qwen golden for 127,999 was not generated (edit landed after the phase script had started); re-queued as a separate step.

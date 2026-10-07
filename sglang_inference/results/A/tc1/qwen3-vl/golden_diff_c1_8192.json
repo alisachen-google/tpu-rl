@@ -1,0 +1,41 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1/8192.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/8192.jsonl",
+ "ids": 2,
+ "failed": 0,
+ "identical": 2,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl8192_k0",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 4605,
+   "token_prefix": 1024,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.0,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl8192_k1",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 4682,
+   "token_prefix": 1024,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.0,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

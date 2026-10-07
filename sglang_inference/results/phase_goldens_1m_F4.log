@@ -6,3 +6,12 @@
 2026-10-07T22:16:58Z a_holders=[] b_holders=[]
 2026-10-07T22:16:58Z goldens 1m shape: gpt-oss on a, qwen on b
 2026-10-07T22:22:30Z golden servers up; generating (c=1): tiny, 8192/32768 (2-chunk+), 262144, 524288, 1047552, 255123, 511777, 999999
+2026-10-07T23:12:49Z goldens 1m done
+2026-10-07 23:12:49 stopping ours on a
+[cleanup] remaining sglang procs (all users): 0  TPU holders: 
+2026-10-07 23:12:54 stopping ours on b
+[cleanup] remaining sglang procs (all users): 0  TPU holders: 
+2026-10-07T23:13:03Z PD Config A gpt-oss 1m -> A_gptoss_1m_run1
+2026-10-07 23:13:04 starting decode on b (10.128.0.90)
+2880813
+2026-10-07 23:13:04 starting prefill on a (10.128.15.217)

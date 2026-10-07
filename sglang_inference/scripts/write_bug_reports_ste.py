@@ -148,35 +148,43 @@ For concurrent runs, use these gates instead: the needle answers, the exact toke
 `results/golden/gpt-oss_fp8_rep2_c1/determinism_*.json`, `results/golden/gpt-oss_fp8_rep2_c1/determinism.txt`.
 """
 
-REPORTS["F-4"] = f"""# F-4: gpt-oss-120b in PD mode gives a different first token than the monolithic server for prompts longer than one prefill chunk
+REPORTS["F-4"] = f"""# F-4: gpt-oss-120b in PD mode gives a different output than the monolithic server for long prompts
 
-**Type:** bug candidate (correctness). **Severity:** high. **Status:** reproduced on 6 of 6 long prompts and 0 of 4 short prompts. Isolation in progress.
+**Type:** numerical difference (bug candidate). **Severity:** high until the accuracy check is complete. **Status:** reproduced on 6 of 6 long prompts. Cause identified with high confidence. Confirmation run queued.
 
 ## Summary
 
 We compare the PD system (Config A: 1 prefill + 1 decode, raiden, radix cache off) with the monolithic server. Both run at concurrency 1 with
-greedy sampling. For prompts of 1,024 and 8,192 tokens (one prefill chunk), all 1,024 output tokens are identical. For prompts of 32,768 tokens
-and more (4 or more chunks of 8,192 tokens), the outputs differ from token 3 to 19. The first-token log-probability differs by 0.10 to 0.16 at
-32k. The prefill engine computes the first token. So the difference is in the prefill forward pass, not in the decode engine.
+greedy sampling. For gpt-oss prompts of 32,768 tokens and more, the outputs differ from token 3 to 19. The first-token log-probability differs
+by up to 0.16. The prefill engine computes the first token, so the difference is in the prefill forward pass.
 
-The same test with Qwen3-VL-30B (a model without sliding-window layers) gives bit-identical first-token log-probabilities for every aligned
-prompt up to 131,072 tokens (16 chunks). So chunked prefill itself is correct in PD mode. The difference is specific to the hybrid
-sliding-window (SWA) KV path of gpt-oss.
+The same test gives identical results in these cases:
+- gpt-oss prompts of 1 to 16,385 tokens (37 prompts, including 2- and 3-chunk prompts): identical.
+- Qwen3-VL-30B (no sliding-window layers) prompts of 1 to 131,072 tokens (43 prompts, up to 16 chunks): identical for all 1,024 output tokens.
+- Monolithic servers with different context sizes (128k and 1M): identical.
 
-| Prompt tokens | Chunks | Identical output (1,024 tokens) | First-token log-prob delta |
-|---|---|---|---|
-| 1,024 (2 prompts) | 1 | yes, yes | 0.0000 |
-| 8,192 (2 prompts) | 1 | yes, yes | 0.0000 |
-| 32,768 (2 prompts) | 4 | no, no (prefix 3 tokens) | 0.104, 0.156 |
-| 131,072 (2 prompts) | 16 | no, no (prefix 5, 15 tokens) | 0.032, 0.031 |
+| Model | Prompt tokens | Chunks | Identical output | First-token log-prob delta |
+|---|---|---|---|---|
+| gpt-oss | 1,024 and 8,192 | 1 | yes (4 of 4) | 0.0000 |
+| gpt-oss | 8,193 and 16,385 (160 output tokens) | 2 to 3 | yes (2 of 2) | 0.0000 |
+| gpt-oss | 32,768 | 4 | no (prefix 3 tokens) | 0.104, 0.156 |
+| gpt-oss | 131,072 | 16 | no (prefix 5, 15 tokens) | 0.032, 0.031 |
+| Qwen3-VL | 1,024 to 131,072 | 1 to 16 | yes (8 of 8) | 0.0000 |
 
-The PD system is deterministic: a repeat of the PD run gives identical outputs. The monolithic server is also deterministic at a fixed batch
-size (F-3). So the difference is systematic.
+## Cause (high confidence)
+
+The prefill chunk sizes differ between the two modes for gpt-oss only. For the same 131,072-token prompts, the PD prefill engine uses chunks of
+8192, 2752, 2880 and 8064 tokens. The monolithic server uses chunks of 8064, 1344 and 8192 tokens. Qwen uses 8192 in both modes. The chunk size
+is limited by the free slots in the small hybrid sliding-window (SWA) pool (6,144 tokens in this configuration). The two modes use that pool
+differently, because the PD prefill engine holds SWA pages for the KV transfer. Different chunk boundaries change the accumulation order in
+bf16 and FP8 arithmetic. After a few tokens the greedy argmax changes.
+
+So the difference is numerical, not a KV-transfer fault. The needle answers are correct on both sides.
 
 ## Effect
 
-Outputs from the PD system and the monolithic system are not interchangeable for long gpt-oss prompts. The needle answers are still correct on
-both sides. The size of the quality effect is not known yet (GSM8K through PD is queued).
+Outputs from the PD system and the monolithic system are not interchangeable for long gpt-oss prompts. The effect on task accuracy is not
+measured yet (GSM8K through PD is queued).
 
 {ENV}
 ## How to reproduce
@@ -188,19 +196,27 @@ both sides. The size of the quality effect is not known yet (GSM8K through PD is
 5. Start the PD pair: `bash scripts/pd.sh start recipes/gpt-oss_A_128k.json f4-pd`.
 6. Generate the PD outputs through the mini-LB at concurrency 1: `bash scripts/run_tc1.sh gpt-oss http://10.128.15.217:8080 results/f4-pd 1024,8192,32768,131072 results/golden/f4 1`.
 7. Read the `diff vs golden` tables in `results/f4-pd/tc1.log`.
+8. Optional: compare the chunk sizes. Run `grep -oE '#new-token: [0-9]+' <server.log> | sort | uniq -c` on the prefill log and on the monolithic log.
 
 **Observed result.** `identical=True` for 1,024 and 8,192 tokens. `identical=False` with a token prefix of 3 to 15 for 32,768 and 131,072 tokens.
-**Expected result.** `identical=True` for all lengths, or a first-token log-probability delta that is not larger than the monolithic noise (0.0000 at 32k).
+The chunk-size histograms differ.
+**Expected result.** `identical=True` for all lengths, or a documented statement that PD and monolithic outputs differ for hybrid-SWA models.
 
-## Isolation steps (queued)
+## Confirmation steps (queued)
 
-1. Run Config A with `--disable-hybrid-swa-memory` on both engines (`recipes/gpt-oss_A_128k_noswamem.json`). If the outputs become identical, the SWA pool is the cause.
-2. Compare the tiny prompt set (8,191 / 8,193 / 16,385 tokens) against its golden to find the first length that differs.
+1. Run Config A and the golden with `--disable-hybrid-swa-memory` (`recipes/gpt-oss_A_128k_noswamem.json`). Without the small SWA pool, both
+   modes should use 8192-token chunks and the outputs should be identical.
+2. Run GSM8K (100 examples) through the PD system and compare with the monolithic score (0.99).
+
+## Suggested fix
+
+Make the chunk schedule independent of the serving mode, for example by giving the PD prefill engine the same SWA-pool budget per chunk as the
+monolithic server. Or document the difference.
 
 ## Evidence
 
-`results/A/tc1/gpt-oss/golden_diff_c1_*.json` (PD versus golden at concurrency 1), `results/A/tc1/gpt-oss/rep2/pd_self_*.json` (PD repeat),
-`results/phase_A_qwen.log` (Qwen first-token comparison).
+`results/A/tc1/gpt-oss/golden_diff_c1_*.json`, `results/A/tc1/gpt-oss/rep2/pd_self_*.json`, `results/A/tc1/qwen3-vl/golden_diff_c1_*.json`,
+`results/A/tiny/*/tiny.jsonl` versus `results/golden/*_1m_c1/tiny.jsonl`, chunk histograms in `results/FINDINGS.md`.
 """
 
 REPORTS["F-5"] = f"""# F-5: One request that asks for prompt log-probabilities stops the whole prefill engine
@@ -382,7 +398,7 @@ Config B (radix cache on). The radix tree cache may take a different path in `re
 
 REPORTS["F-9"] = f"""# F-9: Prompt lengths that are not a multiple of the page or chunk size give a different first token in PD mode (candidate)
 
-**Type:** bug candidate (correctness). **Severity:** medium. **Status:** observed on 4 of 4 unaligned prompts. Exact check queued.
+**Type:** bug candidate (correctness). **Severity:** medium. **Status:** observed on 4 of 4 unaligned prompts. The exact check against a concurrency-1 golden is queued.
 
 ## Summary
 
@@ -486,7 +502,7 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-1](F-1.md) | Hard abort when the tier-2 compile cache directory cannot be created | bug (robustness) | low | reproduced, work-around |
 | [F-2](F-2.md) | Qwen3-VL-30B-A3B language model is not compiled on TPU | bug (perf, missing policy) | high for perf tests | reproduced on every start |
 | [F-3](F-3.md) | Greedy decoding is not batch-invariant | test-method note | medium | measured |
-| [F-4](F-4.md) | gpt-oss PD output differs from monolithic for prompts longer than one chunk | bug candidate (correctness) | high | reproduced 6/6, isolation in progress |
+| [F-4](F-4.md) | gpt-oss PD output differs from monolithic for long prompts (chunk schedule differs) | numerical difference | high until accuracy check | reproduced 6/6, cause identified |
 | [F-5](F-5.md) | A prompt-logprob request stops the prefill engine | bug (crash) | high | reproduced 1/1 |
 | [F-6](F-6.md) | `n=2` request gets no response for 300 s | bug candidate (hang) | high if confirmed | observed 1/1 |
 | [F-7](F-7.md) | Decode engine recovers about 2 min after the prefill engine dies | observation | low | observed |
