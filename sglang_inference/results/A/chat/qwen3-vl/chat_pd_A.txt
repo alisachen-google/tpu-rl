@@ -1,0 +1,13 @@
+model=qwen3-vl-30b kind=qwen 8 cases, endpoints: a=http://10.128.15.217:8080
+case                  A st/fin/len                  B st/fin/len                  same  verdict notes
+-----------------------------------------------------------------------------------------------------
+plain_chat            None/None/0c/0r               -                             -     FAIL    a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie
+multi_turn_3          None/None/0c/0r               -                             -     FAIL    a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie
+stop_string_chat      None/None/0c/0r               -                             -     FAIL    a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie
+stream_with_usage     None/None/0c/0r               -                             -     FAIL    a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie
+long_system_prompt    None/None/0c/0r               -                             -     FAIL    a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie
+empty_user_message    None/None/0c/0r               -                             -     FAIL    a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie
+oversized_max_tokens  None/None/0c/0r               -                             -     FAIL    a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie
+bad_image_payload     None/None/0c/0r               -                             -     FAIL    a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie; a: expected 4xx, got None; a: follow-up after bad image failed: None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie
+
+8 cases, 8 failed -> /home/alisachen_google_com/pd_disagg/results/A/chat/qwen3-vl/chat_pd_A.json

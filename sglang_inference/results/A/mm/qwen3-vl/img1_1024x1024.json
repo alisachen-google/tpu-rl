@@ -1,0 +1,61 @@
+{
+ "text": "The image displays a large, solid red circle centered on a light gray background. In the top left corner, the text \"IMAGE 1\" is visible in black, uppercase letters. The red circle is the main focus of the image, and it is perfectly round with a uniform color.\n\nThe secret word is plum-7731.",
+ "usage": {
+  "prompt_tokens": 1056,
+  "total_tokens": 1126,
+  "completion_tokens": 70,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "image_tokens": 1024
+  },
+  "reasoning_tokens": 0
+ },
+ "ttft_ms": 15983.5,
+ "e2e_ms": 15983.5,
+ "status": 200,
+ "error": null,
+ "raw": {
+  "id": "5a269c8d40f241a6a4a655bc2f6c1973",
+  "object": "chat.completion",
+  "created": 1791411181,
+  "model": "qwen3-vl-30b",
+  "choices": [
+   {
+    "index": 0,
+    "message": {
+     "role": "assistant",
+     "content": "The image displays a large, solid red circle centered on a light gray background. In the top left corner, the text \"IMAGE 1\" is visible in black, uppercase letters. The red circle is the main focus of the image, and it is perfectly round with a uniform color.\n\nThe secret word is plum-7731.",
+     "reasoning_content": null,
+     "tool_calls": null
+    },
+    "logprobs": null,
+    "finish_reason": "stop",
+    "matched_stop": 151645
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 1056,
+   "total_tokens": 1126,
+   "completion_tokens": 70,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "image_tokens": 1024
+   },
+   "reasoning_tokens": 0
+  },
+  "metadata": {
+   "weight_version": "default",
+   "weight_versions": [
+    {
+     "version": "default",
+     "start": 0,
+     "end": 70
+    }
+   ]
+  }
+ },
+ "image_descriptions": [
+  "red circle labeled 'IMAGE 1'"
+ ],
+ "est_prompt_tokens": 359
+}

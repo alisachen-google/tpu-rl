@@ -165,3 +165,35 @@ done: 35 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/A/tin
    n=4 448x448: needle FOUND: plum-7731
    n=16 448x448: status=200 prompt_tokens=3198 completion_tokens=192 cached_tokens=0 ttft=34865.6ms e2e=34865.6ms
    n=16 448x448: needle MISSING: plum-7731
+   n=1 1024x1024: status=200 prompt_tokens=1056 completion_tokens=70 cached_tokens=0 ttft=15983.5ms e2e=15983.5ms
+   n=1 1024x1024: needle FOUND: plum-7731
+   n=1 1920x1080: ERROR HTTP 500: Internal Server Error
+   n=1 1920x1080: status=500 prompt_tokens=None completion_tokens=None cached_tokens=None ttft=Nonems e2e=65323.7ms
+   n=1 1920x1080: needle MISSING: plum-7731
+   n=4 1024x1024: ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+   n=4 1024x1024: status=None prompt_tokens=None completion_tokens=None cached_tokens=None ttft=Nonems e2e=1.4ms
+   n=4 1024x1024: needle MISSING: plum-7731
+2026-10-07T22:14:07Z (3b) image straddling the 8k chunk, 64 images, text-only, corrupt image
+   straddle: ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+   straddle: status=None prompt_tokens=None completion_tokens=None cached_tokens=None ttft=Nonems e2e=1.9ms
+   straddle: needle MISSING: kiwi-4410
+   64img: payload: 307.8 KiB, 64 image(s) 448x448 (~64 tok each), est prompt tokens ~4112, content parts=65
+   64img: ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+   64img: status=None prompt_tokens=None completion_tokens=None cached_tokens=None ttft=Nonems e2e=2.5ms
+   text-only: ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-10-07T22:14:08Z chat rc=1
+
+http://10.128.0.90:30000 sglang:num_running_reqs{engine_type="decode",model_name="qwen3-vl-30b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_queue_reqs{engine_type="decode",model_name="qwen3-vl-30b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:full_token_usage{engine_type="decode",model_name="qwen3-vl-30b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_used_tokens{engine_type="decode",model_name="qwen3-vl-30b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_retracted_reqs{engine_type="decode",model_name="qwen3-vl-30b",moe_ep_rank="0",pid="2799184",pp_rank="0",tp_rank="0"}=0.0  
+2026-10-07T22:14:08Z (4) same image + different question (cache key must include image), then different image + same text
+   q1: status=None prompt_tokens=None completion_tokens=None cached_tokens=None ttft=Nonems e2e=1.5ms
+   q2: status=None prompt_tokens=None completion_tokens=None cached_tokens=None ttft=Nonems e2e=2.0ms
+2026-10-07T22:14:09Z (5) aborts (decode phase; eager decode makes this long)
+2026-10-07T22:15:39Z abort rc=1
+
+http://10.128.0.90:30000 sglang:num_running_reqs{engine_type="decode",model_name="qwen3-vl-30b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_queue_reqs{engine_type="decode",model_name="qwen3-vl-30b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:full_token_usage{engine_type="decode",model_name="qwen3-vl-30b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_used_tokens{engine_type="decode",model_name="qwen3-vl-30b",moe_ep_rank="0",pp_rank="0",tp_rank="0"}=0.0  http://10.128.0.90:30000 sglang:num_retracted_reqs{engine_type="decode",model_name="qwen3-vl-30b",moe_ep_rank="0",pid="2799184",pp_rank="0",tp_rank="0"}=0.0  
+decode_A_qwen: ready_at_line=4908 total_lines=7603
+  startup : __recompiles=224  Compiling/compile=16  cache_miss=0  InductorError=0
+  serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+  serving-time recompile lines (first 5):
+   vision compile events (decode): 8
+2026-10-07T22:16:39Z phase A qwen done

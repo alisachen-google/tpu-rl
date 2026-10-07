@@ -1,0 +1,8 @@
+2026-10-07T22:16:43Z qwen A phase done
+2026-10-07 22:16:43 stopping ours on a
+[cleanup] remaining sglang procs (all users): 0  TPU holders: 
+2026-10-07 22:16:48 stopping ours on b
+[cleanup] remaining sglang procs (all users): 0  TPU holders: 
+2026-10-07T22:16:58Z a_holders=[] b_holders=[]
+2026-10-07T22:16:58Z goldens 1m shape: gpt-oss on a, qwen on b
+2026-10-07T22:22:30Z golden servers up; generating (c=1): tiny, 8192/32768 (2-chunk+), 262144, 524288, 1047552, 255123, 511777, 999999

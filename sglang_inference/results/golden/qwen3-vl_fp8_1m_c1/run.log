@@ -1,0 +1,77 @@
+=== 2026-10-07T22:22:30Z run_golden model=qwen3-vl url=http://10.128.0.90:30000 lengths=tiny,1024,8192,32768,131072,262144,255123 conc=1 max_new_tokens=1024
+2026-10-07T22:22:30Z endpoint healthy
+35 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[tiny1] tokens=160 finish=length cached=0 ttft=5110.76ms e2e=30099.19ms
+[tiny2] tokens=160 finish=length cached=0 ttft=4928.84ms e2e=28886.66ms
+[tiny16] tokens=160 finish=length cached=0 ttft=5198.36ms e2e=29060.12ms
+[tiny63] tokens=160 finish=length cached=0 ttft=5081.58ms e2e=30832.4ms
+[tiny64] tokens=160 finish=length cached=0 ttft=5296.94ms e2e=30367.35ms
+[tiny65] tokens=160 finish=length cached=0 ttft=5067.78ms e2e=29379.52ms
+[tiny100] tokens=160 finish=length cached=0 ttft=5393.16ms e2e=29894.24ms
+[tiny127] tokens=160 finish=length cached=0 ttft=5179.38ms e2e=30361.84ms
+[tiny128] tokens=160 finish=length cached=0 ttft=5274.7ms e2e=29248.78ms
+[tiny129] tokens=160 finish=length cached=0 ttft=5309.44ms e2e=29132.92ms
+[tiny130] tokens=160 finish=length cached=0 ttft=5539.44ms e2e=29267.38ms
+[tiny191] tokens=160 finish=length cached=0 ttft=5337.82ms e2e=30020.11ms
+[tiny192] tokens=160 finish=length cached=0 ttft=5316.84ms e2e=28892.06ms
+[tiny193] tokens=160 finish=length cached=0 ttft=5230.63ms e2e=29060.37ms
+[tiny255] tokens=160 finish=length cached=0 ttft=6826.92ms e2e=30799.97ms
+[tiny256] tokens=160 finish=length cached=0 ttft=5177.0ms e2e=29145.36ms
+[tiny257] tokens=160 finish=length cached=0 ttft=5383.81ms e2e=29710.58ms
+[tiny383] tokens=160 finish=length cached=0 ttft=5328.62ms e2e=29084.65ms
+[tiny384] tokens=160 finish=length cached=0 ttft=5488.88ms e2e=28980.3ms
+[tiny385] tokens=160 finish=length cached=0 ttft=5574.52ms e2e=29845.14ms
+[tiny511] tokens=160 finish=length cached=0 ttft=5646.74ms e2e=29309.69ms
+[tiny512] tokens=160 finish=length cached=0 ttft=5259.91ms e2e=30037.95ms
+[tiny513] tokens=160 finish=length cached=0 ttft=5977.91ms e2e=31333.43ms
+[tiny1023] tokens=160 finish=length cached=0 ttft=5456.51ms e2e=30164.45ms
+[tiny1024] tokens=160 finish=length cached=0 ttft=5534.87ms e2e=29617.87ms
+[tiny1025] tokens=160 finish=length cached=0 ttft=5487.04ms e2e=31631.95ms
+[tiny8191] tokens=160 finish=length cached=0 ttft=9664.11ms e2e=35384.74ms
+[tiny8192] tokens=160 finish=length cached=0 ttft=9871.28ms e2e=34519.15ms
+[tiny8193] tokens=160 finish=length cached=0 ttft=713.01ms e2e=24064.01ms
+[tiny8255] tokens=160 finish=length cached=0 ttft=650.61ms e2e=24497.92ms
+[tiny8256] tokens=160 finish=length cached=0 ttft=725.42ms e2e=24257.64ms
+[tiny8257] tokens=160 finish=length cached=0 ttft=709.05ms e2e=25963.29ms
+[tiny16383] tokens=160 finish=length cached=0 ttft=919.46ms e2e=25196.27ms
+[tiny16384] tokens=160 finish=length cached=0 ttft=897.68ms e2e=25038.24ms
+[tiny16385] tokens=160 finish=length cached=0 ttft=1026.18ms e2e=24947.88ms
+done: 35 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1/tiny.jsonl
+2026-10-07T22:39:29Z isl=tiny done in 1019 s rc=0
+    tiny1 tokens= 160 finish= length ttft_ms= 5111 e2e_ms= 30099 err= None
+    tiny2 tokens= 160 finish= length ttft_ms= 4929 e2e_ms= 28887 err= None
+    tiny16 tokens= 160 finish= length ttft_ms= 5198 e2e_ms= 29060 err= None
+    tiny63 tokens= 160 finish= length ttft_ms= 5082 e2e_ms= 30832 err= None
+    tiny64 tokens= 160 finish= length ttft_ms= 5297 e2e_ms= 30367 err= None
+    tiny65 tokens= 160 finish= length ttft_ms= 5068 e2e_ms= 29380 err= None
+    tiny100 tokens= 160 finish= length ttft_ms= 5393 e2e_ms= 29894 err= None
+    tiny127 tokens= 160 finish= length ttft_ms= 5179 e2e_ms= 30362 err= None
+    tiny128 tokens= 160 finish= length ttft_ms= 5275 e2e_ms= 29249 err= None
+    tiny129 tokens= 160 finish= length ttft_ms= 5309 e2e_ms= 29133 err= None
+    tiny130 tokens= 160 finish= length ttft_ms= 5539 e2e_ms= 29267 err= None
+    tiny191 tokens= 160 finish= length ttft_ms= 5338 e2e_ms= 30020 err= None
+    tiny192 tokens= 160 finish= length ttft_ms= 5317 e2e_ms= 28892 err= None
+    tiny193 tokens= 160 finish= length ttft_ms= 5231 e2e_ms= 29060 err= None
+    tiny255 tokens= 160 finish= length ttft_ms= 6827 e2e_ms= 30800 err= None
+    tiny256 tokens= 160 finish= length ttft_ms= 5177 e2e_ms= 29145 err= None
+    tiny257 tokens= 160 finish= length ttft_ms= 5384 e2e_ms= 29711 err= None
+    tiny383 tokens= 160 finish= length ttft_ms= 5329 e2e_ms= 29085 err= None
+    tiny384 tokens= 160 finish= length ttft_ms= 5489 e2e_ms= 28980 err= None
+    tiny385 tokens= 160 finish= length ttft_ms= 5575 e2e_ms= 29845 err= None
+    tiny511 tokens= 160 finish= length ttft_ms= 5647 e2e_ms= 29310 err= None
+    tiny512 tokens= 160 finish= length ttft_ms= 5260 e2e_ms= 30038 err= None
+    tiny513 tokens= 160 finish= length ttft_ms= 5978 e2e_ms= 31333 err= None
+    tiny1023 tokens= 160 finish= length ttft_ms= 5457 e2e_ms= 30164 err= None
+    tiny1024 tokens= 160 finish= length ttft_ms= 5535 e2e_ms= 29618 err= None
+    tiny1025 tokens= 160 finish= length ttft_ms= 5487 e2e_ms= 31632 err= None
+    tiny8191 tokens= 160 finish= length ttft_ms= 9664 e2e_ms= 35385 err= None
+    tiny8192 tokens= 160 finish= length ttft_ms= 9871 e2e_ms= 34519 err= None
+    tiny8193 tokens= 160 finish= length ttft_ms= 713 e2e_ms= 24064 err= None
+    tiny8255 tokens= 160 finish= length ttft_ms= 651 e2e_ms= 24498 err= None
+    tiny8256 tokens= 160 finish= length ttft_ms= 725 e2e_ms= 24258 err= None
+    tiny8257 tokens= 160 finish= length ttft_ms= 709 e2e_ms= 25963 err= None
+    tiny16383 tokens= 160 finish= length ttft_ms= 919 e2e_ms= 25196 err= None
+    tiny16384 tokens= 160 finish= length ttft_ms= 898 e2e_ms= 25038 err= None
+    tiny16385 tokens= 160 finish= length ttft_ms= 1026 e2e_ms= 24948 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[isl1024_k0] tokens=1024 finish=length cached=0 ttft=279.69ms e2e=162715.58ms

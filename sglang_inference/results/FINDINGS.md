@@ -171,3 +171,19 @@ Context lines: the aborted request (`rid=abort-0-…`) was mid-chunk (`#pending-
 odd chunking of a 131,072-token prompt into 8064+2880 pieces); TokenizerManager logged "Received output for rid=… but the state was deleted".
 Root cause: the deferred chunked-sender abort path frees the request's KV before its allocation is complete; `ChunkCache` (radix disabled) asserts.
 Expected to also affect Config B/C (radix tree) unless `supports_mamba()` differs — to verify.
+
+**F-4 isolation update (Qwen3-VL Config A vs monolithic golden, first-token logprob = prefill-engine output; `results/phase_A_qwen.log`).**
+
+| ISL | chunks | aligned to page 128 / chunk 8192 | first-token logprob Δ (k0 / k1) |
+|---|---|---|---|
+| 1,024 | 1 | yes | 0.0 / 0.0 |
+| 8,192 | 1 | yes | 0.0 / 0.0 |
+| 32,768 | 4 | yes | 0.0 / 0.0 |
+| 131,072 | 16 | yes | 0.0 / 0.0 |
+| 127,999 | 16 | **no** | 0.0114 / **0.2278** |
+
+Qwen3-VL has no sliding-window layers. Its PD prefill matches monolithic **bit-exactly** for every page/chunk-aligned prompt, including 16-chunk
+prompts → chunked prefill in PD mode is numerically identical to monolithic per se. Therefore the gpt-oss divergence at aligned 32k/128k (F-4
+table) is attributable to the **hybrid sliding-window KV path** in PD prefill (hypothesis (a)); the `--disable-hybrid-swa-memory` run will confirm.
+A second, separate effect exists for **unaligned prompt lengths** (127,999 on both models): PD prefill differs from monolithic when the last
+chunk/page is partial — candidate F-9 (to confirm against the c=1 Qwen golden for 127,999, queued).

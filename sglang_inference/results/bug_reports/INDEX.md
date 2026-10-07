@@ -1,6 +1,6 @@
 # Bug reports — sglang-torchtpu 1P/1D on TPU v7x
 
-Generated 2026-10-07 22:11 UTC from FINDINGS.md.
+Generated 2026-10-07 22:13 UTC from FINDINGS.md.
 
 | ID | Class | First seen (UTC) | Severity | Area | Status | File |
 |---|---|---|---|---|---|---|

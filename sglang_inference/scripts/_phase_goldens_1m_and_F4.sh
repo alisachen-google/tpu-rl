@@ -14,7 +14,7 @@ env -u TORCH_DEVICE_BACKEND_AUTOLOAD bash $S/pd.sh golden $HOME/pd_disagg/recipe
 wait
 log "golden servers up; generating (c=1): tiny, 8192/32768 (2-chunk+), 262144, 524288, 1047552, 255123, 511777, 999999"
 ( bash $S/run_golden.sh gpt-oss $A $R/golden/gpt-oss_fp8_1m_c1 tiny,32768,262144,255123,524288,511777,1047552,999999 1 1024 ) &
-( bash $S/run_golden.sh qwen3-vl $B $R/golden/qwen3-vl_fp8_1m_c1 tiny,1024,8192,32768,131072,262144,255123 1 1024 ) &
+( bash $S/run_golden.sh qwen3-vl $B $R/golden/qwen3-vl_fp8_1m_c1 tiny,1024,8192,32768,131072,127999,262144,255123 1 1024 ) &
 wait
 log "goldens 1m done"; cp $R/runs/G_gptoss_1m_fp8/golden/server.log $R/golden/gpt-oss_fp8_1m_c1/server.log 2>/dev/null
 bash $S/pd.sh stop; sleep 5

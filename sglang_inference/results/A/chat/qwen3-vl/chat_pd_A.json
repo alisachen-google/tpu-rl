@@ -1,0 +1,197 @@
+{
+ "model": "qwen3-vl-30b",
+ "kind": "qwen",
+ "a": "http://10.128.15.217:8080",
+ "b": null,
+ "timeout": 900.0,
+ "cases": 8,
+ "failed": 8,
+ "rows": [
+  {
+   "name": "plain_chat",
+   "compare_mode": "content",
+   "a": {
+    "status": null,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.002,
+    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+    "hang": false,
+    "done_seen": null,
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [
+    "a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie"
+   ],
+   "verdict": "FAIL"
+  },
+  {
+   "name": "multi_turn_3",
+   "compare_mode": "content",
+   "a": {
+    "status": null,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.001,
+    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+    "hang": false,
+    "done_seen": null,
+    "turns": [
+     ""
+    ],
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [
+    "a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie"
+   ],
+   "verdict": "FAIL"
+  },
+  {
+   "name": "stop_string_chat",
+   "compare_mode": "content",
+   "a": {
+    "status": null,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.001,
+    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+    "hang": false,
+    "done_seen": null,
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [
+    "a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie"
+   ],
+   "verdict": "FAIL"
+  },
+  {
+   "name": "stream_with_usage",
+   "compare_mode": "content",
+   "a": {
+    "status": null,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.001,
+    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+    "hang": false,
+    "done_seen": null,
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [
+    "a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie"
+   ],
+   "verdict": "FAIL"
+  },
+  {
+   "name": "long_system_prompt",
+   "compare_mode": "content",
+   "a": {
+    "status": null,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.001,
+    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+    "hang": false,
+    "done_seen": null,
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [
+    "a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie"
+   ],
+   "verdict": "FAIL"
+  },
+  {
+   "name": "empty_user_message",
+   "compare_mode": "content",
+   "a": {
+    "status": null,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.001,
+    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+    "hang": false,
+    "done_seen": null,
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [
+    "a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie"
+   ],
+   "verdict": "FAIL"
+  },
+  {
+   "name": "oversized_max_tokens",
+   "compare_mode": "status",
+   "a": {
+    "status": null,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.0,
+    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+    "hang": false,
+    "done_seen": null,
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [
+    "a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie"
+   ],
+   "verdict": "FAIL"
+  },
+  {
+   "name": "bad_image_payload",
+   "compare_mode": "status",
+   "a": {
+    "status": null,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.0,
+    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+    "hang": false,
+    "done_seen": null,
+    "followup_status": null,
+    "self_fail": [
+     "expected 4xx, got None",
+     "follow-up after bad image failed: None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie"
+    ],
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [
+    "a: http None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie",
+    "a: expected 4xx, got None",
+    "a: follow-up after bad image failed: None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retrie"
+   ],
+   "verdict": "FAIL"
+  }
+ ]
+}

@@ -1,0 +1,15 @@
+{
+ "text": "",
+ "usage": null,
+ "ttft_ms": null,
+ "e2e_ms": 1.4,
+ "status": null,
+ "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+ "image_descriptions": [
+  "red circle labeled 'IMAGE 1'",
+  "green square labeled 'IMAGE 2'",
+  "blue triangle labeled 'IMAGE 3'",
+  "orange diamond labeled 'IMAGE 4'"
+ ],
+ "est_prompt_tokens": 1361
+}
