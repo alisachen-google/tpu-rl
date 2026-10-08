@@ -48,7 +48,7 @@ decode side has no such bound at all.
 
 ## Trigger conditions (observed)
 
-The stall occurred on four fresh pairs with two recipes (140k shape radix off, 1M shape radix on), both with one request slot; every two- or eight-slot pair served normally. All pairs: gpt-oss-120b, raiden, radix cache off on
+The stall occurred on four fresh single-slot pairs (140k shape radix off, 1M shape radix on) on their first request, and on one two-slot 1M pair after a burst of very long requests; eight-slot pairs never stalled. All pairs: gpt-oss-120b, raiden, radix cache off on
 the prefill, both engines freshly started, first request sent within a minute of the load balancer becoming healthy.
 
 | Pair | `--max-running-requests` (both engines) | `--context-length` / `--max-total-tokens` | `SGLANG_RAIDEN_HOST_POOL_GB` | Compile batch sizes | Requests | Outcome |
@@ -57,6 +57,7 @@ the prefill, both engines freshly started, first request sent within a minute of
 | F12_…_mr1_try1 (fresh pair) | 1 | 140,288 / 786,432 | 128 | [1] | 8k, 8k, 32k | **stall on every request** |
 | F12_…_mr1_try2 (fresh pair) | 1 | 140,288 / 786,432 | 128 | [1] | 8k | **stall on the first request** |
 | B_gpt-oss_1m (radix cache **on**) | 1 | 1,056,768 / 1,114,112 | 320 | [1] | 32k | **stall on the first request** (prefill holds it in the inflight queue; decode never runs a batch) |
+| B_gpt-oss_1m_mr2 (radix on, **2 slots**) | 2 | 1,056,768 / 1,114,112 | 320 | [1, 2] | 14 long prompts 32k…1M served, then ~705k + ~1M boundary prompts, then 256k reuse, then GSM8K | **stall on GSM8K's first requests** (decode in `_update_handshake_waiters` 30 min; prefill holds 2 in the inflight queue; paired abort lines when the clients died) |
 | F11_gpt-oss_A_128k_mr2 | 2 | 140,288 / 786,432 | 128 | [1, 2] | 8k, 32k, 131k | served, 6 of 6 |
 | Config A campaign (A_gptoss_128k_run1/run2) | 8 | 140,288 / 786,432 | 128 | [1, 2, 4, 8] | ~200 requests over two days | served |
 | A_gptoss_1m_run1/run2 | 1 | 1,056,768 / 1,114,112 | 320 | [1] | 1k, 8k (longer prompts hit F-11) | served |
@@ -67,9 +68,10 @@ What this says about the trigger:
 - **A single request slot on both engines is necessary.** Changing only `--max-running-requests` from 1 to 2 on the stalling recipe removes the
   stall. A single slot also means a decode SWA pool of 512 tokens (768 rounded down to 8 pages), a request table of one row on each engine, and
   compile batch size 1 only.
-- **A single slot is present in every stalling pair** (four pairs, two recipes, with and without the radix cache, 140k and 1M context). The
-  one single-slot pair that served requests (`A_gptoss_1m`, radix off) is the exception, so a single slot alone does not fully explain it,
-  but it is the strongest common factor; two slots never stalled.
+- **A single slot is not required.** Four single-slot pairs stalled on their first request, but a two-slot 1M pair also stalled after serving
+  14 long prompts (up to 1M tokens) and two near-context-length prompts. The common factor across all five stalls is a decode prealloc queue
+  that never leaves `Bootstrapping` for a room the prefill considers live; what triggers that disagreement (fresh start with one slot, or a
+  burst of very long requests with two) is still open. Eight-slot pairs never stalled in ~400 requests.
 - **It does not depend on the prompt.** 8k (one chunk) and 32k prompts stall alike; the request is prefilled completely before the stall.
 - **It does not depend on warm-up state.** Three pairs started from scratch stalled on their very first request.
 - **It is not timing-sensitive in the usual sense.** The handshake never completes even after 30 minutes, so this is not a slow path but a

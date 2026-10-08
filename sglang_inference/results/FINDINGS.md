@@ -582,3 +582,12 @@ present in every stalling pair (4 pairs, 2 recipes); the only single-slot pair t
   prompt was 704,702 server tokens and "ctx+1" was also under the limit, so the server's 200 was correct (and fast: cached prefix of the
   previous prompt). Rerun with the exact tokenizer in `B/gpt-oss_1m_mr2/boundary_exact.txt`. The earlier "Boundary 4xx: PASS" in the
   catalogue was unverified and has been corrected.
+
+**F-12 with 2 slots at the 1M shape (`B_gpt-oss_1m_mr2`, 19:43–20:40 UTC).** After the long TC-1 sweep (32k…1M, 14 prompts), the boundary
+step (a ~705k and a ~1M-token prompt) and the 256k reuse pass, GSM8K's first requests never returned: prefill `num_running_reqs 1`,
+`num_prefill_inflight_queue_reqs 2`, `num_queue_reqs 2`; decode idle in `pop_preallocated → _update_handshake_waiters`. When the clients were
+killed at 20:13:54 both sides logged the paired aborts (`Decode handshake failed … Aborted by AbortReq`, `Prefill transfer failed … Aborted by
+decode-side abort notification`) and the next requests stalled again. A concurrent exact-tokenizer boundary request (1,055,744 tokens) was
+in flight when the stall began. **So the handshake stall is not confined to one request slot**; it has now occurred with 2 slots after a
+burst of very long requests. Evidence: `results/F12/B_1m_mr2_stall/` (decode stack, both engines' metrics), `results/logs/runs/B_gpt-oss_1m_mr2/`.
+Config B at 1M otherwise served every length (TC-1 complete); Config C at 1M skipped (same family), MT-Bench phase released.
