@@ -414,3 +414,11 @@ defers the release (raiden `group_failure_requires_drain`, sender not drained) a
 sees `holds_kv` and frees the row; the later drain (scheduler.py 3779–3796) calls `release_kv_cache` without a `holds_kv` guard → the
 assertion in `common.py` 292–300. The chunk cache's `release_aborted_request` is a no-op, so it is not the first releaser. Secondary: the
 result-path free happens before the raiden group has drained, which the deferral was meant to prevent. Issue draft: `bug_reports/F-8_github_issue.md`.
+
+**F-10 mechanism located in code (2026-10-08 08:20 UTC).** `ViTTpuCompileRunner.bucket_for_patches` (vit_tpu_compile_runner.py 616–634)
+returns the raw patch count for an image above the top bucket and warns about a "one-time recompile"; `VisionTpuCompilePolicy.run` (348–364)
+then always calls `compiled_fn`, which recompiles → `RuntimeError` under the stance armed in `_maybe_arm_fail_on_recompile` (scheduler.py 5187–5208).
+The runner saves the uncompiled forward as `eager_fn` (line 186) but never calls it, whereas `MoonVitTpuCompilePolicy._run_one` (moonvit 189–214)
+and `Gemma4VisionTpuCompilePolicy` (gemma4 176–194) fall back to `eager_fn` for exactly this case. Image is not downscaled because
+`SGLANG_IMAGE_MAX_PIXELS` defaults to 16384×28×28. 1920×1080 → 120×68 = 8,160 patches vs 4,900 (70×70) top bucket; 1024² fits, 896×504 (1,512) fits.
+Issue draft: `bug_reports/F-10_github_issue.md`.

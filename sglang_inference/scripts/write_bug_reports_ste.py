@@ -506,7 +506,7 @@ None found. New (still unconfirmed).
 
 REPORTS["F-10"] = f"""# F-10: One large image (1920×1080) stops the Qwen3-VL prefill engine
 
-**Type:** bug (crash). **Severity:** high. **Status:** reproduced one time. Repeat queued.
+**Type:** bug (crash). **Severity:** high. **Status:** reproduced 2 of 2 (2026-10-07 and 2026-10-08). 896×504 works.
 
 ## Summary
 
@@ -546,11 +546,14 @@ RuntimeError: Detected recompile when torch.compile stance is 'fail_on_recompile
 ```
 **Expected result.** The server compiles the new shape one time and answers. Or it returns HTTP 400 or 413 for an image that is too large.
 
-## Possible cause and suggested fix
+## Cause (located in the code) and suggested fix
 
-The ViT runner expects a one-time recompile, but the global `fail_on_recompile` stance (armed at `Warmup complete; froze torch.compile`) blocks
-it. Suggested fixes: exclude the ViT runner from the stance; or reject images above the precompiled range at request validation; or set a default
-`max_pixels` in `--mm-process-config` (the Qwen3-VL-8B recipe uses 313,600).
+The generic ViT runner used by Qwen3-VL sends an image above the top precompiled bucket to the compiled function, which recompiles; the
+global `fail_on_recompile` stance (armed at `Warmup complete; froze torch.compile`) turns the recompile into a `RuntimeError`. The runner
+keeps the uncompiled encoder as `eager_fn` but never calls it. The MoonViT and Gemma4 vision policies in the same directory run such images
+through `eager_fn` instead. Fix: add the same fallback to `VisionTpuCompilePolicy.run` (or the Qwen3-VL run adapter); or reject images above the
+precompiled range with HTTP 413; or ship a `max_pixels` default that matches the compiled range (the Qwen3-VL-8B recipe uses 313,600). In all
+cases catch encoder exceptions per request so the scheduler survives. Full trace: `F-10_github_issue.md`.
 
 ## Also to test
 

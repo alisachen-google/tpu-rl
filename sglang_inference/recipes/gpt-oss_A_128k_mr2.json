@@ -130,6 +130,5 @@
     "runtime_envs": {
       "SGLANG_TPU_FUSED_MOE_SC_GATHER": "0"
     }
-  },
-  "name": null
+  }
 }

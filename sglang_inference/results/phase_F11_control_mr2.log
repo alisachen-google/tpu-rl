@@ -1,3 +1,10 @@
 2026-10-08T07:07:21Z a_holders=[] b_holders=[]
 2026-10-08T07:07:21Z F-11 control: F11_gpt-oss_A_128k_mr2
 2026-10-08T07:36:04Z control pair blocked: another user's servers started on both hosts at 07:07; requeued behind tpu_free
+2026-10-08T08:02:26Z TPU free again; starting control pair
+2026-10-08T08:02:38Z a_holders=[] b_holders=[]
+2026-10-08T08:02:38Z F-11 control: F11_gpt-oss_A_128k_mr2
+grep: /home/alisachen_google_com/pd_disagg/results/runs/F11_gpt-oss_A_128k_mr2/prefill/server.log: No such file or directory
+2026-10-08T08:12:02Z first two launches failed: recipe had a null 'name' field (launcher: Unknown P/D config fields); fixed, relaunching
+2026-10-08T08:12:15Z a_holders=[] b_holders=[]
+2026-10-08T08:12:15Z F-11 control: F11_gpt-oss_A_128k_mr2
