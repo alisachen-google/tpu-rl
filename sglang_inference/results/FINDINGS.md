@@ -522,3 +522,12 @@ Not in the open-issue list (no issue mentions kv-canary).
 - F-13 confirmed on Qwen3-VL (18:00 UTC, `A_qwen3-vl_128k_kvcheck`): `NotImplementedError: kv-canary: no attacher registered for pool class
   TpuFusedMHATokenToKVPool`. Both TPU pool shapes fail → `--kv-canary` unusable on TPU. Draft: `bug_reports/F-13_github_issue.md`.
   Checksum-only TC-15 runs queued (`_phase_kv_checksum_gptoss.sh`, then Qwen).
+
+**EAGLE3 monolithic control (18:03–18:13 UTC, `results/D/gpt-oss/eagle3_control/`).** Same spec flags, bf16 KV, host b only.
+- TC-1 8k vs plain bf16 golden: diverges after 22 / 16 tokens, agreement 0.031 / 0.028 — **identical to PD Config D's numbers** → the
+  divergence is the speculative verify path itself; PD adds nothing.
+- Acceptance: random-text TC-1 1.38; GSM8K window gauge 2.64 (rate 0.55); decode-batch accept len over the run p50 2.66, min 1.20, max 3.16.
+  GSM8K 0.96, 745 tok/s, 48.7 s (PD-D: 0.99, 770 tok/s, 47.4 s). PD-D's decode-batch p50 during its GSM8K window was 1.48 (with 4
+  concurrent threads and different batch composition), yet end-to-end throughput was equal → the per-batch numbers are not like-for-like.
+  **Inconclusive**; controlled comparison queued (`_phase_spec_accept_compare.sh`: same 20 natural prompts, c=1, per-request
+  `completion_tokens / spec_verify_ct` from `meta_info`, PD-D vs monolithic).

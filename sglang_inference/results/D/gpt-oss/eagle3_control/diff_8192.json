@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_bf16_c1/8192.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/D/gpt-oss/eagle3_control/8192.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl8192_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 22<256",
+    "agreement 0.031<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 107,
+   "token_prefix": 22,
+   "token_agreement": 0.03125,
+   "first_divergence_token": 22,
+   "first_divergence_char": 107,
+   "context_a": "e secret code words for checkpoint 1, 2,",
+   "context_b": "e secret code words embedded: \"The secre",
+   "first_token_logprob_absdiff": 0.0,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl8192_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 16<256",
+    "agreement 0.028<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 82,
+   "token_prefix": 16,
+   "token_agreement": 0.0283203125,
+   "first_divergence_token": 16,
+   "first_divergence_char": 82,
+   "context_a": "ed above, in order. In the massive text,",
+   "context_b": "ed above, in order. Let's scan the text ",
+   "first_token_logprob_absdiff": 0.0,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

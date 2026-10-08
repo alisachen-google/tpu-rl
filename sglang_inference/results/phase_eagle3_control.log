@@ -1,1 +1,15 @@
 2026-10-08T18:00:57Z [eagle3-control] kv integrity done
+2026-10-08T18:11:56Z [eagle3-control] (1) TC-1 8k vs bf16 golden (identity check of the spec verify path, monolithic)
+   [isl8192_k0] tokens=1024 finish=length cached=0 ttft=1213.37ms e2e=13003.71ms
+   [isl8192_k1] tokens=1024 finish=length cached=0 ttft=297.75ms e2e=9006.0ms
+   vs bf16 golden isl8192_k0    False     107     22  0.031   0.0000  FAIL  token prefix 22<256; agreement 0.031<0.95
+   vs bf16 golden isl8192_k1    False      82     16  0.028   0.0000  FAIL  token prefix 16<256; agreement 0.028<0.95
+   vs bf16 golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/D/gpt-oss/eagle3_control/diff_8192.json
+   accept after random-text TC-1: sglang:spec_accept_length 1.375 sglang:spec_accept_rate 0.125 
+2026-10-08T18:12:18Z [eagle3-control] (2) GSM8K-100 (natural text): accuracy, throughput and acceptance, monolithic EAGLE3
+   Total latency: 48.749 s
+   Output throughput: 744.651 token/s
+   [METRIC] gsm8k_score=0.96 labels={"model": "gpt-oss-120b", "eval": "gsm8k"}
+   accept after GSM8K: sglang:spec_accept_length 2.641509433962264 sglang:spec_accept_rate 0.5471698113207547   cumulative avg_spec_accept_length=2.6579788712816237
+   accept len over all decode batches: n=117 min=1.20 p50=2.66 max=3.16
+2026-10-08T18:13:22Z [eagle3-control] phase eagle3 control done
