@@ -439,3 +439,14 @@ no deadline at all while a room is in `Bootstrapping`. Drafts and PRIORITIES.md 
 pool `17216 -> 16896`; the 32k prompt's chunks are 8192, 8192, **320**, 7680 … with SWA usage 0.97 → 0.51 around the 320-token chunk
 (exactly the predicted budget); 8k and 32k complete in ~6 s. No handshake stall on this pair → F-12 needs the single slot (necessary, not
 sufficient: the single-slot 1M recipe works).
+
+## Config B (gpt-oss, prefill radix cache on) — 2026-10-08 08:44–08:54 UTC, `results/B/gpt-oss/`, run `B_gpt-oss_128k`
+- TC-1 vs c=1 golden: 8k identical 2/2; 32k and 128k diverge after 3–24 tokens (F-4 class; identical numbers across two runs → PD deterministic); needles 3/3 at every length.
+- Prefix cache works through PD: after one pass 24,576 of 32,768 tokens cached (last chunk not inserted), second pass 32,704 cached, prefill computes 64 tokens; text identical cold vs cached, first-token logprob delta 0.034 / 0.001 (#321 class).
+- Params matrix (n_2, return_logprob_top5 excluded) all PASS; chat 10/11 (tool_call: known parser config); GSM8K 0.99; concurrency c=1/2/4 at 128k all OK (ITL 5.5–8.9 ms); decode aborts 6/6 PASS.
+- **Prefill-phase abort does NOT crash with the radix cache on** (F-8 needs `--disable-radix-cache`). Compile audit: 0 serving-time recompiles on both engines.
+- Tiny sweep: 7 of 35 prompts flagged (see next entry).
+- First attempt of B died in the params matrix: `return_logprob_top5` sets `logprob_start_len 0` → F-5 (same in A); case excluded, harness now relaunches after crashes.
+- Tiny sweep flags: the same 7 prompts as in Config A (100–1,025 tokens), same output text ("the text appears to be a random collection…"):
+  gpt-oss reasons for all 160 tokens and never states the needle. Test-design limit of the tiny set (160 tokens), not a serving defect; 28/35
+  needles found, all 35 produce exactly 160 tokens with no errors.

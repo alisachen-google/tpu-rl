@@ -44,7 +44,7 @@ disconnect should look identical from the outside, only with the page release de
 | TPU stack | torch-tpu 0.1.1+release.2026.9.22.20260927223741, libtpu 0.0.47, tpu-sync-torch 0.0.1.dev20261002213151, torch 2.11.0+cpu, transformers 5.8.1 |
 | Hardware | Two TPU v7x hosts (4 chips / 8 TensorCores each). Host a: prefill engine. Host b: decode engine. TP 8, EP 8 on each |
 | Model | `openai/gpt-oss-120b` (MXFP4 weights), KV cache fp8_e4m3, page size 64 |
-| Prefill flags that matter | `--disaggregation-mode prefill --disaggregation-transfer-backend raiden --disable-radix-cache --chunked-prefill-size 8192 --context-length 140288` (overlap scheduling on; tree cache is `SWAChunkCache`) |
+| Prefill flags that matter | `--disaggregation-mode prefill --disaggregation-transfer-backend raiden --disable-radix-cache --chunked-prefill-size 8192 --context-length 140288` (overlap scheduling on; tree cache is `SWAChunkCache`). **Required:** `--disable-radix-cache`; with the radix cache on the abort is handled correctly (tested) |
 
 ## Code trace
 
@@ -107,6 +107,12 @@ load balancer that runs in the same process group dies with it. The tokenizer ma
 **Why decode-phase disconnects are fine.** A request in the decode phase is no longer `chunked_req`, so the abort takes the running-batch path,
 which releases once.
 
+**With the radix cache on, the same abort does not crash.** Config B of our campaign (identical flags except `--disable-radix-cache` removed, tree
+cache `UnifiedRadixCache`) ran the same prefill-phase abort: the request was dropped, both engines stayed healthy, usage returned to baseline, and
+the follow-up requests succeeded (one served from the cache with 131,008 cached tokens). So the double release either does not happen on the
+radix path or is absorbed by its `claim_kv_row` branch; the crash is specific to the chunk cache (`--disable-radix-cache`), which is the
+configuration disaggregated prefill uses when the prefix cache is not wanted.
+
 **Secondary concern.** Step 3 frees the pages while the raiden group may still be draining, which is exactly what the deferral in step 2 was
 meant to prevent. On this run the sender had drained before step 4, so the crash is the only symptom we saw, but a slow drain could let the
 pages be reused while a remote read is still in progress.
@@ -144,8 +150,8 @@ and compares running requests, queued requests and token usage with the pre-test
 **Observed.** Step 4 prints `000`. Step 5 shows the traceback above on every rank.
 **Expected.** `200`; the prefill engine frees the request's pages after the raiden group drains and serves the next request.
 
-Also worth running: the same abort with the radix cache on (`UnifiedRadixCache`), which takes a different branch in `release_kv_cache`, and
-with `--disable-overlap-schedule`, where the in-flight chunk's result lands in the same step.
+Run as a control: the same abort with the radix cache on (`UnifiedRadixCache`) passes (see Code trace). Still worth running: `--disable-overlap-schedule`,
+where the in-flight chunk's result lands in the same step.
 
 ## Fix proposal
 
