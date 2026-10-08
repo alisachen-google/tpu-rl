@@ -551,3 +551,9 @@ progress (same code path expected).
 only by the differential tests (TC-1: Qwen bit-identical at all lengths; gpt-oss identical with SWA memory off) and GSM8K.
 - F-14 confirmed on Qwen3-VL (18:31 UTC, `A_qwen3-vl_128k_kvcheck_nocanary`): pair healthy, first TC-1 request → all prefill ranks die at
   `checksum.py:105` (`is_cuda` assertion). 2/2 models.
+
+**EAGLE3 acceptance, controlled comparison (18:33–18:40 UTC, `results/D/gpt-oss/spec_accept_compare/`).** Same 20 natural-text prompts,
+greedy, 256 tokens, c=1, per-request `completion_tokens / spec_verify_ct`: **PD Config D mean 2.229 (p50 2.265, 1.84–2.46), 236.8 tok/s;
+monolithic EAGLE3 mean 2.229 (p50 2.265, 1.84–2.46), 232.5 tok/s; verify counts identical per request.** Speculative decoding through the
+P/D pair is exactly as effective as on one server; the earlier per-batch "1.5 vs 2.6" gap was a measurement artefact (different windows and
+batch composition). EAGLE3 question closed: no PD defect, no new issue. Single-stream decode with EAGLE3: ~235 tok/s vs 176 without.

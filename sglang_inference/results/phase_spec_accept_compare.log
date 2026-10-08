@@ -1,2 +1,49 @@
 2026-10-08T18:33:28Z [spec-accept] kv checksum phases done
 2026-10-08T18:33:40Z [spec-accept] === PD Config D
+2026-10-08 18:38:12 prefill /health ready after 271 s
+2026-10-08 18:38:12 decode /health ready after 0 s
+2026-10-08 18:38:13 LB /health_generate ready after 1 s
+  q00 status=200 tokens=256 spec_verify_ct=119 accept_length=2.151 e2e=1.1s meta_keys=['api_server_dispatch_finish_ts', 'cached_tokens', 'cached_tokens_details', 'completion_tokens', 'decode_throughput', 'dp_rank', 'e2e_latency', 'finish_reason', 'first_token_latency', 'forward_entry_time', 'id', 'num_retractions']
+  q01 status=200 tokens=244 spec_verify_ct=103 accept_length=2.369 e2e=1.3s
+  q02 status=200 tokens=256 spec_verify_ct=116 accept_length=2.207 e2e=1.0s
+  q03 status=200 tokens=256 spec_verify_ct=139 accept_length=1.842 e2e=1.5s
+  q04 status=200 tokens=256 spec_verify_ct=108 accept_length=2.37 e2e=1.1s
+  q05 status=200 tokens=256 spec_verify_ct=120 accept_length=2.133 e2e=1.1s
+  q06 status=200 tokens=256 spec_verify_ct=108 accept_length=2.37 e2e=1.3s
+  q07 status=200 tokens=256 spec_verify_ct=121 accept_length=2.116 e2e=1.0s
+  q08 status=200 tokens=256 spec_verify_ct=137 accept_length=1.869 e2e=1.2s
+  q09 status=200 tokens=256 spec_verify_ct=115 accept_length=2.226 e2e=1.0s
+  q10 status=200 tokens=256 spec_verify_ct=104 accept_length=2.462 e2e=0.9s
+  q11 status=200 tokens=250 spec_verify_ct=110 accept_length=2.273 e2e=1.0s
+  q12 status=200 tokens=256 spec_verify_ct=114 accept_length=2.246 e2e=1.0s
+  q13 status=200 tokens=256 spec_verify_ct=110 accept_length=2.327 e2e=0.9s
+  q14 status=200 tokens=255 spec_verify_ct=111 accept_length=2.297 e2e=1.0s
+  q15 status=200 tokens=256 spec_verify_ct=111 accept_length=2.306 e2e=1.0s
+  q16 status=200 tokens=177 spec_verify_ct=82 accept_length=2.159 e2e=0.7s
+  q17 status=200 tokens=256 spec_verify_ct=114 accept_length=2.246 e2e=1.0s
+  q18 status=200 tokens=256 spec_verify_ct=109 accept_length=2.349 e2e=1.1s
+  q19 status=200 tokens=256 spec_verify_ct=113 accept_length=2.265 e2e=1.0s
+accept_length over 20 requests: mean=2.229 p50=2.265 min=1.842 max=2.462; tokens/s (serial)=236.8
+2026-10-08T18:38:49Z [spec-accept] === monolithic EAGLE3 (bf16)
+  q00 status=200 tokens=256 spec_verify_ct=119 accept_length=2.151 e2e=1.5s meta_keys=['api_server_dispatch_finish_ts', 'cached_tokens', 'cached_tokens_details', 'completion_tokens', 'decode_throughput', 'dp_rank', 'e2e_latency', 'finish_reason', 'first_token_latency', 'forward_entry_time', 'id', 'num_retractions']
+  q01 status=200 tokens=244 spec_verify_ct=103 accept_length=2.369 e2e=1.2s
+  q02 status=200 tokens=256 spec_verify_ct=116 accept_length=2.207 e2e=1.3s
+  q03 status=200 tokens=256 spec_verify_ct=139 accept_length=1.842 e2e=1.3s
+  q04 status=200 tokens=256 spec_verify_ct=108 accept_length=2.37 e2e=1.2s
+  q05 status=200 tokens=256 spec_verify_ct=120 accept_length=2.133 e2e=1.1s
+  q06 status=200 tokens=256 spec_verify_ct=108 accept_length=2.37 e2e=1.0s
+  q07 status=200 tokens=256 spec_verify_ct=121 accept_length=2.116 e2e=1.3s
+  q08 status=200 tokens=256 spec_verify_ct=137 accept_length=1.869 e2e=1.2s
+  q09 status=200 tokens=256 spec_verify_ct=115 accept_length=2.226 e2e=1.0s
+  q10 status=200 tokens=256 spec_verify_ct=104 accept_length=2.462 e2e=0.9s
+  q11 status=200 tokens=250 spec_verify_ct=110 accept_length=2.273 e2e=1.0s
+  q12 status=200 tokens=256 spec_verify_ct=114 accept_length=2.246 e2e=1.0s
+  q13 status=200 tokens=256 spec_verify_ct=110 accept_length=2.327 e2e=0.9s
+  q14 status=200 tokens=255 spec_verify_ct=111 accept_length=2.297 e2e=1.0s
+  q15 status=200 tokens=256 spec_verify_ct=111 accept_length=2.306 e2e=1.0s
+  q16 status=200 tokens=177 spec_verify_ct=82 accept_length=2.159 e2e=0.7s
+  q17 status=200 tokens=256 spec_verify_ct=114 accept_length=2.246 e2e=1.0s
+  q18 status=200 tokens=256 spec_verify_ct=109 accept_length=2.349 e2e=1.0s
+  q19 status=200 tokens=256 spec_verify_ct=113 accept_length=2.265 e2e=1.1s
+accept_length over 20 requests: mean=2.229 p50=2.265 min=1.842 max=2.462; tokens/s (serial)=232.5
+2026-10-08T18:44:20Z [spec-accept] phase spec accept compare done
