@@ -227,3 +227,4 @@
 === 2026-10-08T09:11:38Z run_golden finished
 2026-10-08T09:11:47Z [D/gpt-oss] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_D_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_bf16_c1
 2026-10-08T09:12:00Z a_holders=[] b_holders=[]
+2026-10-08T09:22:54Z [D/gpt-oss] cause: TPU device nodes taken by another user's job starting at the same time (not EAGLE3); D/E/Qwen requeued behind tpu_free

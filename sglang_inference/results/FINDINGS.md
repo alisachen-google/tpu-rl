@@ -461,3 +461,7 @@ sufficient: the single-slot 1M recipe works).
   cold prefill). Confounded by load; clean idle measurement queued (`_phase_hicache_reload.sh`).
 - Config C completed 09:05 UTC with 0 relaunches: GSM8K 0.98; decode aborts 6/6 PASS; prefill-phase abort handled (no crash, as in B);
   compile audit 0 serving-time recompiles on both engines.
+
+**Config D start failure (09:12 UTC) was TPU contention, not a bug.** Both engines aborted at init with `Failed to acquire a TPU device node
+'/dev/vfio/N' because it is already opened by another process`; another user's servers started on both hosts at 09:11:50, between our
+holder check (09:12:00, still empty) and device open. Chain stopped; D, E and Qwen B/C are requeued behind `tpu_free`.
