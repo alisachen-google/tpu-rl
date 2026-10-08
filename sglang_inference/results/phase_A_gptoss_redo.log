@@ -45,3 +45,32 @@ sglang:kv_transfer_bootstrap_ms_count 114.0 sglang:kv_transfer_bootstrap_ms_sum 
 
    http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
    http://10.128.0.90:30000 sglang:full_token_usage 0.00016276041666666666 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 1.0 sglang:num_used_tokens 128.0 
+   n=2 t=0.7 HTTP 000 in 120.002766s
+
+   http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.00016276041666666666 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 1.0 sglang:num_used_tokens 128.0 
+2026-10-08T02:57:56Z (5) F-5 repro: prompt logprobs (expect prefill crash) then relaunch
+   prompt-logprob HTTP 500 in 65.479482s
+Internal Server Error
+   prefill /health after F-5 repro: 000
+2026-10-08T03:01:29Z prefill + LB back
+2026-10-08T03:01:29Z (6) F-8 repro: single prefill-phase abort (expect crash), decode-phase aborts after relaunch
+2026-10-08T03:02:37Z abort prefill rc=1
+[+   67.55s] follow-up identical-prompt: FAIL status=500 tokens=None cached=None Internal Server Error
+[+   67.55s] server-info[final] http://10.128.15.217:30000: {'error': "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with ur
+[+   67.72s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   67.72s] FAIL not back to baseline: http://10.128.15.217:30000: poll error: ReadTimeout: HTTPConnectionPool(host='10.128.15.217', port=30000): Read timed out. (read t
+[+   67.72s] FAIL: 1 aborts (0 failed to start), follow-ups short=False identical=False (cached_tokens=None), 1 baseline problem(s) -> /home/alisachen_google_com/pd_disag
+   prefill /health after prefill-abort: 000
+2026-10-08T03:05:19Z prefill + LB back
+2026-10-08T03:07:23Z abort decode rc=0
+[+  116.33s] WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+[+  116.49s] follow-up short: OK status=200 tokens=16 cached=0 
+[+  123.71s] follow-up identical-prompt: OK status=200 tokens=32 cached=0 
+[+  123.72s] server-info[final] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+  123.73s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+  123.73s] PASS: 6 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=0), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/res
+   prefill /health after decode-aborts: 200
+   http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-08T03:07:39Z phase A gpt-oss redo done

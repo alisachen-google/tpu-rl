@@ -287,3 +287,16 @@ prefill), or reject the request with a clear error, or let the watchdog fail a r
 
 **Next isolation (queued):** same 1M shape with `max_running_requests 4` (does the SWA pool scale with the running-request count?), and the
 128k-shape recipe with `max_running_requests 1`.
+
+**Repro results, gpt-oss Config A redo (2026-10-08 02:52–03:07 UTC, `results/phase_A_gptoss_redo.log`).**
+- **F-5 confirmed (2/2):** one prompt-logprob request → HTTP 500 after 65 s, prefill engine dead (`/health` 000). Relaunched.
+- **F-8 confirmed (2/2):** one client abort 2 s into a 131k prefill → prefill engine dead. Decode-phase aborts (6, two concurrent) **PASS**: both engines back to baseline, follow-up requests OK.
+- **F-6 confirmed (3/3):** `n=2` with temperature 0 and with 0.7 → no response in 120 s each; during the stall the decode engine shows `num_running_reqs=1`, `num_used_tokens=128`
+  (one of the two samples finished its 32+... tokens and sits there), prefill idle. Both engines stay healthy; the stuck request remains until the client disconnects.
+  Reclassified from candidate to **confirmed hang**.
+- **GSM8K-100 through PD: 0.98** (monolithic golden 0.99; CI gate 0.80). → F-4 has no measurable accuracy impact; F-4 downgraded to a numerical
+  difference (P2) with the chunk-schedule cause documented.
+- Chat suite 10/11: Harmony reasoning low/medium/high, multi-turn, stop strings, streaming with usage, 6k system prompt, oversized max_tokens → 400 all PASS.
+  `tool_call` returned no `tool_calls` (finish_reason stop, 61 reasoning tokens, empty content): the recipe sets `reasoning_parser gpt-oss` but no
+  `--tool-call-parser`, so this is a configuration gap of the test recipe, not a PD defect; re-test with `--tool-call-parser gpt-oss` when the recipe is next restarted.
+- KV transfer bootstrap: 114 transfers, mean bootstrap ≈ 1 ms.

@@ -1,0 +1,163 @@
+{
+ "url": "http://10.128.15.217:8080",
+ "prompt_id": "isl131072_k0",
+ "phase": "prefill",
+ "abort_after": 2.0,
+ "repeat": 1,
+ "concurrent": 1,
+ "settle": 30.0,
+ "server_info": {
+  "baseline": {
+   "http://10.128.15.217:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "after_abort": {
+   "http://10.128.15.217:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "settled": {
+   "http://10.128.15.217:30000": {
+    "error": "ReadTimeout: HTTPConnectionPool(host='10.128.15.217', port=30000): Read timed out. (read timeout=30)"
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "final": {
+   "http://10.128.15.217:30000": {
+    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  }
+ },
+ "aborts": [
+  {
+   "idx": 0,
+   "rid": "abort-0-1791428489602",
+   "status": 200,
+   "error": null,
+   "first_token_s": null,
+   "aborted_s": 2.038,
+   "chunks": 0,
+   "phase_actual": "prefill",
+   "finished": false
+  }
+ ],
+ "follow_ups": [
+  {
+   "label": "short",
+   "ok": false,
+   "status": 500,
+   "error": "Internal Server Error",
+   "cached_tokens": null,
+   "completion_tokens": null,
+   "elapsed": 5.261
+  },
+  {
+   "label": "identical-prompt",
+   "ok": false,
+   "status": 500,
+   "error": "Internal Server Error",
+   "cached_tokens": null,
+   "completion_tokens": null,
+   "elapsed": 0.01
+  }
+ ],
+ "baseline_problems": [
+  "http://10.128.15.217:30000: poll error: ReadTimeout: HTTPConnectionPool(host='10.128.15.217', port=30000): Read timed out. (read timeout=30)"
+ ],
+ "start_errors": 0,
+ "pass": false,
+ "timeline": [
+  {
+   "t": 0.005,
+   "msg": "prompt id=isl131072_k0 isl=131072 chars=711300 phase=prefill abort_after=2.0s repeat=1 concurrent=1"
+  },
+  {
+   "t": 0.017,
+   "msg": "server-info[baseline] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 0.028,
+   "msg": "server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 0.028,
+   "msg": "round 1/1: launching 1 aborting request(s)"
+  },
+  {
+   "t": 0.065,
+   "msg": "req0: sent (abort-0-1791428489602), headers after 0.04s"
+  },
+  {
+   "t": 2.066,
+   "msg": "req0: aborted at 2.038s in prefill (first_token=Nones, chunks=0)"
+  },
+  {
+   "t": 2.223,
+   "msg": "server-info[after-abort] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 2.236,
+   "msg": "server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 2.236,
+   "msg": "waiting --settle 30.0s"
+  },
+  {
+   "t": 62.267,
+   "msg": "server-info[settled] http://10.128.15.217:30000: {'error': \"ReadTimeout: HTTPConnectionPool(host='10.128.15.217', port=30000): Read timed out. (read timeout=30)\"}"
+  },
+  {
+   "t": 62.277,
+   "msg": "server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 62.278,
+   "msg": "WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
+  },
+  {
+   "t": 67.539,
+   "msg": "follow-up short: FAIL status=500 tokens=None cached=None Internal Server Error"
+  },
+  {
+   "t": 67.549,
+   "msg": "follow-up identical-prompt: FAIL status=500 tokens=None cached=None Internal Server Error"
+  },
+  {
+   "t": 67.55,
+   "msg": "server-info[final] http://10.128.15.217:30000: {'error': \"ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn\"}"
+  },
+  {
+   "t": 67.721,
+   "msg": "server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 67.721,
+   "msg": "FAIL not back to baseline: http://10.128.15.217:30000: poll error: ReadTimeout: HTTPConnectionPool(host='10.128.15.217', port=30000): Read timed out. (read timeout=30)"
+  }
+ ]
+}

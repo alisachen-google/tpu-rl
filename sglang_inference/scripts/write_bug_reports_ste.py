@@ -162,7 +162,7 @@ For concurrent runs, use these gates instead: the needle answers, the exact toke
 
 REPORTS["F-4"] = f"""# F-4: gpt-oss-120b in PD mode gives a different output than the monolithic server for long prompts
 
-**Type:** numerical difference (bug candidate). **Severity:** high until the accuracy check is complete. **Status:** reproduced on 6 of 6 long prompts. Cause identified with high confidence. Confirmation run queued.
+**Type:** numerical difference. **Severity:** low (GSM8K through PD scores 0.98 against 0.99 monolithic; no measurable accuracy effect). **Status:** reproduced on 6 of 6 long prompts; cause identified; SWA-off paired comparison running.
 
 ## Summary
 
@@ -237,7 +237,7 @@ monolithic server. Or document the difference.
 
 REPORTS["F-5"] = f"""# F-5: One request that asks for prompt log-probabilities stops the whole prefill engine
 
-**Type:** bug (crash). **Severity:** high. **Status:** reproduced one time. Repeat queued.
+**Type:** bug (crash). **Severity:** high. **Status:** reproduced 2 of 2 (2026-10-07 and 2026-10-08).
 
 ## Summary
 
@@ -296,7 +296,7 @@ The same request against the monolithic server. We expect the same crash, becaus
 
 REPORTS["F-6"] = f"""# F-6: A request with `n=2` gets no response for 300 seconds (candidate, not confirmed)
 
-**Type:** bug candidate (hang). **Severity:** high if confirmed. **Status:** observed one time. Repeat queued.
+**Type:** bug (hang). **Severity:** high. **Status:** reproduced 3 of 3 (temperature 0 and 0.7). The decode engine keeps one running request with 128 used tokens until the client disconnects; both engines stay healthy.
 
 ## Summary
 
@@ -365,7 +365,7 @@ The log line says `0 requests affected`, but one request was affected. This mess
 
 REPORTS["F-8"] = f"""# F-8: A client that disconnects during chunked prefill stops the whole prefill engine
 
-**Type:** bug (crash). **Severity:** high. **Status:** reproduced one time. Repeat queued.
+**Type:** bug (crash). **Severity:** high. **Status:** reproduced 2 of 2. Aborts during the decode phase (6, two concurrent) pass: resources return to baseline.
 
 ## Summary
 

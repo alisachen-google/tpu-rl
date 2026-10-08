@@ -1,0 +1,18 @@
+[+    0.00s] prompt id=isl131072_k0 isl=131072 chars=711300 phase=prefill abort_after=2.0s repeat=1 concurrent=1
+[+    0.02s] server-info[baseline] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    0.03s] server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    0.03s] round 1/1: launching 1 aborting request(s)
+[+    0.07s] req0: sent (abort-0-1791428489602), headers after 0.04s
+[+    2.07s] req0: aborted at 2.038s in prefill (first_token=Nones, chunks=0)
+[+    2.22s] server-info[after-abort] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    2.24s] server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    2.24s] waiting --settle 30.0s
+[+   62.27s] server-info[settled] http://10.128.15.217:30000: {'error': "ReadTimeout: HTTPConnectionPool(host='10.128.15.217', port=30000): Read timed out. (read timeout=30)"}
+[+   62.28s] server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   62.28s] WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+[+   67.54s] follow-up short: FAIL status=500 tokens=None cached=None Internal Server Error
+[+   67.55s] follow-up identical-prompt: FAIL status=500 tokens=None cached=None Internal Server Error
+[+   67.55s] server-info[final] http://10.128.15.217:30000: {'error': "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"}
+[+   67.72s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   67.72s] FAIL not back to baseline: http://10.128.15.217:30000: poll error: ReadTimeout: HTTPConnectionPool(host='10.128.15.217', port=30000): Read timed out. (read timeout=30)
+[+   67.72s] FAIL: 1 aborts (0 failed to start), follow-ups short=False identical=False (cached_tokens=None), 1 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/A/abort/gpt-oss/abort_prefill_repro.json
