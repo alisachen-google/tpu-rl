@@ -1,0 +1,11 @@
+2026-10-08 01:01:44 starting decode on b (10.128.0.90)
+2909345
+2026-10-08 01:01:44 starting prefill on a (10.128.15.217)
+2026-10-08 01:04:45 prefill /health ready after 180 s
+2026-10-08 01:04:45 decode /health ready after 0 s
+2026-10-08 01:04:46 LB /health_generate ready after 1 s
+a: {'version': '0.5.13.dev7249+g09d1244c2', 'disaggregation_mode': 'prefill', 'disaggregation_transfer_backend': 'raiden', 'model_path': '/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a', 'kv_cache_dtype': 'fp8_e4m3', 'page_size': 64, 'context_length': 1056768, 'max_total_num_tokens': 1114112, 'max_running_requests': 1, 'chunked_prefill_size': 8192, 'disable_radix_cache': True, 'enable_hierarchical_cache': False, 'hicache_io_backend': 'kernel', 'hicache_ratio': 2.0, 'disaggregation_decode_enable_radix_cache': False, 'speculative_algorithm': None, 'enable_torch_compile': True, 'tpu_compile_bs': [1], 'tpu_compile_tokens': [512, 1024, 2048, 4096, 8192], 'mem_fraction_static': 0.45}
+   state: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None, 'gen_throughput': None, 'avg_spec_accept_length': None}
+b: {'version': '0.5.13.dev7249+g09d1244c2', 'disaggregation_mode': 'decode', 'disaggregation_transfer_backend': 'raiden', 'model_path': '/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a', 'kv_cache_dtype': 'fp8_e4m3', 'page_size': 64, 'context_length': 1056768, 'max_total_num_tokens': 1114112, 'max_running_requests': 1, 'chunked_prefill_size': 8192, 'disable_radix_cache': True, 'enable_hierarchical_cache': False, 'hicache_io_backend': 'raiden', 'hicache_ratio': None, 'disaggregation_decode_enable_radix_cache': False, 'speculative_algorithm': None, 'enable_torch_compile': True, 'tpu_compile_bs': [1], 'tpu_compile_tokens': [512, 1024, 2048, 4096, 8192], 'mem_fraction_static': 0.45}
+   state: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None, 'gen_throughput': None, 'avg_spec_accept_length': None}
+{"detail":"Not Found"}

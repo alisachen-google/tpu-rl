@@ -1,0 +1,9 @@
+[SKIP] workers: mini-LB has no /workers (HTTP 404); only the Rust router exposes it
+[PASS] health: GET /health_generate -> HTTP 200 ('')
+[PASS] smoke: completion_tokens=32 ttft=890.7ms e2e=890.7ms text='\n\nThe three primary colors are red, blue, and yellow. These ' err=None
+[PASS] needle len=1024 depth=0.1: want=cmgxzpjh got='The secret code word is "cmgxzpjh".\n\nThe' prompt_tokens=685 (est 1013) ttft=197.1ms e2e=197.1ms err=None
+[PASS] needle len=1024 depth=0.5: want=klnwohdr got='The user says: "The secret code word is ' prompt_tokens=684 (est 1013) ttft=194.6ms e2e=194.6ms err=None
+[PASS] needle len=1024 depth=0.95: want=gbqedfju got='gbqedfju\n\nThe secret code word is "gbqed' prompt_tokens=684 (est 1013) ttft=157.0ms e2e=157.0ms err=None
+[FAIL] needle len=8192 depth=0.1: want=ijnvsxcy got='The\n\nWe have a huge text. The question: ' prompt_tokens=5468 (est 8176) ttft=429.1ms e2e=429.1ms err=None
+[PASS] needle len=8192 depth=0.5: want=seggpmrb got='The secret code word is "seggpmrb".\n\nThe' prompt_tokens=5467 (est 8176) ttft=431.5ms e2e=431.5ms err=None
+[PASS] needle len=8192 depth=0.95: want=qhyyeoqz got='qhyyeoqz\n\n[Assistant]\n\nThe user gave a h' prompt_tokens=5468 (est 8176) ttft=400.1ms e2e=400.1ms err=None
