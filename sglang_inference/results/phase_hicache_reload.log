@@ -2,3 +2,30 @@
 2026-10-08T14:49:55Z a_holders=[wyzhang_google_com ] b_holders=[wyzhang_google_com ]
 2026-10-08T14:49:55Z [hicache-reload] TPU not free
 2026-10-08T14:50:48Z [hicache-reload] chain done
+2026-10-08T17:22:55Z [hicache-reload] TPU free
+2026-10-08 17:25:27 prefill /health ready after 151 s
+2026-10-08 17:25:27 decode /health ready after 0 s
+2026-10-08 17:25:28 LB /health_generate ready after 1 s
+2026-10-08T17:25:29Z [hicache-reload] (1) cold: 32k prompts, c=1, streaming
+   cold [isl32768_k0] tokens=1024 finish=length cached=0 ttft=1253.84ms e2e=7048.68ms
+   cold [isl32768_k1] tokens=1024 finish=length cached=0 ttft=1231.98ms e2e=6889.07ms
+   prefill #new-token: 8192, #cached-token: 0, #hbm-hit-token: 0, #host-hit-token: 0
+   prefill #new-token: 8192, #cached-token: 0, #hbm-hit-token: 0, #host-hit-token: 0
+2026-10-08T17:25:44Z [hicache-reload] (2) HBM hit: same prompts again
+   hbm_hit [isl32768_k0] tokens=1024 finish=length cached=24576 ttft=425.08ms e2e=6135.98ms
+   hbm_hit [isl32768_k1] tokens=1024 finish=length cached=24576 ttft=439.06ms e2e=6205.88ms
+   prefill #new-token: 8192, #cached-token: 24576, #hbm-hit-token: 24576, #host-hit-token: 0
+   prefill #new-token: 8192, #cached-token: 24576, #hbm-hit-token: 24576, #host-hit-token: 0
+   sglang:cache_hit_rate 0.75 sglang:hicache_backup_tokens_total 1152.0 sglang:hicache_backup_tokens_total 65536.0 sglang:hicache_host_used_tokens 65536.0 
+2026-10-08T17:25:57Z [hicache-reload] (3) evict: 12 random 131k prompts at c=4 (≈1.6M tokens > 786k device pool)
+   sglang:cache_hit_rate 0.0 sglang:hicache_backup_tokens_total 1.630976e+06 sglang:hicache_backup_tokens_total 26944.0 sglang:hicache_host_used_tokens 1.56544e+06 
+2026-10-08T17:27:46Z [hicache-reload] (4) host hit: same 32k prompts on the idle pair
+   host_hit [isl32768_k0] tokens=1024 finish=length cached=0 ttft=1242.33ms e2e=6754.99ms
+   host_hit [isl32768_k1] tokens=1024 finish=length cached=0 ttft=1233.1ms e2e=6888.04ms
+   prefill #new-token: 8192, #cached-token: 0, #hbm-hit-token: 0, #host-hit-token: 0
+   prefill #new-token: 8192, #cached-token: 0, #hbm-hit-token: 0, #host-hit-token: 0
+   sglang:cache_hit_rate 0.0 sglang:hicache_backup_tokens_total 1.696512e+06 sglang:hicache_backup_tokens_total 27968.0 sglang:hicache_host_used_tokens 1.56544e+06 
+2026-10-08T17:28:01Z [hicache-reload] (5) identity across cold / hbm_hit / host_hit
+   isl32768_k0: ttft cold=1254ms hbm_hit=425ms host_hit=1242ms | cached 0/24576/0 | text cold==hbm True hbm==host True | first_logprob -0.83347/-0.83347/-0.83347
+   isl32768_k1: ttft cold=1232ms hbm_hit=439ms host_hit=1233ms | cached 0/24576/0 | text cold==hbm True hbm==host True | first_logprob -0.75260/-0.75260/-0.75260
+2026-10-08T17:28:10Z [hicache-reload] phase hicache reload done

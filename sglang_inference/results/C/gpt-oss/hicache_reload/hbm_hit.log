@@ -1,0 +1,4 @@
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl32768_k0] tokens=1024 finish=length cached=24576 ttft=425.08ms e2e=6135.98ms
+[isl32768_k1] tokens=1024 finish=length cached=24576 ttft=439.06ms e2e=6205.88ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/C/gpt-oss/hicache_reload/hbm_hit.jsonl
