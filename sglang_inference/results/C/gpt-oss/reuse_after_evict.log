@@ -1,0 +1,4 @@
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=False)
+[isl32768_k0] tokens=1024 finish=length cached=32704 ttft=16034.45ms e2e=16038.13ms
+[isl32768_k1] tokens=1024 finish=length cached=32704 ttft=8895.31ms e2e=8896.59ms
+done: 2 prompts, 0 errors -> C/gpt-oss/reuse_after_evict.jsonl

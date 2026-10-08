@@ -450,3 +450,12 @@ sufficient: the single-slot 1M recipe works).
 - Tiny sweep flags: the same 7 prompts as in Config A (100–1,025 tokens), same output text ("the text appears to be a random collection…"):
   gpt-oss reasons for all 160 tokens and never states the needle. Test-design limit of the tiny set (160 tokens), not a serving defect; 28/35
   needles found, all 35 produce exactly 160 tokens with no errors.
+
+## Config C (gpt-oss, radix on + HiCache raiden host offload) — 2026-10-08 08:54– UTC, `results/C/gpt-oss/`
+- Start OK (154 s warm). TC-1, reuse, params, chat, concurrency: identical numbers to Config B (HiCache adds no numerical change).
+- Write-through works: after TC-1 `hicache_backup_tokens_total` 454,912; after the concurrency sweep (14 × 131k random prompts) 1.50M tokens
+  backed up to the 1.57M-token host pool, `hicache_dropped_tokens_total 0`, device cache evicted (`cache_hit_rate` 0.0 right after the sweep).
+- **Host reload works and is bit-exact:** re-sent 32k prompts served with `#hbm-hit-token: 0, #host-hit-token: 32704`; first-token logprobs
+  identical to the HBM-hit run (−0.79959, −0.75351); needles 3/3. Text diverged later only because GSM8K ran concurrently (F-3 batch effect).
+- Reload timing under concurrent GSM8K load: e2e 16.0 s / 8.9 s for 1,024 tokens (≈10 s / 3.3 s of prefill-from-host for 32k tokens, vs 1.3 s
+  cold prefill). Confounded by load; clean idle measurement queued (`_phase_hicache_reload.sh`).

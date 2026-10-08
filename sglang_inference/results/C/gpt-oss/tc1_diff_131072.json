@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1/131072.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/C/gpt-oss/tc1_131072.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl131072_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 5<256",
+    "agreement 0.075<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 21,
+   "token_prefix": 5,
+   "token_agreement": 0.0751953125,
+   "first_divergence_token": 5,
+   "first_divergence_char": 21,
+   "context_a": "e need to parse the massive text. The se",
+   "context_b": "e need to parse the huge text. The secre",
+   "first_token_logprob_absdiff": 0.05053579807281494,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl131072_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 14<256",
+    "agreement 0.024<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 76,
+   "token_prefix": 14,
+   "token_agreement": 0.0244140625,
+   "first_divergence_token": 14,
+   "first_divergence_char": 76,
+   "context_a": "words for checkpoints: \"falcon-f88b\", \"v",
+   "context_b": "words for checkpoint 1, 2, 3. At the sta",
+   "first_token_logprob_absdiff": 0.18294832110404968,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}
