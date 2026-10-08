@@ -1,0 +1,268 @@
+{
+ "url": "http://10.128.15.217:8080",
+ "prompt_id": "isl131072_k0",
+ "phase": "decode",
+ "abort_after": 5.0,
+ "repeat": 3,
+ "concurrent": 2,
+ "settle": 60.0,
+ "server_info": {
+  "baseline": {
+   "http://10.128.15.217:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "after_abort": {
+   "http://10.128.15.217:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "settled": {
+   "http://10.128.15.217:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "final": {
+   "http://10.128.15.217:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  }
+ },
+ "aborts": [
+  {
+   "idx": 0,
+   "rid": "abort-0-1791450178824",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.386,
+   "aborted_s": 6.387,
+   "chunks": 752,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 1,
+   "rid": "abort-1-1791450178827",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.83,
+   "aborted_s": 6.83,
+   "chunks": 792,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 2,
+   "rid": "abort-2-1791450185657",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.139,
+   "aborted_s": 6.14,
+   "chunks": 783,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 3,
+   "rid": "abort-3-1791450185660",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.16,
+   "aborted_s": 6.16,
+   "chunks": 783,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 4,
+   "rid": "abort-4-1791450191820",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.136,
+   "aborted_s": 6.137,
+   "chunks": 781,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 5,
+   "rid": "abort-5-1791450191822",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.151,
+   "aborted_s": 6.151,
+   "chunks": 782,
+   "phase_actual": "decode",
+   "finished": false
+  }
+ ],
+ "follow_ups": [
+  {
+   "label": "short",
+   "ok": true,
+   "status": 200,
+   "error": null,
+   "cached_tokens": 0,
+   "completion_tokens": 16,
+   "elapsed": 0.196
+  },
+  {
+   "label": "identical-prompt",
+   "ok": true,
+   "status": 200,
+   "error": null,
+   "cached_tokens": 131008,
+   "completion_tokens": 32,
+   "elapsed": 0.88
+  }
+ ],
+ "baseline_problems": [],
+ "start_errors": 0,
+ "pass": true,
+ "timeline": [
+  {
+   "t": 0.004,
+   "msg": "prompt id=isl131072_k0 isl=131072 chars=711300 phase=decode abort_after=5.0s repeat=3 concurrent=2"
+  },
+  {
+   "t": 0.017,
+   "msg": "server-info[baseline] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 0.029,
+   "msg": "server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 0.029,
+   "msg": "round 1/3: launching 2 aborting request(s)"
+  },
+  {
+   "t": 0.238,
+   "msg": "req0: sent (abort-0-1791450178824), headers after 0.21s"
+  },
+  {
+   "t": 0.253,
+   "msg": "req1: sent (abort-1-1791450178827), headers after 0.22s"
+  },
+  {
+   "t": 6.416,
+   "msg": "req0: aborted at 6.387s in decode (first_token=1.386s, chunks=752)"
+  },
+  {
+   "t": 6.861,
+   "msg": "req1: aborted at 6.83s in decode (first_token=1.83s, chunks=792)"
+  },
+  {
+   "t": 6.861,
+   "msg": "round 2/3: launching 2 aborting request(s)"
+  },
+  {
+   "t": 6.886,
+   "msg": "req2: sent (abort-2-1791450185657), headers after 0.02s"
+  },
+  {
+   "t": 7.069,
+   "msg": "req3: sent (abort-3-1791450185660), headers after 0.20s"
+  },
+  {
+   "t": 13.001,
+   "msg": "req2: aborted at 6.14s in decode (first_token=1.139s, chunks=783)"
+  },
+  {
+   "t": 13.024,
+   "msg": "req3: aborted at 6.16s in decode (first_token=1.16s, chunks=783)"
+  },
+  {
+   "t": 13.024,
+   "msg": "round 3/3: launching 2 aborting request(s)"
+  },
+  {
+   "t": 13.047,
+   "msg": "req4: sent (abort-4-1791450191820), headers after 0.02s"
+  },
+  {
+   "t": 13.217,
+   "msg": "req5: sent (abort-5-1791450191822), headers after 0.19s"
+  },
+  {
+   "t": 19.161,
+   "msg": "req4: aborted at 6.137s in decode (first_token=1.136s, chunks=781)"
+  },
+  {
+   "t": 19.179,
+   "msg": "req5: aborted at 6.151s in decode (first_token=1.151s, chunks=782)"
+  },
+  {
+   "t": 19.192,
+   "msg": "server-info[after-abort] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 19.208,
+   "msg": "server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 19.208,
+   "msg": "waiting --settle 60.0s"
+  },
+  {
+   "t": 79.22,
+   "msg": "server-info[settled] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 79.23,
+   "msg": "server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 79.23,
+   "msg": "WARN http://10.128.15.217:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
+  },
+  {
+   "t": 79.23,
+   "msg": "WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
+  },
+  {
+   "t": 79.426,
+   "msg": "follow-up short: OK status=200 tokens=16 cached=0 "
+  },
+  {
+   "t": 80.307,
+   "msg": "follow-up identical-prompt: OK status=200 tokens=32 cached=131008 "
+  },
+  {
+   "t": 80.318,
+   "msg": "server-info[final] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 80.33,
+   "msg": "server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  }
+ ]
+}

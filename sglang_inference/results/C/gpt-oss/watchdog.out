@@ -72,3 +72,27 @@
 [2026-10-08T09:03:27+00:00] decode ok=1 m=1 lat=11.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
 [2026-10-08T09:03:37+00:00] prefill ok=1 m=1 lat=10.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
 [2026-10-08T09:03:37+00:00] decode ok=1 m=1 lat=11.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T09:03:47+00:00] prefill ok=1 m=1 lat=11.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T09:03:47+00:00] decode ok=1 m=1 lat=12.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T09:03:57+00:00] prefill ok=1 m=1 lat=11.2ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T09:03:57+00:00] decode ok=1 m=1 lat=13.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T09:04:07+00:00] prefill ok=1 m=1 lat=12.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T09:04:07+00:00] decode ok=1 m=1 lat=11.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T09:04:17+00:00] prefill ok=1 m=1 lat=11.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T09:04:17+00:00] decode ok=1 m=1 lat=10.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T09:04:27+00:00] prefill ok=1 m=1 lat=12.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T09:04:27+00:00] decode ok=1 m=1 lat=11.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T09:04:37+00:00] prefill ok=1 m=1 lat=11.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T09:04:37+00:00] decode ok=1 m=1 lat=11.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T09:04:47+00:00] prefill ok=1 m=1 lat=11.3ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T09:04:47+00:00] decode ok=1 m=1 lat=11.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T09:04:57+00:00] prefill ok=1 m=1 lat=11.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T09:04:57+00:00] decode ok=1 m=1 lat=11.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T09:05:07+00:00] prefill ok=1 m=1 lat=12.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T09:05:07+00:00] decode ok=1 m=1 lat=10.3ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+
+=== watchdog summary ===
+elapsed_s=451 polls=92 failures=0 alerts=0 (crash=0, hang=0)
+max_token_usage[prefill]=0.6700
+max_token_usage[decode]=0.6700
+csv=/home/alisachen_google_com/pd_disagg/results/C/gpt-oss/watchdog.csv

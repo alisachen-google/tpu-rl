@@ -19,3 +19,12 @@
 [+   19.19s] server-info[after-abort] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
 [+   19.21s] server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
 [+   19.21s] waiting --settle 60.0s
+[+   79.22s] server-info[settled] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   79.23s] server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   79.23s] WARN http://10.128.15.217:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+[+   79.23s] WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+[+   79.43s] follow-up short: OK status=200 tokens=16 cached=0 
+[+   80.31s] follow-up identical-prompt: OK status=200 tokens=32 cached=131008 
+[+   80.32s] server-info[final] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   80.33s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   80.33s] PASS: 6 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=131008), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/C/gpt-oss/abort_decode.json

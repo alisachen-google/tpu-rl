@@ -459,3 +459,5 @@ sufficient: the single-slot 1M recipe works).
   identical to the HBM-hit run (−0.79959, −0.75351); needles 3/3. Text diverged later only because GSM8K ran concurrently (F-3 batch effect).
 - Reload timing under concurrent GSM8K load: e2e 16.0 s / 8.9 s for 1,024 tokens (≈10 s / 3.3 s of prefill-from-host for 32k tokens, vs 1.3 s
   cold prefill). Confounded by load; clean idle measurement queued (`_phase_hicache_reload.sh`).
+- Config C completed 09:05 UTC with 0 relaunches: GSM8K 0.98; decode aborts 6/6 PASS; prefill-phase abort handled (no crash, as in B);
+  compile audit 0 serving-time recompiles on both engines.

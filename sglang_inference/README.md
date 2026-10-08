@@ -67,6 +67,10 @@ Engines: `http://<ip>:30000`; LB: `http://10.128.15.217:8080` (`/workers`, `/hea
 - `compile_audit.sh` — startup vs serving-time recompile counts from a server log.
 - Phase chains `_phase_*.sh` run the campaign unattended; logs in `results/phase_*.log`, `results/A/edges_gptoss.log`.
 
+## Test-case catalogue
+`results/TEST_CASES.md` lists every test case with commands, pass criteria, per-configuration results and evidence paths;
+`results/bug_reports/PRIORITIES.md` is the production triage; `results/bug_reports/*_github_issue.md` are the ready-to-file drafts.
+
 ## Gates in practice (see results/COVERAGE.md, FINDINGS.md F-3/F-4)
 - Strict token-exact differential only at matched concurrency 1 (greedy decode is not batch-invariant on this stack).
 - Always: needles 3/3, completion_tokens exact, finish_reason, no errors, resource return (`sglang:num_running_reqs`=0, `full_token_usage`≈0), GSM8K-100 ≥ 0.96.

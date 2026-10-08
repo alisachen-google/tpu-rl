@@ -201,3 +201,29 @@
 2026-10-08T09:01:38Z [C/gpt-oss] (9) GSM8K-100 via LB
    [METRIC] gsm8k_score=0.98 labels={"model": "gpt-oss-120b", "eval": "gsm8k"}
 2026-10-08T09:02:58Z [C/gpt-oss] (10) decode-phase client aborts (3, two concurrent)
+2026-10-08T09:04:19Z [C/gpt-oss] abort decode rc=0
+   [+   80.33s] PASS: 6 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=131008), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/C/gpt-oss/abort_deco
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T09:04:19Z [C/gpt-oss] (11) compile audit (decode, prefill)
+   decode_C: ready_at_line=1135 total_lines=2412
+     startup : __recompiles=24  Compiling/compile=22  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+   prefill_C: ready_at_line=1303 total_lines=1722
+     startup : __recompiles=32  Compiling/compile=23  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+2026-10-08T09:04:20Z [C/gpt-oss] (12) LAST: prefill-phase client abort (crashes the prefill engine in Config A, F-8)
+2026-10-08T09:04:52Z [C/gpt-oss] abort prefill rc=0
+   prefill /health after prefill-abort: 200   decode: 200
+   requests.exceptions.ConnectionError: HTTPConnectionPool(host='127.0.0.1', port=30000): Max retries exceeded with url: /freeze_gc (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=30
+   [2026-10-08 08:59:44] [http_server] Error: Grammar-based generation (json_schema, regex, ebnf, structural_tag) is not supported when the server is launched with --grammar-backend none
+   [2026-10-08 08:59:44] [http_server] Error: Grammar-based generation (json_schema, regex, ebnf, structural_tag) is not supported when the server is launched with --grammar-backend none
+2026-10-08T09:05:08Z [C/gpt-oss] archiving logs
+2026-10-08T09:05:18Z [C/gpt-oss] === config C/gpt-oss done (relaunches: 0)
+2026-10-08T09:05:18Z === bf16 c=1 goldens for D/E (monolithic gpt-oss, bf16 KV)
+2026-10-08T09:05:30Z a_holders=[] b_holders=[]
+    isl131072_k0 tokens= 1024 finish= length ttft_ms= 7058 e2e_ms= 12977 err= None
+    isl131072_k1 tokens= 1024 finish= length ttft_ms= 7030 e2e_ms= 12900 err= None
+=== 2026-10-08T09:11:38Z run_golden finished
+2026-10-08T09:11:47Z [D/gpt-oss] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_D_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_bf16_c1
+2026-10-08T09:12:00Z a_holders=[] b_holders=[]
