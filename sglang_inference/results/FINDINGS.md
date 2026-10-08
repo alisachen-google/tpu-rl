@@ -434,3 +434,8 @@ triage file `bug_reports/PRIORITIES.md`.
 `SGLANG_DISAGGREGATION_WAITING_TIMEOUT=7200` (to survive 1M-token prefills). So "no deadline fired in 30 min" is expected for every deadline
 that reads those variables (sender `fail_decode_silence`, receiver `_check_waiting_timeout`). The code gap that stands: the raiden receiver has
 no deadline at all while a room is in `Bootstrapping`. Drafts and PRIORITIES.md corrected.
+
+**F-11 control confirmed; F-12 narrowed (2026-10-08 08:32 UTC, `F11_gpt-oss_A_128k_mr2`).** 140k recipe with `max_running_requests 2`:
+pool `17216 -> 16896`; the 32k prompt's chunks are 8192, 8192, **320**, 7680 … with SWA usage 0.97 → 0.51 around the 320-token chunk
+(exactly the predicted budget); 8k and 32k complete in ~6 s. No handshake stall on this pair → F-12 needs the single slot (necessary, not
+sufficient: the single-slot 1M recipe works).

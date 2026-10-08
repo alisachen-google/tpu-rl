@@ -43,7 +43,7 @@ decode side has no such bound at all.
 | Hardware | Two TPU v7x hosts (4 chips / 8 TensorCores each), prefill on host a, decode on host b, TP 8, EP 8 |
 | Model | `openai/gpt-oss-120b` (MXFP4), KV cache fp8_e4m3, page size 64 |
 | Recipe that stalls (3 of 3 pairs) | both engines `--max-running-requests 1 --context-length 140288 --max-total-tokens 786432 --chunked-prefill-size 8192 --disable-radix-cache`, `SGLANG_RAIDEN_HOST_POOL_GB=128`, compile batch sizes `[1]`, `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=7200`, `SGLANG_DISAGGREGATION_WAITING_TIMEOUT=7200` |
-| Recipes that work | same flags with `--context-length 1056768 --max-total-tokens 1114112`, host pool 320 GiB (single slot); and the 140k recipe with `--max-running-requests 8` |
+| Recipes that work | the same 140k recipe with `--max-running-requests 2` (tested right after the third stall: 8k and 32k served normally); the 140k recipe with `--max-running-requests 8`; and the single-slot recipe with `--context-length 1056768 --max-total-tokens 1114112`, host pool 320 GiB |
 
 ## Code trace
 
@@ -112,8 +112,9 @@ Nothing is logged until the client disconnects.
 3. **Log the handshake.** At INFO level, log on both sides when a room is registered, when the decode's request is received, and when the
    reply is sent. Today the only lines are the abort messages, which made the trigger impossible to isolate from the logs. With that logging we
    can re-run the three recipes and report what differs.
-4. Investigate the trigger: the only recipe differences between the stalling and the working single-slot pair are context length (140k vs 1M),
-   `max_total_tokens` (786k vs 1.1M) and `SGLANG_RAIDEN_HOST_POOL_GB` (128 vs 320).
+4. Investigate the trigger. Changing only `--max-running-requests` from 1 to 2 on the stalling recipe makes the stall disappear, so the single
+   request slot is necessary; it is not sufficient, because the single-slot 1M recipe (larger `max_total_tokens`, host pool 320 GiB) works.
+   A single slot on both engines also means a decode SWA pool of 512 tokens (768 rounded down to 8 pages) and a request table of one row.
 
 ## Related
 

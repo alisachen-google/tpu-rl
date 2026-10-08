@@ -29,7 +29,7 @@ uses, cannot serve any prompt longer than 16,384 tokens.
 | Pool | Occupied when chunk 3 is planned | Free | Chunk 3 budget | Result |
 |---|---|---|---|---|
 | 16,384 (1 slot) | 16,192 | 192 | 0 | deadlock, 4 of 4 prompts above 16,384 tokens |
-| 16,896 (2 slots, predicted) | 16,384 | 512 | 320 | chunk of 320 tokens, eviction runs |
+| 16,896 (2 slots, observed) | 16,384 | 512 | 320 | chunk of exactly 320 tokens logged, pool 0.97 → 0.51, 32k prompt completes in 6.5 s |
 | 17,920 (4 slots) | 16,256 | 1,664 | 1,472 | chunk of 1,344 tokens observed, eviction runs; 8k, 32k, 131k complete in 7 to 13 s |
 
 Pool sizes as logged (`aligning swa_max_total_num_tokens`):
@@ -37,6 +37,7 @@ Pool sizes as logged (`aligning swa_max_total_num_tokens`):
 | `--max-running-requests` | SWA pool from the cap | After TPU rounding | Free above two chunks | Observed |
 |---|---|---|---|---|
 | 1 | 16,832 | 16,384 | 0 | hang on every prompt > 16,384 tokens (4 of 4) |
+| 2 | 17,216 | 16,896 | 512 | 8k and 32k complete; third chunk 320 tokens |
 | 4 | 17,984 | 17,920 | 1,536 | 8k, 32k, 131k prompts complete in 7 to 13 s (6 of 6) |
 | 8 | 19,520 | 19,456 | 3,072 | 128k prompts complete; pool cycles 0.58 to 0.84 |
 
@@ -125,7 +126,9 @@ Two hosts, prefill on a, decode on b, raiden transfer. Only the prefill flags ma
 then nothing. An 8k prompt (one chunk) completes normally.
 **Expected.** The 32k prompt completes in a few seconds, as it does with `--max-running-requests 4`, or the request fails with an error.
 
-Control: repeat with `--max-running-requests 2`. The pool becomes 17,216 → 16,896 after rounding, 512 tokens of headroom, and the hang does not occur.
+Control (run): repeat with `--max-running-requests 2`. Log: `aligning swa_max_total_num_tokens 17216 -> 16896`, 512 tokens of headroom. The 32k prompt's
+chunks are `8192, 8192, 320, 7680, ...` with `swa token usage` 0.97 before the 320-token chunk and 0.51 after it, and the prompt completes in 6.5 s.
+The third-chunk size matches the budget arithmetic to the token.
 
 ## Fix proposal
 

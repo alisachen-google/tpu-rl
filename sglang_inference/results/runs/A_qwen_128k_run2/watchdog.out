@@ -6229,3 +6229,57 @@
 [2026-10-08T08:30:49+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
 [2026-10-08T08:30:49+00:00] prefill ok=0 m=0 lat=1.6ms run=None q=None use=None thr=None crash=-
 [2026-10-08T08:30:49+00:00] decode ok=1 m=1 lat=12.2ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:30:59+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-08T08:30:59+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-08T08:30:59+00:00] prefill ok=0 m=0 lat=1.5ms run=None q=None use=None thr=None crash=-
+[2026-10-08T08:30:59+00:00] decode ok=1 m=1 lat=11.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:31:09+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-08T08:31:09+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-08T08:31:09+00:00] prefill ok=0 m=0 lat=0.7ms run=None q=None use=None thr=None crash=-
+[2026-10-08T08:31:09+00:00] decode ok=1 m=1 lat=10.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:31:19+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-08T08:31:19+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-08T08:31:19+00:00] prefill ok=0 m=0 lat=1.9ms run=None q=None use=None thr=None crash=-
+[2026-10-08T08:31:19+00:00] decode ok=1 m=1 lat=11.2ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:31:29+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-08T08:31:29+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-08T08:31:29+00:00] prefill ok=0 m=0 lat=1.7ms run=None q=None use=None thr=None crash=-
+[2026-10-08T08:31:29+00:00] decode ok=1 m=1 lat=11.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:31:39+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-08T08:31:39+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-08T08:31:39+00:00] prefill ok=0 m=0 lat=0.8ms run=None q=None use=None thr=None crash=-
+[2026-10-08T08:31:39+00:00] decode ok=1 m=1 lat=11.2ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:31:49+00:00] WARN prefill: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=30000): Failed to establi
+[2026-10-08T08:31:49+00:00] WARN prefill: /metrics ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionEr
+[2026-10-08T08:31:49+00:00] prefill ok=0 m=0 lat=1.5ms run=None q=None use=None thr=None crash=-
+[2026-10-08T08:31:49+00:00] decode ok=1 m=1 lat=10.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:31:59+00:00] prefill ok=1 m=1 lat=12.3ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:31:59+00:00] decode ok=1 m=1 lat=10.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:32:09+00:00] prefill ok=1 m=1 lat=12.3ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:32:09+00:00] decode ok=1 m=1 lat=14.9ms run=1.0 q=0.0 use=0.12 thr=191.07981963564882 crash=0
+[2026-10-08T08:32:19+00:00] prefill ok=1 m=1 lat=13.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:32:19+00:00] decode ok=1 m=1 lat=12.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:32:29+00:00] prefill ok=1 m=1 lat=13.6ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:32:29+00:00] decode ok=1 m=1 lat=10.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:32:39+00:00] prefill ok=1 m=1 lat=16.2ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:32:39+00:00] decode ok=1 m=1 lat=11.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:32:49+00:00] prefill ok=1 m=1 lat=14.2ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:32:49+00:00] decode ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:32:59+00:00] prefill ok=1 m=1 lat=142.7ms run=1.0 q=0.0 use=0.97 thr=0.0 crash=-
+[2026-10-08T08:32:59+00:00] decode ok=1 m=1 lat=12.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:33:09+00:00] prefill ok=1 m=1 lat=11.6ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:33:09+00:00] decode ok=1 m=1 lat=11.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:33:19+00:00] prefill ok=1 m=1 lat=10.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:33:19+00:00] decode ok=1 m=1 lat=11.6ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:33:29+00:00] prefill ok=1 m=1 lat=13.2ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:33:29+00:00] decode ok=1 m=1 lat=11.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:33:39+00:00] prefill ok=1 m=1 lat=250.4ms run=1.0 q=0.0 use=0.51 thr=0.0 crash=-
+[2026-10-08T08:33:39+00:00] decode ok=1 m=1 lat=11.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:33:49+00:00] prefill ok=1 m=1 lat=12.3ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:33:49+00:00] decode ok=1 m=1 lat=15.3ms run=1.0 q=0.0 use=0.17 thr=189.9266710534092 crash=0
+[2026-10-08T08:33:59+00:00] prefill ok=1 m=1 lat=14.2ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:33:59+00:00] decode ok=1 m=1 lat=16.7ms run=1.0 q=0.0 use=0.17 thr=178.8452438072947 crash=0
+[2026-10-08T08:34:09+00:00] prefill ok=1 m=1 lat=10.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:34:09+00:00] decode ok=1 m=1 lat=14.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:34:19+00:00] prefill ok=1 m=1 lat=11.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:34:19+00:00] decode ok=1 m=1 lat=14.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0

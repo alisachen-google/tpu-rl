@@ -1,4 +1,4 @@
 2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=False)
-[isl8192_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused b
-[isl8192_k1] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused b
-done: 2 prompts, 2 errors -> /home/alisachen_google_com/pd_disagg/results/F11/F11_gpt-oss_A_128k_mr2_8192.jsonl
+[isl8192_k0] tokens=1024 finish=length cached=0 ttft=6211.98ms e2e=6212.2ms
+[isl8192_k1] tokens=1024 finish=length cached=0 ttft=5509.98ms e2e=5510.14ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/F11/F11_gpt-oss_A_128k_mr2_8192.jsonl

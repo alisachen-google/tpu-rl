@@ -11,3 +11,10 @@ grep: /home/alisachen_google_com/pd_disagg/results/runs/F11_gpt-oss_A_128k_mr2/p
 2026-10-08T08:27:51Z third launch failed: recipe was never copied to host a; recipes synced, relaunching
 2026-10-08T08:28:03Z a_holders=[] b_holders=[]
 2026-10-08T08:28:03Z F-11 control: F11_gpt-oss_A_128k_mr2
+2026-10-08 08:32:06 prefill /health ready after 240 s
+2026-10-08 08:32:06 decode /health ready after 0 s
+2026-10-08 08:32:07 LB /health_generate ready after 1 s
+aligning swa_max_total_num_tokens 17216 -> 16896
+   ISL=8192: 0 of 2 completed in 45 s; 
+   ISL=32768: 0 of 2 completed in 45 s; 
+   ISL=131072: 0 of 2 completed in 45 s; 
