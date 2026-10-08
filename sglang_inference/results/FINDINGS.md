@@ -498,3 +498,9 @@ holder check (09:12:00, still empty) and device open. Chain stopped; D, E and Qw
 - Pair up 196 s. TC-1 vs c=1 golden: **identical 6/6**; tiny 35/35; reuse 32,640 cached, identical, delta 0.0000.
 - HiCache write-through: 448,768 tokens backed up, 0 dropped. Params 17/17; chat 8/8; 1×448 / 4×448 images OK; concurrency all successful
   (eager ITL); GSM8K 0.96; decode aborts PASS; prefill-phase abort handled; 0 serving-time recompiles. No new defects.
+
+**HiCache timing on an idle Config C pair (17:25 UTC, `results/C/gpt-oss/hicache_reload/`).** 32k prompts, streaming, c=1: cold TTFT
+1,254 / 1,232 ms; HBM hit (24,576 cached) 425 / 439 ms; outputs and first-token logprobs identical across cold, HBM-hit and recompute.
+The host-hit step did not measure a host hit: the eviction load (12 × 131k = 1.57M tokens) filled the 1.57M-token host pool and evicted the
+32k prefixes from the host tier too (`#host-hit-token: 0`, TTFT 1,242 ms = cold). Rerun queued with 8 prompts (`_phase_hicache_reload2.sh`).
+The earlier host hit in Config C (14 × 131k < pool) remains the evidence that reload works and is bit-exact.

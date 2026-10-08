@@ -1,0 +1,11 @@
+2026-10-08T17:28:57Z [kv-integrity] hicache phase done
+2026-10-08T17:29:10Z [kv-integrity] === gpt-oss: start pair with kv checksum + canary
+2026-10-08T17:58:45Z [kv-integrity] pair did not come up
+AttributeError: 'TpuFusedMHATokenToKVPool' object has no attribute 'k_buffer'. Did you mean: 'kv_buffer'?
+Traceback (most recent call last):
+    raise RuntimeError(
+RuntimeError: An engine or router exited with -9
+AttributeError: 'TpuFusedMHATokenToKVPool' object has no attribute 'k_buffer'. Did you mean: 'kv_buffer'?
+AttributeError: 'TpuFusedMHATokenToKVPool' object has no attribute 'k_buffer'. Did you mean: 'kv_buffer'?
+    raise RuntimeError(
+RuntimeError: An engine or router exited with -9
