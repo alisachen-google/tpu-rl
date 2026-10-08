@@ -1,1 +1,7 @@
 2026-10-08T23:25:14Z [boundary2] === (1) F-12 with 300 s deadlines: single-slot 128k recipe, BOOTSTRAP/WAITING timeout 300
+2026-10-08 23:27:43 prefill /health ready after 136 s
+2026-10-08 23:27:43 decode /health ready after 0 s
+2026-10-08 23:27:44 LB /health_generate ready after 1 s
+   t+30s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
+   t+60s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
+   t+90s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
