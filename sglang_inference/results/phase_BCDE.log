@@ -545,3 +545,38 @@
    stream_vs_nonstream                 200/128/length        -                     -    -    -    PASS    
    17 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/C/qwen3-vl/params.json
 2026-10-08T14:28:24Z [C/qwen3-vl] (7) chat suite
+2026-10-08T14:30:07Z [C/qwen3-vl] chat rc=0
+   model=qwen3-vl-30b kind=qwen 8 cases, endpoints: a=http://10.128.15.217:8080
+   8 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/C/qwen3-vl/chat.json
+2026-10-08T14:30:07Z [C/qwen3-vl] (7b) multimodal: 1x448 and 4x448 images
+   1x448: status=200 prompt_tokens=217 completion_tokens=37 cached_tokens=0 ttft=11690.3ms e2e=11690.4ms
+   4x448: status=200 prompt_tokens=811 completion_tokens=48 cached_tokens=128 ttft=13460.5ms e2e=13460.6ms
+2026-10-08T14:30:33Z [C/qwen3-vl] (8) concurrency sweep c=1,2,4 at ISL 131072 / OSL 256
+   c=1 Successful requests: 2 ;Output token throughput (tok/s): 5.49 ;Mean TTFT (ms): 5835.03 ;P99 TTFT (ms): 10066.69 ;Mean ITL (ms): 159.50 ;
+
+   c=2 Successful requests: 4 ;Output token throughput (tok/s): 8.15 ;Mean TTFT (ms): 15444.29 ;P99 TTFT (ms): 36840.52 ;Mean ITL (ms): 167.02 ;
+
+   c=4 Successful requests: 8 ;Output token throughput (tok/s): 14.62 ;Mean TTFT (ms): 14802.46 ;P99 TTFT (ms): 40913.38 ;Mean ITL (ms): 177.34 ;
+
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T14:37:32Z [C/qwen3-vl] (9) GSM8K-100 via LB
+   [METRIC] gsm8k_score=0.96 labels={"model": "qwen3-vl-30b", "eval": "gsm8k"}
+2026-10-08T14:45:22Z [C/qwen3-vl] (10) decode-phase client aborts (3, two concurrent)
+2026-10-08T14:46:57Z [C/qwen3-vl] abort decode rc=0
+   [+   94.14s] PASS: 6 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=130944), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/C/qwen3-vl/abort_dec
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T14:46:57Z [C/qwen3-vl] (11) compile audit (decode, prefill)
+   decode_C: ready_at_line=4908 total_lines=7100
+     startup : __recompiles=224  Compiling/compile=16  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+   prefill_C: ready_at_line=4972 total_lines=8514
+     startup : __recompiles=224  Compiling/compile=16  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+2026-10-08T14:46:58Z [C/qwen3-vl] (12) LAST: prefill-phase client abort (crashes the prefill engine in Config A, F-8)
+2026-10-08T14:47:34Z [C/qwen3-vl] abort prefill rc=0
+   prefill /health after prefill-abort: 200   decode: 200
+2026-10-08T14:47:50Z [C/qwen3-vl] archiving logs
+2026-10-08T14:48:01Z [C/qwen3-vl] === config C/qwen3-vl done (relaunches: 0)
+2026-10-08T14:48:01Z phase BCDE done

@@ -493,3 +493,8 @@ holder check (09:12:00, still empty) and device open. Chain stopped; D, E and Qw
 - Prefix cache: 32,640 of 32,768 cached (page 128), identical text, delta 0.0000. Params 17/17; chat 8/8; 1×448 and 4×448 images OK.
 - Concurrency c=1/2/4 all successful, ITL 155–172 ms (eager decode, F-2). GSM8K 0.96 (golden 0.97). Decode aborts PASS; prefill-phase abort
   handled (no crash, radix on). 0 serving-time recompiles.
+
+## Config C (Qwen3-VL, radix on + HiCache raiden host offload) — 2026-10-08 13:37–14:48 UTC, `results/C/qwen3-vl/`
+- Pair up 196 s. TC-1 vs c=1 golden: **identical 6/6**; tiny 35/35; reuse 32,640 cached, identical, delta 0.0000.
+- HiCache write-through: 448,768 tokens backed up, 0 dropped. Params 17/17; chat 8/8; 1×448 / 4×448 images OK; concurrency all successful
+  (eager ITL); GSM8K 0.96; decode aborts PASS; prefill-phase abort handled; 0 serving-time recompiles. No new defects.

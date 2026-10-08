@@ -1,0 +1,169 @@
+{
+ "url": "http://10.128.15.217:8080",
+ "prompt_id": "isl131072_k1",
+ "phase": "prefill",
+ "abort_after": 2.0,
+ "repeat": 1,
+ "concurrent": 1,
+ "settle": 30.0,
+ "server_info": {
+  "baseline": {
+   "http://10.128.15.217:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "after_abort": {
+   "http://10.128.15.217:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "settled": {
+   "http://10.128.15.217:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "final": {
+   "http://10.128.15.217:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  }
+ },
+ "aborts": [
+  {
+   "idx": 0,
+   "rid": "abort-0-1791470818496",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.469,
+   "aborted_s": 1.469,
+   "chunks": 1,
+   "phase_actual": "decode (first token beat the abort)",
+   "finished": false
+  }
+ ],
+ "follow_ups": [
+  {
+   "label": "short",
+   "ok": true,
+   "status": 200,
+   "error": null,
+   "cached_tokens": 0,
+   "completion_tokens": 16,
+   "elapsed": 2.59
+  },
+  {
+   "label": "identical-prompt",
+   "ok": true,
+   "status": 200,
+   "error": null,
+   "cached_tokens": 130944,
+   "completion_tokens": 1,
+   "elapsed": 1.466
+  }
+ ],
+ "baseline_problems": [],
+ "start_errors": 0,
+ "pass": true,
+ "timeline": [
+  {
+   "t": 0.004,
+   "msg": "prompt id=isl131072_k1 isl=131072 chars=707157 phase=prefill abort_after=2.0s repeat=1 concurrent=1"
+  },
+  {
+   "t": 0.016,
+   "msg": "server-info[baseline] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 0.03,
+   "msg": "server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 0.03,
+   "msg": "round 1/1: launching 1 aborting request(s)"
+  },
+  {
+   "t": 0.042,
+   "msg": "req0: sent (abort-0-1791470818496), headers after 0.01s"
+  },
+  {
+   "t": 1.499,
+   "msg": "req0: aborted at 1.469s in decode (first token beat the abort) (first_token=1.469s, chunks=1)"
+  },
+  {
+   "t": 1.513,
+   "msg": "server-info[after-abort] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 1.676,
+   "msg": "server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 1.676,
+   "msg": "waiting --settle 30.0s"
+  },
+  {
+   "t": 31.689,
+   "msg": "server-info[settled] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 31.701,
+   "msg": "server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 31.701,
+   "msg": "WARN http://10.128.15.217:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
+  },
+  {
+   "t": 31.701,
+   "msg": "WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
+  },
+  {
+   "t": 34.291,
+   "msg": "follow-up short: OK status=200 tokens=16 cached=0 "
+  },
+  {
+   "t": 35.757,
+   "msg": "follow-up identical-prompt: OK status=200 tokens=1 cached=130944 "
+  },
+  {
+   "t": 35.77,
+   "msg": "server-info[final] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 35.782,
+   "msg": "server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 35.782,
+   "msg": "WARN req0: abort landed in 'decode (first token beat the abort)' (tune --abort-after)"
+  }
+ ]
+}

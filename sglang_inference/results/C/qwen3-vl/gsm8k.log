@@ -1,0 +1,19 @@
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/layers/quantization/awq/awq.py:53: UserWarning: Only CUDA, HIP and XPU support AWQ currently.
+  warnings.warn(f"Only CUDA, HIP and XPU support AWQ currently.")
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/layers/quantization/gguf.py:69: UserWarning: Only CUDA, MUSA and NPU support GGUF quantization currently.
+  warnings.warn(f"Only CUDA, MUSA and NPU support GGUF quantization currently.")
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/test/run_eval.py:367: DeprecationWarning: sglang.test.run_eval is deprecated; its legacy scorers will be removed. Use sglang.test.sgl_eval_utils.run_sgl_eval or `sgl-eval run` instead.
+  run_eval(args)
+ChatCompletionSampler initialized with self.system_message=None self.temperature=0.0 self.max_tokens=1024 self.reasoning_effort=None self.extra_body=None self.stop=None self.record_meta_info=True
+  0%|          | 0/100 [00:00<?, ?it/s]  1%|          | 1/100 [00:55<1:31:27, 55.43s/it]  3%|▎         | 3/100 [01:04<28:57, 17.91s/it]    8%|▊         | 8/100 [03:12<35:53, 23.41s/it] 35%|███▌      | 35/100 [03:15<03:56,  3.64s/it] 37%|███▋      | 37/100 [03:18<03:38,  3.47s/it] 39%|███▉      | 39/100 [03:39<04:17,  4.22s/it] 43%|████▎     | 43/100 [03:53<03:51,  4.07s/it] 48%|████▊     | 48/100 [03:59<02:47,  3.22s/it] 49%|████▉     | 49/100 [04:07<03:03,  3.60s/it] 54%|█████▍    | 54/100 [04:23<02:37,  3.43s/it] 57%|█████▋    | 57/100 [04:25<01:58,  2.76s/it] 58%|█████▊    | 58/100 [06:15<09:25, 13.47s/it] 74%|███████▍  | 74/100 [07:43<03:26,  7.94s/it]100%|██████████| 100/100 [07:43<00:00,  4.63s/it]
+Total latency: 463.474 s
+Score: 0.960
+Output throughput: 37.282 token/s
+[METRIC] gsm8k_score=0.96 labels={"model": "qwen3-vl-30b", "eval": "gsm8k"}
+[METRIC] gsm8k_latency=463.47377202217467 labels={"model": "qwen3-vl-30b", "eval": "gsm8k"}
+====================
+Speculative decoding: no per-request spec_accept_length in responses (non-speculative server, or --api completion which lacks return_meta_info).
+====================
+Writing report to /tmp/gsm8k_qwen3-vl-30b.html
+{'score:std': np.float64(0.19595917942265423), 'score': np.float64(0.96), 'latency': 463.47377202217467, 'output_throughput': 37.2815055415332}
+Writing results to /tmp/gsm8k_qwen3-vl-30b.json

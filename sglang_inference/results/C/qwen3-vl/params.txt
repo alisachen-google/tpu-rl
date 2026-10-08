@@ -17,3 +17,6 @@ skip_special_tokens_false           200/128/length        -                     
 sampling_seed_42_temp0.7            200/128/length        -                     -    -    -    PASS    a: info: seeded-rerun DIFFERS
 json_schema                         400/None/None         -                     -    -    -    PASS    
 regex                               400/None/None         -                     -    -    -    PASS    
+stream_vs_nonstream                 200/128/length        -                     -    -    -    PASS    
+
+17 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/C/qwen3-vl/params.json
