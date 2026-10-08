@@ -11,3 +11,17 @@
    t+211s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
    t+241s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
    t+271s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
+   t+301s sglang:num_prefill_inflight_queue_reqs 0.0 decode_running=0.0
+   t+331s sglang:num_prefill_inflight_queue_reqs 0.0 decode_running=0.0
+   t+361s sglang:num_prefill_inflight_queue_reqs 0.0 decode_running=0.0
+   t+391s sglang:num_prefill_inflight_queue_reqs 0.0 decode_running=0.0
+   t+422s sglang:num_prefill_inflight_queue_reqs 0.0 decode_running=0.0
+   client: [isl8192_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out. [isl8192_k1] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out.   elapsed=1440s
+   deadline lines: prefill=4 decode=16
+   prefill: [2026-10-08 23:44:45 TP2 EP2] Prefill transfer failed for request rank=2 req.rid='isl8192_k1' req.bootstrap_room=5487390733633689445 with exception Raiden transfer failed on another attention TP/CP ra
+   prefill: [2026-10-08 23:44:45 TP5 EP5] Prefill transfer failed for request rank=5 req.rid='isl8192_k1' req.bootstrap_room=5487390733633689445 with exception Raiden transfer failed on another attention TP/CP ra
+   decode: [2026-10-08 23:51:45 TP2 EP2] Decode handshake failed for request rank=2 decode_req.req.rid='isl8192_k1' decode_req.req.bootstrap_room=5487390733633689445 with exception Aborted by AbortReq.
+   decode: [2026-10-08 23:51:45 TP1 EP1] Decode handshake failed for request rank=1 decode_req.req.rid='isl8192_k1' decode_req.req.bootstrap_room=5487390733633689445 with exception Aborted by AbortReq.
+   http://10.128.15.217:30000 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-08T23:51:47Z [boundary2] === (2) Config A boundary cases

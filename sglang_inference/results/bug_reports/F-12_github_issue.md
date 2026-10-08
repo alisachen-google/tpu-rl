@@ -32,8 +32,8 @@ So on the decode side nothing bounds a room that never leaves `Bootstrapping`, w
 the bootstrap timeout, 7200 s in our recipe. With one request slot the pair is unusable for the whole period.
 
 **Expected behavior.** Either the handshake completes and the request is served, or both sides give up within the configured bootstrap timeout:
-the decode fails the request with a clear error, the prefill releases its pages, the client gets HTTP 500, and the next request works. Today the
-decode side has no such bound at all.
+the decode fails the request with a clear error, the prefill releases its pages, the client gets HTTP 500, and the next request works. Today only
+the prefill side times out (verified with 300 s deadlines); the decode holds the request and the client connection until the client disconnects.
 
 ## Environment
 
@@ -45,6 +45,21 @@ decode side has no such bound at all.
 | Model | `openai/gpt-oss-120b` (MXFP4), KV cache fp8_e4m3, page size 64 |
 | Recipe that stalls (3 of 3 pairs) | both engines `--max-running-requests 1 --context-length 140288 --max-total-tokens 786432 --chunked-prefill-size 8192 --disable-radix-cache`, `SGLANG_RAIDEN_HOST_POOL_GB=128`, compile batch sizes `[1]`, `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=7200`, `SGLANG_DISAGGREGATION_WAITING_TIMEOUT=7200` |
 | Recipes that work | the same 140k recipe with `--max-running-requests 2` (tested right after the third stall: 8k, 32k and 131k served normally, 6 of 6); the 140k recipe with `--max-running-requests 8`; and the single-slot recipe with `--context-length 1056768 --max-total-tokens 1114112`, host pool 320 GiB |
+
+## With default-length deadlines (300 s) the hang is still user-visible
+
+We re-ran the stalling single-slot recipe with `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=300` and `SGLANG_DISAGGREGATION_WAITING_TIMEOUT=300`
+(our other runs used 7200 s). Result for an 8k request:
+
+| t | Prefill | Decode | Client |
+|---|---|---|---|
+| 0 s | prefills the prompt in one chunk, request enters the inflight queue | request in the prealloc queue, receiver in `Bootstrapping` | waiting |
+| 300 s | `Prefill transfer failed … Request <room> timed out after 300.0s waiting for the decode to ask for its KV` on all ranks; slot freed | still `Bootstrapping`, no log line | still waiting (the mini-LB returns the decode's response) |
+| 720 s | – | `Decode handshake failed … Aborted by AbortReq` (client disconnect) | `Read timed out` (client's own timeout) |
+
+So the prefill deadline works and tells us the cause: **the decode never asked for the KV**, i.e. its bootstrap for the room never completed.
+The decode has no deadline of its own, so the request is held until the client disconnects, and the client sees a hang of its own timeout
+length regardless of the server-side setting. Both requests in the run behaved identically.
 
 ## Trigger conditions (observed)
 

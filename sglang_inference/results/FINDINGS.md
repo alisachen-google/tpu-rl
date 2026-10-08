@@ -625,3 +625,12 @@ rely on the decode-side cache / host restore for this; Config E (decode radix + 
 tokens): 200, 7.7 s. ctx+1 (140,289): **400** with `The input (140292 tokens) is longer than the model's context length (140288 tokens)`.
 Boundary row closed (PASS). The tool's two 1k-needle "FAILs" are gpt-oss reasoning before answering within an 8-token budget (same artefact as
 the tiny sweep), not retrieval failures.
+
+**F-12 with 300 s deadlines (23:27–23:52 UTC, `A_128k_mr1_t300`, `results/boundary2/f12_t300.*`).** `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT`
+and `..._WAITING_TIMEOUT` = 300 (instead of our 7200). Stall reproduced on the first 8k request. **Prefill:** at t+300 s all ranks log
+`Prefill transfer failed … Request <room> timed out after 300.0s waiting for the decode to ask for its KV` (`fail_decode_silence`) → the
+decode never sent its pull request; prefill frees the slot. **Decode:** no deadline fires; the room is released only when the client
+disconnects (`Decode handshake failed … Aborted by AbortReq` at the client's 720 s read timeout). **Client:** `Read timed out` after 720 s for
+each of the two requests (the mini-LB waits for the decode's response). So with default deadlines F-12 is still a user-visible hang of
+client-timeout length per request plus a decode-side hold until disconnect; only the prefill side recovers. Mechanism sharpened: the decode's
+bootstrap for the room never completes, so it never asks the prefill for the KV.
