@@ -591,3 +591,10 @@ decode-side abort notification`) and the next requests stalled again. A concurre
 in flight when the stall began. **So the handshake stall is not confined to one request slot**; it has now occurred with 2 slots after a
 burst of very long requests. Evidence: `results/F12/B_1m_mr2_stall/` (decode stack, both engines' metrics), `results/logs/runs/B_gpt-oss_1m_mr2/`.
 Config B at 1M otherwise served every length (TC-1 complete); Config C at 1M skipped (same family), MT-Bench phase released.
+
+## O-3 — Multi-turn prefix caching in PD only covers the prompt, not the previous answer (MT-Bench, Config A vs B, 20:40–20:58 UTC)
+MT-Bench 80 questions × 2 turns, c=1, gpt-oss. Config A (radix off): turn-2 cached 0, TTFT 336 ms. Config B (radix on): turn-2 cached
+**102 of 572 tokens (18 %)**, TTFT 350 ms, output 191 tok/s (A: 195). The cached 102 tokens are the system prompt + turn-1 question; the
+turn-1 **answer (~414 tokens) was generated on the decode engine, so its KV never existed on the prefill** and turn 2 recomputes it. With
+short chat turns the prefill radix cache therefore gives no measurable TTFT or throughput benefit in PD mode. The repo's multi-turn PD tests
+rely on the decode-side cache / host restore for this; Config E (decode radix + decode HiCache) queued on MT-Bench to measure it.

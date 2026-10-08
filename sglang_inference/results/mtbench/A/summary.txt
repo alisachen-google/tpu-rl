@@ -1,0 +1,10 @@
+[A] c=1 questions=80 ok turn1=80 turn2=80 wall=349.3s output_tokens=68289 out_tok/s=195.5
+[A]   TTFT turn1 mean=333ms p50=324ms | turn2 mean=336ms p50=338ms
+[A]   turn2 cached_tokens mean=0 of prompt mean=572 (cached fraction 0.00); turn1 cached mean=0
+[A]   e2e per turn mean: turn1=2.12s turn2=2.25s; completion mean turn1=414 turn2=440
+[A]   no spec_verify_ct (non-speculative server)
+[A] c=4 questions=80 ok turn1=80 turn2=80 wall=114.9s output_tokens=68780 out_tok/s=598.7
+[A]   TTFT turn1 mean=393ms p50=367ms | turn2 mean=406ms p50=393ms
+[A]   turn2 cached_tokens mean=0 of prompt mean=574 (cached fraction 0.00); turn1 cached mean=0
+[A]   e2e per turn mean: turn1=2.71s turn2=2.89s; completion mean turn1=416 turn2=444
+[A]   no spec_verify_ct (non-speculative server)

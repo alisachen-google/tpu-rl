@@ -72,3 +72,4 @@
    [isl262144_k0] tokens=1024 finish=length cached=0 ttft=18174.0ms e2e=24332.74ms
    [isl262144_k1] tokens=1024 finish=length cached=0 ttft=18184.96ms e2e=24292.57ms
 2026-10-08T19:43:47Z [1m/B] (4) GSM8K-100
+2026-10-08T20:37:47Z [1m/B] GSM8K stalled 51 min: 2 requests held in the P/D handshake (F-12 pattern with 2 slots at 1M after long requests); pair stopped; Config C at 1M skipped. phase 1m BC done
