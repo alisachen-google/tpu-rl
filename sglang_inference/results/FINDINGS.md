@@ -422,3 +422,10 @@ The runner saves the uncompiled forward as `eager_fn` (line 186) but never calls
 and `Gemma4VisionTpuCompilePolicy` (gemma4 176–194) fall back to `eager_fn` for exactly this case. Image is not downscaled because
 `SGLANG_IMAGE_MAX_PIXELS` defaults to 16384×28×28. 1920×1080 → 120×68 = 8,160 patches vs 4,900 (70×70) top bucket; 1024² fits, 896×504 (1,512) fits.
 Issue draft: `bug_reports/F-10_github_issue.md`.
+
+**F-6 mechanism located in code (2026-10-08 08:30 UTC).** `tokenizer_manager._handle_batch_request` (L2003–2060) expands `n=2` into a
+prefix request (`max_new_tokens 0`) and two samples, all copied from `obj[i]` with i = prompt index, so all three carry `bootstrap_room[0]`;
+`_normalize_bootstrap_params` (io_struct L886–910) had produced `[room, room+1]` but the second room is never used; the mini-LB attaches one
+int room per HTTP request (mini_lb.py L490–513). Three requests, one room → collision in the per-room transfer state; decode holds one with
+128 used tokens (prompt pages), prefill idle; no deadline (same gap as F-12). Drafts written: F-1, F-5, F-6, F-12 (`bug_reports/*_github_issue.md`);
+triage file `bug_reports/PRIORITIES.md`.

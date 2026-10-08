@@ -350,6 +350,14 @@ request. The repeat has not run yet.
 **Observed result (first run).** No response in 300 seconds.
 **Expected result.** Two outputs within a few seconds, or HTTP 400 if `n>1` is not supported in PD mode.
 
+## Cause (located in the code)
+
+The tokenizer manager expands one `n=2` request into a prefix request (`max_new_tokens 0`) plus two sampling requests, all built from the
+same prompt object, so all three carry the same `bootstrap_room` (the second room produced by `_normalize_bootstrap_params` is never used).
+Three requests with one room collide in the transfer bookkeeping; the decode engine keeps one of them with the prompt pages allocated and
+nothing to generate, and no deadline fires while its receiver waits. Fix: index bootstrap rooms per sub-request and do not send the
+prefix-only request to the decode in disaggregated mode. Full trace: `F-6_github_issue.md`.
+
 ## Related open issues in sgl-project/sglang-torchtpu
 
 None found. New.
@@ -693,7 +701,9 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-11](F-11.md) | Chunked prefill deadlocks when the SWA continuation budget hits 0 before eviction (gpt-oss, 1 slot, TPU rounding) | bug (hang) | high | reproduced 4/4, root cause in code  none (#1067 would hit it) |
 | [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug (hang) | high | reproduced on 3/3 fresh pairs (one recipe)  #1113/#1078 related (those expire) |
 
-Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`).
+Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`). Production triage (severity, priority, filing order):
+`PRIORITIES.md`. Ready-to-file GitHub issue drafts with code traces: `F-1_github_issue.md`, `F-2_github_issue.md`, `F-5_github_issue.md`,
+`F-6_github_issue.md`, `F-8_github_issue.md`, `F-10_github_issue.md`, `F-11_github_issue.md`, `F-12_github_issue.md`.
 
 ## Common steps
 

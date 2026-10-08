@@ -18,7 +18,9 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-11](F-11.md) | Chunked prefill deadlocks when the SWA continuation budget hits 0 before eviction (gpt-oss, 1 slot, TPU rounding) | bug (hang) | high | reproduced 4/4, root cause in code  none (#1067 would hit it) |
 | [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug (hang) | high | reproduced on 3/3 fresh pairs (one recipe)  #1113/#1078 related (those expire) |
 
-Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`).
+Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`). Production triage (severity, priority, filing order):
+`PRIORITIES.md`. Ready-to-file GitHub issue drafts with code traces: `F-1_github_issue.md`, `F-2_github_issue.md`, `F-5_github_issue.md`,
+`F-6_github_issue.md`, `F-8_github_issue.md`, `F-10_github_issue.md`, `F-11_github_issue.md`, `F-12_github_issue.md`.
 
 ## Common steps
 
