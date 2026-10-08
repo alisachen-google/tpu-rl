@@ -12,3 +12,12 @@ sglang:num_running_reqs 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num
 sglang:num_running_reqs 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 
     _update_handshake_waiters (decode.py:1146)
     pop_preallocated (decode.py:1354)
+   ISL=32768: 0 of 2 completed in 600 s;       2 ERROR ReadTimeout 
+2026-10-08T06:59:28Z a_holders=[] b_holders=[]
+2026-10-08T06:59:28Z F-12 repro attempt 2: fresh pair F12_gptoss_A_128k_mr1_try2
+2026-10-08 07:01:30 prefill /health ready after 121 s
+2026-10-08 07:01:30 decode /health ready after 0 s
+2026-10-08 07:01:31 LB /health_generate ready after 1 s
+2026-10-08T07:02:16Z    ISL=8192: no answer after 45 s -> stall suspected; capturing state
+sglang:num_running_reqs 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 
+2026-10-08T07:06:43Z F12 repro stopped by operator after attempt 2 stalled on its first request (3 of 3 fresh pairs); phase F12 repro done

@@ -562,7 +562,7 @@ Other non-square sizes, for example 896×504. A request with `--mm-process-confi
 `results/logs/runs/A_qwen_128k_run1/prefill_server.log.gz` (from line 7648), `results/A/mm/qwen3-vl/img1_1920x1080.json`.
 """
 
-REPORTS["F-11"] = f"""# F-11: The prefill engine stops forever on prompts longer than two chunks when `max-running-requests` is 1 (gpt-oss, TPU)
+REPORTS["F-11"] = f"""# F-11: Chunked prefill stops forever when the SWA continuation budget reaches 0 before window eviction runs (gpt-oss, `max-running-requests` 1, TPU)
 
 **Type:** bug (hang, deadlock). **Severity:** high. **Status:** reproduced 4 of 4 in the 1M-context recipe. Root cause located in the code. Not reproduced with 4 request slots (0 of 6 hang).
 
@@ -624,7 +624,7 @@ None describe this. #1067 (long-context PD stress test for gpt-oss) would hit it
 
 REPORTS["F-12"] = f"""# F-12: The P/D handshake never completes and both engines hold the request with no deadline (candidate)
 
-**Type:** bug (hang). **Severity:** high. **Status:** reproduced on 2 of 2 freshly started pairs with the `gpt-oss_A_128k_mr1` recipe (every request to those pairs stalls). Pairs with the 1M-context recipe (same flags, larger context and pool) and with 8 request slots did not show it. Trigger not yet isolated.
+**Type:** bug (hang). **Severity:** high. **Status:** reproduced on 3 of 3 freshly started pairs with the `gpt-oss_A_128k_mr1` recipe (every request to those pairs stalls, including 8k single-chunk prompts). Pairs with the 1M-context recipe (same flags, larger context and pool) and with 8 request slots did not show it. Trigger not yet isolated.
 
 ## Summary
 
@@ -684,8 +684,8 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-8](F-8.md) | Client disconnect during chunked prefill stops the prefill engine | bug (crash) | high | reproduced 2/2  none |
 | [F-9](F-9.md) | Unaligned prompt lengths give a different first token in PD mode | resolved: not a bug (F-3 artefact) | none | identical 2/2 at c=1  none |
 | [F-10](F-10.md) | One 1920×1080 image stops the Qwen3-VL prefill engine | bug (crash) | high | reproduced 2/2  #488 (same mechanism, other trigger); #1068 |
-| [F-11](F-11.md) | Prefill deadlocks on prompts > 2 chunks when max-running-requests is 1 (TPU SWA pool rounding) | bug (hang) | high | reproduced 4/4, root cause in code  none (#1067 would hit it) |
-| [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug (hang) | high | reproduced on 2/2 fresh pairs (one recipe)  #1113/#1078 related (those expire) |
+| [F-11](F-11.md) | Chunked prefill deadlocks when the SWA continuation budget hits 0 before eviction (gpt-oss, 1 slot, TPU rounding) | bug (hang) | high | reproduced 4/4, root cause in code  none (#1067 would hit it) |
+| [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug (hang) | high | reproduced on 3/3 fresh pairs (one recipe)  #1113/#1078 related (those expire) |
 
 Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`).
 

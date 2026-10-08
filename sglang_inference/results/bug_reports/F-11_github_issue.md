@@ -1,6 +1,6 @@
 # GitHub issue draft for sgl-project/sglang-torchtpu
 
-**Title:** [TPU/PD] Prefill deadlocks on any prompt longer than two chunks when `--max-running-requests 1` (hybrid-SWA pool is rounded down to exactly two chunks; gpt-oss-120b)
+**Title:** [TPU/PD] Chunked prefill deadlocks when the SWA continuation budget reaches 0 before window eviction runs (hit by gpt-oss-120b with `--max-running-requests 1`)
 
 **Labels:** bug, tpu, pd
 
@@ -8,24 +8,33 @@
 
 ## Summary
 
-In disaggregated prefill with the radix cache off and `--max-running-requests 1`, gpt-oss-120b never finishes a prompt longer than
-16,384 tokens. The prefill engine runs two chunks (8,192 and 8,000 tokens), then schedules nothing more. The request stays in the running
-slot until the client disconnects. Both engines report healthy and no watchdog fires, because no forward pass is in flight.
+For a hybrid sliding-window model in chunked prefill, the scheduler sizes the next chunk from the free sliding-window (SWA) pool minus
+`window + page`. The SWA pages that already slid behind the window are freed only inside the preparation of a batch that contains the request.
+If the free pool drops below `window + 2 pages` (256 tokens here) while those pages are still occupying it, the next chunk is sized to 0,
+no batch is formed, the eviction never runs, and the request waits forever. Both engines report healthy and no watchdog fires, because no
+forward pass is in flight.
 
-The cause is a chain of three things that are each reasonable on their own:
+The number of resident chunks does not matter; only the free pool at the continuation point does. Our configuration reaches exactly 0 free
+budget after two chunks because of how the pool is sized:
 
-1. The sliding-window (SWA) KV pool is sized from a worst-case cap of two prefill chunks plus a small per-slot allowance plus one page.
-   With one slot that is 16,832 tokens.
-2. A TPU-only rule rounds the SWA pool **down** to a multiple of 8 pages (512 tokens): 16,832 becomes 16,384, exactly two chunks. The
-   headroom the cap reserved is gone.
-3. A continuation chunk is admitted only if `window + page` (192 tokens) stays free, and SWA pages that slid out of the window are freed
-   only as a side effect of running the request's next chunk. After two chunks only 192 tokens are free, the third chunk is sized to 0 and
-   is never scheduled, so the eviction that would free about 16,000 pages never runs.
+1. With the radix cache off and `--max-running-requests` explicit, the SWA pool is sized from a worst-case cap: two prefill chunks plus 384
+   tokens per request slot plus one page. With one slot that is 16,832 tokens.
+2. A TPU-only rule rounds the pool **down** to a multiple of 8 pages (512 tokens): 16,832 becomes 16,384, exactly two chunks of 8,192.
+3. Chunk 1 takes 8,192, chunk 2 is cut to 8,000 to keep `window + page` free, 192 tokens remain, and the budget for chunk 3 is 192 − 192 = 0.
 
-With two or more request slots the rounding leaves at least 512 tokens of headroom, a small third chunk is admitted, it triggers the
-eviction and the pool cycles normally. So the failure is specific to one slot, which is exactly what a 1M-context recipe uses.
+With two or more slots the rounding leaves at least 512 free tokens at that point, a small third chunk is admitted, its preparation evicts the
+pages behind the window, and the pool cycles normally. So in practice gpt-oss-120b with one request slot, which is what a 1M-context recipe
+uses, cannot serve any prompt longer than 16,384 tokens.
 
-| `--max-running-requests` | SWA pool from the cap | After TPU rounding | Headroom above two chunks | Observed |
+| Pool | Occupied when chunk 3 is planned | Free | Chunk 3 budget | Result |
+|---|---|---|---|---|
+| 16,384 (1 slot) | 16,192 | 192 | 0 | deadlock, 4 of 4 prompts above 16,384 tokens |
+| 16,896 (2 slots, predicted) | 16,384 | 512 | 320 | chunk of 320 tokens, eviction runs |
+| 17,920 (4 slots) | 16,256 | 1,664 | 1,472 | chunk of 1,344 tokens observed, eviction runs; 8k, 32k, 131k complete in 7 to 13 s |
+
+Pool sizes as logged (`aligning swa_max_total_num_tokens`):
+
+| `--max-running-requests` | SWA pool from the cap | After TPU rounding | Free above two chunks | Observed |
 |---|---|---|---|---|
 | 1 | 16,832 | 16,384 | 0 | hang on every prompt > 16,384 tokens (4 of 4) |
 | 4 | 17,984 | 17,920 | 1,536 | 8k, 32k, 131k prompts complete in 7 to 13 s (6 of 6) |
@@ -120,19 +129,20 @@ Control: repeat with `--max-running-requests 2`. The pool becomes 17,216 → 16,
 
 ## Fix proposal
 
-Any one of the first two closes the hang; the third makes the failure visible if it ever recurs.
+The defect is that the continuation budget can reach 0 before the eviction that would raise it runs, and nothing else triggers that eviction.
+Fix 1 removes the defect for every pool size. Fix 2 keeps this configuration away from the edge. Fix 3 turns a silent hang into an error.
 
-1. **Do not let the TPU alignment eat the cap's headroom.** In `kv_cache_configurator.py`, round a chunk-capped SWA pool **up** to the next
-   multiple of 8 pages instead of down (the extra memory is at most 7 pages), or apply the 8-page alignment inside
-   `SWAChunkCapPoolConfigurator.calculate_pool_sizes` before the full pool is sized, so the cap is honoured after alignment. The existing
-   `ValueError` for a pool below 8 pages already shows the intent that alignment must not shrink a capped pool below what the scheduler needs.
-2. **Evict before budgeting.** In `get_new_batch_prefill`, when `self.chunked_req` is set and the cache supports SWA, call the request's
-   out-of-window eviction (`tree_cache.evict_sliding_windows(req, len(req.prefix_indices))`, respecting the overlap safety rule) before
-   constructing the `PrefillAdder`, so `remaining_swa` reflects the pages that the completed chunks no longer need. This also removes the
-   dependence of chunk sizes on pool headroom, which is what makes PD and monolithic chunk schedules differ for this model.
+1. **Evict before budgeting (primary).** In `get_new_batch_prefill`, when `self.chunked_req` is set and the cache supports SWA, run the
+   request's out-of-window eviction (`tree_cache.evict_sliding_windows(req, len(req.prefix_indices))`, respecting the overlap safety rule that
+   the previous chunk's result must have landed) before constructing the `PrefillAdder`, so `remaining_swa` reflects the pages the completed
+   chunks no longer need. Chunk sizes then stop depending on pool headroom, which is also what makes PD and monolithic chunk schedules differ
+   for this model.
+2. **Do not let the TPU alignment eat the cap's headroom.** In `kv_cache_configurator.py`, round a chunk-capped SWA pool **up** to the next
+   multiple of 8 pages instead of down (at most 7 extra pages), or apply the 8-page alignment inside
+   `SWAChunkCapPoolConfigurator.calculate_pool_sizes` before the full pool is sized, so the cap is honoured after alignment.
 3. **Fail instead of waiting.** When `add_chunked_req` cannot fit any tokens, nothing else is running and no eviction is possible, abort the
    request with a clear error (`SWA pool too small for chunked prefill continuation`) rather than returning it to the next iteration forever.
-   A startup check that `swa_pool >= 2 * chunked_prefill_size + window + page` after alignment would catch the configuration at launch.
+   A startup check that the aligned SWA pool leaves at least `window + 2 pages` above a whole number of chunks would catch the configuration at launch.
 
 ## Related
 

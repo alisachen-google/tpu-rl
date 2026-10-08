@@ -402,3 +402,8 @@ Correlation so far: fails on `gpt-oss_A_128k_mr1` (mrr 1, compile bs [1], ctx 14
 pool 1.1M, host pool 320 GiB) and on `gpt-oss_A_128k` (mrr 8). The recipes differ only in those fields. Mechanism unchanged: decode receiver
 never leaves `Bootstrapping`, no deadline covers that state. Note for the harness: the engines see the abort only when the client *process*
 exits (sockets close), not at the per-request timeout, so stalled requests outlive the client timeout.
+
+**F-12: 3 of 3 fresh pairs (2026-10-08 06:59–07:06 UTC, `F12_gptoss_A_128k_mr1_try2`).** Third pair, first 8k request stalled again within
+45 s; decode in `_update_handshake_waiters`. Deterministic for recipe `gpt-oss_A_128k_mr1`. Repro loop stopped; a control pair with
+`max_running_requests 2` (`recipes/gpt-oss_A_128k_mr2.json`, `_phase_F11_control_mr2.sh`) runs next: it is both the F-11 control (predicted
+pool 17,216 → 16,896, no deadlock) and the F-12 isolation (does the handshake stall need one slot?).
