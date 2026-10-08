@@ -525,3 +525,23 @@
    http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
    http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
 2026-10-08T13:57:19Z [C/qwen3-vl] (2) tiny boundary sweep (160 tokens, c=1) + needles
+   tiny: 35 prompts, 0 problems []
+2026-10-08T14:13:47Z [C/qwen3-vl] (3) prefix-cache reuse: 32k prompts twice at c=1 (64 tokens); second pass should report cached_tokens>0 and identical text
+   isl32768_k0: pass1 cached=32640 ttft=154209.84ms | pass2 cached=32640 ttft=157993.96ms | identical_text=True first_logprob_delta=0.0000
+   isl32768_k1: pass1 cached=32640 ttft=155885.24ms | pass2 cached=32640 ttft=156075.18ms | identical_text=True first_logprob_delta=0.0000
+   prefill cache metrics: sglang:cache_hit_rate 0.99609375 
+2026-10-08T14:24:11Z [C/qwen3-vl] (4) HiCache: host-cache lines in the prefill log so far
+   [2026-10-08 13:37:44] [TPU] libtpu premapped host staging pool: 0.00 GiB (TPU_PREMAPPED_BUFFER_SIZE=0); raise it if KV-offload H2D OOMs.
+     LIBTPU_INIT_ARGS=--xla_tpu_enable_async_collective_fusion=true --xla_tpu_overlap_compute_collective_tc=true --xla_tpu_enable_async_collective_fusion_multiple_steps=true --xla_tpu_enable_latency_hidi
+   [2026-10-08 13:37:44] [TPU] libtpu premapped host staging pool: 0.00 GiB (TPU_PREMAPPED_BUFFER_SIZE=0); raise it if KV-offload H2D OOMs.
+     LIBTPU_INIT_ARGS=--xla_tpu_enable_async_collective_fusion=true --xla_tpu_overlap_compute_collective_tc=true --xla_tpu_enable_async_collective_fusion_multiple_steps=true --xla_tpu_enable_latency_hidi
+   [2026-10-08 13:37:45] [TPU] libtpu premapped host staging pool: 0.00 GiB (TPU_PREMAPPED_BUFFER_SIZE=0); raise it if KV-offload H2D OOMs.
+     LIBTPU_INIT_ARGS=--xla_tpu_enable_async_collective_fusion=true --xla_tpu_overlap_compute_collective_tc=true --xla_tpu_enable_async_collective_fusion_multiple_steps=true --xla_tpu_enable_latency_hidi
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T14:24:12Z [C/qwen3-vl] (6) sampling-params matrix (n_2 excluded: F-6; return_logprob_top5 excluded: F-5)
+2026-10-08T14:28:24Z [C/qwen3-vl] params rc=0
+   regex                               400/None/None         -                     -    -    -    PASS    
+   stream_vs_nonstream                 200/128/length        -                     -    -    -    PASS    
+   17 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/C/qwen3-vl/params.json
+2026-10-08T14:28:24Z [C/qwen3-vl] (7) chat suite
