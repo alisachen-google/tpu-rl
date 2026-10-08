@@ -1,3 +1,12 @@
 2026-10-08T06:02:47Z F11 isolation done
 2026-10-08T06:03:00Z a_holders=[] b_holders=[]
 2026-10-08T06:03:00Z patch applied
+2026-10-08T06:10:16Z warm start with patch: 421 s
+2026-10-08T06:10:16Z GSM8K-100 on the COMPILED (patched) Qwen
+   compiled: gsm8k_score=0.99   eager: gsm8k_score=0.97
+qwen_F2patch_acc: ready_at_line=24719 total_lines=25089
+  startup : __recompiles=368  Compiling/compile=36  cache_miss=0  InductorError=0
+  serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+2026-10-08T06:11:01Z patch reverted; tree clean: 0
+tmpfs           473G  133G  341G  28% /dev/shm
+2026-10-08T06:11:07Z phase F2 accuracy done
