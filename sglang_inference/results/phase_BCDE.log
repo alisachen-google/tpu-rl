@@ -414,3 +414,34 @@
 2026-10-08T12:22:24Z [E/gpt-oss] === config E/gpt-oss done (relaunches: 0)
 2026-10-08T12:22:24Z [B/qwen3-vl] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/qwen3-vl_B_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1
 2026-10-08T12:22:37Z a_holders=[] b_holders=[]
+2026-10-08 12:25:24 prefill /health ready after 166 s
+2026-10-08 12:29:09 decode /health ready after 225 s
+2026-10-08 12:29:30 LB /health_generate ready after 21 s
+2026-10-08T12:29:32Z [B/qwen3-vl] pair up in 415 s
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:29:32Z [B/qwen3-vl] (1) TC-1: c=1 greedy, 1024 tokens, 8k/32k/128k vs goldens in /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1
+   [isl8192_k0] tokens=1024 finish=length cached=0 ttft=9424.27ms e2e=175795.71ms
+   [isl8192_k1] tokens=1024 finish=length cached=0 ttft=560.99ms e2e=159447.94ms
+   vs golden isl8192_k0    True     4605   1024  1.000   0.0000  PASS  
+   vs golden isl8192_k1    True     4682   1024  1.000   0.0000  PASS  
+   vs golden 2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/qwen3-vl/tc1_diff_8192.json
+   needles {"id": "isl8192_k0", "isl": 8192, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 105, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl8192_k1", "isl": 8192, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 107, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl32768_k0] tokens=1024 finish=length cached=0 ttft=1959.74ms e2e=160060.15ms
+   [isl32768_k1] tokens=1024 finish=length cached=0 ttft=1956.53ms e2e=157443.95ms
+   vs golden isl32768_k0   True     4372   1024  1.000   0.0000  PASS  
+   vs golden isl32768_k1   True     4472   1024  1.000   0.0000  PASS  
+   vs golden 2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/qwen3-vl/tc1_diff_32768.json
+   needles {"id": "isl32768_k0", "isl": 32768, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 106, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl32768_k1", "isl": 32768, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 106, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl131072_k0] tokens=1024 finish=length cached=0 ttft=18679.62ms e2e=177439.18ms
+   [isl131072_k1] tokens=1024 finish=length cached=0 ttft=10031.72ms e2e=167144.87ms
+   vs golden isl131072_k0  True     4448   1024  1.000   0.0000  PASS  
+   vs golden isl131072_k1  True     4430   1024  1.000   0.0000  PASS  
+   vs golden 2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/qwen3-vl/tc1_diff_131072.json
+   needles {"id": "isl131072_k0", "isl": 131071, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 110, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl131072_k1", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 99, "completion_tokens": 1024, "finish_reason": "length"}
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:46:10Z [B/qwen3-vl] (2) tiny boundary sweep (160 tokens, c=1) + needles
