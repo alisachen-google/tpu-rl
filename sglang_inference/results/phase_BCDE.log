@@ -301,3 +301,115 @@
 2026-10-08T12:05:11Z [D/gpt-oss] (9) GSM8K-100 via LB
    [METRIC] gsm8k_score=0.99 labels={"model": "gpt-oss-120b", "eval": "gsm8k"}
 2026-10-08T12:06:05Z [D/gpt-oss] (10) decode-phase client aborts (3, two concurrent)
+2026-10-08T12:07:26Z [D/gpt-oss] abort decode rc=0
+   [+   80.49s] PASS: 6 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=131008), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/D/gpt-oss/abort_deco
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:07:26Z [D/gpt-oss] (11) compile audit (decode, prefill)
+   decode_D: ready_at_line=20037 total_lines=21045
+     startup : __recompiles=432  Compiling/compile=78  cache_miss=0  InductorError=0
+     serving : __recompiles=8  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+   prefill_D: server not ready yet (no ready marker); lines=1802
+   prefill_D: ready_at_line=1802 total_lines=1802
+     startup : __recompiles=16  Compiling/compile=3  cache_miss=0  InductorError=0
+2026-10-08T12:07:27Z [D/gpt-oss] (12) LAST: prefill-phase client abort (crashes the prefill engine in Config A, F-8)
+2026-10-08T12:07:59Z [D/gpt-oss] abort prefill rc=0
+   prefill /health after prefill-abort: 200   decode: 200
+   requests.exceptions.ConnectionError: HTTPConnectionPool(host='127.0.0.1', port=30000): Max retries exceeded with url: /freeze_gc (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=30
+   [2026-10-08 12:03:17] [http_server] Error: Grammar-based generation (json_schema, regex, ebnf, structural_tag) is not supported when the server is launched with --grammar-backend none
+   [2026-10-08 12:03:17] [http_server] Error: Grammar-based generation (json_schema, regex, ebnf, structural_tag) is not supported when the server is launched with --grammar-backend none
+2026-10-08T12:08:15Z [D/gpt-oss] archiving logs
+2026-10-08T12:08:25Z [D/gpt-oss] === config D/gpt-oss done (relaunches: 0)
+2026-10-08T12:08:25Z [E/gpt-oss] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_E_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_bf16_c1
+2026-10-08T12:08:38Z a_holders=[] b_holders=[]
+2026-10-08 12:13:10 prefill /health ready after 271 s
+2026-10-08 12:14:10 decode /health ready after 60 s
+2026-10-08 12:14:11 LB /health_generate ready after 1 s
+2026-10-08T12:14:12Z [E/gpt-oss] pair up in 334 s
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:14:12Z [E/gpt-oss] (1) TC-1: c=1 greedy, 1024 tokens, 8k/32k/128k vs goldens in /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_bf16_c1
+   [isl8192_k0] tokens=1024 finish=length cached=0 ttft=359.03ms e2e=13299.02ms
+   [isl8192_k1] tokens=1024 finish=length cached=0 ttft=331.57ms e2e=9209.83ms
+   vs golden isl8192_k0    False     107     22  0.031   0.0000  FAIL  token prefix 22<256; agreement 0.031<0.95
+   vs golden isl8192_k1    False      82     16  0.028   0.0000  FAIL  token prefix 16<256; agreement 0.028<0.95
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/E/gpt-oss/tc1_diff_8192.json
+   needles {"id": "isl8192_k0", "isl": 8192, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 286, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl8192_k1", "isl": 8192, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 326, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl32768_k0] tokens=1024 finish=length cached=0 ttft=1320.05ms e2e=11062.58ms
+   [isl32768_k1] tokens=1024 finish=length cached=0 ttft=1339.35ms e2e=11033.08ms
+   vs golden isl32768_k0   False      64     11  0.022   0.0000  FAIL  token prefix 11<256; agreement 0.022<0.95
+   vs golden isl32768_k1   False     570    151  0.157   0.0235  FAIL  token prefix 151<256; agreement 0.157<0.95
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/E/gpt-oss/tc1_diff_32768.json
+   needles {"id": "isl32768_k0", "isl": 32768, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 146, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl32768_k1", "isl": 32768, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 185, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl131072_k0] tokens=1024 finish=length cached=0 ttft=7159.33ms e2e=19804.33ms
+   [isl131072_k1] tokens=1024 finish=length cached=0 ttft=7122.55ms e2e=19933.09ms
+   vs golden isl131072_k0  False      11      3  0.019   0.0529  FAIL  token prefix 3<256; agreement 0.019<0.95
+   vs golden isl131072_k1  False     419     99  0.120   0.0590  FAIL  token prefix 99<256; agreement 0.120<0.95
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/E/gpt-oss/tc1_diff_131072.json
+   needles {"id": "isl131072_k0", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 272, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl131072_k1", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 207, "completion_tokens": 1024, "finish_reason": "length"}
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:15:38Z [E/gpt-oss] (2) tiny boundary sweep (160 tokens, c=1) + needles
+   tiny: 35 prompts, 6 problems ['tiny128', 'tiny130', 'tiny256', 'tiny383', 'tiny1025', 'tiny8256']
+2026-10-08T12:16:31Z [E/gpt-oss] (3) prefix-cache reuse: 32k prompts twice at c=1 (64 tokens); second pass should report cached_tokens>0 and identical text
+   isl32768_k0: pass1 cached=32704 ttft=10201.67ms | pass2 cached=32704 ttft=10058.29ms | identical_text=True first_logprob_delta=0.0000
+   isl32768_k1: pass1 cached=32704 ttft=9638.74ms | pass2 cached=32704 ttft=9574.8ms | identical_text=True first_logprob_delta=0.0000
+   prefill cache metrics: sglang:cache_hit_rate 0.998046875 
+2026-10-08T12:17:11Z [E/gpt-oss] (4) HiCache: host-cache lines in the prefill log so far
+   [2026-10-08 12:08:57] [TPU] libtpu premapped host staging pool: 0.00 GiB (TPU_PREMAPPED_BUFFER_SIZE=0); raise it if KV-offload H2D OOMs.
+     LIBTPU_INIT_ARGS=--xla_tpu_enable_async_collective_fusion=true --xla_tpu_overlap_compute_collective_tc=true --xla_tpu_enable_async_collective_fusion_multiple_steps=true --xla_tpu_enable_latency_hidi
+   [2026-10-08 12:08:58] [TPU] libtpu premapped host staging pool: 0.00 GiB (TPU_PREMAPPED_BUFFER_SIZE=0); raise it if KV-offload H2D OOMs.
+     LIBTPU_INIT_ARGS=--xla_tpu_enable_async_collective_fusion=true --xla_tpu_overlap_compute_collective_tc=true --xla_tpu_enable_async_collective_fusion_multiple_steps=true --xla_tpu_enable_latency_hidi
+   [2026-10-08 12:08:58] [TPU] libtpu premapped host staging pool: 0.00 GiB (TPU_PREMAPPED_BUFFER_SIZE=0); raise it if KV-offload H2D OOMs.
+     LIBTPU_INIT_ARGS=--xla_tpu_enable_async_collective_fusion=true --xla_tpu_overlap_compute_collective_tc=true --xla_tpu_enable_async_collective_fusion_multiple_steps=true --xla_tpu_enable_latency_hidi
+2026-10-08T12:17:12Z [E/gpt-oss] (5) EAGLE3: acceptance length and spec lines
+   http://10.128.15.217:30000 avg_spec_accept_length=None
+   http://10.128.0.90:30000 avg_spec_accept_length=1.440217391304348
+   decode [2026-10-08 12:17:09 TP0 EP0] Decode batch, #running-req: 1, #full token: 33664, full token usage: 0.04, #swa token: 320, swa token usage: 0.00, accept len: 1.40, accept rate: 0.13, pre-allocated usag
+   decode [2026-10-08 12:17:09 TP0 EP0] Decode batch, #running-req: 1, #full token: 33728, full token usage: 0.04, #swa token: 384, swa token usage: 0.00, accept len: 1.35, accept rate: 0.12, pre-allocated usag
+   decode [2026-10-08 12:17:10 TP0 EP0] Decode batch, #running-req: 1, #full token: 33728, full token usage: 0.04, #swa token: 256, swa token usage: 0.00, accept len: 1.23, accept rate: 0.07, pre-allocated usag
+   decode [2026-10-08 12:17:10 TP0 EP0] Decode batch, #running-req: 1, #full token: 33792, full token usage: 0.04, #swa token: 320, swa token usage: 0.00, accept len: 1.25, accept rate: 0.08, pre-allocated usag
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:17:12Z [E/gpt-oss] (6) sampling-params matrix (n_2 excluded: F-6; return_logprob_top5 excluded: F-5)
+2026-10-08T12:17:26Z [E/gpt-oss] params rc=0
+   regex                               400/None/None         -                     -    -    -    PASS    
+   stream_vs_nonstream                 200/128/length        -                     -    -    -    PASS    
+   17 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/E/gpt-oss/params.json
+2026-10-08T12:17:26Z [E/gpt-oss] (7) chat suite
+2026-10-08T12:17:34Z [E/gpt-oss] chat rc=1
+   model=gpt-oss-120b kind=gptoss 11 cases, endpoints: a=http://10.128.15.217:8080
+   tool_call             200/stop/0c/75r               -                             -     FAIL    a: no tool_calls (finish_reason=stop)
+   11 cases, 1 failed -> /home/alisachen_google_com/pd_disagg/results/E/gpt-oss/chat.json
+2026-10-08T12:17:34Z [E/gpt-oss] (8) concurrency sweep c=1,2,4 at ISL 131072 / OSL 256
+   c=1 Successful requests: 2 ;Output token throughput (tok/s): 33.25 ;Mean TTFT (ms): 3738.96 ;P99 TTFT (ms): 7150.63 ;Mean ITL (ms): 8.14 ;
+
+   c=2 Successful requests: 4 ;Output token throughput (tok/s): 44.15 ;Mean TTFT (ms): 5317.03 ;P99 TTFT (ms): 12863.88 ;Mean ITL (ms): 10.87 ;
+
+   c=4 Successful requests: 8 ;Output token throughput (tok/s): 52.08 ;Mean TTFT (ms): 8210.65 ;P99 TTFT (ms): 24496.87 ;Mean ITL (ms): 12.76 ;
+
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:19:17Z [E/gpt-oss] (9) GSM8K-100 via LB
+   [METRIC] gsm8k_score=0.98 labels={"model": "gpt-oss-120b", "eval": "gsm8k"}
+2026-10-08T12:20:08Z [E/gpt-oss] (10) decode-phase client aborts (3, two concurrent)
+2026-10-08T12:21:26Z [E/gpt-oss] abort decode rc=0
+   [+   77.44s] PASS: 6 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=131008), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/E/gpt-oss/abort_deco
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:21:26Z [E/gpt-oss] (11) compile audit (decode, prefill)
+   decode_E: ready_at_line=19150 total_lines=20206
+     startup : __recompiles=432  Compiling/compile=75  cache_miss=0  InductorError=0
+     serving : __recompiles=8  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+   prefill_E: server not ready yet (no ready marker); lines=1394
+   prefill_E: ready_at_line=1394 total_lines=1394
+     startup : __recompiles=42  Compiling/compile=8  cache_miss=0  InductorError=0
+2026-10-08T12:21:27Z [E/gpt-oss] (12) LAST: prefill-phase client abort (crashes the prefill engine in Config A, F-8)
+2026-10-08T12:21:58Z [E/gpt-oss] abort prefill rc=0
+   prefill /health after prefill-abort: 200   decode: 200
+2026-10-08T12:22:14Z [E/gpt-oss] archiving logs
+2026-10-08T12:22:24Z [E/gpt-oss] === config E/gpt-oss done (relaunches: 0)
+2026-10-08T12:22:24Z [B/qwen3-vl] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/qwen3-vl_B_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1

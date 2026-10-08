@@ -1,0 +1,19 @@
+[+    0.00s] prompt id=isl131072_k0 isl=131072 chars=711300 phase=prefill abort_after=2.0s repeat=1 concurrent=1
+[+    0.02s] server-info[baseline] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    0.03s] server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    0.03s] round 1/1: launching 1 aborting request(s)
+[+    0.04s] req0: sent (abort-0-1791461247200), headers after 0.01s
+[+    0.74s] req0: aborted at 0.709s in decode (first token beat the abort) (first_token=0.709s, chunks=1)
+[+    0.75s] server-info[after-abort] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    0.77s] server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    0.77s] waiting --settle 30.0s
+[+   30.78s] server-info[settled] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   30.79s] server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   30.79s] WARN http://10.128.15.217:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+[+   30.79s] WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+[+   30.99s] follow-up short: OK status=200 tokens=16 cached=0 
+[+   31.98s] follow-up identical-prompt: OK status=200 tokens=32 cached=131008 
+[+   32.00s] server-info[final] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   32.01s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   32.01s] WARN req0: abort landed in 'decode (first token beat the abort)' (tune --abort-after)
+[+   32.01s] PASS: 1 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=131008), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/D/gpt-oss/abort_prefill.json

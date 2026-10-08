@@ -475,3 +475,11 @@ holder check (09:12:00, still empty) and device open. Chain stopped; D, E and Qw
   GSM8K-100 (natural text, 4 threads): accept length p50 1.48, max 3.58, cumulative avg 2.13; **770 tok/s vs 561 (A) / 578 (B) / 491 (C)**,
   score **0.99**. Repo's own PD-EAGLE3 e2e gate is accept_length > 1.0.
 - Monolithic EAGLE3 control (same flags, GSM8K acceptance) queued: `_phase_eagle3_control.sh`.
+
+## Config E (gpt-oss, D + decode radix cache + decode HiCache) — 2026-10-08 12:08–12:22 UTC, `results/E/gpt-oss/`
+- Pair up in 271 s (prefill) / decode ready 60 s later. TC-1 vs bf16 golden: same spec-path NUM as D, needles 3/3, 1,024 tokens each.
+- Reuse: both passes fully cached (32,704), identical text, first-token delta 0.0000; prefill hit rate 0.998. Decode-side tiers active:
+  462,912 tokens written through to the decode host pool, 252,736 cached tokens on the decode radix tree.
+- Params all PASS; chat 10/11 (tool_call parser config); concurrency c=1/2/4 all successful (ITL 8.1–12.8 ms with spec); **GSM8K 0.98 at
+  809 tok/s** (fastest config); decode aborts 6/6 PASS; prefill-phase abort handled (no crash); **decode scheduler 0 exceptions after
+  multi-turn + concurrency traffic → #856 (decode radix + EAGLE3 dies after multi-turn) does not reproduce in this build with this traffic.**

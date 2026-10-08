@@ -1,0 +1,22 @@
+prompt=isl8192_k0 (43963 chars), 17 cases, endpoints: a=http://10.128.15.217:8080
+case                                A st/tok/fin          B st/tok/fin          txt  tok  fin  verdict notes
+------------------------------------------------------------------------------------------------------------
+greedy_baseline                     200/128/length        -                     -    -    -    PASS    
+top_k_1                             200/128/length        -                     -    -    -    PASS    
+repetition_penalty_1.3              200/128/length        -                     -    -    -    PASS    
+frequency_penalty_0.8               200/128/length        -                     -    -    -    PASS    
+presence_penalty_0.8                200/128/length        -                     -    -    -    PASS    
+min_new_tokens_100_ignore_eos_false 200/128/length        -                     -    -    -    PASS    
+stop_string                         200/103/stop          -                     -    -    -    PASS    
+stop_token_ids                      200/7/stop            -                     -    -    -    PASS    
+no_stop_trim                        200/103/stop          -                     -    -    -    PASS    
+logit_bias                          200/128/length        -                     -    -    -    PASS    
+max_new_tokens_1                    200/1/length          -                     -    -    -    PASS    
+max_new_tokens_0                    200/0/length          -                     -    -    -    PASS    
+skip_special_tokens_false           200/128/length        -                     -    -    -    PASS    
+sampling_seed_42_temp0.7            200/128/length        -                     -    -    -    PASS    a: info: seeded-rerun DIFFERS
+json_schema                         400/None/None         -                     -    -    -    PASS    
+regex                               400/None/None         -                     -    -    -    PASS    
+stream_vs_nonstream                 200/128/length        -                     -    -    -    PASS    
+
+17 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/E/gpt-oss/params.json

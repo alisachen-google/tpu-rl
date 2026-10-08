@@ -76,3 +76,21 @@
 [2026-10-08T12:06:57+00:00] decode ok=1 m=1 lat=10.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
 [2026-10-08T12:07:07+00:00] prefill ok=1 m=1 lat=12.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
 [2026-10-08T12:07:07+00:00] decode ok=1 m=1 lat=11.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T12:07:17+00:00] prefill ok=1 m=1 lat=12.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T12:07:17+00:00] decode ok=1 m=1 lat=11.4ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T12:07:27+00:00] prefill ok=1 m=1 lat=16.3ms run=1.0 q=0.0 use=0.17 thr=0.0 crash=-
+[2026-10-08T12:07:27+00:00] decode ok=1 m=1 lat=13.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T12:07:37+00:00] prefill ok=1 m=1 lat=11.3ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T12:07:37+00:00] decode ok=1 m=1 lat=10.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T12:07:47+00:00] prefill ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T12:07:47+00:00] decode ok=1 m=1 lat=12.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T12:07:57+00:00] prefill ok=1 m=1 lat=11.7ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T12:07:57+00:00] decode ok=1 m=1 lat=10.6ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T12:08:07+00:00] prefill ok=1 m=1 lat=12.6ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T12:08:07+00:00] decode ok=1 m=1 lat=10.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+
+=== watchdog summary ===
+elapsed_s=448 polls=90 failures=0 alerts=0 (crash=0, hang=0)
+max_token_usage[prefill]=0.5000
+max_token_usage[decode]=0.6700
+csv=/home/alisachen_google_com/pd_disagg/results/D/gpt-oss/watchdog.csv

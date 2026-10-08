@@ -1,0 +1,305 @@
+{
+ "model": "gpt-oss-120b",
+ "kind": "gptoss",
+ "a": "http://10.128.15.217:8080",
+ "b": null,
+ "timeout": 600.0,
+ "cases": 11,
+ "failed": 1,
+ "rows": [
+  {
+   "name": "plain_chat",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 241,
+    "usage": {
+     "prompt_tokens": 77,
+     "total_tokens": 234,
+     "completion_tokens": 157,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 48
+    },
+    "tool_calls": null,
+    "elapsed": 0.762,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "The sky appears blue because molecules and tiny particles in Earth\u2019s atmosphere scatter sunlight in all directions, a process called Rayleigh scattering. This scattering is far more efficient for shor"
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "reasoning_low",
+   "compare_mode": "reasoning",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 63,
+    "usage": {
+     "prompt_tokens": 99,
+     "total_tokens": 352,
+     "completion_tokens": 253,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 24
+    },
+    "tool_calls": null,
+    "elapsed": 0.828,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "**Answer:** The ball costs **5\u202f\u00a2** (\u202f$0.05\u202f).\n\n**Why?**  \n\nLet  \n\n- \\(b\\) = price of the ball (in dollars)  \n- \\(t\\) = price of the bat (in dollars)\n\nWe are given two facts:\n\n1. The total cost is $1.1"
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "reasoning_medium",
+   "compare_mode": "reasoning",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 151,
+    "usage": {
+     "prompt_tokens": 99,
+     "total_tokens": 329,
+     "completion_tokens": 230,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 68
+    },
+    "tool_calls": null,
+    "elapsed": 0.697,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "Let  \n\n*\u202f\\(x\\) = price of the ball (in dollars)  \n*\u202f\\(x + 1.00\\) = price of the bat (since the bat costs $1.00 more than the ball)\n\nThe total cost is $1.10, so\n\n\\[\nx + (x + 1.00) = 1.10.\n\\]\n\nCombine l"
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "reasoning_high",
+   "compare_mode": "reasoning",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 867,
+    "usage": {
+     "prompt_tokens": 99,
+     "total_tokens": 493,
+     "completion_tokens": 394,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 252
+    },
+    "tool_calls": null,
+    "elapsed": 1.244,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "Let the ball cost **\\(x\\)** dollars.  \nThen the bat costs **\\(x + 1.00\\)** dollars (it\u2019s $1 more than the ball).\n\nThe total price is $1.10, so\n\n\\[\nx + (x + 1.00) = 1.10 \\\\\n2x + 1.00 = 1.10 \\\\\n2x = 0.1"
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "multi_turn_3",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "length",
+    "reasoning_len": 235,
+    "usage": {
+     "prompt_tokens": 124,
+     "total_tokens": 188,
+     "completion_tokens": 64,
+     "prompt_tokens_details": {
+      "cached_tokens": 64
+     },
+     "reasoning_tokens": 60
+    },
+    "tool_calls": null,
+    "elapsed": 0.356,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "turns": [
+     "Mango",
+     "Orange",
+     ""
+    ],
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "tool_call",
+   "compare_mode": "tool",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 75,
+    "usage": {
+     "prompt_tokens": 133,
+     "total_tokens": 178,
+     "completion_tokens": 45,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 21
+    },
+    "tool_calls": null,
+    "elapsed": 0.354,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "self_fail": [
+     "no tool_calls (finish_reason=stop)"
+    ],
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [
+    "a: no tool_calls (finish_reason=stop)"
+   ],
+   "verdict": "FAIL"
+  },
+  {
+   "name": "stop_string_chat",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 74,
+    "usage": {
+     "prompt_tokens": 75,
+     "total_tokens": 105,
+     "completion_tokens": 30,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 22
+    },
+    "tool_calls": null,
+    "elapsed": 0.209,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "Elephant  "
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "stream_with_usage",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 241,
+    "usage": {
+     "prompt_tokens": 77,
+     "total_tokens": 234,
+     "completion_tokens": 157,
+     "prompt_tokens_details": {
+      "cached_tokens": 64
+     },
+     "reasoning_tokens": 48
+    },
+    "tool_calls": null,
+    "elapsed": 0.664,
+    "error": null,
+    "hang": false,
+    "done_seen": true,
+    "content_head": "The sky appears blue because molecules and tiny particles in Earth\u2019s atmosphere scatter sunlight in all directions, a process called Rayleigh scattering. This scattering is far more efficient for shor"
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "long_system_prompt",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "length",
+    "reasoning_len": 475,
+    "usage": {
+     "prompt_tokens": 4804,
+     "total_tokens": 4932,
+     "completion_tokens": 128,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 90
+    },
+    "tool_calls": null,
+    "elapsed": 0.911,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "The reference material is an extremely long, repetitive string of seemingly random words\u2014like \u201cpolicy,\u201d \u201ccompass,\u201d \u201cglacier,\u201d \u201carchive,\u201d \u201cration,\u201d"
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "empty_user_message",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 163,
+    "usage": {
+     "prompt_tokens": 67,
+     "total_tokens": 121,
+     "completion_tokens": 54,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 39
+    },
+    "tool_calls": null,
+    "elapsed": 0.294,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "Hello! How can I assist you today?"
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "oversized_max_tokens",
+   "compare_mode": "status",
+   "a": {
+    "status": 400,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.004,
+    "error": "{\"object\":\"error\",\"message\":\"max_completion_tokens is too large: 10000000.This model supports at most 140288 completion tokens.\",\"type\":\"BadRequestError\",\"param\":null,\"code\":400}",
+    "hang": false,
+    "done_seen": null,
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  }
+ ]
+}
