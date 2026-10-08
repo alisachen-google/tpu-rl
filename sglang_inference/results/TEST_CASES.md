@@ -95,7 +95,7 @@ Legend: PASS = met the pass criterion; NUM = numerical difference only (content 
 |---|---|
 | Checks | write-through to the host pool (`sglang:hicache_backup_tokens_total`, `hicache_host_used_tokens`, `hicache_dropped_tokens_total`); device eviction via 14 × 131k random prompts; re-request of an evicted prefix served with `#host-hit-token` > 0; bit-exact first-token log-prob vs the HBM hit; needles |
 | Command | metrics: `curl -s http://10.128.15.217:30000/metrics \| grep hicache`; eviction: `python -m sglang.bench_serving --dataset-name random --random-input-len 131072 --random-output-len 256 --num-prompts 8 --max-concurrency 4` (TC-8 doubles as the eviction load); reload: TC-3 pass again |
-| Results C | write-through 454,912 tokens after TC-1, **1.50M tokens** (of 1.57M host pool) after the sweep, 0 dropped, device `cache_hit_rate` 0 after eviction. Re-sent 32k prompts: `#hbm-hit-token: 0, #host-hit-token: 32704`, first-token log-probs **identical** to the HBM hit, needles 3/3. Reload time under concurrent GSM8K load ≈ 3–10 s per 32k prefix (confounded); clean idle timing: `_phase_hicache_reload.sh`, pending |
+| Results C | write-through 454,912 tokens after TC-1, **1.50M tokens** (of 1.57M host pool) after the sweep, 0 dropped, device `cache_hit_rate` 0 after eviction. Re-sent 32k prompts: `#hbm-hit-token: 0, #host-hit-token: 32704`, first-token log-probs **identical** to the HBM hit, needles 3/3. **Idle timing (`hicache_reload2/`): cold TTFT 1,244 ms, HBM hit 422 ms (8k computed), host hit 257 ms (32,704 reloaded from host, 64 computed)**; bit-exact at equal cache split. Note: an eviction load equal to the host pool size evicts the prefixes from the host too (first timing attempt) |
 | Evidence | `results/C/gpt-oss/reuse_after_evict.*`, `FINDINGS.md` (Config C), `results/C/gpt-oss/hicache_reload/` (pending) |
 
 ### TC-4 Speculative decoding EAGLE3 (D, E)
@@ -212,7 +212,7 @@ Legend: PASS = met the pass criterion; NUM = numerical difference only (content 
 - Config B and C for Qwen3-VL: done; identical to the golden at every length, prefix cache and HiCache write-through working, GSM8K 0.96.
 - HiCache reload timing on an idle pair: `_phase_hicache_reload.sh`, queued after the chain.
 - TC-15: canary runs failed at start-up (F-13); checksum-only runs queued (`_phase_kv_checksum_gptoss.sh`, `_phase_kv_checksum_qwen.sh`).
-- HiCache host-hit timing: first idle run evicted the prefixes from the host too (load = host pool size); rerun with a smaller load queued (`_phase_hicache_reload2.sh`).
+- HiCache host-hit timing: done (257 ms TTFT for a 32k host hit).
 - 1m shape for B–E: blocked by F-11 at 1 slot; plan is the 4-slot variant once memory headroom at 1M is measured.
 - Not covered on this hardware: multi-host engines (each host is a 4-chip slice), both engines on one host, the Rust router variant,
   KV checksum / canary flags (`--disaggregation-enable-kv-checksum`, `--kv-canary`), fault injection (covered by a colleague's campaigns).

@@ -531,3 +531,9 @@ Not in the open-issue list (no issue mentions kv-canary).
   concurrent threads and different batch composition), yet end-to-end throughput was equal → the per-batch numbers are not like-for-like.
   **Inconclusive**; controlled comparison queued (`_phase_spec_accept_compare.sh`: same 20 natural prompts, c=1, per-request
   `completion_tokens / spec_verify_ct` from `meta_info`, PD-D vs monolithic).
+
+**HiCache host-reload timing, clean (18:17 UTC, `results/C/gpt-oss/hicache_reload2/`, eviction 8 × 131k = 1.05M tokens).** 32k prompts,
+c=1 streaming: cold TTFT 1,244 ms (8192-token chunks); HBM hit 422 ms (24,576 cached, 8,192 computed); **host hit 257 ms (32,704 served from
+the host tier, 64 computed)** → host→device reload of 32k tokens well under 0.25 s. First-token logprob of the host hit (−0.79959) equals the
+Config C host hit with the same cache split; differs from the HBM-hit run only because that run computed a full 8k chunk (F-4-class split
+effect). HiCache offload + reload: correct and fast.
