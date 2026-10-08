@@ -359,3 +359,32 @@ harness now puts both caches under `/dev/shm/alisachen_cache/` (RAM-backed, 473 
 - With mrr ≥ 2 the rounding leaves ≥ 512 tokens of headroom → a small third chunk (e.g. 1,344 tokens in the mr4 run) gets scheduled, triggers the eviction, and the pool cycles. Only mrr 1 deadlocks.
 - Fix candidates: round the TPU alignment UP (`ceil`) or add the alignment slack to the cap; or evict the chunked request's out-of-window SWA pages before computing its continuation budget; or fail the request with an error when `fit_chunk` returns None and nothing else is running.
 - Open: in the 128k shape with mrr 1 (pool also 16,384) the FIRST 8k prompt (one chunk) also stalled: prefill holds it in the inflight queue (swa 0.5), the decode engine (mrr 1, SWA pool 768→512) never ran a batch and shows empty queues. Different symptom, not yet explained; the harness aborts at 900 s and continues with 32k.
+
+**F-9 resolved (2026-10-08 04:40–05:05 UTC).** Qwen3-VL, two prompts of 127,999 tokens (not page- or chunk-aligned), PD vs monolithic, both at
+concurrency 1, 1,024 new tokens: **identical 2 of 2**, first-token log-prob delta 0.0000 (`results/A/tc1/qwen3-vl/golden_diff_c1_127999.json`).
+The earlier deltas (0.011, 0.228) were against a concurrency-8 golden, i.e. the F-3 batch-composition effect. F-9 is closed as not a bug.
+
+**Eager Qwen3-VL GSM8K-100 = 0.97** (`results/golden/qwen3-vl_fp8_1m_c1/gsm8k_eager.log`); reference for the F-2 compiled-server check (running).
+
+**F-11 isolation summary.** (a) 1M shape, `max_running_requests 4`: no hang up to 131k (see root-cause entry above). (b) 128k shape,
+`max_running_requests 1`: not testable — the pair was blocked by a different stall (F-12 below) from its first request; stopped at 06:02 UTC.
+The chunk-deadlock prediction for (b) therefore rests on the code analysis and the exact match of the 8192/8000 chunk sizes and pool numbers.
+
+## F-12 (candidate) — P/D handshake never completes; request held on both engines with no deadline (gpt-oss, Config A, fresh pair)
+
+**Symptom (2026-10-08 05:16–06:02 UTC, run `F11_gpt-oss_A_128k_mr1`, `results/F11/handshake_stall/`, logs in `results/logs/runs/F11_gpt-oss_A_128k_mr1/`).**
+The first request to a freshly started pair (8,192-token prompt, one chunk) prefilled normally at 05:16:56 and then never produced a token.
+Prefill: `num_running_reqs 1`, `num_prefill_inflight_queue_reqs 1`, SWA usage 0.5, scheduler idle in `recv_requests` (py-spy). Decode: no batch
+ever ran; the TP0 scheduler sat in `pop_preallocated → _update_handshake_waiters → poll_and_all_reduce` (py-spy), i.e. the room stayed in
+`KVPoll.Bootstrapping`; decode metrics showed empty queues the whole time. No error on either side for 30 min. When the client's 900 s timeout
+(plus the queued second prompt's 900 s) aborted the request at 05:46:56 both sides logged it at once: prefill `Prefill transfer failed … Aborted by AbortReq`,
+decode `Decode handshake failed … Aborted by AbortReq`. The next request then stalled the same way. The 1M-shape pair started 10 min earlier the
+same way (`F11_gpt-oss_A_1m_mr4`) served six requests normally, so the trigger is not deterministic.
+
+**What the code says.** Raiden is consumer-pull: the prefill sender moves its room straight to `WaitingForInput` without waiting for the decode
+(`raiden/sender.py` ~line 1000) and bounds the handshake with `fail_decode_silence(room, init_time, bootstrap_timeout)` (300 s) — which did not
+fire here, so the prefill believed the decode had engaged. The raiden receiver's only deadline (`_check_waiting_timeout`, 300 s) starts in
+`send_metadata`, i.e. after the room leaves `Bootstrapping`; `poll()` has no deadline while the room is still bootstrapping
+(`raiden/receiver.py` ~lines 1140–1170), and the decode prealloc queue treats `Bootstrapping` as "keep waiting" (`decode.py:1160`). So once the
+two sides disagree about the handshake state, nothing times out. Related: #1113 / #1078 (decode waits out transfer/reshard deadlines) — those at
+least expire; this one does not. Needs a repro with raiden debug logging to find why the decode never saw the prefill's per-request reply.

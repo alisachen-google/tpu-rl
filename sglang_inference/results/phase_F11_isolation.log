@@ -15,3 +15,5 @@
 2026-10-08 05:16:55 LB /health_generate ready after 1 s
     gpt-oss_A_128k_mr1 mrr= 1 ctx= 140288 capacity= 786432 capacity_swa= 16384
    ISL=8192: 0 of 2 completed in 1800 s; swa_usage now: sglang:swa_token_usage 0.5
+2026-10-08T06:02:26Z F11 isolation stopped early by operator: 128k_mr1 pair blocked by a P/D handshake stall (F-12 candidate); 32k/131k not testable in this pair
+2026-10-08T06:02:36Z phase F11 isolation done

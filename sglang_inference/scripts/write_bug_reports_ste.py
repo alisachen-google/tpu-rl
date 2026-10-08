@@ -322,7 +322,7 @@ The same request against the monolithic server. We expect the same crash, becaus
 `results/logs/runs/A_gptoss_128k_run1/prefill/server.attempt1_crash_prompt_logprob.log.gz`, `results/A/params/gpt-oss/params_pd_A.json`.
 """
 
-REPORTS["F-6"] = f"""# F-6: A request with `n=2` gets no response for 300 seconds (candidate, not confirmed)
+REPORTS["F-6"] = f"""# F-6: A request with `n=2` gets no response
 
 **Type:** bug (hang). **Severity:** high. **Status:** reproduced 3 of 3 (temperature 0 and 0.7). The decode engine keeps one running request with 128 used tokens until the client disconnects; both engines stay healthy.
 
@@ -351,11 +351,11 @@ request. The repeat has not run yet.
 
 ## Related open issues in sgl-project/sglang-torchtpu
 
-None found. New (still unconfirmed).
+None found. New.
 
 ## Evidence
 
-`results/A/params/gpt-oss/params_pd_A.json` (case `n_2`, `HANG?`).
+`results/A/params/gpt-oss/params_pd_A.json` (case `n_2`, `HANG?`); repeat 2026-10-08 02:52 UTC in `results/phase_A_gptoss_redo.log` (3 of 3, decode engine holds one running request with 128 used tokens until the client disconnects).
 """
 
 REPORTS["F-7"] = f"""# F-7: After the prefill engine dies, the decode engine recovers in about two minutes (observation, not a bug report)
@@ -456,9 +456,9 @@ None found. #1114 covers a different hold (prefill keeps a request after decode 
 `results/logs/runs/A_gptoss_128k_run1/prefill_server.attempt2_abort_crash.log.gz`, `results/A/abort/gpt-oss/abort_prefill.json`.
 """
 
-REPORTS["F-9"] = f"""# F-9: Prompt lengths that are not a multiple of the page or chunk size give a different first token in PD mode (candidate)
+REPORTS["F-9"] = f"""# F-9: Prompt lengths that are not a multiple of the page or chunk size give a different first token in PD mode (resolved: not a bug)
 
-**Type:** bug candidate (correctness). **Severity:** medium. **Status:** observed on 4 of 4 unaligned prompts. The exact check against a concurrency-1 golden is queued.
+**Type:** bug candidate (correctness). **Severity:** none. **Status:** resolved 2026-10-08. Against a concurrency-1 golden, two 127,999-token Qwen3-VL prompts are token-identical for all 1,024 output tokens (delta 0.0000). The earlier deltas came from a concurrency-8 golden (F-3 batch effect).
 
 ## Summary
 
@@ -482,13 +482,14 @@ Most real prompts are not aligned. If this difference is real, almost every long
 6. Generate the PD outputs: `bash scripts/run_tc1.sh qwen3-vl http://10.128.15.217:8080 results/f9-pd 131072,127999 results/golden/f9 1`.
 7. Compare the `first_token_logprob` field for each prompt id in `results/golden/f9/*.jsonl` and `results/f9-pd/*.jsonl`.
 
-**Observed result.** Delta 0.0 for 131,072 tokens. Delta 0.011 and 0.228 for 127,999 tokens.
-**Expected result.** Delta 0.0 for all lengths.
+**Observed result (first run, concurrency-8 golden).** Delta 0.0 for 131,072 tokens. Delta 0.011 and 0.228 for 127,999 tokens.
+**Observed result (2026-10-08, concurrency-1 golden).** Delta 0.0000 and identical 1,024-token outputs for both 127,999-token prompts (`results/A/tc1/qwen3-vl/golden_diff_c1_127999.json`).
+**Expected result.** Delta 0.0 for all lengths. Met.
 
-## Possible cause
+## Cause
 
-Handling of the partial last chunk or page in the PD prefill engine (padding of the last extend chunk, or transfer and pre-allocation of a
-partially filled page).
+The golden used in the first run was generated at concurrency 8. Greedy decoding on this backend is not batch-invariant (F-3), so the
+comparison measured batch composition, not alignment. PD prefill handles the partial last chunk and page correctly.
 
 ## Related open issues in sgl-project/sglang-torchtpu
 
@@ -560,6 +561,111 @@ Other non-square sizes, for example 896×504. A request with `--mm-process-confi
 `results/logs/runs/A_qwen_128k_run1/prefill_server.log.gz` (from line 7648), `results/A/mm/qwen3-vl/img1_1920x1080.json`.
 """
 
+REPORTS["F-11"] = f"""# F-11: The prefill engine stops forever on prompts longer than two chunks when `max-running-requests` is 1 (gpt-oss, TPU)
+
+**Type:** bug (hang, deadlock). **Severity:** high. **Status:** reproduced 4 of 4 in the 1M-context recipe. Root cause located in the code. Not reproduced with 4 request slots (0 of 6 hang).
+
+## Summary
+
+gpt-oss-120b has sliding-window attention layers (window 128). In the disaggregated prefill recipe the radix cache is off and
+`--max-running-requests 1` is set. The sliding-window (SWA) KV pool is then sized from a worst-case formula: two prefill chunks plus a small
+per-slot allowance plus one page. A TPU-only rule rounds the pool down to a multiple of 8 pages. With one slot the rounding removes all the
+headroom: the pool is exactly two chunks (16,384 tokens). The scheduler admits a continuation chunk only if window plus one page (192 tokens)
+stay free. After two chunks only 192 tokens are free, so the third chunk gets size 0 and is never scheduled. Pages that left the window are
+freed only when the next chunk of the request runs. Nothing runs, nothing is freed, the request waits forever. Both engines report healthy.
+
+| Request slots | Pool from the formula | Pool after TPU rounding | Headroom above two chunks | Result |
+|---|---|---|---|---|
+| 1 | 16,832 | 16,384 | 0 | hang on every prompt longer than 16,384 tokens |
+| 4 | 17,984 | 17,920 | 1,536 | works; pool cycles 0.54 to 0.91 |
+| 8 | 19,520 | 19,456 | 3,072 | works |
+
+## Effect
+
+The 1M-context configuration (one request slot) cannot serve any prompt above about 16k tokens. A stalled request holds the only slot until
+the client disconnects. No watchdog fires because no forward pass is in flight.
+
+{ENV}
+## How to reproduce
+
+{HOW_TO_START.format(recipe="gpt-oss_A_1m.json", run="f11-repro")}
+### Steps
+
+1. Confirm the pool size in the prefill log on host a: `grep 'aligning swa_max_total_num_tokens' results/runs/f11-repro/prefill/server.log`. Expect `16832 -> 16384`.
+2. Send one 32,768-token prompt: `python scripts/verify_pd_disagg.py --url $LB --router --lengths 32768 --timeout 600`.
+3. After 60 seconds read the prefill metrics: `curl -s $PREFILL/metrics | grep -E 'swa_token_usage|num_running_reqs'`.
+4. Read the prefill log: `grep 'Prefill batch' results/runs/f11-repro/prefill/server.log | tail -3`.
+
+**Observed result.** Step 2 gets no answer in 600 seconds. Step 3 shows `swa_token_usage 0.99` and `num_running_reqs 1`. Step 4 shows two
+batches, `#new-token: 8192` then `#new-token: 8000`, and nothing after. The request stays until the client disconnects.
+**Expected result.** The 32k prompt answers in a few seconds, as it does with `--max-running-requests 4`.
+
+## Cause (located in the code, commit 09d1244c26)
+
+1. `model_executor/pool_configurator.py`, `SWAChunkCapPoolConfigurator` and `compute_swa_request_cap`: pool = 2 x chunked_prefill_size + (window + eviction_interval + 2 pages) x slots + 1 page. With one slot: 16,832 tokens.
+2. `mem_cache/kv_cache_configurator.py`, TPU branch: rounds down to a multiple of 8 pages (512 tokens): 16,384. Log line `[hybrid-SWA] aligning swa_max_total_num_tokens 16832 -> 16384`.
+3. `mem_cache/prefill_budget.py`, `_continuation_chunk_cap`: next chunk may use `remaining_swa - (window + page)`. Chunk 1 = 8,192, chunk 2 = 8,000, chunk 3 = 0 and `fit_chunk` returns None.
+4. `managers/schedule_batch.py`, `maybe_evict_swa`: out-of-window SWA pages of a chunked request are freed only when a batch with that request runs (from the third chunk on with overlap scheduling). No batch, no eviction. Deadlock.
+
+## Suggested fix
+
+Round the TPU alignment up, or apply it before the headroom is added. Also evict the chunked request's out-of-window pages before its
+continuation budget is computed, and fail the request with an error when no chunk fits and nothing else runs.
+
+## Related open issues in sgl-project/sglang-torchtpu
+
+None describe this. #1067 (long-context PD stress test for gpt-oss) would hit it with one request slot.
+
+## Evidence
+
+`results/F11/` (isolation runs `gpt-oss_A_1m_mr4_*`), `results/runs/A_gptoss_1m_run2/decode/server.log`, prefill log of `A_gptoss_1m_run2` on host a, `results/FINDINGS.md` (F-11 entries).
+"""
+
+REPORTS["F-12"] = f"""# F-12: The P/D handshake never completes and both engines hold the request with no deadline (candidate)
+
+**Type:** bug candidate (hang). **Severity:** high if confirmed. **Status:** observed on 2 of 2 requests to one freshly started pair. Not reproduced on a second pair started the same way.
+
+## Summary
+
+The first request to a new gpt-oss pair (8,192-token prompt, one chunk, `--max-running-requests 1`) was prefilled and then never produced a
+token. The prefill engine kept the request in its inflight queue (one running request, SWA usage 0.5, scheduler idle). The decode engine never
+ran a batch. Its scheduler polled the request's KV receiver in the handshake wait and the receiver stayed in the `Bootstrapping` state for 30
+minutes. No error was logged on either side. When the client disconnected, both sides logged the abort at once (`Prefill transfer failed`,
+`Decode handshake failed`, both `Aborted by AbortReq`). The next request stalled in the same way.
+
+## Effect
+
+One request occupies the only slot on both engines until the client gives up. No timeout clears it.
+
+{ENV}
+## How to reproduce (observed once, trigger not yet isolated)
+
+{HOW_TO_START.format(recipe="gpt-oss_A_128k.json with --max-running-requests 1", run="f12-repro")}
+### Steps
+
+1. Send one 8,192-token prompt: `python scripts/golden_diff.py generate --prompts prompts/gpt-oss/8192.jsonl --url $LB --out /tmp/f12.jsonl --max-new-tokens 64 --concurrency 1 --timeout 900`.
+2. After 60 seconds read both engines: `curl -s $PREFILL/metrics | grep -E 'num_running_reqs|inflight'` and `curl -s http://10.128.0.90:30000/metrics | grep -E 'num_running_reqs|prealloc|transfer'`.
+3. Dump the decode scheduler: `py-spy dump --pid <decode TP0 scheduler pid> --nonblocking`.
+
+**Observed result.** Prefill: one running request in the inflight queue. Decode: all queues 0, scheduler in `pop_preallocated -> _update_handshake_waiters -> poll_and_all_reduce`.
+**Expected result.** 64 tokens within seconds, or a failed request within the 300 s bootstrap or waiting timeout.
+
+## What the code says
+
+The raiden sender moves its room to `WaitingForInput` without waiting for the decode and bounds the handshake with `fail_decode_silence`
+(300 s). That deadline did not fire, so the prefill believed the decode had engaged. The raiden receiver's only deadline (`_check_waiting_timeout`,
+300 s) starts in `send_metadata`, after the room leaves `Bootstrapping`. While the room is still bootstrapping, `poll()` has no deadline and the
+decode prealloc queue keeps waiting. When the two sides disagree about the handshake state, nothing times out.
+
+## Related open issues in sgl-project/sglang-torchtpu
+
+#1113 and #1078 describe decode waits that at least expire after the transfer or reshard deadline. This wait does not expire.
+
+## Evidence
+
+`results/F11/handshake_stall/decode_tp0_pyspy.txt`, `results/F11/handshake_stall/prefill_tp0_pyspy.txt`, `results/logs/runs/F11_gpt-oss_A_128k_mr1/*.log.gz`, `results/F11/gpt-oss_A_128k_mr1_8192.log`.
+"""
+
 INDEX = """# Bug reports: sglang-torchtpu, 1 prefill + 1 decode on TPU v7x
 
 The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 style: short sentences, active voice, one instruction per step. Each report has a numbered
@@ -571,12 +677,14 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-2](F-2.md) | Qwen3-VL-30B-A3B language model is not compiled on TPU | bug (perf, missing policy) | high for perf tests | reproduced on every start  #1069 (coverage request only) |
 | [F-3](F-3.md) | Greedy decoding is not batch-invariant | test-method note | medium | measured  #321/#391 related |
 | [F-4](F-4.md) | gpt-oss PD output differs from monolithic for long prompts (chunk schedule differs) | numerical difference | high until accuracy check | reproduced 6/6, cause identified  #321 related |
-| [F-5](F-5.md) | A prompt-logprob request stops the prefill engine | bug (crash) | high | reproduced 1/1  #432 (same code, no crash reported) |
-| [F-6](F-6.md) | `n=2` request gets no response for 300 s | bug candidate (hang) | high if confirmed | observed 1/1  none |
+| [F-5](F-5.md) | A prompt-logprob request stops the prefill engine | bug (crash) | high | reproduced 2/2  #432 (same code, no crash reported) |
+| [F-6](F-6.md) | `n=2` request gets no response | bug (hang) | high | reproduced 3/3  none |
 | [F-7](F-7.md) | Decode engine recovers about 2 min after the prefill engine dies | observation | low | observed  #1113 (same mechanism) |
-| [F-8](F-8.md) | Client disconnect during chunked prefill stops the prefill engine | bug (crash) | high | reproduced 1/1  none |
-| [F-9](F-9.md) | Unaligned prompt lengths give a different first token in PD mode | bug candidate (correctness) | medium | observed 4/4  none |
-| [F-10](F-10.md) | One 1920×1080 image stops the Qwen3-VL prefill engine | bug (crash) | high | reproduced 1/1  #488 (same mechanism, other trigger); #1068 |
+| [F-8](F-8.md) | Client disconnect during chunked prefill stops the prefill engine | bug (crash) | high | reproduced 2/2  none |
+| [F-9](F-9.md) | Unaligned prompt lengths give a different first token in PD mode | resolved: not a bug (F-3 artefact) | none | identical 2/2 at c=1  none |
+| [F-10](F-10.md) | One 1920×1080 image stops the Qwen3-VL prefill engine | bug (crash) | high | reproduced 2/2  #488 (same mechanism, other trigger); #1068 |
+| [F-11](F-11.md) | Prefill deadlocks on prompts > 2 chunks when max-running-requests is 1 (TPU SWA pool rounding) | bug (hang) | high | reproduced 4/4, root cause in code  none (#1067 would hit it) |
+| [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug candidate (hang) | high if confirmed | observed 2/2 on one pair  #1113/#1078 related (those expire) |
 
 Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`).
 

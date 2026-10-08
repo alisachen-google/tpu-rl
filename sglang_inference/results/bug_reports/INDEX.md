@@ -9,12 +9,14 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-2](F-2.md) | Qwen3-VL-30B-A3B language model is not compiled on TPU | bug (perf, missing policy) | high for perf tests | reproduced on every start  #1069 (coverage request only) |
 | [F-3](F-3.md) | Greedy decoding is not batch-invariant | test-method note | medium | measured  #321/#391 related |
 | [F-4](F-4.md) | gpt-oss PD output differs from monolithic for long prompts (chunk schedule differs) | numerical difference | high until accuracy check | reproduced 6/6, cause identified  #321 related |
-| [F-5](F-5.md) | A prompt-logprob request stops the prefill engine | bug (crash) | high | reproduced 1/1  #432 (same code, no crash reported) |
-| [F-6](F-6.md) | `n=2` request gets no response for 300 s | bug candidate (hang) | high if confirmed | observed 1/1  none |
+| [F-5](F-5.md) | A prompt-logprob request stops the prefill engine | bug (crash) | high | reproduced 2/2  #432 (same code, no crash reported) |
+| [F-6](F-6.md) | `n=2` request gets no response | bug (hang) | high | reproduced 3/3  none |
 | [F-7](F-7.md) | Decode engine recovers about 2 min after the prefill engine dies | observation | low | observed  #1113 (same mechanism) |
-| [F-8](F-8.md) | Client disconnect during chunked prefill stops the prefill engine | bug (crash) | high | reproduced 1/1  none |
-| [F-9](F-9.md) | Unaligned prompt lengths give a different first token in PD mode | bug candidate (correctness) | medium | observed 4/4  none |
-| [F-10](F-10.md) | One 1920×1080 image stops the Qwen3-VL prefill engine | bug (crash) | high | reproduced 1/1  #488 (same mechanism, other trigger); #1068 |
+| [F-8](F-8.md) | Client disconnect during chunked prefill stops the prefill engine | bug (crash) | high | reproduced 2/2  none |
+| [F-9](F-9.md) | Unaligned prompt lengths give a different first token in PD mode | resolved: not a bug (F-3 artefact) | none | identical 2/2 at c=1  none |
+| [F-10](F-10.md) | One 1920×1080 image stops the Qwen3-VL prefill engine | bug (crash) | high | reproduced 2/2  #488 (same mechanism, other trigger); #1068 |
+| [F-11](F-11.md) | Prefill deadlocks on prompts > 2 chunks when max-running-requests is 1 (TPU SWA pool rounding) | bug (hang) | high | reproduced 4/4, root cause in code  none (#1067 would hit it) |
+| [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug candidate (hang) | high if confirmed | observed 2/2 on one pair  #1113/#1078 related (those expire) |
 
 Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`).
 
