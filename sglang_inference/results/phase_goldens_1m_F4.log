@@ -52,3 +52,8 @@ b: {'version': '0.5.13.dev7249+g09d1244c2', 'disaggregation_mode': 'decode', 'di
   FAIL needle len=32768 depth=0.95
   FAIL warm-cache
 --- (2) ISL=262144 through LB
+2026-10-08T02:42:51Z a_holders=[] b_holders=[]
+2026-10-08T02:42:51Z F-4 isolation: PD Config A gpt-oss 128k --disable-hybrid-swa-memory -> A_gptoss_128k_noswamem
+2026-10-08 02:42:52 starting decode on b (10.128.0.90)
+2948183
+2026-10-08 02:42:52 starting prefill on a (10.128.15.217)

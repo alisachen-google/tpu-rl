@@ -256,3 +256,34 @@ TP layout) grew to 23 GB on host a and 17 GB on host b after ~10 server launches
 the tier-3 compile cache (12 GB) this filled the 96 GB root disk of host a to 100 % and would have broken the next launch and the 60-minute soak
 (TC-6). Mitigation in the harness: `TORCHINDUCTOR_CACHE_DIR` moved under `compile_cache/`, and `launch_role.sh` prunes it when < 20 GB is free.
 Worth a note upstream: a size cap or LRU for the inductor cache on TPU.
+
+| F-11 | 2026-10-08 01:35 | **High (hang: prefill stalls forever on prompts ≥ ~16k tokens in the 1M-context config)** | PD prefill, hybrid-SWA KV pool sizing | observed 4/4 requests ≥ 22k tokens; recovered only via client abort |
+
+## F-11 — PD prefill engine hangs on any prompt longer than its sliding-window pool (gpt-oss, 1M-context recipe)
+
+**Symptom.** Config A gpt-oss with the 1M shape (`recipes/gpt-oss_A_1m.json`: context 1,056,768, pool 1,114,112 tokens, `max_running_requests 1`,
+raiden host pool 320 GiB). Requests of 1k and 8k tokens work. Every request of ~22k tokens or more never returns: the prefill logs two
+chunks (`#new-token: 8192`, then `8000`), then no further `Prefill batch` line for 30 minutes, until the client's 1,800 s timeout aborts the
+request (HTTP 500 via the mini-LB). During the stall: `num_running_reqs=1`, `full_token_usage=0.0145`, **`swa_token_usage=0.988`**,
+`num_used_tokens=16192`, `max_total_num_tokens_swa=16384`. Both engines stay healthy; after the abort the prefill returns to 0 usage.
+The monolithic server with the same 1M shape served the same 256k/512k/1M prompts without problems (`results/golden/gpt-oss_fp8_1m_c1`).
+
+**Mechanism (high confidence).** The hybrid sliding-window (SWA) KV pool of this configuration holds only 16,384 tokens. In PD prefill mode the
+SWA pages of the prompt are not released as the window slides (they are kept for the P→D transfer of the window), so a single request consumes
+SWA slots in proportion to its length. After 16,192 tokens the next chunk cannot be allocated; with one running request nothing can be evicted,
+and the scheduler waits forever instead of failing the request. In the 128k-shape recipe the SWA pool was 6,144 tokens and 128k prompts
+worked, with `swa token usage` cycling 0.58→0.84, so page release does happen there; the difference between the two shapes
+(`max_running_requests` 8 vs 1, context 140k vs 1M) is the next isolation target.
+
+**Why it matters.** This is the plan's hang definition (a): a running request with no progress for > 300 s. It makes the 1M-context target
+unreachable with this recipe, and a stalled prefill blocks the only running slot indefinitely (no watchdog fires because no forward step is running).
+
+**Repro.** `bash scripts/pd.sh start recipes/gpt-oss_A_1m.json f11` → `python scripts/verify_pd_disagg.py --url http://10.128.15.217:8080 --router --lengths 32768 --timeout 600`
+→ no answer in 600 s; `curl $PREFILL/metrics | grep swa_token_usage` shows 0.99. Evidence: `results/F11/`, `results/runs/A_gptoss_1m_run2/decode/server.log`,
+prefill log on host a `runs/A_gptoss_1m_run2/prefill/server.log`.
+
+**Expected.** Either size the SWA pool from the context length (a 1M context needs more than 16k SWA slots, or page release during chunked
+prefill), or reject the request with a clear error, or let the watchdog fail a request that makes no progress.
+
+**Next isolation (queued):** same 1M shape with `max_running_requests 4` (does the SWA pool scale with the running-request count?), and the
+128k-shape recipe with `max_running_requests 1`.
