@@ -308,3 +308,19 @@ same prompt gets the **same bootstrap room**. The mini-LB sends a list of rooms 
 otherwise (L507-513). Decode-side state during the hang (1 running request, 128 used tokens = 2 pages, no throughput) is consistent with the two
 samples colliding in the bootstrap/transfer bookkeeping or with the LB waiting for a single response object. To pin it: send `n=2` directly to the
 prefill and decode engines with explicit distinct rooms (bypassing the LB) and with an explicit shared room.
+
+**F-4 resolved (2026-10-08 03:27 UTC): PD prefill is numerically identical to monolithic once the hybrid-SWA pool is out of the picture.**
+Paired comparison with `--disable-hybrid-swa-memory` on both the PD pair (`runs/A_gptoss_128k_noswamem`) and the monolithic golden
+(`golden/gpt-oss_fp8_noswamem_c1`), both at concurrency 1, 1,024 new tokens: **identical for 6 of 6 prompts at 8k, 32k and 128k**
+(`results/A_noswamem/golden_diff_noswamem_c1_*.json`). Control: the monolithic server with SWA memory on vs off differs at 32k
+(token prefix 24 / 3), so the SWA-memory mode itself changes the numerics. Together with the chunk-size histograms (PD 8192/2752/2880/8064
+vs monolithic 8064/1344/8192 with SWA memory on; uniform 8192 with it off) and GSM8K through PD = 0.98 (monolithic 0.99), F-4 is a
+**configuration-dependent numerical difference, not a PD defect**: the small hybrid-SWA pool makes the prefill chunk schedule depend on the serving
+mode, and different chunk boundaries change bf16/FP8 accumulation order. Severity: low / informational. Worth an upstream note so that
+PD-vs-monolithic comparisons for hybrid-SWA models are done with `--disable-hybrid-swa-memory` or with a pool large enough for full chunks.
+
+**F-1 extension (2026-10-08 03:09 UTC).** Launching with `ENABLE_COMPILE_CACHE=0` (the launcher then sets no `TORCH_TPU_INTERNAL_TIER2_COMPILATION_CACHE`)
+does **not** disable the tier-2 cache: torch_tpu falls back to the name `default`, i.e. `/dev/shm/torch_tpu_cache/default/<hash>/`, which on a
+shared host belongs to whoever launched first. Our server aborted on all ranks with
+`tier2_compilation_cache.cc:266 Check failed: lock_fd_.valid() Failed to create tier-2 cache entry lock file: /dev/shm/torch_tpu_cache/default/.../*.lock with error: Permission denied`.
+So two users with default settings on one host cannot both run servers, and "compile cache off" is not a work-around. Added to the F-1 report.

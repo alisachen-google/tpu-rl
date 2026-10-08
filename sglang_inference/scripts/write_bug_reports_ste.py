@@ -32,7 +32,7 @@ REPORTS = {}
 
 REPORTS["F-1"] = f"""# F-1: The server stops with a hard abort when it cannot create the tier-2 compile cache directory
 
-**Type:** bug (robustness). **Severity:** low. **Status:** reproduced one time. Work-around applied.
+**Type:** bug (robustness). **Severity:** low-medium (blocks every second user on a shared host). **Status:** reproduced 2 of 2, in two forms.
 
 ## Summary
 
@@ -59,9 +59,20 @@ RuntimeError: Rank 0 scheduler died during initialization (exit code: -6)
 ```
 **Expected result.** The server starts without the tier-2 cache, or it stops with a clear message that names the directory and the permission problem.
 
+## Second form of the same problem (2026-10-08)
+
+When the launcher runs with `ENABLE_COMPILE_CACHE=0`, it sets no tier-2 name. torch_tpu then uses the name `default`, so every user's server writes to
+`/dev/shm/torch_tpu_cache/default/<hash>/`. The first user owns that directory. The second user's server aborts on all ranks:
+```
+F0000 ... tier2_compilation_cache.cc:266] Check failed: lock_fd_.valid() Failed to create tier-2 cache entry lock file:
+/dev/shm/torch_tpu_cache/default/ee8e2de63f954d59/<entry>.lock with error: Permission denied
+```
+So "compile cache off" is not a work-around, and two users with default settings cannot share a host.
+
 ## Work-around
 
-Run `sudo chmod 1777 /dev/shm/torch_tpu_cache` on each host. Or start with `--runtime-envs '{{"TORCH_TPU_INTERNAL_TIER2_COMPILATION_CACHE": null}}'`.
+Run `sudo chmod 1777 /dev/shm/torch_tpu_cache` on each host and give each user or job its own tier-2 name
+(`TORCH_TPU_INTERNAL_TIER2_COMPILATION_CACHE=<unique name>`). Setting the variable to null does not help, because torch_tpu falls back to `default`.
 
 ## Possible cause and suggested fix
 
@@ -162,7 +173,7 @@ For concurrent runs, use these gates instead: the needle answers, the exact toke
 
 REPORTS["F-4"] = f"""# F-4: gpt-oss-120b in PD mode gives a different output than the monolithic server for long prompts
 
-**Type:** numerical difference. **Severity:** low (GSM8K through PD scores 0.98 against 0.99 monolithic; no measurable accuracy effect). **Status:** reproduced on 6 of 6 long prompts; cause identified; SWA-off paired comparison running.
+**Type:** numerical difference (not a PD defect). **Severity:** low / informational. **Status:** resolved 2026-10-08: with `--disable-hybrid-swa-memory` on both sides, PD and monolithic are token-identical for 6 of 6 prompts at 8k, 32k and 128k; GSM8K through PD 0.98 vs 0.99 monolithic.
 
 ## Summary
 
@@ -214,11 +225,10 @@ measured yet (GSM8K through PD is queued).
 The chunk-size histograms differ.
 **Expected result.** `identical=True` for all lengths, or a documented statement that PD and monolithic outputs differ for hybrid-SWA models.
 
-## Confirmation steps (queued)
+## Confirmation (done)
 
-1. Run Config A and the golden with `--disable-hybrid-swa-memory` (`recipes/gpt-oss_A_128k_noswamem.json`). Without the small SWA pool, both
-   modes should use 8192-token chunks and the outputs should be identical.
-2. Run GSM8K (100 examples) through the PD system and compare with the monolithic score (0.99).
+1. Config A and the golden with `--disable-hybrid-swa-memory` (`recipes/gpt-oss_A_128k_noswamem.json`, `recipes/gpt-oss_G_128k_fp8_e4m3_noswamem.json`): both modes use 8192-token chunks and the outputs are **identical for 6 of 6 prompts** (8k, 32k, 128k; 1,024 tokens each). Control: the monolithic server with SWA memory on vs off differs at 32k, so the SWA-memory mode itself changes the numerics.
+2. GSM8K (100 examples) through PD: **0.98**; monolithic: 0.99. No measurable accuracy effect.
 
 ## Suggested fix
 
