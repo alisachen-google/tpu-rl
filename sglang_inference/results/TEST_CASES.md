@@ -112,7 +112,7 @@ Legend: PASS = met the pass criterion; NUM = numerical difference only (content 
 | Item | Value |
 |---|---|
 | Checks | no serving-time recompile across 35 prompt lengths (TC-2), 4 lengths (TC-1), concurrency 1–8, aborts; vision encoder: new resolution must not kill the engine |
-| Results | 0 serving-time recompiles in every gpt-oss run and in the compiled Qwen run. **F-10:** a 1920×1080 image (8,160 patches > 4,900 bucket) triggers a recompile under `fail_on_recompile` and kills the Qwen prefill (2/2); 448², 1024², 896×504 fine |
+| Results | 0 serving-time recompiles in every gpt-oss run (A–E) and in the compiled Qwen run. In D/E the audit counts 8 recompile lines after its "precompile done" marker, but they are the EAGLE3 draft-step graph for batch size 1 compiling during warm-up, before `Warmup complete; froze torch.compile`; 0 recompiles after the freeze. **F-10:** a 1920×1080 image (8,160 patches > 4,900 bucket) triggers a recompile under `fail_on_recompile` and kills the Qwen prefill (2/2); 448², 1024², 896×504 fine |
 | Evidence | compile audits; `results/A/mm/qwen3-vl/img1_1920x1080*.json` |
 
 ### TC-6 Sampling and decoding parameters across the P→D boundary

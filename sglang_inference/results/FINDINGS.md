@@ -483,3 +483,7 @@ holder check (09:12:00, still empty) and device open. Chain stopped; D, E and Qw
 - Params all PASS; chat 10/11 (tool_call parser config); concurrency c=1/2/4 all successful (ITL 8.1–12.8 ms with spec); **GSM8K 0.98 at
   809 tok/s** (fastest config); decode aborts 6/6 PASS; prefill-phase abort handled (no crash); **decode scheduler 0 exceptions after
   multi-turn + concurrency traffic → #856 (decode radix + EAGLE3 dies after multi-turn) does not reproduce in this build with this traffic.**
+- Compile audit note for D/E: `compile_audit.sh` reports 8 "serving-time" recompile lines on the decode, but they are the EAGLE3
+  `_fused_draft_steps` graph for batch size 1 compiling during warm-up, between the `precompile done` marker (the audit's "ready" line) and
+  `Warmup complete; froze torch.compile`. Recompiles after the freeze: **0** in both D and E. Audit artefact; for spec configs the ready marker
+  should be the freeze line.

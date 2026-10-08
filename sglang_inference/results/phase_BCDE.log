@@ -413,3 +413,4 @@
 2026-10-08T12:22:14Z [E/gpt-oss] archiving logs
 2026-10-08T12:22:24Z [E/gpt-oss] === config E/gpt-oss done (relaunches: 0)
 2026-10-08T12:22:24Z [B/qwen3-vl] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/qwen3-vl_B_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1
+2026-10-08T12:22:37Z a_holders=[] b_holders=[]
