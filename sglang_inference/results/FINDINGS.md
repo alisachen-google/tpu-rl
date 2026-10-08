@@ -598,3 +598,21 @@ MT-Bench 80 questions × 2 turns, c=1, gpt-oss. Config A (radix off): turn-2 cac
 turn-1 **answer (~414 tokens) was generated on the decode engine, so its KV never existed on the prefill** and turn 2 recomputes it. With
 short chat turns the prefill radix cache therefore gives no measurable TTFT or throughput benefit in PD mode. The repo's multi-turn PD tests
 rely on the decode-side cache / host restore for this; Config E (decode radix + decode HiCache) queued on MT-Bench to measure it.
+
+## TC-16 MT-Bench (80 questions × 2 turns, gpt-oss, greedy, ≤512 tokens) — 20:38–21:25 UTC, `results/mtbench/<cfg>/summary.txt`
+
+| Config | c | out tok/s | TTFT t1 / t2 (ms) | e2e per turn t1 / t2 (s) | turn-2 cached | accept len |
+|---|---|---|---|---|---|---|
+| A (radix off) | 1 | 195.5 | 333 / 336 | 2.12 / 2.25 | 0 / 572 | – |
+| A | 4 | 598.7 | 393 / 406 | 2.71 / 2.89 | 0 | – |
+| B (radix on) | 1 | 191.3 | 327 / 350 | 2.15 / 2.30 | 102 / 572 (18 %) | – |
+| B | 4 | 599.4 | 380 / 406 | 2.71 / 2.86 | 109 (19 %) | – |
+| C_bf16 (= D without spec) | 1 | 187.1 | 339 / 350 | 2.17 / 2.36 | 102 (18 %) | – |
+| C_bf16 | 4 | 590.3 | 431 / 410 | 2.76 / 2.91 | 119 (21 %) | – |
+| **D (EAGLE3)** | 1 | **268.1 (+43 %)** | 454 / 567 | **1.50 / 1.69 (−31 %)** | 102 (18 %) | **2.46 mean, 2.41 p50, 1.65–3.79** |
+| **D** | 4 | **740.1 (+25 %)** | 633 / 653 | 2.15 / 2.35 | 124 (22 %) | 2.46 mean |
+
+- **Speculation (D vs C_bf16):** +43 % single-stream and +25 % at c=4 on real chat traffic, 160/160 turns answered; cost ≈ +115–240 ms TTFT.
+- **Prefix caching (B vs A):** no measurable gain on short multi-turn chat in PD mode — only the prompt (18–22 %) is cached because the
+  previous answer's KV lives on the decode (O-3). Config E (decode radix) and C (host tier) queued on the same set.
+- All 4 configs: 160/160 turns OK at both concurrencies; prefill hit rate 0.10 with the cache on.
