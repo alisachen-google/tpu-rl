@@ -231,3 +231,73 @@
 2026-10-08T11:50:45Z TPU free; resuming chain at D
 2026-10-08T11:50:45Z [D/gpt-oss] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_D_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_bf16_c1
 2026-10-08T11:50:57Z a_holders=[] b_holders=[]
+2026-10-08 12:00:45 prefill /health ready after 587 s
+2026-10-08 12:00:45 decode /health ready after 0 s
+2026-10-08 12:00:46 LB /health_generate ready after 1 s
+2026-10-08T12:00:47Z [D/gpt-oss] pair up in 590 s
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:00:47Z [D/gpt-oss] (1) TC-1: c=1 greedy, 1024 tokens, 8k/32k/128k vs goldens in /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_bf16_c1
+   [isl8192_k0] tokens=1024 finish=length cached=0 ttft=380.17ms e2e=13022.24ms
+   [isl8192_k1] tokens=1024 finish=length cached=0 ttft=370.06ms e2e=9006.63ms
+   vs golden isl8192_k0    False     107     22  0.031   0.0000  FAIL  token prefix 22<256; agreement 0.031<0.95
+   vs golden isl8192_k1    False      82     16  0.028   0.0000  FAIL  token prefix 16<256; agreement 0.028<0.95
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/D/gpt-oss/tc1_diff_8192.json
+   needles {"id": "isl8192_k0", "isl": 8192, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 286, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl8192_k1", "isl": 8192, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 326, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl32768_k0] tokens=1024 finish=length cached=0 ttft=1316.08ms e2e=10932.77ms
+   [isl32768_k1] tokens=1024 finish=length cached=0 ttft=1324.13ms e2e=10797.11ms
+   vs golden isl32768_k0   False      64     11  0.022   0.0000  FAIL  token prefix 11<256; agreement 0.022<0.95
+   vs golden isl32768_k1   False     570    151  0.157   0.0235  FAIL  token prefix 151<256; agreement 0.157<0.95
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/D/gpt-oss/tc1_diff_32768.json
+   needles {"id": "isl32768_k0", "isl": 32768, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 146, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl32768_k1", "isl": 32768, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 185, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl131072_k0] tokens=1024 finish=length cached=0 ttft=7178.33ms e2e=19540.15ms
+   [isl131072_k1] tokens=1024 finish=length cached=0 ttft=7153.79ms e2e=19773.98ms
+   vs golden isl131072_k0  False      11      3  0.019   0.0529  FAIL  token prefix 3<256; agreement 0.019<0.95
+   vs golden isl131072_k1  False     419     99  0.120   0.0590  FAIL  token prefix 99<256; agreement 0.120<0.95
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/D/gpt-oss/tc1_diff_131072.json
+   needles {"id": "isl131072_k0", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 272, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl131072_k1", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 207, "completion_tokens": 1024, "finish_reason": "length"}
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:02:11Z [D/gpt-oss] (2) tiny boundary sweep (160 tokens, c=1) + needles
+   tiny: 35 prompts, 6 problems ['tiny128', 'tiny130', 'tiny256', 'tiny383', 'tiny1025', 'tiny8256']
+2026-10-08T12:03:03Z [D/gpt-oss] (4) HiCache: host-cache lines in the prefill log so far
+   [2026-10-08 12:00:22 TP1 EP1] Tree cache initialized: source=default impl=UnifiedRadixCache hybrid_swa=True hybrid_ssm=False hicache_attached=True streaming_wrapped=False
+   [2026-10-08 12:00:22 TP0 EP0] Tree cache initialized: source=default impl=UnifiedRadixCache hybrid_swa=True hybrid_ssm=False hicache_attached=True streaming_wrapped=False
+   [2026-10-08 12:00:24 TP6 EP6] Tree cache initialized: source=default impl=UnifiedRadixCache hybrid_swa=True hybrid_ssm=False hicache_attached=True streaming_wrapped=False
+   [2026-10-08 12:00:24 TP4 EP4] Tree cache initialized: source=default impl=UnifiedRadixCache hybrid_swa=True hybrid_ssm=False hicache_attached=True streaming_wrapped=False
+   [2026-10-08 12:00:24 TP5 EP5] Tree cache initialized: source=default impl=UnifiedRadixCache hybrid_swa=True hybrid_ssm=False hicache_attached=True streaming_wrapped=False
+   [2026-10-08 12:00:25 TP7 EP7] Tree cache initialized: source=default impl=UnifiedRadixCache hybrid_swa=True hybrid_ssm=False hicache_attached=True streaming_wrapped=False
+2026-10-08T12:03:04Z [D/gpt-oss] (5) EAGLE3: acceptance length and spec lines
+   http://10.128.15.217:30000 avg_spec_accept_length=None
+   http://10.128.0.90:30000 avg_spec_accept_length=1.4579207920792079
+   decode [2026-10-08 12:03:00 TP0 EP0] Decode batch, #running-req: 1, #full token: 16512, full token usage: 0.02, #swa token: 256, swa token usage: 0.03, accept len: 1.70, accept rate: 0.23, pre-allocated usag
+   decode [2026-10-08 12:03:01 TP0 EP0] Decode batch, #running-req: 1, #full token: 16576, full token usage: 0.02, #swa token: 192, swa token usage: 0.02, accept len: 1.93, accept rate: 0.31, pre-allocated usag
+   decode [2026-10-08 12:03:02 TP0 EP0] Decode batch, #running-req: 1, #full token: 16448, full token usage: 0.02, #swa token: 192, swa token usage: 0.02, accept len: 1.68, accept rate: 0.23, pre-allocated usag
+   decode [2026-10-08 12:03:02 TP0 EP0] Decode batch, #running-req: 1, #full token: 16512, full token usage: 0.02, #swa token: 256, swa token usage: 0.03, accept len: 1.52, accept rate: 0.17, pre-allocated usag
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:03:04Z [D/gpt-oss] (6) sampling-params matrix (n_2 excluded: F-6; return_logprob_top5 excluded: F-5)
+2026-10-08T12:03:18Z [D/gpt-oss] params rc=0
+   regex                               400/None/None         -                     -    -    -    PASS    
+   stream_vs_nonstream                 200/128/length        -                     -    -    -    PASS    
+   17 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/D/gpt-oss/params.json
+2026-10-08T12:03:18Z [D/gpt-oss] (7) chat suite
+2026-10-08T12:03:25Z [D/gpt-oss] chat rc=1
+   model=gpt-oss-120b kind=gptoss 11 cases, endpoints: a=http://10.128.15.217:8080
+   tool_call             200/stop/0c/75r               -                             -     FAIL    a: no tool_calls (finish_reason=stop)
+   11 cases, 1 failed -> /home/alisachen_google_com/pd_disagg/results/D/gpt-oss/chat.json
+2026-10-08T12:03:25Z [D/gpt-oss] (8) concurrency sweep c=1,2,4 at ISL 131072 / OSL 256
+   c=1 Successful requests: 2 ;Output token throughput (tok/s): 32.56 ;Mean TTFT (ms): 3960.24 ;P99 TTFT (ms): 7097.51 ;Mean ITL (ms): 7.50 ;
+
+   c=2 Successful requests: 4 ;Output token throughput (tok/s): 43.12 ;Mean TTFT (ms): 5798.91 ;P99 TTFT (ms): 13077.47 ;Mean ITL (ms): 9.52 ;
+
+   c=4 Successful requests: 8 ;Output token throughput (tok/s): 44.14 ;Mean TTFT (ms): 9395.94 ;P99 TTFT (ms): 25253.08 ;Mean ITL (ms): 10.96 ;
+
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T12:05:11Z [D/gpt-oss] (9) GSM8K-100 via LB
+   [METRIC] gsm8k_score=0.99 labels={"model": "gpt-oss-120b", "eval": "gsm8k"}
+2026-10-08T12:06:05Z [D/gpt-oss] (10) decode-phase client aborts (3, two concurrent)

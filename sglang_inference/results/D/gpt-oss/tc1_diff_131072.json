@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_bf16_c1/131072.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/D/gpt-oss/tc1_131072.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl131072_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 3<256",
+    "agreement 0.019<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 11,
+   "token_prefix": 3,
+   "token_agreement": 0.0185546875,
+   "first_divergence_token": 3,
+   "first_divergence_char": 11,
+   "context_a": "We need to extract secret code ",
+   "context_b": "We need to list secret code wor",
+   "first_token_logprob_absdiff": 0.052916765213012695,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl131072_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 99<256",
+    "agreement 0.120<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 419,
+   "token_prefix": 99,
+   "token_agreement": 0.1201171875,
+   "first_divergence_token": 99,
+   "first_divergence_char": 419,
+   "context_a": " of appearance)**  \n\n1. **Checkpoint\u202f1:*",
+   "context_b": " of appearance)**  \n1. **falcon\u2011f88b** \u2013",
+   "first_token_logprob_absdiff": 0.0590398907661438,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

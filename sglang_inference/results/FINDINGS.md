@@ -465,3 +465,13 @@ sufficient: the single-slot 1M recipe works).
 **Config D start failure (09:12 UTC) was TPU contention, not a bug.** Both engines aborted at init with `Failed to acquire a TPU device node
 '/dev/vfio/N' because it is already opened by another process`; another user's servers started on both hosts at 09:11:50, between our
 holder check (09:12:00, still empty) and device open. Chain stopped; D, E and Qwen B/C are requeued behind `tpu_free`.
+
+## Config D (gpt-oss, C + EAGLE3 on both engines, bf16 KV) — 2026-10-08 11:50–12:10 UTC, `results/D/gpt-oss/`
+- First launch (09:12) lost the TPUs to another user's job; relaunch 11:50 OK, cold start 587 s (target-verify graphs for bs 1–8, 4 draft tokens).
+- TC-1 vs bf16 c=1 golden: first-token logprob delta 0.0000 at 8k (prefill identical), text diverges after 11–151 tokens (NUM: the verify
+  path's numerics differ from plain decode), needles 3/3 at all lengths, 1,024 tokens each.
+- **EAGLE3 acceptance is workload-dependent, as designed, not a defect:** synthetic random-word prompts (TC-1, bench_serving random): accept
+  length ≈1.0–1.15, accept rate 1–5 % → pure overhead (c=1 output 32.6 tok/s vs 50 in B; ITL 7.5 vs 5.5 ms; 1,024 tokens in 9–13 s vs 6 s).
+  GSM8K-100 (natural text, 4 threads): accept length p50 1.48, max 3.58, cumulative avg 2.13; **770 tok/s vs 561 (A) / 578 (B) / 491 (C)**,
+  score **0.99**. Repo's own PD-EAGLE3 e2e gate is accept_length > 1.0.
+- Monolithic EAGLE3 control (same flags, GSM8K acceptance) queued: `_phase_eagle3_control.sh`.

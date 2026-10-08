@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_bf16_c1/32768.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/D/gpt-oss/tc1_32768.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl32768_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 11<256",
+    "agreement 0.022<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 64,
+   "token_prefix": 11,
+   "token_agreement": 0.0224609375,
+   "first_divergence_token": 11,
+   "first_divergence_char": 64,
+   "context_a": "checkpoint mentioned. In the massive tex",
+   "context_b": "checkpoint mentioned in the massive text",
+   "first_token_logprob_absdiff": 1.2159347534179688e-05,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl32768_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 151<256",
+    "agreement 0.157<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 570,
+   "token_prefix": 151,
+   "token_agreement": 0.1572265625,
+   "first_divergence_token": 151,
+   "first_divergence_char": 570,
+   "context_a": "ting code words, we need to write a deta",
+   "context_b": "ting code words, we write a story about ",
+   "first_token_logprob_absdiff": 0.023495018482208252,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}
