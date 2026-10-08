@@ -620,3 +620,8 @@ rely on the decode-side cache / host restore for this; Config E (decode radix + 
   accept 2.46; c=4 727 tok/s, turn-2 cached 32 %. **C** (host tier) c=1 192 tok/s, turn-2 cached 18 %; c=4 595 tok/s, 19 %. Neither the
   decode-side radix cache nor the host tier raises the prefill's cached fraction for the previous answer in this build: O-3 holds for every
   configuration. E is ~12 % slower than D single-stream (decode-side cache bookkeeping overhead) with identical acceptance.
+
+**Boundary with exact token counts (22:05 UTC, Config A, 128k shape, `results/A/boundary/boundary_exact_128k.txt`).** ctx−1024 (139,264
+tokens): 200, 7.7 s. ctx+1 (140,289): **400** with `The input (140292 tokens) is longer than the model's context length (140288 tokens)`.
+Boundary row closed (PASS). The tool's two 1k-needle "FAILs" are gpt-oss reasoning before answering within an 8-token budget (same artefact as
+the tiny sweep), not retrieval failures.
