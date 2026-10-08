@@ -1,1 +1,5 @@
 2026-10-08T21:23:44Z [mtbench] mtbench A-D done
+2026-10-08T21:23:56Z [mtbench] === E: start /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_E_128k.json
+2026-10-08 21:28:29 prefill /health ready after 271 s
+2026-10-08 21:28:29 decode /health ready after 0 s
+2026-10-08 21:28:30 LB /health_generate ready after 1 s
