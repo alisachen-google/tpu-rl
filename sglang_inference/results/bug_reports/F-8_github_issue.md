@@ -131,6 +131,11 @@ and compares running requests, queued requests and token usage with the pre-test
 - Repeated on a fresh pair the next day: identical. The decode-phase variant (abort 10 s in, 6 aborts, 2 concurrent) passed with resources
   back to baseline.
 
+**Third reproduction (boundary phase, 2026-10-08 23:55 UTC).** A 131,072-token prompt aborted 6.4 s after submission, while the
+prefill still had 2,368 tokens pending in its last chunks, killed the prefill with the same traceback (`runs/A_128k_boundary2/prefill/server.log`).
+The tokenizer manager logged `Received output for rid='abort-0-…' but the state was deleted` one line before the scheduler exception, i.e. the
+request had already been retired once. 3 of 3 disconnects during chunked prefill with the radix cache off have killed the engine.
+
 ## How to reproduce
 
 1. Start a gpt-oss-120b pair as in the environment table (prefill with `--disable-radix-cache --chunked-prefill-size 8192`, raiden transfer).

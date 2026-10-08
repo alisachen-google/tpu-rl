@@ -226,24 +226,24 @@ Legend: ✔ covered (where), ◐ partial, ✘ gap, ⏳ queued in `_phase_boundar
 | Input length | 1k / 8k / 32k / 128k and unaligned 127,999 | ✔ TC-1 |
 | Input length | 256k / 512k / 1M and unaligned 255,123 / 511,777 / 999,999 | ✔ Config B at 1M (2 slots); A blocked by F-11 at 1 slot |
 | Input length | ISL = context − 1024 accepted; ISL = context + 1 → 4xx | ✔ 128k shape (exact tokenizer); ✘ 1M shape (heuristic run invalid; pair later wedged by F-12) |
-| Input length | ISL + max_new_tokens > context (prefill fits, decode would not) | ⏳ (2a); fits-exactly control (2b) |
-| Input length | empty prompt, whitespace-only, empty `input_ids` | ⏳ (2c) |
+| Input length | ISL + max_new_tokens > context (prefill fits, decode would not) | ✔ (2a) 400 in 0.19 s; (2b) fits-exactly 200, engines back to baseline |
+| Input length | empty prompt, whitespace-only, empty `input_ids` | ◐ (2c) empty text 400, whitespace 200, empty `input_ids` **500** (validation gap, engines healthy) |
 | Input length | image patch count at the compiled bucket edge (4,900) and just above | ◐ F-10 covers 8,160 and 1,512; the exact 4,900/4,901 pair is not run |
 | Output length | `max_new_tokens` 0 and 1 | ✔ TC-6 |
 | Output length | `max_new_tokens` above the remaining context (chat path) → 400 | ✔ TC-9 `oversized_max_tokens` |
 | Disconnection | client abort during chunked prefill | ✔ TC-7: F-8 with radix off; handled with radix on |
 | Disconnection | client abort during decode, two concurrent | ✔ TC-7, all configs |
-| Disconnection | client abort in the transfer window (just before first token) | ⏳ (2e) |
-| Disconnection | abort storm (40 aborts, 20 concurrent) | ⏳ (2f) |
+| Disconnection | client abort in the transfer window (just before first token) | ◐ (2e) abort at 6.4 s landed in the last chunks → third F-8 kill; the ~0.2 s post-chunk window itself not hit |
+| Disconnection | abort storm (40 aborts, 20 concurrent) | ✘ (2f) skipped: prefill dead after (2e); rerun needs radix on or the F-8 fix |
 | Disconnection | client process exit while requests are held in the handshake | ✔ observed: both engines log the abort and release (F-12 runs) |
 | Disconnection | prefill engine death → decode recovery | ✔ F-7 (comment on #1113) |
 | Disconnection | decode engine death mid-stream; load-balancer restart | ✘ |
 | Disconnection | transport failure between hosts (raiden fault injection) | ✘ here; covered by a colleague's campaign (#1112/#1113) |
 | Deadlock / hang | SWA pool continuation deadlock at 1 slot (F-11) + 2- and 4-slot controls | ✔ |
-| Deadlock / hang | P/D handshake hold (F-12): 1 slot fresh pairs, 2 slots after long requests | ✔ observed 5 pairs; ⏳ (1) does a 300 s deadline recover it? |
+| Deadlock / hang | P/D handshake hold (F-12): 1 slot fresh pairs, 2 slots after long requests | ✔ 6 pairs; (1) with 300 s deadlines: prefill times out (decode never asked for KV), decode holds until client disconnect, client hangs to its own timeout |
 | Deadlock / hang | `n=2` request never returns (F-6) | ✔ |
 | Deadlock / hang | decode KV pool exhaustion: retraction / prealloc pressure (ISL+OSL > pool) | ◐ TC-8 retraction test never triggered retraction (decode admitted ≤5); ⏳ (3) small decode pool forces it |
-| Deadlock / hang | duplicate request id concurrently | ⏳ (2d) (one earlier incidental 400 observed) |
+| Deadlock / hang | duplicate request id concurrently | ✔ (2d) one 400, one 200 |
 | Deadlock / hang | queue limit (`max_queued_requests`) overflow → 429 | ✘ |
 | Deadlock / hang | no-progress watchdog (300 s) on both engines during every phase | ✔ harness |
 | Resource return | engines back to baseline after every abort / phase | ✔ asserted by `abort_test.py` and `state` snapshots |

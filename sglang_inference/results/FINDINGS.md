@@ -634,3 +634,12 @@ disconnects (`Decode handshake failed … Aborted by AbortReq` at the client's 7
 each of the two requests (the mini-LB waits for the decode's response). So with default deadlines F-12 is still a user-visible hang of
 client-timeout length per request plus a decode-side hold until disconnect; only the prefill side recovers. Mechanism sharpened: the decode's
 bootstrap for the room never completes, so it never asks the prefill for the KV.
+
+**Boundary phase 2, Config A 128k (23:54–23:56 UTC, `results/boundary2/`).** (2a) ISL 131,072 + `max_new_tokens` 20,000 (sum > context
+140,288): **400 in 0.19 s**, rejected up front. (2b) ISL 131,072 + 9,000 (fits): 200 in 55 s; both engines back to 0 used tokens. (2c) empty
+`text`: 400; whitespace `text`: 200; empty `input_ids` list: **500 in 1 ms** (validation gap, engines unaffected; body captured below).
+(2d) same `rid` twice concurrently: one 400, one 200 (correct). (2e) abort of a 131k prompt at 6.4 s: the abort landed in the **last two
+chunks** of prefill (log: `#pending-token: 2368`, token usage drops to 0.00, then `Received output for rid=... but the state was deleted`) and
+the prefill died with `AssertionError: Only a mamba-capable tree cache allows freeing before alloc` from `_drain_deferred_chunked_sender_aborts`
+→ `release_kv_cache`: **third reproduction of F-8** (now 3/3 with radix off), same traceback as the draft. The ~0.2 s window between the last
+chunk and the decode pull was not hit; a transfer-window abort proper remains partial coverage. (2f) abort storm skipped (prefill down).
