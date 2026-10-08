@@ -38,4 +38,6 @@ export SGLANG_TPU_FUSED_MOE_SC_GATHER=${SGLANG_TPU_FUSED_MOE_SC_GATHER:-0}
 # --- compile cache: ON for dev iterations, set ENABLE_COMPILE_CACHE=0 for TC-0 / TC-5 ---
 export ENABLE_COMPILE_CACHE=${ENABLE_COMPILE_CACHE:-1}
 export COMPILE_CACHE_ROOT=${COMPILE_CACHE_ROOT:-$HOME/pd_disagg/compile_cache}
+# Inductor cache grows ~4-5 GB per launch and is never pruned (filled a 96 GB disk in one day); keep it under the campaign dir.
+export TORCHINDUCTOR_CACHE_DIR=${TORCHINDUCTOR_CACHE_DIR:-$COMPILE_CACHE_ROOT/inductor}
 echo "[env] host=$(hostname) ip=$(hostname -I | awk '{print $1}') TPU_WORKER_HOSTNAMES=$TPU_WORKER_HOSTNAMES python=$PYTHON sglang=$(git -C $SGLANG_ROOT rev-parse --short HEAD 2>/dev/null)"

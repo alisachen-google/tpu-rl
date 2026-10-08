@@ -35,6 +35,8 @@ MODELS = {
         "env": {},
     },
 }
+# raiden host staging needs ~9.1 GiB per transfer slot at 1M context (128 GiB default / 8 ranks / 2 engines = 8 GiB -> startup ValueError)
+RAIDEN_HOST_POOL_BY_SHAPE = {"128k": "128", "256k": "128", "512k": "256", "1m": "320"}
 SHAPES = {  # ISL -> (context_length, max_total_tokens, max_running_requests)
     "128k": (131072 + 9216, 786432, 8),
     "256k": (262144 + 9216, 786432, 4),
@@ -120,8 +122,9 @@ def pd_recipe(model, cfg, shape):
         d.update(HICACHE)
         d.update(disaggregation_decode_enable_radix_cache=True, disaggregation_decode_retraction_backup="cpu_tensor")
         d_env["SGLANG_UNIFIED_RADIX_TREE_CORE_BACKEND"] = "python"   # required by tpu/pd_decode_swa_hicache.py
+    env = dict(COMMON_ENV); env["SGLANG_RAIDEN_HOST_POOL_GB"] = RAIDEN_HOST_POOL_BY_SHAPE[shape]
     return {"group": {"hosts": 2, "prefill_engines": 1, "decode_engines": 1},
-            "runtime_envs": COMMON_ENV,
+            "runtime_envs": env,
             "prefill": {"server_args": p, "runtime_envs": p_env},
             "decode": {"server_args": d, "runtime_envs": d_env}}
 

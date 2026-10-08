@@ -243,3 +243,16 @@ Log: `results/runs/A_qwen_128k_run1/prefill_server.log` (line ~7648 ff).
   `--disable-hybrid-swa-memory` run (queued) should make both schedules 8192-regular and the outputs identical; GSM8K through PD will show
   whether accuracy is affected. Severity stays "high" until both checks are in.
 - F-9: the c=1 Qwen golden for 127,999 was not generated (edit landed after the phase script had started); re-queued as a separate step.
+
+**Observation O-1 (2026-10-07 23:14 UTC, PASS for the plan's "clean start-up failure" case).** Config A gpt-oss with the 1M shape
+(`context_length 1056768`) and the default `SGLANG_RAIDEN_HOST_POOL_GB=128` refuses to start on both engines with a clear message:
+`ValueError: raiden host staging: one transfer slot needs 9.07 GiB but this engine's share of SGLANG_RAIDEN_HOST_POOL_GB is 8.00 GiB; raise
+SGLANG_RAIDEN_HOST_POOL_GB or lower the context length` (128 GiB / 8 ranks / 2 engines = 8 GiB per slot). Capacity rule for the plan: the
+raiden host pool must be ≥ 16 × (context_length × KV bytes/token/rank) → for 1M gpt-oss ≈ 9.1 GiB per slot → set 320 GiB. Recipes for 512k/1M
+now set 256/320 GiB. The driver lost ~90 min in its health wait; not a product bug.
+
+**Observation O-2 (2026-10-08 01:00 UTC, operational).** `~/.cache/sglang/inductor_dp1_dprank0_tp8` (the TorchInductor cache SGLang sets per
+TP layout) grew to 23 GB on host a and 17 GB on host b after ~10 server launches (≈2–4 GB per launch, 272–436 files, never pruned). Together with
+the tier-3 compile cache (12 GB) this filled the 96 GB root disk of host a to 100 % and would have broken the next launch and the 60-minute soak
+(TC-6). Mitigation in the harness: `TORCHINDUCTOR_CACHE_DIR` moved under `compile_cache/`, and `launch_role.sh` prunes it when < 20 GB is free.
+Worth a note upstream: a size cap or LRU for the inductor cache on TPU.

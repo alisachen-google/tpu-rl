@@ -9,6 +9,9 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$HERE/env_singlehost_v7x.sh"
 RUN_DIR="$HOME/pd_disagg/results/runs/$run/$role"; mkdir -p "$RUN_DIR"
 export RUN_DIR
+# Disk guard: the inductor cache (~/.cache/sglang, $TORCHINDUCTOR_CACHE_DIR) grows 4-5 GB per launch; prune when the root disk is low.
+free_gb=$(df -BG --output=avail / | tail -1 | tr -dc 0-9)
+if (( free_gb < 20 )); then echo "[launch] root disk low (${free_gb} GB free): pruning inductor caches"; rm -rf "$HOME/.cache/sglang/inductor_dp1_dprank0_tp8" "$COMPILE_CACHE_ROOT/inductor"; df -h / | tail -1; fi
 # Refuse to start if another user's engine holds the TPU.
 holders=$(sudo -n fuser -v /dev/vfio/0 2>&1 | awk 'NR>1{print $(NF-3)}' | sort -u | grep -v "^$(id -un)$" || true)
 if [[ -n "$holders" ]]; then echo "[launch] REFUSING: TPU held by: $holders" >&2; exit 3; fi
