@@ -1,10 +1,59 @@
 {
- "text": "",
- "usage": null,
- "ttft_ms": null,
- "e2e_ms": 1.9,
- "status": null,
- "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+ "text": "Based on the provided information, here is a brief description of each image and the secret word.\n\n- **Image 1:** This image displays a solid red circle centered on a light gray background. The text \"IMAGE 1\" is located in the top-left corner.\n- **Image 2:** This image shows a solid green square, also centered on a light gray background. The text \"IMAGE 2\" is in the top-left corner.\n\nThe secret word is **kiwi-4410**.",
+ "usage": {
+  "prompt_tokens": 14164,
+  "total_tokens": 14269,
+  "completion_tokens": 105,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "image_tokens": 392
+  },
+  "reasoning_tokens": 0
+ },
+ "ttft_ms": 30637.1,
+ "e2e_ms": 30637.2,
+ "status": 200,
+ "error": null,
+ "raw": {
+  "id": "36df7e9633db470db077003b21b5edc8",
+  "object": "chat.completion",
+  "created": 1791433739,
+  "model": "qwen3-vl-30b",
+  "choices": [
+   {
+    "index": 0,
+    "message": {
+     "role": "assistant",
+     "content": "Based on the provided information, here is a brief description of each image and the secret word.\n\n- **Image 1:** This image displays a solid red circle centered on a light gray background. The text \"IMAGE 1\" is located in the top-left corner.\n- **Image 2:** This image shows a solid green square, also centered on a light gray background. The text \"IMAGE 2\" is in the top-left corner.\n\nThe secret word is **kiwi-4410**.",
+     "reasoning_content": null,
+     "tool_calls": null
+    },
+    "logprobs": null,
+    "finish_reason": "stop",
+    "matched_stop": 151645
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 14164,
+   "total_tokens": 14269,
+   "completion_tokens": 105,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "image_tokens": 392
+   },
+   "reasoning_tokens": 0
+  },
+  "metadata": {
+   "weight_version": "default",
+   "weight_versions": [
+    {
+     "version": "default",
+     "start": 0,
+     "end": 105
+    }
+   ]
+  }
+ },
  "image_descriptions": [
   "red circle labeled 'IMAGE 1'",
   "green square labeled 'IMAGE 2'"

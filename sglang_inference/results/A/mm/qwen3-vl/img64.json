@@ -1,10 +1,59 @@
 {
- "text": "",
- "usage": null,
- "ttft_ms": null,
- "e2e_ms": 2.5,
- "status": null,
- "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+ "text": "Here is a brief description of each image, followed by the secret word.\n\n- **IMAGE 1:** A red circle.\n- **IMAGE 2:** A green square.\n- **IMAGE 3:** A blue triangle.\n- **IMAGE 4:** An orange diamond.\n- **IMAGE 5:** A purple star",
+ "usage": {
+  "prompt_tokens": 12691,
+  "total_tokens": 12755,
+  "completion_tokens": 64,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "image_tokens": 12544
+  },
+  "reasoning_tokens": 0
+ },
+ "ttft_ms": 21812.5,
+ "e2e_ms": 21812.5,
+ "status": 200,
+ "error": null,
+ "raw": {
+  "id": "1cb04e9629974e32bd524df6f836b116",
+  "object": "chat.completion",
+  "created": 1791433761,
+  "model": "qwen3-vl-30b",
+  "choices": [
+   {
+    "index": 0,
+    "message": {
+     "role": "assistant",
+     "content": "Here is a brief description of each image, followed by the secret word.\n\n- **IMAGE 1:** A red circle.\n- **IMAGE 2:** A green square.\n- **IMAGE 3:** A blue triangle.\n- **IMAGE 4:** An orange diamond.\n- **IMAGE 5:** A purple star",
+     "reasoning_content": null,
+     "tool_calls": null
+    },
+    "logprobs": null,
+    "finish_reason": "length",
+    "matched_stop": null
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 12691,
+   "total_tokens": 12755,
+   "completion_tokens": 64,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "image_tokens": 12544
+   },
+   "reasoning_tokens": 0
+  },
+  "metadata": {
+   "weight_version": "default",
+   "weight_versions": [
+    {
+     "version": "default",
+     "start": 0,
+     "end": 64
+    }
+   ]
+  }
+ },
  "image_descriptions": [
   "red circle labeled 'IMAGE 1'",
   "green square labeled 'IMAGE 2'",

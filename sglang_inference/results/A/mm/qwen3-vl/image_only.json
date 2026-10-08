@@ -1,0 +1,61 @@
+{
+ "text": "This is a simple image, labeled \"IMAGE 1\", which features a single, solid red circle centered on a light gray background. The circle is the main subject of the image.",
+ "usage": {
+  "prompt_tokens": 206,
+  "total_tokens": 244,
+  "completion_tokens": 38,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "image_tokens": 196
+  },
+  "reasoning_tokens": 0
+ },
+ "ttft_ms": 11649.1,
+ "e2e_ms": 11649.2,
+ "status": 200,
+ "error": null,
+ "raw": {
+  "id": "f237b3fd08844247bde8b18bf5f7b524",
+  "object": "chat.completion",
+  "created": 1791433779,
+  "model": "qwen3-vl-30b",
+  "choices": [
+   {
+    "index": 0,
+    "message": {
+     "role": "assistant",
+     "content": "This is a simple image, labeled \"IMAGE 1\", which features a single, solid red circle centered on a light gray background. The circle is the main subject of the image.",
+     "reasoning_content": null,
+     "tool_calls": null
+    },
+    "logprobs": null,
+    "finish_reason": "stop",
+    "matched_stop": 151645
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 206,
+   "total_tokens": 244,
+   "completion_tokens": 38,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "image_tokens": 196
+   },
+   "reasoning_tokens": 0
+  },
+  "metadata": {
+   "weight_version": "default",
+   "weight_versions": [
+    {
+     "version": "default",
+     "start": 0,
+     "end": 38
+    }
+   ]
+  }
+ },
+ "image_descriptions": [
+  "red circle labeled 'IMAGE 1'"
+ ],
+ "est_prompt_tokens": 64
+}

@@ -334,3 +334,12 @@ token-identity numbers are still pending; rerun in progress with caches on tmpfs
 (/dev/shm) in ~8 minutes before `No space left on device` killed the schedulers (`AOTAutograd cache unable to serialize compiled graph: [Errno 28]`,
 `compilation_cache.cc: RESOURCE_EXHAUSTED: failed to write to file`). A 96 GB root disk cannot host more than two or three such launches. The
 harness now puts both caches under `/dev/shm/alisachen_cache/` (RAM-backed, 473 GiB). Upstream: document the cache footprint or cap it.
+
+**F-2 patch validated on hardware (2026-10-08 04:02–04:23 UTC, `results/F2_patch/`, run `G_qwen_128k_fp8_F2patch`).**
+- Policy installs: `[decoder compile policy] Installed Qwen3VLDecoderTpuCompilePolicy on Qwen3MoeLLMModel.forward`; `Capture target decode TPU graph end. elapsed=1094 s`.
+- Cold start with the patch ≈ 19 min (04:02:30 → 04:21:48), of which 18 min is the decoder graph capture (gpt-oss: 4 min). Compile artefacts: 65 GB inductor + 51 GB tier-3 + tier-2.
+- **Decode speed 178–183 tokens/s for one request (eager: 6–13); 1,024-token answers in 5.9–7.1 s (eager: 160–195 s).** TTFT 48 ms–1.5 s (1k–32k).
+- Serving-time recompiles across the 35-length boundary sweep: **0** (startup recompiles 616 during bucket capture).
+- Outputs are **not token-identical** to the eager server: divergence after 9–83 tokens, first-token log-prob Δ 0.03–0.25; tiny set 21/35 identical.
+  Compiled and eager kernels differ numerically (expected), so an accuracy check is the right gate: GSM8K-100 compiled vs eager is queued.
+- Patch reverted; tree clean. Recommendation: upstream the registration; also budget compile time and cache space for this model.

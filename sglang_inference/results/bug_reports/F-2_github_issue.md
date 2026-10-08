@@ -109,8 +109,21 @@ Register the existing policy for the MoE language model, mirroring `qwen3_vl.py`
 Alternative or additional hardening in `TpuGraphRunner`: apply the whole-model fallback (or log a warning) when policies were installed only on
 non-decoder modules, so a missing decoder registration cannot pass silently.
 
-Validation of the patch on hardware is in progress (decode speed, token identity against the eager outputs, serving-time recompile audit); results
-will be added here.
+## Validation of the patch on hardware (2026-10-08)
+
+| Measure | Eager (main @ 09d1244c26) | With patch |
+|---|---|---|
+| Decoder policy in log | none | `Installed Qwen3VLDecoderTpuCompilePolicy on Qwen3MoeLLMModel.forward` |
+| Decode speed, one request | 6 to 13 tokens/s | 178 to 183 tokens/s |
+| 1,024-token answer | 160 to 195 s | 5.9 to 7.1 s |
+| Cold start | 474 s | about 1,160 s; decoder graph capture alone 1,094 s |
+| Compile artefacts | small | 65 GB TorchInductor cache + 51 GB tier-3 cache |
+| Serving-time recompiles over 35 prompt lengths (1 to 16,385 tokens) | 0 (nothing compiled) | 0 |
+| Outputs vs eager | reference | not token-identical (divergence after 9 to 83 tokens); needles retrieved correctly in both |
+
+The numerical difference between compiled and eager kernels is expected; an accuracy comparison (GSM8K, 100 examples) is running and will be
+added. Two side observations for reviewers: the decoder capture for this model takes 18 minutes, and the compile caches need over 100 GB of
+space, which exhausted a 96 GB root disk on the first attempt.
 
 ## Related
 

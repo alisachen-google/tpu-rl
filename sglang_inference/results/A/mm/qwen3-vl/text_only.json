@@ -1,10 +1,53 @@
 {
- "text": "",
- "usage": null,
- "ttft_ms": null,
- "e2e_ms": 1.4,
- "status": null,
- "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+ "text": "hello",
+ "usage": {
+  "prompt_tokens": 14,
+  "total_tokens": 16,
+  "completion_tokens": 2,
+  "prompt_tokens_details": null,
+  "reasoning_tokens": 0
+ },
+ "ttft_ms": 5283.3,
+ "e2e_ms": 5283.3,
+ "status": 200,
+ "error": null,
+ "raw": {
+  "id": "6c9859d83b6e4bdaa8495b99f78e4c7d",
+  "object": "chat.completion",
+  "created": 1791433767,
+  "model": "qwen3-vl-30b",
+  "choices": [
+   {
+    "index": 0,
+    "message": {
+     "role": "assistant",
+     "content": "hello",
+     "reasoning_content": null,
+     "tool_calls": null
+    },
+    "logprobs": null,
+    "finish_reason": "stop",
+    "matched_stop": 151645
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 14,
+   "total_tokens": 16,
+   "completion_tokens": 2,
+   "prompt_tokens_details": null,
+   "reasoning_tokens": 0
+  },
+  "metadata": {
+   "weight_version": "default",
+   "weight_versions": [
+    {
+     "version": "default",
+     "start": 0,
+     "end": 2
+    }
+   ]
+  }
+ },
  "image_descriptions": [],
  "est_prompt_tokens": 7
 }

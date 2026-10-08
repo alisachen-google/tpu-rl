@@ -1,10 +1,59 @@
 {
- "text": "",
- "usage": null,
- "ttft_ms": null,
- "e2e_ms": 1.5,
- "status": null,
- "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+ "text": "Based on the image provided, the shape is a circle.\n\nThe color of the shape is **red**.",
+ "usage": {
+  "prompt_tokens": 212,
+  "total_tokens": 235,
+  "completion_tokens": 23,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "image_tokens": 196
+  },
+  "reasoning_tokens": 0
+ },
+ "ttft_ms": 9143.9,
+ "e2e_ms": 9144.0,
+ "status": 200,
+ "error": null,
+ "raw": {
+  "id": "1ccff88087294da886bdec0eeaa41533",
+  "object": "chat.completion",
+  "created": 1791433788,
+  "model": "qwen3-vl-30b",
+  "choices": [
+   {
+    "index": 0,
+    "message": {
+     "role": "assistant",
+     "content": "Based on the image provided, the shape is a circle.\n\nThe color of the shape is **red**.",
+     "reasoning_content": null,
+     "tool_calls": null
+    },
+    "logprobs": null,
+    "finish_reason": "stop",
+    "matched_stop": 151645
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 212,
+   "total_tokens": 235,
+   "completion_tokens": 23,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "image_tokens": 196
+   },
+   "reasoning_tokens": 0
+  },
+  "metadata": {
+   "weight_version": "default",
+   "weight_versions": [
+    {
+     "version": "default",
+     "start": 0,
+     "end": 23
+    }
+   ]
+  }
+ },
  "image_descriptions": [
   "red circle labeled 'IMAGE 1'"
  ],

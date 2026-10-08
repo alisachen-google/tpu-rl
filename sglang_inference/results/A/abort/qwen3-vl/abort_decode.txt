@@ -1,19 +1,17 @@
 [+    0.00s] prompt id=isl32768_k0 isl=32768 chars=176813 phase=decode abort_after=10.0s repeat=2 concurrent=1
-[+    0.00s] server-info[baseline] http://10.128.15.217:30000: {'error': "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"}
-[+    0.02s] server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
-[+    0.02s] round 1/2: launching 1 aborting request(s)
-[+    0.02s] req0: could not start: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new 
-[+    0.02s] round 2/2: launching 1 aborting request(s)
-[+    0.02s] req1: could not start: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new 
-[+    0.02s] server-info[after-abort] http://10.128.15.217:30000: {'error': "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"}
-[+    0.03s] server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
-[+    0.03s] waiting --settle 90.0s
-[+   90.03s] server-info[settled] http://10.128.15.217:30000: {'error': "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"}
-[+   90.04s] server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
-[+   90.04s] WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
-[+   90.04s] follow-up short: FAIL status=None tokens=None cached=None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new 
-[+   90.05s] follow-up identical-prompt: FAIL status=None tokens=None cached=None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new 
-[+   90.05s] server-info[final] http://10.128.15.217:30000: {'error': "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"}
-[+   90.06s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
-[+   90.06s] FAIL not back to baseline: http://10.128.15.217:30000: poll error: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn
-[+   90.06s] FAIL: 2 aborts (2 failed to start), follow-ups short=False identical=False (cached_tokens=None), 1 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/A/abort/qwen3-vl/abort_decode.json
+[+    0.02s] server-info[baseline] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    0.03s] server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    0.03s] round 1/2: launching 1 aborting request(s)
+[+    0.04s] req0: sent (abort-0-1791433928302), headers after 0.01s
+[+   11.99s] req0: aborted at 11.962s in decode (first_token=1.962s, chunks=67)
+[+   11.99s] round 2/2: launching 1 aborting request(s)
+[+   12.00s] req1: sent (abort-1-1791433940264), headers after 0.01s
+[+   23.94s] req1: aborted at 11.949s in decode (first_token=1.949s, chunks=67)
+[+   23.95s] server-info[after-abort] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   24.03s] server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   24.03s] waiting --settle 90.0s
+[+  114.04s] server-info[settled] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+  114.05s] server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+  114.05s] WARN http://10.128.15.217:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+[+  114.05s] WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+[+  121.67s] follow-up short: OK status=200 tokens=16 cached=0 

@@ -1,10 +1,59 @@
 {
- "text": "",
- "usage": null,
- "ttft_ms": null,
- "e2e_ms": 2.0,
- "status": null,
- "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))",
+ "text": "Based on the image provided, the text written in the top-left corner is \"IMAGE 1\".\n\nThe number written in the image is **1**.",
+ "usage": {
+  "prompt_tokens": 214,
+  "total_tokens": 246,
+  "completion_tokens": 32,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "image_tokens": 196
+  },
+  "reasoning_tokens": 0
+ },
+ "ttft_ms": 9987.1,
+ "e2e_ms": 9987.2,
+ "status": 200,
+ "error": null,
+ "raw": {
+  "id": "5f7857ddb1e041ac91334884af7a8456",
+  "object": "chat.completion",
+  "created": 1791433798,
+  "model": "qwen3-vl-30b",
+  "choices": [
+   {
+    "index": 0,
+    "message": {
+     "role": "assistant",
+     "content": "Based on the image provided, the text written in the top-left corner is \"IMAGE 1\".\n\nThe number written in the image is **1**.",
+     "reasoning_content": null,
+     "tool_calls": null
+    },
+    "logprobs": null,
+    "finish_reason": "stop",
+    "matched_stop": 151645
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 214,
+   "total_tokens": 246,
+   "completion_tokens": 32,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "image_tokens": 196
+   },
+   "reasoning_tokens": 0
+  },
+  "metadata": {
+   "weight_version": "default",
+   "weight_versions": [
+    {
+     "version": "default",
+     "start": 0,
+     "end": 32
+    }
+   ]
+  }
+ },
  "image_descriptions": [
   "red circle labeled 'IMAGE 1'"
  ],
