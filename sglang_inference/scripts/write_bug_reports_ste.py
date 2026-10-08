@@ -438,11 +438,14 @@ AssertionError: Only a mamba-capable tree cache allows freeing before alloc
 The tokenizer manager also logs `Received output for rid='abort-0-...' but the state was deleted in TokenizerManager`.
 **Expected result.** The engine frees the resources of the aborted request within 60 seconds and stays healthy. Step 4 returns 200.
 
-## Possible cause and suggested fix
+## Cause (located in the code) and suggested fix
 
-The deferred abort path frees the KV cache of a request whose chunked allocation is not complete. `release_kv_cache` permits this only for a
-mamba-capable tree cache. Suggested fix: in `_drain_deferred_chunked_sender_aborts`, wait until the current chunk is complete, or free only the
-pages that are allocated.
+The KV row of the aborted request is released twice. `process_pending_chunked_abort` defers the release because the raiden sender must drain
+first, and parks the request in a deferred list. One step later the result of the chunk that was already in flight reaches
+`_retire_aborted_prefill_result`, which sees that the request still holds its row and frees it. When the deferred list is drained,
+`release_kv_cache` is called again without a `holds_kv` guard, and the routine asserts because only a mamba-capable cache may release without
+a row. Fix: let the deferred list own the release (skip the free in `_retire_aborted_prefill_result` while the sender is not drained) and guard
+the drain with `holds_kv`. Full trace with line references: `F-8_github_issue.md`.
 
 ## Also to test
 

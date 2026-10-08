@@ -407,3 +407,10 @@ exits (sockets close), not at the per-request timeout, so stalled requests outli
 45 s; decode in `_update_handshake_waiters`. Deterministic for recipe `gpt-oss_A_128k_mr1`. Repro loop stopped; a control pair with
 `max_running_requests 2` (`recipes/gpt-oss_A_128k_mr2.json`, `_phase_F11_control_mr2.sh`) runs next: it is both the F-11 control (predicted
 pool 17,216 → 16,896, no deadlock) and the F-12 isolation (does the handshake stall need one slot?).
+
+**F-8 mechanism confirmed from code (2026-10-08 07:20 UTC).** Double release of the aborted chunked request's KV row: `process_pending_chunked_abort`
+defers the release (raiden `group_failure_requires_drain`, sender not drained) and parks the request in `_deferred_chunked_sender_aborts`
+(scheduler.py 3720–3777); one step later the in-flight chunk's result reaches `_retire_aborted_prefill_result` (prefill.py 1198–1222), which
+sees `holds_kv` and frees the row; the later drain (scheduler.py 3779–3796) calls `release_kv_cache` without a `holds_kv` guard → the
+assertion in `common.py` 292–300. The chunk cache's `release_aborted_request` is a no-op, so it is not the first releaser. Secondary: the
+result-path free happens before the raiden group has drained, which the deferral was meant to prevent. Issue draft: `bug_reports/F-8_github_issue.md`.
