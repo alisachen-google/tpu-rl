@@ -175,7 +175,7 @@ Legend: PASS = met the pass criterion; NUM = numerical difference only (content 
 |---|---|
 | Checks | 1m-shape pair (context 1,056,768, 1 slot): 1k…1M prompts; boundary: ISL = context − 1024 accepted, context + 1 → clean 4xx; goldens at 256k/512k/1M incl. unaligned |
 | Command | `bash $S/pd.sh start recipes/gpt-oss_A_1m.json A_gptoss_1m`; `python $S/verify_pd_disagg.py --url <LB> --router --lengths 32768 --timeout 600`; goldens via `run_golden.sh ... 262144,524288,1047552,255123,511777,999999 1 1024` |
-| Results | goldens: all lengths to 1M served by the monolithic server (gpt-oss and Qwen). PD 1m: 1k and 8k OK; **every prompt > 16,384 tokens hangs (F-11, 4/4)**; with 4 slots (`_mr4`) 8k/32k/131k complete; with 2 slots on the 128k shape the predicted 320-token third chunk is observed. Boundary 4xx: PASS |
+| Results | goldens: all lengths to 1M served by the monolithic server (gpt-oss and Qwen). PD 1m: 1k and 8k OK; **every prompt > 16,384 tokens hangs (F-11, 4/4)**; with 4 slots (`_mr4`) 8k/32k/131k complete; with 2 slots on the 128k shape the predicted 320-token third chunk is observed. **1M shape with radix on and 2 slots (B): every length 32k…1M served** (TTFT 18 s at 256k, 57 s at 512k, 196 s at 1M; output degenerate beyond 128k exactly like the golden). Boundary: the tool's first run used a 3.6-chars/token heuristic (prompts were ~705k real tokens, so the 200 it reported as FAIL was correct server behaviour); exact-tokenizer rerun recorded below |
 | Evidence | `results/golden/*_1m_c1/`, `results/F11/`, `results/A1m/` |
 
 ### TC-13 P/D handshake robustness (found during isolation)

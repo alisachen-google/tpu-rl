@@ -45,3 +45,30 @@
    vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss_1m_mr2/tc1_diff_511777.json
    needles {"id": "isl511777_k0", "isl": 511777, "needles": 3, "found": 0, "missing": ["sable-f3ec", "copper-1b3c", "lantern-e794"], "answer_region_chars": null, "completion_tokens": 1024, "finish_reason": "length"}
    needles {"id": "isl511777_k1", "isl": 511777, "needles": 3, "found": 0, "missing": ["thistle-aba5", "raven-503f", "walnut-1799"], "answer_region_chars": null, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl1047552_k0] tokens=1024 finish=length cached=0 ttft=195730.05ms e2e=205435.59ms
+   [isl1047552_k1] tokens=1024 finish=length cached=0 ttft=195724.05ms e2e=205436.95ms
+   vs golden isl1047552_k0 False       0      0  0.654   0.0789  FAIL  token prefix 0<256; agreement 0.654<0.95; structural:degenerate_4gram_x493,degenerate_4gram_x488
+   vs golden isl1047552_k1 False       8      3  0.621   0.1361  FAIL  token prefix 3<256; agreement 0.621<0.95; structural:degenerate_4gram_x327,degenerate_4gram_x492
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss_1m_mr2/tc1_diff_1047552.json
+   needles {"id": "isl1047552_k0", "isl": 1047551, "needles": 3, "found": 0, "missing": ["velvet-ed5b", "pepper-0daf", "pepper-b461"], "answer_region_chars": null, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl1047552_k1", "isl": 1047552, "needles": 3, "found": 0, "missing": ["falcon-b394", "raven-0db6", "tundra-5cf8"], "answer_region_chars": null, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl999999_k0] tokens=1024 finish=length cached=0 ttft=179770.26ms e2e=189307.31ms
+   [isl999999_k1] tokens=1024 finish=length cached=0 ttft=179915.36ms e2e=189457.89ms
+   vs golden isl999999_k0  False      35      9  0.896   0.3268  FAIL  token prefix 9<256; agreement 0.896<0.95; structural:degenerate_4gram_x482,degenerate_4gram_x442
+   vs golden isl999999_k1  False      38     13  0.494   0.1259  FAIL  token prefix 13<256; agreement 0.494<0.95; structural:degenerate_4gram_x499,degenerate_4gram_x348
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss_1m_mr2/tc1_diff_999999.json
+   needles {"id": "isl999999_k0", "isl": 999999, "needles": 3, "found": 0, "missing": ["quartz-bb7e", "zephyr-acb3", "velvet-df9f"], "answer_region_chars": null, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl999999_k1", "isl": 999999, "needles": 3, "found": 0, "missing": ["velvet-47ed", "cobalt-732c", "lantern-641b"], "answer_region_chars": null, "completion_tokens": 1024, "finish_reason": "length"}
+   http://10.128.15.217:30000 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T19:41:16Z [1m/B] (2) boundary: ISL = context-1024 accepted, context+1 rejected
+   [PASS] warm-cache: second: cached_tokens=640 prompt_tokens=686 ttft1=195.6ms ttft2=186.4ms ratio=0.953
+   [PASS] boundary ctx-1024 (1055744 tok): status=200 prompt_tokens=704702 e2e=95968.5ms err=None
+   [FAIL] boundary ctx+1 (1056769 tok, expect 4xx): status=200 e2e=4238.9ms err=
+   
+   === summary: 7 passed, 1 failed, 0 skipped ===
+     FAIL boundary ctx+1 (1056769 tok, expect 4xx)
+2026-10-08T19:42:58Z [1m/B] (3) prefix reuse at 256k (second pass cached)
+   [isl262144_k0] tokens=1024 finish=length cached=0 ttft=18174.0ms e2e=24332.74ms
+   [isl262144_k1] tokens=1024 finish=length cached=0 ttft=18184.96ms e2e=24292.57ms
+2026-10-08T19:43:47Z [1m/B] (4) GSM8K-100

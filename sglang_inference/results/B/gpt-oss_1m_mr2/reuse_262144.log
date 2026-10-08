@@ -1,0 +1,4 @@
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl262144_k0] tokens=1024 finish=length cached=0 ttft=18174.0ms e2e=24332.74ms
+[isl262144_k1] tokens=1024 finish=length cached=0 ttft=18184.96ms e2e=24292.57ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss_1m_mr2/reuse_262144.jsonl

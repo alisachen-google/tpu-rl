@@ -1,0 +1,63 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_1m_c1/999999.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/B/gpt-oss_1m_mr2/tc1_999999.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl999999_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 9<256",
+    "agreement 0.896<0.95",
+    "structural:degenerate_4gram_x482,degenerate_4gram_x442"
+   ],
+   "identical": false,
+   "char_prefix": 35,
+   "token_prefix": 9,
+   "token_agreement": 0.896484375,
+   "first_divergence_token": 9,
+   "first_divergence_char": 35,
+   "context_a": " is a bit confusing.\n\nThe prompt is a\n\nT",
+   "context_b": " is a bit confusing. The text says\n\nThe ",
+   "first_token_logprob_absdiff": 0.32679200172424316,
+   "structural_a": [
+    "degenerate_4gram_x482"
+   ],
+   "structural_b": [
+    "degenerate_4gram_x442"
+   ]
+  },
+  {
+   "id": "isl999999_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 13<256",
+    "agreement 0.494<0.95",
+    "structural:degenerate_4gram_x499,degenerate_4gram_x348"
+   ],
+   "identical": false,
+   "char_prefix": 38,
+   "token_prefix": 13,
+   "token_agreement": 0.494140625,
+   "first_divergence_token": 13,
+   "first_divergence_char": 38,
+   "context_a": "\n\nThe text is a\n\nThe text\n\nThe text\n\nThe",
+   "context_b": "\n\nThe text is a\n\nThe\n\nThe\n\nThe\n\nThe\n\nThe",
+   "first_token_logprob_absdiff": 0.12594902515411377,
+   "structural_a": [
+    "degenerate_4gram_x499"
+   ],
+   "structural_b": [
+    "degenerate_4gram_x348"
+   ]
+  }
+ ]
+}

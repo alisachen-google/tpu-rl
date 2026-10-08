@@ -576,3 +576,9 @@ present in every stalling pair (4 pairs, 2 recipes); the only single-slot pair t
 - 255,123 (unaligned): both prompts served (TTFT 17.4 s). PD output flagged `degenerate_4gram_x64/x61`, but the **golden is equally
   degenerate** (max 4-gram repeats 33 / 67 vs PD 64 / 61; both tails are loops). gpt-oss beyond its native 128k context loops regardless of
   PD; structural flags above 128k apply to both sides and are not a PD defect.
+- 512k / 511,777: TTFT 57 s / 55 s; 1M (1,047,552): **TTFT 196 s, 1,024 tokens in 205 s**, both prompts; 999,999: TTFT 180 s. All served,
+  engines healthy. Prefill rate ≈ 5.3k tokens/s at 1M.
+- Boundary step false alarm: `verify_pd_disagg.py --boundary` without `--tokenizer-json` sizes prompts at 3.6 chars/token; the "ctx−1024"
+  prompt was 704,702 server tokens and "ctx+1" was also under the limit, so the server's 200 was correct (and fast: cached prefix of the
+  previous prompt). Rerun with the exact tokenizer in `B/gpt-oss_1m_mr2/boundary_exact.txt`. The earlier "Boundary 4xx: PASS" in the
+  catalogue was unverified and has been corrected.

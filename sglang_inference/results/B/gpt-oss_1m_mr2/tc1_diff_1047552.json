@@ -1,0 +1,63 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_1m_c1/1047552.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/B/gpt-oss_1m_mr2/tc1_1047552.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl1047552_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 0<256",
+    "agreement 0.654<0.95",
+    "structural:degenerate_4gram_x493,degenerate_4gram_x488"
+   ],
+   "identical": false,
+   "char_prefix": 0,
+   "token_prefix": 0,
+   "token_agreement": 0.654296875,
+   "first_divergence_token": 0,
+   "first_divergence_char": 0,
+   "context_a": "The\n\nThe user\n\nThe u",
+   "context_b": "```\n\nThe user wants ",
+   "first_token_logprob_absdiff": 0.07894444465637207,
+   "structural_a": [
+    "degenerate_4gram_x493"
+   ],
+   "structural_b": [
+    "degenerate_4gram_x488"
+   ]
+  },
+  {
+   "id": "isl1047552_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 3<256",
+    "agreement 0.621<0.95",
+    "structural:degenerate_4gram_x327,degenerate_4gram_x492"
+   ],
+   "identical": false,
+   "char_prefix": 8,
+   "token_prefix": 3,
+   "token_agreement": 0.62109375,
+   "first_divergence_token": 3,
+   "first_divergence_char": 8,
+   "context_a": "The\n\nThe\n\nThe\n\nThe\n\nThe\n\nThe",
+   "context_b": "The\n\nThe prompt asks:\n\nThe p",
+   "first_token_logprob_absdiff": 0.13607847690582275,
+   "structural_a": [
+    "degenerate_4gram_x327"
+   ],
+   "structural_b": [
+    "degenerate_4gram_x492"
+   ]
+  }
+ ]
+}
