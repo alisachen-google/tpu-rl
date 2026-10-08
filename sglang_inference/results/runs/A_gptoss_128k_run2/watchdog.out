@@ -744,3 +744,59 @@
 [2026-10-08T03:24:52+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
 [2026-10-08T03:24:52+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
 [2026-10-08T03:24:52+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:25:02+00:00] prefill ok=1 m=1 lat=10.6ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:25:02+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:25:02+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:25:02+00:00] decode ok=0 m=0 lat=0.5ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:25:12+00:00] prefill ok=1 m=1 lat=9.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:25:12+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:25:12+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:25:12+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:25:22+00:00] prefill ok=1 m=1 lat=11.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:25:22+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:25:22+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:25:22+00:00] decode ok=0 m=0 lat=0.5ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:25:32+00:00] prefill ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:25:32+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:25:32+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:25:32+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:25:42+00:00] prefill ok=1 m=1 lat=10.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:25:42+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:25:42+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:25:42+00:00] decode ok=0 m=0 lat=0.5ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:25:52+00:00] prefill ok=1 m=1 lat=11.6ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:25:52+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:25:52+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:25:52+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:26:02+00:00] prefill ok=1 m=1 lat=11.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:26:02+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:26:02+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:26:02+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:26:12+00:00] prefill ok=1 m=1 lat=11.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:26:12+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:26:12+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:26:12+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:26:22+00:00] prefill ok=1 m=1 lat=16.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:26:22+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:26:22+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:26:22+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:26:32+00:00] prefill ok=1 m=1 lat=10.2ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:26:32+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:26:32+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:26:32+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:26:42+00:00] prefill ok=1 m=1 lat=10.6ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:26:42+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:26:42+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:26:42+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:26:52+00:00] prefill ok=1 m=1 lat=14.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:26:52+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:26:52+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:26:52+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:27:02+00:00] prefill ok=1 m=1 lat=10.5ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:27:02+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:27:02+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:27:02+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0
+[2026-10-08T03:27:12+00:00] prefill ok=1 m=1 lat=10.8ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T03:27:12+00:00] WARN decode: ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConnectionError("HTTPConnection(host='10.128.0.90', port=30000): Failed to establish a
+[2026-10-08T03:27:12+00:00] WARN decode: /metrics ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Max retries exceeded with url: /metrics (Caused by NewConnectionErro
+[2026-10-08T03:27:12+00:00] decode ok=0 m=0 lat=0.4ms run=None q=None use=None thr=None crash=0

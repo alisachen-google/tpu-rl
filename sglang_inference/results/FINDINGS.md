@@ -300,3 +300,11 @@ prefill), or reject the request with a clear error, or let the watchdog fail a r
   `tool_call` returned no `tool_calls` (finish_reason stop, 61 reasoning tokens, empty content): the recipe sets `reasoning_parser gpt-oss` but no
   `--tool-call-parser`, so this is a configuration gap of the test recipe, not a PD defect; re-test with `--tool-call-parser gpt-oss` when the recipe is next restarted.
 - KV transfer bootstrap: 114 transfers, mean bootstrap ≈ 1 ms.
+
+**F-6 code-level suspects (not yet proven).** For `n>1` the tokenizer manager expands one HTTP request into `n` sub-requests with new rids
+(`tokenizer_manager.py` ~L2037-2050). Bootstrap parameters are normalised in `io_struct.py::_normalize_bootstrap_params` (L886-910): an integer
+room becomes `[room+i for i in range(num)]`, but a **list** room is repeated with `list * parallel_sample_num`, i.e. every parallel sample of the
+same prompt gets the **same bootstrap room**. The mini-LB sends a list of rooms for batched requests (`mini_lb.py` L495-505) and a single int
+otherwise (L507-513). Decode-side state during the hang (1 running request, 128 used tokens = 2 pages, no throughput) is consistent with the two
+samples colliding in the bootstrap/transfer bookkeeping or with the LB waiting for a single response object. To pin it: send `n=2` directly to the
+prefill and decode engines with explicit distinct rooms (bypassing the LB) and with an explicit shared room.

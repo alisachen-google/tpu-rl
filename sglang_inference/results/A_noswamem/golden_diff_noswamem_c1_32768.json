@@ -1,0 +1,41 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_noswamem_c1/32768.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/A_noswamem/tc1/gpt-oss/32768.jsonl",
+ "ids": 2,
+ "failed": 0,
+ "identical": 2,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl32768_k0",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 4471,
+   "token_prefix": 1024,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 1.0132789611816406e-06,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl32768_k1",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 4388,
+   "token_prefix": 1024,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 1.1920928955078125e-06,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}
