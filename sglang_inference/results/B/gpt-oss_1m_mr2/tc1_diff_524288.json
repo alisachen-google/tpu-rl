@@ -1,0 +1,61 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_1m_c1/524288.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/B/gpt-oss_1m_mr2/tc1_524288.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl524288_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 6<256",
+    "agreement 0.045<0.95",
+    "structural:degenerate_4gram_x200"
+   ],
+   "identical": false,
+   "char_prefix": 19,
+   "token_prefix": 6,
+   "token_agreement": 0.044921875,
+   "first_divergence_token": 6,
+   "first_divergence_char": 19,
+   "context_a": "```\n\nThe text is a long, detailed, and ",
+   "context_b": "```\n\nThe text is a very long and repeti",
+   "first_token_logprob_absdiff": 0.4860292673110962,
+   "structural_a": [
+    "degenerate_4gram_x200"
+   ],
+   "structural_b": []
+  },
+  {
+   "id": "isl524288_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 1<256",
+    "agreement 0.040<0.95",
+    "structural:degenerate_4gram_x279,degenerate_4gram_x116"
+   ],
+   "identical": false,
+   "char_prefix": 3,
+   "token_prefix": 1,
+   "token_agreement": 0.0400390625,
+   "first_divergence_token": 1,
+   "first_divergence_char": 3,
+   "context_a": "```\"\n\nWow, this is a ve",
+   "context_b": "```\n\nThis is a very lon",
+   "first_token_logprob_absdiff": 0.1407531499862671,
+   "structural_a": [
+    "degenerate_4gram_x279"
+   ],
+   "structural_b": [
+    "degenerate_4gram_x116"
+   ]
+  }
+ ]
+}

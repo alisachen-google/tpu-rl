@@ -565,5 +565,14 @@ dist-store port choice; relaunched. Not counted as a finding (single occurrence)
 **F-12 at the 1M shape with the radix cache on (19:03 UTC, `B_gpt-oss_1m`, single slot).** First 32k request: prefill ran all 4 chunks in
 1 s and holds the request (`num_prefill_inflight_queue_reqs 1`, `num_used_tokens 32768`); decode never ran a batch, all queues 0, for 13+
 minutes. Same stall as F-12. New trigger-table row: ctx 1M / pool 1.11M / host pool 320 GiB / radix ON / 1 slot → **stall**. Single slot is
-present in every stalling pair (4 pairs, 2 recipes); the only single-slot pair that worked is `A_1m` (radix off). Decode stack and metrics:
-`results/F12/B_1m_stall/`. The 1M B/C runs continue with 2-slot recipes (`gpt-oss_[BC]_1m_mr2.json`).
+present in every stalling pair (4 pairs, 2 recipes); the only single-slot pair that worked is `A_1m` (radix off). Decode metrics in `results/F12/B_1m_stall/` (the py-spy dump failed: run without sudo). The 1M B/C runs continue with 2-slot recipes (`gpt-oss_[BC]_1m_mr2.json`).
+
+## 1M shape, Config B with 2 slots (`B_gpt-oss_1m_mr2`, 19:17 UTC–) — `results/B/gpt-oss_1m_mr2/`
+- Pair up 245 s; SWA pool ratio-sized 890,880 (radix on) → no F-11; 2 slots → no F-12 stall. 32k probe: same F-4 divergence vs golden as at
+  128k (prefix 24 / 3), deterministic across shapes.
+- 256k: TTFT 18.2 s, 1,024 tokens in 24.8 s, both prompts. Needles 0/3 — **and the monolithic golden also finds 0/3 at 256k**: beyond
+  gpt-oss's native 128k context neither server retrieves the planted facts (both spend the budget reasoning). Needle gate is uninformative
+  above 128k; the checks that matter there are: served without error, healthy engines, same behaviour as golden.
+- 255,123 (unaligned): both prompts served (TTFT 17.4 s). PD output flagged `degenerate_4gram_x64/x61`, but the **golden is equally
+  degenerate** (max 4-gram repeats 33 / 67 vs PD 64 / 61; both tails are loops). gpt-oss beyond its native 128k context loops regardless of
+  PD; structural flags above 128k apply to both sides and are not a PD defect.

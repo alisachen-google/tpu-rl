@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_1m_c1/262144.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/B/gpt-oss_1m_mr2/tc1_262144.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl262144_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 1<256",
+    "agreement 0.004<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 3,
+   "token_prefix": 1,
+   "token_agreement": 0.00390625,
+   "first_divergence_token": 1,
+   "first_divergence_char": 3,
+   "context_a": "We are given a huge blo",
+   "context_b": "We need to answer: \"Lis",
+   "first_token_logprob_absdiff": 0.06792742013931274,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl262144_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 7<256",
+    "agreement 0.029<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 28,
+   "token_prefix": 7,
+   "token_agreement": 0.029296875,
+   "first_divergence_token": 7,
+   "first_divergence_char": 28,
+   "context_a": "a huge block of text that is basically a",
+   "context_b": "a huge block of text. The user says: \"Li",
+   "first_token_logprob_absdiff": 0.05642777681350708,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

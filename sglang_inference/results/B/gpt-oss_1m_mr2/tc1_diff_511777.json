@@ -1,0 +1,63 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_1m_c1/511777.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/B/gpt-oss_1m_mr2/tc1_511777.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl511777_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 0<256",
+    "agreement 0.130<0.95",
+    "structural:degenerate_4gram_x340,degenerate_4gram_x197"
+   ],
+   "identical": false,
+   "char_prefix": 0,
+   "token_prefix": 0,
+   "token_agreement": 0.1298828125,
+   "first_divergence_token": 0,
+   "first_divergence_char": 0,
+   "context_a": "The committee\n\nThe c",
+   "context_b": "```\n\nThis is a very ",
+   "first_token_logprob_absdiff": 0.22501933574676514,
+   "structural_a": [
+    "degenerate_4gram_x340"
+   ],
+   "structural_b": [
+    "degenerate_4gram_x197"
+   ]
+  },
+  {
+   "id": "isl511777_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 2<256",
+    "agreement 0.005<0.95",
+    "structural:degenerate_4gram_x92,degenerate_4gram_x140"
+   ],
+   "identical": false,
+   "char_prefix": 7,
+   "token_prefix": 2,
+   "token_agreement": 0.0048828125,
+   "first_divergence_token": 2,
+   "first_divergence_char": 7,
+   "context_a": "```\n\nThe text is a long, de",
+   "context_b": "```\n\nThis is a very long te",
+   "first_token_logprob_absdiff": 0.05971395969390869,
+   "structural_a": [
+    "degenerate_4gram_x92"
+   ],
+   "structural_b": [
+    "degenerate_4gram_x140"
+   ]
+  }
+ ]
+}

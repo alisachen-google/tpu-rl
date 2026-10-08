@@ -1,0 +1,61 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_1m_c1/255123.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/B/gpt-oss_1m_mr2/tc1_255123.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl255123_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 1<256",
+    "agreement 0.010<0.95",
+    "structural:degenerate_4gram_x64"
+   ],
+   "identical": false,
+   "char_prefix": 4,
+   "token_prefix": 1,
+   "token_agreement": 0.009765625,
+   "first_divergence_token": 1,
+   "first_divergence_char": 4,
+   "context_a": "The prompt is a bit conf",
+   "context_b": "The answer is: \nThe comm",
+   "first_token_logprob_absdiff": 0.1696072220802307,
+   "structural_a": [],
+   "structural_b": [
+    "degenerate_4gram_x64"
+   ]
+  },
+  {
+   "id": "isl255123_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 1<256",
+    "agreement 0.011<0.95",
+    "structural:degenerate_4gram_x67,degenerate_4gram_x61"
+   ],
+   "identical": false,
+   "char_prefix": 3,
+   "token_prefix": 1,
+   "token_agreement": 0.0107421875,
+   "first_divergence_token": 1,
+   "first_divergence_char": 3,
+   "context_a": "We have a very long tex",
+   "context_b": "We need to find the sec",
+   "first_token_logprob_absdiff": 0.05826467275619507,
+   "structural_a": [
+    "degenerate_4gram_x67"
+   ],
+   "structural_b": [
+    "degenerate_4gram_x61"
+   ]
+  }
+ ]
+}
