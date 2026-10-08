@@ -7,7 +7,7 @@ SSH_A="ssh -i $HOME/.ssh/google_compute_engine -o BatchMode=yes -o StrictHostKey
 log(){ echo "$(date -u +%FT%TZ) [1m/$CFG] $*"; }
 state(){ for u in $PRE $DEC; do echo "   $u $(curl -s -m 10 $u/metrics | grep -E '^sglang:(num_running_reqs|num_used_tokens|swa_token_usage)' | sed -E 's/\{[^}]*\}//' | sort -u | tr '\n' ' ')"; done; }
 for CFG in B C; do
-  OUT=$R/$CFG/gpt-oss_1m; mkdir -p $OUT; RUN=${CFG}_gpt-oss_1m; REC=$HOME/pd_disagg/recipes/gpt-oss_${CFG}_1m.json
+  OUT=$R/$CFG/gpt-oss_1m_mr2; mkdir -p $OUT; RUN=${CFG}_gpt-oss_1m_mr2; REC=$HOME/pd_disagg/recipes/gpt-oss_${CFG}_1m_mr2.json
   bash $S/pd.sh stop >/dev/null 2>&1; sleep 3; until bash $S/tpu_free.sh >/dev/null 2>&1; do sleep 120; done
   log "=== start $REC"; t0=$(date +%s)
   env -u TORCH_DEVICE_BACKEND_AUTOLOAD bash $S/pd.sh start $REC $RUN 2>&1 | tee $R/runs/$RUN.driver.log | grep -E 'ready|NOT'

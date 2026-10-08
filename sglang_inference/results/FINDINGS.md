@@ -557,3 +557,13 @@ greedy, 256 tokens, c=1, per-request `completion_tokens / spec_verify_ct`: **PD 
 monolithic EAGLE3 mean 2.229 (p50 2.265, 1.84–2.46), 232.5 tok/s; verify counts identical per request.** Speculative decoding through the
 P/D pair is exactly as effective as on one server; the earlier per-batch "1.5 vs 2.6" gap was a measurement artefact (different windows and
 batch composition). EAGLE3 question closed: no PD defect, no new issue. Single-stream decode with EAGLE3: ~235 tok/s vs 176 without.
+
+**Environment note (18:46 UTC).** First 1M Config B launch: the decode engine died at start-up with `torch.distributed.DistNetworkError:
+... port: 34587 ... EADDRINUSE`, two minutes after the previous server on host b was stopped. Transient port collision in the launcher's
+dist-store port choice; relaunched. Not counted as a finding (single occurrence).
+
+**F-12 at the 1M shape with the radix cache on (19:03 UTC, `B_gpt-oss_1m`, single slot).** First 32k request: prefill ran all 4 chunks in
+1 s and holds the request (`num_prefill_inflight_queue_reqs 1`, `num_used_tokens 32768`); decode never ran a batch, all queues 0, for 13+
+minutes. Same stall as F-12. New trigger-table row: ctx 1M / pool 1.11M / host pool 320 GiB / radix ON / 1 slot → **stall**. Single slot is
+present in every stalling pair (4 pairs, 2 recipes); the only single-slot pair that worked is `A_1m` (radix off). Decode stack and metrics:
+`results/F12/B_1m_stall/`. The 1M B/C runs continue with 2-slot recipes (`gpt-oss_[BC]_1m_mr2.json`).

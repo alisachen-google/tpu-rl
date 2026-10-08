@@ -1,1 +1,10 @@
 2026-10-08T18:46:20Z [1m/B] === start /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_B_1m.json
+2026-10-08T19:00:36Z [1m/B] first launch: decode died at start-up with torch.distributed TCPStore EADDRINUSE (port 34587, 2 min after the previous server on host b was stopped); relaunching
+2026-10-08T19:00:48Z [1m/B] === start /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_B_1m.json
+2026-10-08 19:03:05 prefill /health ready after 135 s
+2026-10-08 19:03:05 decode /health ready after 0 s
+2026-10-08 19:03:06 LB /health_generate ready after 1 s
+2026-10-08T19:03:08Z [1m/B] pair up in 139 s; SWA pool: aligning swa_max_total_num_tokens 891264 -> 890880
+2026-10-08T19:03:08Z [1m/B] (0) probe: 32k prompt with 900 s timeout (F-11 bail-out)
+2026-10-08T19:17:30Z [1m/B] 32k probe stalled: prefill holds the request in the inflight queue, decode never ran a batch (F-12 pattern at 1M shape, radix on, 1 slot); switching the 1M runs to 2-slot recipes
+2026-10-08T19:17:53Z [1m/B] === start /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_B_1m_mr2.json
