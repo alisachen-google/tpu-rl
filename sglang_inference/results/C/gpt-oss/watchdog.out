@@ -1,0 +1,4 @@
+[2026-10-08T08:57:37+00:00] prefill ok=1 m=1 lat=11.0ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:57:37+00:00] decode ok=1 m=1 lat=10.9ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=0
+[2026-10-08T08:57:47+00:00] prefill ok=1 m=1 lat=13.1ms run=0.0 q=0.0 use=0.0 thr=0.0 crash=-
+[2026-10-08T08:57:47+00:00] decode ok=1 m=1 lat=22.5ms run=1.0 q=0.0 use=0.03 thr=178.78398598622587 crash=0
