@@ -23,3 +23,15 @@
 [tiny512] tokens=160 finish=length cached=0 ttft=29675.46ms e2e=29675.71ms
 [tiny513] tokens=160 finish=length cached=0 ttft=30261.71ms e2e=30262.0ms
 [tiny1023] tokens=160 finish=length cached=0 ttft=30572.57ms e2e=30572.84ms
+[tiny1024] tokens=160 finish=length cached=0 ttft=31225.07ms e2e=31225.33ms
+[tiny1025] tokens=160 finish=length cached=0 ttft=33713.95ms e2e=33714.28ms
+[tiny8191] tokens=160 finish=length cached=0 ttft=25032.71ms e2e=25033.03ms
+[tiny8192] tokens=160 finish=length cached=0 ttft=25091.14ms e2e=25091.41ms
+[tiny8193] tokens=160 finish=length cached=0 ttft=25809.92ms e2e=25810.23ms
+[tiny8255] tokens=160 finish=length cached=0 ttft=25866.51ms e2e=25866.76ms
+[tiny8256] tokens=160 finish=length cached=0 ttft=25545.37ms e2e=25545.64ms
+[tiny8257] tokens=160 finish=length cached=0 ttft=25117.91ms e2e=25118.15ms
+[tiny16383] tokens=160 finish=length cached=0 ttft=26290.49ms e2e=26290.79ms
+[tiny16384] tokens=160 finish=length cached=0 ttft=26514.62ms e2e=26514.87ms
+[tiny16385] tokens=160 finish=length cached=0 ttft=26269.01ms e2e=26269.29ms
+done: 35 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/B/qwen3-vl/tiny.jsonl

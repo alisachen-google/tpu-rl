@@ -1,0 +1,13 @@
+model=qwen3-vl-30b kind=qwen 8 cases, endpoints: a=http://10.128.15.217:8080
+case                  A st/fin/len                  B st/fin/len                  same  verdict notes
+-----------------------------------------------------------------------------------------------------
+plain_chat            200/stop/0c/0r                -                             -     PASS    
+multi_turn_3          200/stop/0c/0r                -                             -     PASS    
+stop_string_chat      200/stop/0c/0r                -                             -     PASS    
+stream_with_usage     200/stop/0c/0r                -                             -     PASS    
+long_system_prompt    200/stop/0c/0r                -                             -     PASS    
+empty_user_message    200/length/0c/0r              -                             -     PASS    
+oversized_max_tokens  400/None/0c/0r                -                             -     PASS    
+bad_image_payload     400/None/0c/0r                -                             -     PASS    
+
+8 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/B/qwen3-vl/chat.json

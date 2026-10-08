@@ -1,0 +1,213 @@
+{
+ "model": "qwen3-vl-30b",
+ "kind": "qwen",
+ "a": "http://10.128.15.217:8080",
+ "b": null,
+ "timeout": 600.0,
+ "cases": 8,
+ "failed": 0,
+ "rows": [
+  {
+   "name": "plain_chat",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 0,
+    "usage": {
+     "prompt_tokens": 19,
+     "total_tokens": 100,
+     "completion_tokens": 81,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 0
+    },
+    "tool_calls": null,
+    "elapsed": 17.294,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "The sky appears blue because of Rayleigh scattering, a phenomenon where sunlight interacts with molecules and small particles in the atmosphere. Shorter wavelengths of light, such as blue and violet, "
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "multi_turn_3",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 0,
+    "usage": {
+     "prompt_tokens": 64,
+     "total_tokens": 67,
+     "completion_tokens": 3,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 0
+    },
+    "tool_calls": null,
+    "elapsed": 0.634,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "turns": [
+     "Apple",
+     "Red",
+     "Red Apple"
+    ],
+    "content_head": "Red Apple"
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "stop_string_chat",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 0,
+    "usage": {
+     "prompt_tokens": 16,
+     "total_tokens": 19,
+     "completion_tokens": 3,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 0
+    },
+    "tool_calls": null,
+    "elapsed": 0.73,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "Lion  "
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "stream_with_usage",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 0,
+    "usage": {
+     "prompt_tokens": 19,
+     "total_tokens": 100,
+     "completion_tokens": 81,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 0
+    },
+    "tool_calls": null,
+    "elapsed": 12.405,
+    "error": null,
+    "hang": false,
+    "done_seen": true,
+    "content_head": "The sky appears blue because of Rayleigh scattering, a phenomenon where sunlight interacts with molecules and small particles in the atmosphere. Shorter wavelengths of light, such as blue and violet, "
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "long_system_prompt",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "stop",
+    "reasoning_len": 0,
+    "usage": {
+     "prompt_tokens": 5504,
+     "total_tokens": 5595,
+     "completion_tokens": 91,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 0
+    },
+    "tool_calls": null,
+    "elapsed": 25.226,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "The reference material consists of a repetitive sequence of words including \"policy compass,\" \"glacier archive,\" \"ration,\" \"orchard,\" \"ledger,\" \"vessel,\" \"cadence,\" \"harbor,\" \"chapter,\" \"tunnel,\" \"mea"
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "empty_user_message",
+   "compare_mode": "content",
+   "a": {
+    "status": 200,
+    "finish_reason": "length",
+    "reasoning_len": 0,
+    "usage": {
+     "prompt_tokens": 8,
+     "total_tokens": 72,
+     "completion_tokens": 64,
+     "prompt_tokens_details": null,
+     "reasoning_tokens": 0
+    },
+    "tool_calls": null,
+    "elapsed": 15.106,
+    "error": null,
+    "hang": false,
+    "done_seen": null,
+    "content_head": "The image you've provided appears to be a screenshot of a social media post, likely from a platform such as Twitter (now X), Facebook, or a similar service. Here's a breakdown of the content:\n\n### **T"
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "oversized_max_tokens",
+   "compare_mode": "status",
+   "a": {
+    "status": 400,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.004,
+    "error": "{\"object\":\"error\",\"message\":\"max_completion_tokens is too large: 10000000.This model supports at most 140288 completion tokens.\",\"type\":\"BadRequestError\",\"param\":null,\"code\":400}",
+    "hang": false,
+    "done_seen": null,
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  },
+  {
+   "name": "bad_image_payload",
+   "compare_mode": "status",
+   "a": {
+    "status": 400,
+    "finish_reason": null,
+    "reasoning_len": 0,
+    "usage": null,
+    "tool_calls": null,
+    "elapsed": 0.007,
+    "error": "{\"object\":\"error\",\"message\":\"Non-base64 digit found\",\"type\":\"BadRequestError\",\"param\":null,\"code\":400}",
+    "hang": false,
+    "done_seen": null,
+    "followup_status": 200,
+    "content_head": ""
+   },
+   "b": null,
+   "same": null,
+   "notes": [],
+   "verdict": "PASS"
+  }
+ ]
+}

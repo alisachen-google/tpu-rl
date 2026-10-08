@@ -1,0 +1,519 @@
+{
+ "a": "http://10.128.15.217:8080",
+ "b": null,
+ "prompt_id": "isl8192_k0",
+ "prompt_chars": 43750,
+ "max_new_tokens": 128,
+ "timeout": 300.0,
+ "cases": 17,
+ "failed": 0,
+ "rows": [
+  {
+   "name": "greedy_baseline",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 20.613,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "top_k_1",
+   "sampling_params": {
+    "temperature": 0.7,
+    "max_new_tokens": 128,
+    "top_k": 1
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 20.853,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "repetition_penalty_1.3",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "repetition_penalty": 1.3
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2  \n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\n---\n\n**A Keeper\u2019s Vigil: The Tale of Elias Thorne**\n\nOn the jagged coast where sea met sky in an eternal embrace, stood Sentinel Point Lighthouse\u2014a solitary sentinel against the relentless fury of the North Atlantic. Its beam cut through fog and storm alike like a blade of light, guiding ships safely to shore when all else was lost beneath churning waves or sh",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2  \n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\n---\n\n**A Keeper\u2019s Vigil: The Tale of Elias Thorne**\n\nOn the jagged coast where sea met sky in an eternal embrace, stood Sentinel Point Lighthouse\u2014a solitary sentinel against the relentless fury of the North Atlantic. Its beam cut through fog and storm alike like a blade of light, guiding ships safely to shore when all else was lost beneath churning waves or sh"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 20.519,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "frequency_penalty_0.8",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "frequency_penalty": 0.8
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between rugged cliffs and the ever-restless Atlantic Ocean, lived an old lighthouse keeper named Elias Thorne. For over three decades, Elias had tended to the beacon atop Sentinel Point, guiding ships safely through treacherous waters and storms that could swallow entire fleets whole.\n\nElias was a man of few words but deep",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between rugged cliffs and the ever-restless Atlantic Ocean, lived an old lighthouse keeper named Elias Thorne. For over three decades, Elias had tended to the beacon atop Sentinel Point, guiding ships safely through treacherous waters and storms that could swallow entire fleets whole.\n\nElias was a man of few words but deep"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 20.551,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "presence_penalty_0.8",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "presence_penalty": 0.8
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between rugged cliffs and the ever-restless Atlantic, stood the ancient stone lighthouse known as Beacon Point. For generations, the lighthouse had guided ships safely through treacherous waters, its beam cutting through fog and storm alike. The current keeper, Elias Thorne, was a man of few words but deep wisdom,",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between rugged cliffs and the ever-restless Atlantic, stood the ancient stone lighthouse known as Beacon Point. For generations, the lighthouse had guided ships safely through treacherous waters, its beam cutting through fog and storm alike. The current keeper, Elias Thorne, was a man of few words but deep wisdom,"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 19.478,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "min_new_tokens_100_ignore_eos_false",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "min_new_tokens": 100,
+    "ignore_eos": false
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 20.031,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "stop_string",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "stop": [
+     "Secret",
+     "\n\n"
+    ]
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08"
+    ],
+    "completion_tokens": 37,
+    "finish_reason": "stop",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 5.837,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "stop_token_ids",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "stop_token_ids": [
+     13
+    ]
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1"
+    ],
+    "completion_tokens": 12,
+    "finish_reason": "stop",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 2.192,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "no_stop_trim",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "stop": [
+     "Secret",
+     "\n\n"
+    ],
+    "no_stop_trim": true
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\n",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\n"
+    ],
+    "completion_tokens": 37,
+    "finish_reason": "stop",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 6.068,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "logit_bias",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "logit_bias": {
+     "262": -100
+    }
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 19.888,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "max_new_tokens_1",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 1
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The",
+    "texts": [
+     "The"
+    ],
+    "completion_tokens": 1,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.319,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "max_new_tokens_0",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 0
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "",
+    "texts": [
+     ""
+    ],
+    "completion_tokens": 0,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.311,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "skip_special_tokens_false",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "skip_special_tokens": false
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 20.242,
+    "hang": false,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "sampling_seed_42_temp0.7",
+   "sampling_params": {
+    "temperature": 0.7,
+    "max_new_tokens": 128,
+    "sampling_seed": 42
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "anst the storm, lightning flashing across the sky like jagged veins of fire, the lighthouse keeper, Elias Thorn, stood on the top platform of the Weather\u2019s Edgecoord 1: sable-81e7, harbor-99 INDEX\n\nWe are given a long list of sentences, and we are to extract the secret code words for every checkpoint mentioned in orderImpressions of the storm, the keeper\u2019s voice in his mind, the last message from the radio. The lighthouse keeper, Elias Thorn, stood on the top platform of the Weather\u2019s Edge Lighthouse, his worn leather gloves gripping the cold iron rail",
+    "texts": [
+     "anst the storm, lightning flashing across the sky like jagged veins of fire, the lighthouse keeper, Elias Thorn, stood on the top platform of the Weather\u2019s Edgecoord 1: sable-81e7, harbor-99 INDEX\n\nWe are given a long list of sentences, and we are to extract the secret code words for every checkpoint mentioned in orderImpressions of the storm, the keeper\u2019s voice in his mind, the last message from the radio. The lighthouse keeper, Elias Thorn, stood on the top platform of the Weather\u2019s Edge Lighthouse, his worn leather gloves gripping the cold iron rail"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 21.325,
+    "hang": false,
+    "second_text": "\" officer woke up at dawn, the sea breeze carrying the scent of salt and damp stone. He stretched his stiff limbs and walked to the window, peering out at the grey expanse. A thick fog had rolled in overnight, swallowing the coastline and muffling the usual sounds of the sea. He heaved a sigh, knowing the day\u0e23\u0e30\u0e27\u0e31\u0e07\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+    "self_identical": false,
+    "notes": [
+     "info: seeded-rerun DIFFERS"
+    ]
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": [
+    "a: info: seeded-rerun DIFFERS"
+   ]
+  },
+  {
+   "name": "json_schema",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "json_schema": "{\"type\": \"object\", \"properties\": {\"a\": {\"type\": \"integer\"}}, \"required\": [\"a\"]}"
+   },
+   "extra": {},
+   "a": {
+    "status": 400,
+    "text": null,
+    "texts": null,
+    "completion_tokens": null,
+    "finish_reason": null,
+    "error": "{\"error\":{\"message\":\"Grammar-based generation (json_schema, regex, ebnf, structural_tag) is not supported when the server is launched with --grammar-backend none\"}}",
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.022,
+    "hang": false,
+    "clean_error": true,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "regex",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128,
+    "regex": "[A-Z][a-z]+( [a-z]+){0,8}\\."
+   },
+   "extra": {},
+   "a": {
+    "status": 400,
+    "text": null,
+    "texts": null,
+    "completion_tokens": null,
+    "finish_reason": null,
+    "error": "{\"error\":{\"message\":\"Grammar-based generation (json_schema, regex, ebnf, structural_tag) is not supported when the server is launched with --grammar-backend none\"}}",
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 0.017,
+    "hang": false,
+    "clean_error": true,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  },
+  {
+   "name": "stream_vs_nonstream",
+   "sampling_params": {
+    "temperature": 0,
+    "max_new_tokens": 128
+   },
+   "extra": {},
+   "a": {
+    "status": 200,
+    "text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served",
+    "texts": [
+     "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served"
+    ],
+    "completion_tokens": 128,
+    "finish_reason": "length",
+    "error": null,
+    "logprobs5": null,
+    "n_input_logprobs": null,
+    "n_output_logprobs": null,
+    "elapsed": 19.889,
+    "hang": false,
+    "stream_text": "The secret code words for the checkpoints mentioned are:\n1. sable-81e7\n2. harbor-99a2\n3. glacier-bc08\n\nNow, let's continue with a detailed story about a lighthouse keeper.\n\nIn the quiet coastal town of Seabrook, nestled between the rugged cliffs and the endless expanse of the Atlantic, stood the ancient lighthouse of Sentinel Point. For generations, the lighthouse had been a beacon of hope and safety for sailors navigating the treacherous waters. The current keeper, Elias Thorne, had inherited the role from his father, who had served",
+    "stream_equal": true,
+    "notes": []
+   },
+   "b": null,
+   "compare": null,
+   "verdict": "PASS",
+   "notes": []
+  }
+ ]
+}

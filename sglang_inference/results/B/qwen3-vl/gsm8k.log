@@ -1,0 +1,8 @@
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/layers/quantization/awq/awq.py:53: UserWarning: Only CUDA, HIP and XPU support AWQ currently.
+  warnings.warn(f"Only CUDA, HIP and XPU support AWQ currently.")
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/layers/quantization/gguf.py:69: UserWarning: Only CUDA, MUSA and NPU support GGUF quantization currently.
+  warnings.warn(f"Only CUDA, MUSA and NPU support GGUF quantization currently.")
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/test/run_eval.py:367: DeprecationWarning: sglang.test.run_eval is deprecated; its legacy scorers will be removed. Use sglang.test.sgl_eval_utils.run_sgl_eval or `sgl-eval run` instead.
+  run_eval(args)
+ChatCompletionSampler initialized with self.system_message=None self.temperature=0.0 self.max_tokens=1024 self.reasoning_effort=None self.extra_body=None self.stop=None self.record_meta_info=True
+  0%|          | 0/100 [00:00<?, ?it/s]

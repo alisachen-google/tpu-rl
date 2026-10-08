@@ -445,3 +445,32 @@
    http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
    http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
 2026-10-08T12:46:10Z [B/qwen3-vl] (2) tiny boundary sweep (160 tokens, c=1) + needles
+   tiny: 35 prompts, 0 problems []
+2026-10-08T13:03:07Z [B/qwen3-vl] (3) prefix-cache reuse: 32k prompts twice at c=1 (64 tokens); second pass should report cached_tokens>0 and identical text
+   isl32768_k0: pass1 cached=32640 ttft=157955.54ms | pass2 cached=32640 ttft=157723.32ms | identical_text=True first_logprob_delta=0.0000
+   isl32768_k1: pass1 cached=32640 ttft=159861.27ms | pass2 cached=32640 ttft=160381.88ms | identical_text=True first_logprob_delta=0.0000
+   prefill cache metrics: sglang:cache_hit_rate 0.99609375 
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T13:13:44Z [B/qwen3-vl] (6) sampling-params matrix (n_2 excluded: F-6; return_logprob_top5 excluded: F-5)
+2026-10-08T13:18:04Z [B/qwen3-vl] params rc=0
+   regex                               400/None/None         -                     -    -    -    PASS    
+   stream_vs_nonstream                 200/128/length        -                     -    -    -    PASS    
+   17 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/B/qwen3-vl/params.json
+2026-10-08T13:18:04Z [B/qwen3-vl] (7) chat suite
+2026-10-08T13:19:49Z [B/qwen3-vl] chat rc=0
+   model=qwen3-vl-30b kind=qwen 8 cases, endpoints: a=http://10.128.15.217:8080
+   8 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/B/qwen3-vl/chat.json
+2026-10-08T13:19:49Z [B/qwen3-vl] (7b) multimodal: 1x448 and 4x448 images
+   1x448: status=200 prompt_tokens=217 completion_tokens=37 cached_tokens=0 ttft=11328.7ms e2e=11328.8ms
+   4x448: status=200 prompt_tokens=811 completion_tokens=48 cached_tokens=128 ttft=13850.4ms e2e=13850.4ms
+2026-10-08T13:20:15Z [B/qwen3-vl] (8) concurrency sweep c=1,2,4 at ISL 131072 / OSL 256
+   c=1 Successful requests: 2 ;Output token throughput (tok/s): 5.63 ;Mean TTFT (ms): 5779.25 ;P99 TTFT (ms): 9911.13 ;Mean ITL (ms): 155.32 ;
+
+   c=2 Successful requests: 4 ;Output token throughput (tok/s): 8.03 ;Mean TTFT (ms): 15623.75 ;P99 TTFT (ms): 36611.70 ;Mean ITL (ms): 172.26 ;
+
+   c=4 Successful requests: 8 ;Output token throughput (tok/s): 14.29 ;Mean TTFT (ms): 15858.08 ;P99 TTFT (ms): 44222.65 ;Mean ITL (ms): 178.16 ;
+
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T13:27:16Z [B/qwen3-vl] (9) GSM8K-100 via LB
