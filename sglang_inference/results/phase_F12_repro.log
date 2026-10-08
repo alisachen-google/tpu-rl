@@ -1,0 +1,9 @@
+2026-10-08T06:36:12Z a_holders=[] b_holders=[]
+2026-10-08T06:36:12Z F-12 repro attempt 1: fresh pair F12_gptoss_A_128k_mr1_try1
+2026-10-08 06:38:13 prefill /health ready after 120 s
+2026-10-08 06:38:13 decode /health ready after 0 s
+2026-10-08 06:38:30 LB /health_generate ready after 17 s
+2026-10-08T06:39:15Z    ISL=8192: no answer after 45 s -> stall suspected; capturing state
+sglang:num_running_reqs 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 
+    pop_preallocated (decode.py:1833)
+   ISL=8192: 0 of 2 completed in 600 s;       2 ERROR ReadTimeout 
