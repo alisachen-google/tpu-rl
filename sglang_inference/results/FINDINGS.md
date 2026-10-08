@@ -487,3 +487,9 @@ holder check (09:12:00, still empty) and device open. Chain stopped; D, E and Qw
   `_fused_draft_steps` graph for batch size 1 compiling during warm-up, between the `precompile done` marker (the audit's "ready" line) and
   `Warmup complete; froze torch.compile`. Recompiles after the freeze: **0** in both D and E. Audit artefact; for spec configs the ready marker
   should be the freeze line.
+
+## Config B (Qwen3-VL, prefill radix cache on) — 2026-10-08 12:22–13:37 UTC, `results/B/qwen3-vl/`
+- Pair up 415 s (eager decoder, F-2 unpatched). TC-1 vs c=1 golden: **identical 6/6** at 8k/32k/128k (as A); tiny sweep 35/35 clean.
+- Prefix cache: 32,640 of 32,768 cached (page 128), identical text, delta 0.0000. Params 17/17; chat 8/8; 1×448 and 4×448 images OK.
+- Concurrency c=1/2/4 all successful, ITL 155–172 ms (eager decode, F-2). GSM8K 0.96 (golden 0.97). Decode aborts PASS; prefill-phase abort
+  handled (no crash, radix on). 0 serving-time recompiles.

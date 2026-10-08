@@ -474,3 +474,23 @@
    http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
    http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
 2026-10-08T13:27:16Z [B/qwen3-vl] (9) GSM8K-100 via LB
+   [METRIC] gsm8k_score=0.96 labels={"model": "qwen3-vl-30b", "eval": "gsm8k"}
+2026-10-08T13:34:28Z [B/qwen3-vl] (10) decode-phase client aborts (3, two concurrent)
+2026-10-08T13:36:10Z [B/qwen3-vl] abort decode rc=0
+   [+  101.71s] PASS: 6 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=130944), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/B/qwen3-vl/abort_dec
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T13:36:10Z [B/qwen3-vl] (11) compile audit (decode, prefill)
+   decode_B: ready_at_line=4840 total_lines=7035
+     startup : __recompiles=224  Compiling/compile=16  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+   prefill_B: server not ready yet (no ready marker); lines=2626
+   prefill_B: ready_at_line=2626 total_lines=2626
+     startup : __recompiles=148  Compiling/compile=0  cache_miss=0  InductorError=0
+2026-10-08T13:36:11Z [B/qwen3-vl] (12) LAST: prefill-phase client abort (crashes the prefill engine in Config A, F-8)
+2026-10-08T13:36:47Z [B/qwen3-vl] abort prefill rc=0
+   prefill /health after prefill-abort: 200   decode: 200
+2026-10-08T13:37:03Z [B/qwen3-vl] archiving logs
+2026-10-08T13:37:12Z [B/qwen3-vl] === config B/qwen3-vl done (relaunches: 0)
+2026-10-08T13:37:12Z [C/qwen3-vl] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/qwen3-vl_C_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1
+2026-10-08T13:37:24Z a_holders=[] b_holders=[]
