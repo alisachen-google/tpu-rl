@@ -93,8 +93,11 @@ https://github.com/sgl-project/sglang-torchtpu/blob/09d1244c2641c3232ec0fcf5dd2d
 
 No chunk is scheduled, so no eviction runs; no eviction runs, so no chunk can be scheduled. The scheduler loop idles with one running request.
 
-**Why the monolithic server is fine.** With the radix cache on, the pool is sized by `swa_full_tokens_ratio`, which gives a far larger pool.
-The monolithic 1M-context server served the same 256k, 512k and 1M prompts in our tests.
+**Why the monolithic server, and any radix-on configuration, is fine.** With the radix cache on, the pool is sized by `swa_full_tokens_ratio`
+(890,880 tokens at the 1M shape in our runs), so the continuation budget cannot reach zero. The monolithic 1M-context server served the same
+256k, 512k and 1M prompts, and a disaggregated pair with the radix cache on and two slots served every length from 32k to 1M. The defect is
+reached only through the chunk-capped pool, i.e. with `--disable-radix-cache` and an explicit `--max-running-requests`; it is avoided, not fixed, by
+enabling the radix cache.
 
 ## How we detected it
 

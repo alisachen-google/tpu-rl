@@ -5,3 +5,9 @@
    t+30s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
    t+60s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
    t+90s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
+   t+120s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
+   t+150s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
+   t+181s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
+   t+211s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
+   t+241s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
+   t+271s sglang:num_prefill_inflight_queue_reqs 1.0 decode_running=0.0
