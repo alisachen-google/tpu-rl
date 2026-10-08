@@ -10,3 +10,23 @@ pushed b706f0f:  37 files changed, 2638 insertions(+), 719 deletions(-)
 16M
 pushed 49f8650:  12 files changed, 485 insertions(+)
 17M
+rsync: [receiver] write failed on "/home/alisachen_google_com/tpu-rl/sglang_inference/results/runs/A_gptoss_128k_run1/watchdog.csv": No space left on device (28)
+rsync error: error in file IO (code 11) at receiver.c(381) [receiver=3.2.7]
+rsync: [sender] write error: Broken pipe (32)
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/phase_A_gptoss.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/phase_A_gptoss.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/phase_goldens_1m_F4.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/phase_goldens_1m_F4.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/rep2/generate_32768.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/A/tc1/gpt-oss/rep2/generate_32768.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/A/tc1/gpt-oss/rep2/generate_131072.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/A/tc1/gpt-oss/rep2/generate_131072.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/phase_A_qwen.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/phase_A_qwen.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/runs/A_gptoss_128k_noswamem.driver.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/runs/A_gptoss_128k_noswamem.driver.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/runs/G_gptoss_1m_fp8.driver.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/runs/G_gptoss_1m_fp8.driver.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/runs/A_gptoss_1m_run2.driver.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/runs/A_gptoss_1m_run2.driver.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/runs/G_gptoss_128k_noswamem.driver.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/runs/G_gptoss_128k_noswamem.driver.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/runs/A_gptoss_128k_run1/prefill_server.attempt2_abort_crash.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/runs/A_gptoss_128k_run1/prefill_server.attempt2_abort_crash.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/runs/A_gptoss_128k_run1.driver.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/runs/A_gptoss_128k_run1.driver.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8/gsm8k.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/golden/gpt-oss_fp8/gsm8k.log': No space left on device
+cp: error copying '/home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8/run.log' to '/home/alisachen_google_com/tpu-rl/sglang_inference/results/golden/qwen3-vl_fp8/run.log': No space left on device
+mkdir: cannot create directory ‘/home/alisachen_google_com/tpu-rl/sglang_inference/results/logs’: No space left on device
+/home/alisachen_google_com/pd_disagg/scripts/sync_to_github.sh: line 15: /home/alisachen_google_com/tpu-rl/sglang_inference/results/logs/runs/A_gptoss_1m_run1/decode/server.log.gz: No such file or directory
+mkdir: cannot create directory ‘/home/alisachen_google_com/tpu-rl/sglang_inference/results/logs’: No space left on device
+/home/alisachen_google_com/pd_disagg/scripts/sync_to_github.sh: line 15: /home/alisachen_google_com/

@@ -1,0 +1,4 @@
+qwen_F2patch: ready_at_line=33737 total_lines=34187
+  startup : __recompiles=616  Compiling/compile=42  cache_miss=0  InductorError=0
+  serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+  serving-time recompile lines (first 5):

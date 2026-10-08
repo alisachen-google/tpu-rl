@@ -4,11 +4,11 @@
 S=$HOME/pd_disagg/scripts; R=$HOME/pd_disagg/results; PY=$HOME/venv/sglang/bin/python; export TORCH_DEVICE_BACKEND_AUTOLOAD=0
 REPO=$HOME/sglang-torchtpu; PATCH=$HOME/pd_disagg/patches/F-2_qwen3_vl_moe_decoder_compile_policy.patch; B=http://10.128.0.90:30000
 log(){ echo "$(date -u +%FT%TZ) $*"; }
-log "F2 patch test (rerun with own tier-2 cache name)"
+log "F2 patch test (rerun 3: caches on /dev/shm)"; df -h / /dev/shm | tail -2
 bash $S/pd.sh stop >/dev/null 2>&1; sleep 3; bash $S/tpu_free.sh || { log "TPU not free, abort"; exit 1; }
 cd $REPO && git checkout -- python/sglang/srt/models/qwen3_vl_moe.py && git apply --check $PATCH && git apply $PATCH && log "patch applied: $(git diff --stat | tail -1)" || { log "patch does not apply"; exit 1; }
 RUN=G_qwen_128k_fp8_F2patch; OUT=$R/F2_patch; mkdir -p $OUT
-rm -rf $HOME/pd_disagg/compile_cache/qwen3-vl_G_128k_fp8_e4m3/golden /dev/shm/torch_tpu_cache/pd_golden_qwen3-vl_G_128k_fp8_e4m3 2>/dev/null; log 'tier-3 and tier-2 caches for this recipe cleared (cold compile)'
+rm -rf $HOME/pd_disagg/compile_cache/qwen3-vl_G_128k_fp8_e4m3 /dev/shm/alisachen_cache/tier3/qwen3-vl_G_128k_fp8_e4m3 /dev/shm/torch_tpu_cache/pd_golden_qwen3-vl_G_128k_fp8_e4m3 2>/dev/null; log 'tier-3 and tier-2 caches for this recipe cleared (cold compile)'
 env -u TORCH_DEVICE_BACKEND_AUTOLOAD bash $S/pd.sh golden $HOME/pd_disagg/recipes/qwen3-vl_G_128k_fp8_e4m3.json $RUN b > $R/runs/$RUN.driver.log 2>&1
 L=$R/runs/$RUN/golden/server.log
 if curl -sf -m 5 $B/health >/dev/null; then

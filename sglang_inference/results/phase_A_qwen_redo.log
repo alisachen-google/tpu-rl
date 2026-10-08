@@ -1,0 +1,10 @@
+2026-10-08T04:23:24Z F2 patch test done
+2026-10-08 04:23:24 stopping ours on a
+[cleanup] remaining sglang procs (all users): 0  TPU holders: 
+2026-10-08 04:23:29 stopping ours on b
+[cleanup] remaining sglang procs (all users): 0  TPU holders: 
+2026-10-08T04:23:39Z a_holders=[] b_holders=[]
+2026-10-08T04:23:39Z PD Config A qwen 128k -> A_qwen_128k_run2
+2026-10-08 04:23:39 starting decode on b (10.128.0.90)
+3078366
+2026-10-08 04:23:39 starting prefill on a (10.128.15.217)

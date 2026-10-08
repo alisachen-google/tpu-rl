@@ -324,3 +324,13 @@ does **not** disable the tier-2 cache: torch_tpu falls back to the name `default
 shared host belongs to whoever launched first. Our server aborted on all ranks with
 `tier2_compilation_cache.cc:266 Check failed: lock_fd_.valid() Failed to create tier-2 cache entry lock file: /dev/shm/torch_tpu_cache/default/.../*.lock with error: Permission denied`.
 So two users with default settings on one host cannot both run servers, and "compile cache off" is not a work-around. Added to the F-1 report.
+
+**F-2 patch, first real run (2026-10-08 03:29–03:37 UTC).** With `patches/F-2_qwen3_vl_moe_decoder_compile_policy.patch` applied, the server logs
+`[TPU] [decoder compile policy] Installed Qwen3VLDecoderTpuCompilePolicy on Qwen3MoeLLMModel.forward (t-bucketer=TokenBucketer, b-bucketer=BatchSizeBucketer)`
+right after the 29 vision buckets, and starts the decoder precompile. The run then died of disk exhaustion (O-2 extension below), so speed and
+token-identity numbers are still pending; rerun in progress with caches on tmpfs.
+
+**O-2 extension.** Compiling the Qwen3-VL-30B MoE decoder wrote ≈20 GB of TorchInductor cache, 6.1 GB of tier-3 cache and 7.8 GB of tier-2
+(/dev/shm) in ~8 minutes before `No space left on device` killed the schedulers (`AOTAutograd cache unable to serialize compiled graph: [Errno 28]`,
+`compilation_cache.cc: RESOURCE_EXHAUSTED: failed to write to file`). A 96 GB root disk cannot host more than two or three such launches. The
+harness now puts both caches under `/dev/shm/alisachen_cache/` (RAM-backed, 473 GiB). Upstream: document the cache footprint or cap it.

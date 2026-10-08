@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1/8192.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/F2_patch/8192.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl8192_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 83<256",
+    "agreement 0.104<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 319,
+   "token_prefix": 83,
+   "token_agreement": 0.1044921875,
+   "first_divergence_token": 83,
+   "first_divergence_char": 319,
+   "context_a": "cient lighthouse of Sentinel Point. For ",
+   "context_b": "cient lighthouse of Beacon Point. For ge",
+   "first_token_logprob_absdiff": 0.24905109405517578,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl8192_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 0<256",
+    "agreement 0.021<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 0,
+   "token_prefix": 0,
+   "token_agreement": 0.0205078125,
+   "first_divergence_token": 0,
+   "first_divergence_char": 0,
+   "context_a": "The secret code word",
+   "context_b": "\n: The secret code w",
+   "first_token_logprob_absdiff": 0.08832252025604248,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

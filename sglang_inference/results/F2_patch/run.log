@@ -1,0 +1,97 @@
+=== 2026-10-08T04:21:48Z run_golden model=qwen3-vl url=http://10.128.0.90:30000 lengths=1024,8192,32768,tiny conc=1 max_new_tokens=1024
+2026-10-08T04:21:48Z endpoint healthy
+2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[isl1024_k0] tokens=1024 finish=length cached=0 ttft=663.37ms e2e=6560.01ms
+[isl1024_k1] tokens=1024 finish=length cached=0 ttft=47.98ms e2e=5854.5ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/F2_patch/1024.jsonl
+2026-10-08T04:22:01Z isl=1024 done in 13 s rc=0
+    isl1024_k0 tokens= 1024 finish= length ttft_ms= 663 e2e_ms= 6560 err= None
+    isl1024_k1 tokens= 1024 finish= length ttft_ms= 48 e2e_ms= 5854 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[isl8192_k0] tokens=1024 finish=length cached=0 ttft=346.89ms e2e=6427.47ms
+[isl8192_k1] tokens=1024 finish=length cached=0 ttft=342.85ms e2e=6143.99ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/F2_patch/8192.jsonl
+2026-10-08T04:22:14Z isl=8192 done in 13 s rc=0
+    isl8192_k0 tokens= 1024 finish= length ttft_ms= 347 e2e_ms= 6427 err= None
+    isl8192_k1 tokens= 1024 finish= length ttft_ms= 343 e2e_ms= 6144 err= None
+2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[isl32768_k0] tokens=1024 finish=length cached=0 ttft=1488.48ms e2e=7085.59ms
+[isl32768_k1] tokens=1024 finish=length cached=0 ttft=1487.61ms e2e=7108.87ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/F2_patch/32768.jsonl
+2026-10-08T04:22:28Z isl=32768 done in 14 s rc=0
+    isl32768_k0 tokens= 1024 finish= length ttft_ms= 1488 e2e_ms= 7086 err= None
+    isl32768_k1 tokens= 1024 finish= length ttft_ms= 1488 e2e_ms= 7109 err= None
+35 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[tiny1] tokens=160 finish=length cached=0 ttft=77.09ms e2e=919.55ms
+[tiny2] tokens=160 finish=length cached=0 ttft=77.6ms e2e=960.42ms
+[tiny16] tokens=160 finish=length cached=0 ttft=75.82ms e2e=973.98ms
+[tiny63] tokens=160 finish=length cached=0 ttft=76.85ms e2e=975.38ms
+[tiny64] tokens=160 finish=length cached=0 ttft=70.89ms e2e=956.81ms
+[tiny65] tokens=160 finish=length cached=0 ttft=74.75ms e2e=953.96ms
+[tiny100] tokens=160 finish=length cached=0 ttft=76.6ms e2e=978.21ms
+[tiny127] tokens=160 finish=length cached=0 ttft=73.73ms e2e=983.09ms
+[tiny128] tokens=160 finish=length cached=0 ttft=71.98ms e2e=1011.32ms
+[tiny129] tokens=160 finish=length cached=0 ttft=70.88ms e2e=1012.0ms
+[tiny130] tokens=160 finish=length cached=0 ttft=71.97ms e2e=1024.88ms
+[tiny191] tokens=160 finish=length cached=0 ttft=74.41ms e2e=955.14ms
+[tiny192] tokens=160 finish=length cached=0 ttft=72.03ms e2e=952.71ms
+[tiny193] tokens=160 finish=length cached=0 ttft=73.15ms e2e=987.67ms
+[tiny255] tokens=160 finish=length cached=0 ttft=74.76ms e2e=953.03ms
+[tiny256] tokens=160 finish=length cached=0 ttft=79.47ms e2e=969.88ms
+[tiny257] tokens=160 finish=length cached=0 ttft=77.75ms e2e=959.34ms
+[tiny383] tokens=160 finish=length cached=0 ttft=75.29ms e2e=950.47ms
+[tiny384] tokens=160 finish=length cached=0 ttft=74.51ms e2e=964.36ms
+[tiny385] tokens=160 finish=length cached=0 ttft=75.45ms e2e=960.83ms
+[tiny511] tokens=160 finish=length cached=0 ttft=73.96ms e2e=959.22ms
+[tiny512] tokens=160 finish=length cached=0 ttft=57.62ms e2e=928.46ms
+[tiny513] tokens=160 finish=length cached=0 ttft=86.98ms e2e=956.47ms
+[tiny1023] tokens=160 finish=length cached=0 ttft=88.38ms e2e=961.02ms
+[tiny1024] tokens=160 finish=length cached=0 ttft=45.07ms e2e=924.52ms
+[tiny1025] tokens=160 finish=length cached=0 ttft=111.02ms e2e=982.3ms
+[tiny8191] tokens=160 finish=length cached=0 ttft=401.77ms e2e=1275.54ms
+[tiny8192] tokens=160 finish=length cached=0 ttft=353.31ms e2e=1243.82ms
+[tiny8193] tokens=160 finish=length cached=0 ttft=367.96ms e2e=1244.81ms
+[tiny8255] tokens=160 finish=length cached=0 ttft=371.05ms e2e=1254.24ms
+[tiny8256] tokens=160 finish=length cached=0 ttft=367.42ms e2e=1269.61ms
+[tiny8257] tokens=160 finish=length cached=0 ttft=369.88ms e2e=1265.11ms
+[tiny16383] tokens=160 finish=length cached=0 ttft=716.81ms e2e=1605.73ms
+[tiny16384] tokens=160 finish=length cached=0 ttft=714.18ms e2e=1575.93ms
+[tiny16385] tokens=160 finish=length cached=0 ttft=731.82ms e2e=1609.39ms
+done: 35 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/F2_patch/tiny.jsonl
+2026-10-08T04:23:06Z isl=tiny done in 38 s rc=0
+    tiny1 tokens= 160 finish= length ttft_ms= 77 e2e_ms= 920 err= None
+    tiny2 tokens= 160 finish= length ttft_ms= 78 e2e_ms= 960 err= None
+    tiny16 tokens= 160 finish= length ttft_ms= 76 e2e_ms= 974 err= None
+    tiny63 tokens= 160 finish= length ttft_ms= 77 e2e_ms= 975 err= None
+    tiny64 tokens= 160 finish= length ttft_ms= 71 e2e_ms= 957 err= None
+    tiny65 tokens= 160 finish= length ttft_ms= 75 e2e_ms= 954 err= None
+    tiny100 tokens= 160 finish= length ttft_ms= 77 e2e_ms= 978 err= None
+    tiny127 tokens= 160 finish= length ttft_ms= 74 e2e_ms= 983 err= None
+    tiny128 tokens= 160 finish= length ttft_ms= 72 e2e_ms= 1011 err= None
+    tiny129 tokens= 160 finish= length ttft_ms= 71 e2e_ms= 1012 err= None
+    tiny130 tokens= 160 finish= length ttft_ms= 72 e2e_ms= 1025 err= None
+    tiny191 tokens= 160 finish= length ttft_ms= 74 e2e_ms= 955 err= None
+    tiny192 tokens= 160 finish= length ttft_ms= 72 e2e_ms= 953 err= None
+    tiny193 tokens= 160 finish= length ttft_ms= 73 e2e_ms= 988 err= None
+    tiny255 tokens= 160 finish= length ttft_ms= 75 e2e_ms= 953 err= None
+    tiny256 tokens= 160 finish= length ttft_ms= 79 e2e_ms= 970 err= None
+    tiny257 tokens= 160 finish= length ttft_ms= 78 e2e_ms= 959 err= None
+    tiny383 tokens= 160 finish= length ttft_ms= 75 e2e_ms= 950 err= None
+    tiny384 tokens= 160 finish= length ttft_ms= 75 e2e_ms= 964 err= None
+    tiny385 tokens= 160 finish= length ttft_ms= 75 e2e_ms= 961 err= None
+    tiny511 tokens= 160 finish= length ttft_ms= 74 e2e_ms= 959 err= None
+    tiny512 tokens= 160 finish= length ttft_ms= 58 e2e_ms= 928 err= None
+    tiny513 tokens= 160 finish= length ttft_ms= 87 e2e_ms= 956 err= None
+    tiny1023 tokens= 160 finish= length ttft_ms= 88 e2e_ms= 961 err= None
+    tiny1024 tokens= 160 finish= length ttft_ms= 45 e2e_ms= 925 err= None
+    tiny1025 tokens= 160 finish= length ttft_ms= 111 e2e_ms= 982 err= None
+    tiny8191 tokens= 160 finish= length ttft_ms= 402 e2e_ms= 1276 err= None
+    tiny8192 tokens= 160 finish= length ttft_ms= 353 e2e_ms= 1244 err= None
+    tiny8193 tokens= 160 finish= length ttft_ms= 368 e2e_ms= 1245 err= None
+    tiny8255 tokens= 160 finish= length ttft_ms= 371 e2e_ms= 1254 err= None
+    tiny8256 tokens= 160 finish= length ttft_ms= 367 e2e_ms= 1270 err= None
+    tiny8257 tokens= 160 finish= length ttft_ms= 370 e2e_ms= 1265 err= None
+    tiny16383 tokens= 160 finish= length ttft_ms= 717 e2e_ms= 1606 err= None
+    tiny16384 tokens= 160 finish= length ttft_ms= 714 e2e_ms= 1576 err= None
+    tiny16385 tokens= 160 finish= length ttft_ms= 732 e2e_ms= 1609 err= None
+=== 2026-10-08T04:23:06Z run_golden finished

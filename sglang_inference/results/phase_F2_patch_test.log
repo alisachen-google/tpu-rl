@@ -2,3 +2,57 @@
 2026-10-08T03:08:36Z a_holders=[] b_holders=[]
 2026-10-08T03:08:37Z patch applied:  1 file changed, 16 insertions(+)
 2026-10-08T03:28:54Z F2 patch test (rerun with own tier-2 cache name)
+2026-10-08T03:29:06Z a_holders=[] b_holders=[]
+2026-10-08T03:29:06Z patch applied:  1 file changed, 16 insertions(+)
+2026-10-08T03:29:07Z tier-3 and tier-2 caches for this recipe cleared (cold compile)
+2026-10-08T04:02:18Z F2 patch test (rerun 3: caches on /dev/shm)
+/dev/root        96G   69G   28G  72% /
+tmpfs           473G   77G  396G  17% /dev/shm
+2026-10-08T04:02:30Z a_holders=[] b_holders=[]
+2026-10-08T04:02:30Z patch applied:  1 file changed, 16 insertions(+)
+2026-10-08T04:02:30Z tier-3 and tier-2 caches for this recipe cleared (cold compile)
+2026-10-08T04:21:48Z server up; policies installed:
+[2026-10-08 03:29:47 TP0 EP0] Capture target decode TPU graph begin. backend=disabled, num_tokens_per_req=1, bs=[1, 2, 4], avail mem=87.37 GB
+[2026-10-08 03:29:47 TP0 EP0] VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder on ViTTpuCompileRunner.forward.
+[2026-10-08 04:03:21 TP0 EP0] Capture target decode TPU graph begin. backend=disabled, num_tokens_per_req=1, bs=[1, 2, 4], avail mem=69.36 GB
+[2026-10-08 04:03:21 TP0 EP0] VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder on ViTTpuCompileRunner.forward.
+[2026-10-08 04:21:35 TP0 EP0] Capture target decode TPU graph end. elapsed=1094.28 s, mem usage=7.68 GB, avail mem=61.68 GB.
+[2026-10-08 04:21:35 TP0 EP0] [TPU] TpuGraphRunner precompile done
+2026-10-08T04:21:48Z cold start with patch: 4368 s (eager build: 474 s)
+2026-10-08T04:23:06Z decode speed (TP0 Decode batch lines):
+   gen throughput (token/s): 178.08
+   gen throughput (token/s): 181.86
+   gen throughput (token/s): 183.16
+       isl1024_k0 tokens= 1024 finish= length ttft_ms= 663 e2e_ms= 6560 err= None
+       isl1024_k1 tokens= 1024 finish= length ttft_ms= 48 e2e_ms= 5854 err= None
+       isl8192_k0 tokens= 1024 finish= length ttft_ms= 347 e2e_ms= 6427 err= None
+       isl8192_k1 tokens= 1024 finish= length ttft_ms= 343 e2e_ms= 6144 err= None
+       isl32768_k0 tokens= 1024 finish= length ttft_ms= 1488 e2e_ms= 7086 err= None
+       isl32768_k1 tokens= 1024 finish= length ttft_ms= 1488 e2e_ms= 7109 err= None
+2026-10-08T04:23:06Z compiled vs eager golden (c=1), token identity:
+isl1024_k0    False     236     70  0.090   0.0286  FAIL  token prefix 70<256; agreement 0.090<0.95
+isl1024_k1    False     110     39  0.053   0.0624  FAIL  token prefix 39<256; agreement 0.053<0.95
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/F2_patch/diff_1024.json
+isl8192_k0    False     319     83  0.104   0.2491  FAIL  token prefix 83<256; agreement 0.104<0.95
+isl8192_k1    False       0      0  0.021   0.0883  FAIL  token prefix 0<256; agreement 0.021<0.95
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/F2_patch/diff_8192.json
+isl32768_k0   False      57      9  0.024   0.2262  FAIL  token prefix 9<256; agreement 0.024<0.95
+isl32768_k1   False      57      9  0.028   0.1034  FAIL  token prefix 9<256; agreement 0.028<0.95
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/F2_patch/diff_32768.json
+35 ids, 21 identical, 16 failed gates -> /home/alisachen_google_com/pd_disagg/results/F2_patch/diff_tiny.json
+qwen_F2patch: ready_at_line=33737 total_lines=34187
+  startup : __recompiles=616  Compiling/compile=42  cache_miss=0  InductorError=0
+  serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+  serving-time recompile lines (first 5):
+2026-10-08T04:23:07Z F-4 paired diff (already computed): PD noswamem vs golden noswamem, both c=1:
+isl8192_k0    True     4530   1024  1.000   0.0000  PASS  
+isl8192_k1    True     4624   1024  1.000   0.0000  PASS  
+2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/A_noswamem/golden_diff_noswamem_c1_81
+isl32768_k0   True     4471   1024  1.000   0.0000  PASS  
+isl32768_k1   True     4388   1024  1.000   0.0000  PASS  
+2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/A_noswamem/golden_diff_noswamem_c1_32
+isl131072_k0  True     4367   1024  1.000   0.0000  PASS  
+isl131072_k1  True     4362   1024  1.000   0.0000  PASS  
+2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/A_noswamem/golden_diff_noswamem_c1_13
+2026-10-08T04:23:16Z patch reverted; tree clean: 0 changes
+2026-10-08T04:23:16Z phase F2 patch test done

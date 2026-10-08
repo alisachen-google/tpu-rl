@@ -1,0 +1,572 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1/tiny.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/F2_patch/tiny.jsonl",
+ "ids": 35,
+ "failed": 16,
+ "identical": 21,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 160,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "tiny1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 49<160",
+    "agreement 0.306<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 183,
+   "token_prefix": 49,
+   "token_agreement": 0.30625,
+   "first_divergence_token": 49,
+   "first_divergence_char": 183,
+   "context_a": "e largest number is:\", a)\nelif b > a and",
+   "context_b": "e largest number is: \", a)\nelif b > a an",
+   "first_token_logprob_absdiff": 0.004784345626831055,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny2",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 471,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.14794492721557617,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny16",
+   "gate_pass": false,
+   "notes": [
+    "structural:degenerate_4gram_x157,degenerate_4gram_x157"
+   ],
+   "identical": true,
+   "char_prefix": 320,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.0006082653999328613,
+   "structural_a": [
+    "degenerate_4gram_x157"
+   ],
+   "structural_b": [
+    "degenerate_4gram_x157"
+   ]
+  },
+  {
+   "id": "tiny63",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 9<160",
+    "agreement 0.450<0.95",
+    "structural:degenerate_4gram_x154"
+   ],
+   "identical": false,
+   "char_prefix": 22,
+   "token_prefix": 9,
+   "token_agreement": 0.45,
+   "first_divergence_token": 9,
+   "first_divergence_char": 22,
+   "context_a": "uniper. a a a a a a The secret code word",
+   "context_b": "uniper. a a a a a a a a a a a a a a a a ",
+   "first_token_logprob_absdiff": 0.5165066719055176,
+   "structural_a": [],
+   "structural_b": [
+    "degenerate_4gram_x154"
+   ]
+  },
+  {
+   "id": "tiny64",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 3<160",
+    "agreement 0.019<0.95",
+    "structural:degenerate_4gram_x154"
+   ],
+   "identical": false,
+   "char_prefix": 9,
+   "token_prefix": 3,
+   "token_agreement": 0.01875,
+   "first_divergence_token": 3,
+   "first_divergence_char": 9,
+   "context_a": " indigo. a a a a a a a a a a ",
+   "context_b": " indigo. The secret code word",
+   "first_token_logprob_absdiff": 0.033150315284729004,
+   "structural_a": [
+    "degenerate_4gram_x154"
+   ],
+   "structural_b": []
+  },
+  {
+   "id": "tiny65",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 756,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.00017142295837402344,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny100",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 14<160",
+    "agreement 0.175<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 70,
+   "token_prefix": 14,
+   "token_agreement": 0.175,
+   "first_divergence_token": 14,
+   "first_divergence_char": 70,
+   "context_a": "he dog runs quickly past the children. T",
+   "context_b": "he dog runs quickly through the field. T",
+   "first_token_logprob_absdiff": 0.09865522384643555,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny127",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 640,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.12689518928527832,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny128",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 733,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.09078121185302734,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny129",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 568,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.021330654621124268,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny130",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 660,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.004847407341003418,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny191",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 640,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.014207229018211365,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny192",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 586,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.0929766595363617,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny193",
+   "gate_pass": false,
+   "notes": [
+    "structural:degenerate_4gram_x153,degenerate_4gram_x153"
+   ],
+   "identical": true,
+   "char_prefix": 320,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.060652315616607666,
+   "structural_a": [
+    "degenerate_4gram_x153"
+   ],
+   "structural_b": [
+    "degenerate_4gram_x153"
+   ]
+  },
+  {
+   "id": "tiny255",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 733,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.03161478042602539,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny256",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 620,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.06598484516143799,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny257",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 640,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.00014872848987579346,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny383",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 733,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.0028785020112991333,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny384",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 640,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.11616888642311096,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny385",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 574,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.0005455613136291504,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny511",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 11<160",
+    "agreement 0.381<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 50,
+   "token_prefix": 11,
+   "token_agreement": 0.38125,
+   "first_divergence_token": 11,
+   "first_divergence_char": 50,
+   "context_a": "assage of text that seems to be a jumble",
+   "context_b": "assage of text that appears to be a jumb",
+   "first_token_logprob_absdiff": 0.17050856351852417,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny512",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 640,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.0425979346036911,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny513",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 620,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.003769300878047943,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny1023",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 3<160",
+    "agreement 0.050<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 10,
+   "token_prefix": 3,
+   "token_agreement": 0.05,
+   "first_divergence_token": 3,
+   "first_divergence_char": 10,
+   "context_a": " pelican. The secret code word",
+   "context_b": " pelican. a a a a a\nThe text p",
+   "first_token_logprob_absdiff": 0.00313723087310791,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny1024",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 15<160",
+    "agreement 0.138<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 63,
+   "token_prefix": 15,
+   "token_agreement": 0.1375,
+   "first_divergence_token": 15,
+   "first_divergence_char": 63,
+   "context_a": " jumbled or encoded passage, with repeat",
+   "context_b": " jumbled or encoded message, with repeat",
+   "first_token_logprob_absdiff": 0.005282610654830933,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny1025",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 733,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.025723613798618317,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny8191",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 710,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.015346243977546692,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny8192",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 28<160",
+    "agreement 0.225<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 132,
+   "token_prefix": 28,
+   "token_agreement": 0.225,
+   "first_divergence_token": 28,
+   "first_divergence_char": 132,
+   "context_a": "he repeated phrase \"a a a a\" and the men",
+   "context_b": "he repeated phrase \"The secret code word",
+   "first_token_logprob_absdiff": 0.014873996376991272,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny8193",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 4<160",
+    "agreement 0.031<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 13,
+   "token_prefix": 4,
+   "token_agreement": 0.03125,
+   "first_divergence_token": 4,
+   "first_divergence_char": 13,
+   "context_a": " meadow. The secret code word is ",
+   "context_b": " meadow. The text provided appear",
+   "first_token_logprob_absdiff": 0.028782814741134644,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny8255",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 18<160",
+    "agreement 0.131<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 68,
+   "token_prefix": 18,
+   "token_agreement": 0.13125,
+   "first_divergence_token": 18,
+   "first_divergence_char": 68,
+   "context_a": "is is determined by identifying the repe",
+   "context_b": "is is determined by analyzing the provid",
+   "first_token_logprob_absdiff": 0.2336476445198059,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny8256",
+   "gate_pass": true,
+   "notes": [],
+   "identical": true,
+   "char_prefix": 680,
+   "token_prefix": 160,
+   "token_agreement": 1.0,
+   "first_divergence_token": null,
+   "first_token_logprob_absdiff": 0.010553032159805298,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny8257",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 2<160",
+    "agreement 0.013<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 7,
+   "token_prefix": 2,
+   "token_agreement": 0.0125,
+   "first_divergence_token": 2,
+   "first_divergence_char": 7,
+   "context_a": " cobalt. The secret code wo",
+   "context_b": " cobalt\n\nI need to find the",
+   "first_token_logprob_absdiff": 0.04036971926689148,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny16383",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 3<160",
+    "agreement 0.025<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 14,
+   "token_prefix": 3,
+   "token_agreement": 0.025,
+   "first_divergence_token": 3,
+   "first_divergence_char": 14,
+   "context_a": " lantern\n\nThe secret code word is ",
+   "context_b": " lantern\n\nThe text provided appear",
+   "first_token_logprob_absdiff": 0.005476653575897217,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny16384",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 1<160",
+    "agreement 0.013<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 9,
+   "token_prefix": 1,
+   "token_agreement": 0.0125,
+   "first_divergence_token": 1,
+   "first_divergence_char": 9,
+   "context_a": " compass\n\nI need to find the ",
+   "context_b": " compass\n:\n:\n:\n:\n:\n:\n:\n:\n:\n:\n",
+   "first_token_logprob_absdiff": 0.009403519332408905,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "tiny16385",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 12<160",
+    "agreement 0.081<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 42,
+   "token_prefix": 12,
+   "token_agreement": 0.08125,
+   "first_divergence_token": 12,
+   "first_divergence_char": 42,
+   "context_a": "e word is **umber**.  \n\nThis is determin",
+   "context_b": "e word is **umber**.\n: The secret code w",
+   "first_token_logprob_absdiff": 0.03585121035575867,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

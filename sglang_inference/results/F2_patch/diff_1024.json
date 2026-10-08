@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1/1024.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/F2_patch/1024.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl1024_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 70<256",
+    "agreement 0.090<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 236,
+   "token_prefix": 70,
+   "token_agreement": 0.08984375,
+   "first_divergence_token": 70,
+   "first_divergence_char": 236,
+   "context_a": "se Keeper**\n\nOn the edge of a jagged coa",
+   "context_b": "se Keeper**\n\nOn the jagged edge of the N",
+   "first_token_logprob_absdiff": 0.028595447540283203,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl1024_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 39<256",
+    "agreement 0.053<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 110,
+   "token_prefix": 39,
+   "token_agreement": 0.052734375,
+   "first_divergence_token": 39,
+   "first_divergence_char": 110,
+   "context_a": ". quartz-0015\n\n---\n\nThe lighthouse keepe",
+   "context_b": ". quartz-0015\n\n---\n\n**The Keeper of the ",
+   "first_token_logprob_absdiff": 0.062386274337768555,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

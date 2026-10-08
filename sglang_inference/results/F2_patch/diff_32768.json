@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8_1m_c1/32768.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/F2_patch/32768.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl32768_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 9<256",
+    "agreement 0.024<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 57,
+   "token_prefix": 9,
+   "token_agreement": 0.0244140625,
+   "first_divergence_token": 9,
+   "first_divergence_char": 57,
+   "context_a": "ints mentioned are:\n1. pepper-53ba\n2. qu",
+   "context_b": "ints mentioned are:\n\n1. **pepper-53ba** ",
+   "first_token_logprob_absdiff": 0.22621214389801025,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl32768_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 9<256",
+    "agreement 0.028<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 57,
+   "token_prefix": 9,
+   "token_agreement": 0.0283203125,
+   "first_divergence_token": 9,
+   "first_divergence_char": 57,
+   "context_a": "ints mentioned are:\n1. walnut-1571\n2. pe",
+   "context_b": "ints mentioned are:\n\n1. **walnut-1571**\n",
+   "first_token_logprob_absdiff": 0.10338377952575684,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}
