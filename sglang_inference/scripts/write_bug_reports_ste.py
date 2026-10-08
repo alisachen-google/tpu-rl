@@ -624,7 +624,7 @@ None describe this. #1067 (long-context PD stress test for gpt-oss) would hit it
 
 REPORTS["F-12"] = f"""# F-12: The P/D handshake never completes and both engines hold the request with no deadline (candidate)
 
-**Type:** bug candidate (hang). **Severity:** high if confirmed. **Status:** observed on 2 of 2 requests to one freshly started pair. Not reproduced on a second pair started the same way.
+**Type:** bug (hang). **Severity:** high. **Status:** reproduced on 2 of 2 freshly started pairs with the `gpt-oss_A_128k_mr1` recipe (every request to those pairs stalls). Pairs with the 1M-context recipe (same flags, larger context and pool) and with 8 request slots did not show it. Trigger not yet isolated.
 
 ## Summary
 
@@ -664,7 +664,7 @@ decode prealloc queue keeps waiting. When the two sides disagree about the hands
 
 ## Evidence
 
-`results/F11/handshake_stall/decode_tp0_pyspy.txt`, `results/F11/handshake_stall/prefill_tp0_pyspy.txt`, `results/logs/runs/F11_gpt-oss_A_128k_mr1/*.log.gz`, `results/F11/gpt-oss_A_128k_mr1_8192.log`.
+`results/F11/handshake_stall/decode_tp0_pyspy.txt`, `results/F11/handshake_stall/prefill_tp0_pyspy.txt`, `results/logs/runs/F11_gpt-oss_A_128k_mr1/*.log.gz`, `results/F11/gpt-oss_A_128k_mr1_8192.log`. Second pair: `results/F12/` (client logs, decode stack dump), `results/runs/F12_gptoss_A_128k_mr1_try1/`.
 """
 
 INDEX = """# Bug reports: sglang-torchtpu, 1 prefill + 1 decode on TPU v7x
@@ -685,7 +685,7 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-9](F-9.md) | Unaligned prompt lengths give a different first token in PD mode | resolved: not a bug (F-3 artefact) | none | identical 2/2 at c=1  none |
 | [F-10](F-10.md) | One 1920×1080 image stops the Qwen3-VL prefill engine | bug (crash) | high | reproduced 2/2  #488 (same mechanism, other trigger); #1068 |
 | [F-11](F-11.md) | Prefill deadlocks on prompts > 2 chunks when max-running-requests is 1 (TPU SWA pool rounding) | bug (hang) | high | reproduced 4/4, root cause in code  none (#1067 would hit it) |
-| [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug candidate (hang) | high if confirmed | observed 2/2 on one pair  #1113/#1078 related (those expire) |
+| [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug (hang) | high | reproduced on 2/2 fresh pairs (one recipe)  #1113/#1078 related (those expire) |
 
 Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`).
 

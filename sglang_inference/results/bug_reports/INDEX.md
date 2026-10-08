@@ -16,7 +16,7 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-9](F-9.md) | Unaligned prompt lengths give a different first token in PD mode | resolved: not a bug (F-3 artefact) | none | identical 2/2 at c=1  none |
 | [F-10](F-10.md) | One 1920×1080 image stops the Qwen3-VL prefill engine | bug (crash) | high | reproduced 2/2  #488 (same mechanism, other trigger); #1068 |
 | [F-11](F-11.md) | Prefill deadlocks on prompts > 2 chunks when max-running-requests is 1 (TPU SWA pool rounding) | bug (hang) | high | reproduced 4/4, root cause in code  none (#1067 would hit it) |
-| [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug candidate (hang) | high if confirmed | observed 2/2 on one pair  #1113/#1078 related (those expire) |
+| [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug (hang) | high | reproduced on 2/2 fresh pairs (one recipe)  #1113/#1078 related (those expire) |
 
 Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`).
 

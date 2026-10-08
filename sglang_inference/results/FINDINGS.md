@@ -393,3 +393,12 @@ least expire; this one does not. Needs a repro with raiden debug logging to find
 greedy, 1,024 max tokens: **0.99** (eager reference 0.97, CI gate 0.80). Wall time 29 s for 100 problems vs ~17 min eager. Warm start with the
 caches from run 3: 421 s (cold: ~19 min). Serving-time recompiles: 0. The patch is ready to propose upstream; token non-identity vs eager is
 numerical only.
+
+**F-12 reproduced on a second fresh pair (2026-10-08 06:36–06:48 UTC, `results/F12/`, run `F12_gptoss_A_128k_mr1_try1`).** Same recipe
+(`gpt-oss_A_128k_mr1`), first 8k request: prefill ran the chunk at 06:38:30 and holds it (`num_prefill_inflight_queue_reqs 1`, SWA 0.5);
+decode never ran a batch, scheduler idle in `pop_preallocated` (py-spy `F12/F12_gptoss_A_128k_mr1_try1_8192_decode_pyspy.txt`), decode's
+HTTP layer still holds the rid ten minutes later (`Duplicate request ID detected` when the id is reused). **2 of 2 pairs with this recipe.**
+Correlation so far: fails on `gpt-oss_A_128k_mr1` (mrr 1, compile bs [1], ctx 140k) 2/2; works on `gpt-oss_A_1m` (same args except ctx 1M,
+pool 1.1M, host pool 320 GiB) and on `gpt-oss_A_128k` (mrr 8). The recipes differ only in those fields. Mechanism unchanged: decode receiver
+never leaves `Bootstrapping`, no deadline covers that state. Note for the harness: the engines see the abort only when the client *process*
+exits (sockets close), not at the per-request timeout, so stalled requests outlive the client timeout.

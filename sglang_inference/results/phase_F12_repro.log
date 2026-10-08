@@ -7,3 +7,8 @@
 sglang:num_running_reqs 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 
     pop_preallocated (decode.py:1833)
    ISL=8192: 0 of 2 completed in 600 s;       2 ERROR ReadTimeout 
+   ISL=8192: 0 of 2 completed in 45 s;       2 ERROR HTTP 
+2026-10-08T06:50:00Z    ISL=32768: no answer after 45 s -> stall suspected; capturing state
+sglang:num_running_reqs 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 
+    _update_handshake_waiters (decode.py:1146)
+    pop_preallocated (decode.py:1354)
