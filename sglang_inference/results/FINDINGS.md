@@ -537,3 +537,15 @@ c=1 streaming: cold TTFT 1,244 ms (8192-token chunks); HBM hit 422 ms (24,576 ca
 the host tier, 64 computed)** → host→device reload of 32k tokens well under 0.25 s. First-token logprob of the host hit (−0.79959) equals the
 Config C host hit with the same cache split; differs from the HBM-hit run only because that run computed a full 8k chunk (F-4-class split
 effect). HiCache offload + reload: correct and fast.
+
+## F-14 — `--disaggregation-enable-kv-checksum` is CUDA-only: TPU prefill passes health, then dies on the first real request
+
+**Symptom (2026-10-08 18:21–18:25 UTC, `A_gpt-oss_128k_kvcheck_nocanary`).** Pair up normally (prefill ready 136 s, LB health_generate OK);
+first 8k TC-1 request → all 8 prefill ranks: `prefill.py:1418 send_kv_chunk → checksum.py:105 compute: assert kv_page_indices_gpu.is_cuda`
+→ engine dead, every later request a connection error. Health-check requests skip the checksum (`is_health_check_req → value 0`), which is why
+the engine looked healthy. `KvChecksumComputer` is built with `torch.device("cuda:…")` (prefill.py:230-240) and uses the CUDA Adler-32 kernels
+(`sglang/kernels/ops/memory/adler32`); nothing TPU-side implements or rejects it. **Fix:** reject on `--device tpu` at validation; implement a
+host-side or Pallas checksum. No open issue mentions the checksum. Draft: `bug_reports/F-14_github_issue.md`. Qwen checksum-only run in
+progress (same code path expected).
+**TC-15 outcome:** neither built-in KV integrity check (canary F-13, checksum F-14) can run on TPU in this build; the P/D transfer is verified
+only by the differential tests (TC-1: Qwen bit-identical at all lengths; gpt-oss identical with SWA memory off) and GSM8K.

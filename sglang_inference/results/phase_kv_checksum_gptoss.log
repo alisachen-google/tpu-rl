@@ -1,0 +1,32 @@
+2026-10-08T18:20:33Z [kv-checksum-only] hicache reload2 done
+2026-10-08T18:20:45Z [kv-checksum-only] === gpt-oss: start pair with kv checksum + canary
+2026-10-08 18:24:48 prefill /health ready after 241 s
+2026-10-08 18:24:48 decode /health ready after 0 s
+2026-10-08 18:24:49 LB /health_generate ready after 1 s
+   checksum enabled (prefill log): 1  canary lines at start (decode): 2
+2026-10-08T18:24:51Z [kv-checksum-only] (1) TC-1 8k/32k/128k c=1 with checksum verification on decode
+   [isl8192_k0] ERROR ChunkedEncodingError: Response ended prematurely
+   [isl8192_k1] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused b
+   {"id": "isl8192_k1", "status": "ERROR", "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))"}
+   [isl32768_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused b
+   [isl32768_k1] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused b
+   {"id": "isl32768_k1", "status": "ERROR", "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))"}
+   [isl131072_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused b
+   [isl131072_k1] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused b
+   {"id": "isl131072_k1", "status": "ERROR", "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))"}
+2026-10-08T18:24:58Z [kv-checksum-only] (2) concurrency 4 at 32k (checksum under load)
+   completed: 0
+2026-10-08T18:24:58Z [kv-checksum-only] (3) decode-phase aborts (checksum + canary during abort/release)
+   [+   60.08s] FAIL: 6 aborts (6 failed to start), follow-ups short=False identical=False (cached_tokens=None), 1 baseline problem(s) -> /home/alisachen_google_co
+2026-10-08T18:25:58Z [kv-checksum-only] (4) integrity report
+   decode: checksum mismatches=0  canary reports=2 (incl. startup)
+   decode canary: [dump_meta] wrote launch metadata -> /home/alisachen_google_com/pd_disagg/results/runs/A_gpt-oss_128k_kvcheck_nocanary/decode/launch_meta.json
+grep: /home/alisachen_google_com/pd_disagg/results/runs/A_gpt-oss_128k_kvcheck_nocanary/prefill/server.log: Permission denied
+grep: /home/alisachen_google_com/pd_disagg/results/runs/A_gpt-oss_128k_kvcheck_nocanary/prefill/server.log: Permission denied
+   prefill: checksum lines= canary reports=
+   prefill:   File "/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/disaggregation/checksum.py", line 105, in compute
+   prefill:   File "/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/disaggregation/checksum.py", line 105, in compute
+   prefill:   File "/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/disaggregation/checksum.py", line 105, in compute
+   prefill:   File "/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/disaggregation/checksum.py", line 105, in compute
+   decode metrics: 
+2026-10-08T18:26:09Z [kv-checksum-only] phase kv checksum gptoss done
