@@ -206,6 +206,16 @@ Legend: PASS = met the pass criterion; NUM = numerical difference only (content 
 | Command | `bash $S/_phase_kv_integrity.sh` (recipes `recipes/<model>_A_128k_kvcheck.json`, runs `A_<model>_128k_kvcheck`, results `results/A_kvcheck/<model>/`) |
 | Results | **Canary: both pairs fail to start (F-13).** gpt-oss: `AttributeError: 'TpuFusedMHATokenToKVPool' object has no attribute 'k_buffer'` in the SWA adapter; Qwen3-VL: `NotImplementedError: kv-canary: no attacher registered for pool class TpuFusedMHATokenToKVPool`. **Checksum only: the pair starts and passes health, then the prefill dies on the first real request (F-14, `assert kv_page_indices_gpu.is_cuda`; CUDA-only computer).** Neither built-in integrity check runs on TPU; transfer correctness rests on TC-1 and TC-11 |
 
+### TC-16 Dataset-driven comparison on MT-Bench: prefix caching and speculative decoding (queued)
+
+| Item | Value |
+|---|---|
+| Dataset | MT-Bench, 80 questions × 2 turns (`prompts/mt_bench/question.jsonl`, from lm-sys/FastChat). One dataset serves both purposes: turn 2 re-sends turn 1's prompt and answer (prefix-cache benefit), and the answers are natural conversational, writing and coding text (the standard EAGLE acceptance workload). ShareGPT is also in the NFS cache as a larger alternative |
+| Method | `scripts/mtbench_runner.py`: renders each turn with the gpt-oss chat template offline, sends it to `/generate` (greedy, 512 tokens), records per turn TTFT, prompt and cached tokens, completion tokens and `spec_verify_ct`; runs at concurrency 1 (latency) and 4 (throughput) |
+| Pairs | A (radix off) vs B (radix on): turn-2 cached fraction and TTFT, prefill `cache_hit_rate`. C_bf16 (= D without speculation) vs D (EAGLE3): output tok/s, per-request accept length, turn-2 effects combined with the cache |
+| Command | `bash $S/_phase_mtbench.sh` (queued after the 1M phase; results in `results/mtbench/<cfg>/summary.txt`) |
+| Results | pending |
+
 ## 4. Not yet run / pending
 
 - Config D and E (gpt-oss): first D launch lost the TPU to another user's job starting at the same second (device nodes already open); requeued in `_phase_BCDE_resume.sh` behind `tpu_free`.
@@ -213,6 +223,7 @@ Legend: PASS = met the pass criterion; NUM = numerical difference only (content 
 - HiCache reload timing on an idle pair: `_phase_hicache_reload.sh`, queued after the chain.
 - TC-15: canary runs failed at start-up (F-13); checksum-only gpt-oss run died on the first request (F-14); Qwen checksum-only run: identical crash (F-14 confirmed on both models).
 - HiCache host-hit timing: done (257 ms TTFT for a 32k host hit).
-- 1m shape for B–E: blocked by F-11 at 1 slot; plan is the 4-slot variant once memory headroom at 1M is measured.
+- 1m shape: Config B and C with 2 slots running now (`_phase_1m_BC.sh`); single-slot 1M stalls (F-12), radix-on pool is ratio-sized so F-11 does not apply.
+- TC-16 MT-Bench prefix-cache / speculation comparison: queued after the 1M phase.
 - Not covered on this hardware: multi-host engines (each host is a 4-chip slice), both engines on one host, the Rust router variant,
   KV checksum / canary flags (`--disaggregation-enable-kv-checksum`, `--kv-canary`), fault injection (covered by a colleague's campaigns).
