@@ -14,8 +14,9 @@ queue and then idled. The decode engine never ran a batch: its scheduler polled 
 stayed in `KVPoll.Bootstrapping` for 30 minutes. Both engines answered `/health`, all queues looked empty in the metrics, and no warning or error
 was logged until the client disconnected, at which point both sides logged the abort at once.
 
-Two pairs with other recipes started the same way (1M context with the same single slot; 140k context with eight slots) served every request.
-We have not isolated what makes this recipe deterministic for the stall, but the code explains why it never resolves:
+Pairs with neighbouring recipes (the same 140k recipe with two or eight slots; the 1M-context recipe with one slot) served every request; see
+"Trigger conditions" below for the full table. A single request slot on both engines is necessary but not sufficient. The code explains why the
+stall never resolves once it happens:
 
 - The raiden **sender** (prefill) does not wait for the decode. It moves its room straight to `WaitingForInput` and bounds the handshake with
   `fail_decode_silence(room, init_time, bootstrap_timeout)`, which returns early once the decode has "asked" for the room. Note that our recipe
@@ -43,7 +44,38 @@ decode side has no such bound at all.
 | Hardware | Two TPU v7x hosts (4 chips / 8 TensorCores each), prefill on host a, decode on host b, TP 8, EP 8 |
 | Model | `openai/gpt-oss-120b` (MXFP4), KV cache fp8_e4m3, page size 64 |
 | Recipe that stalls (3 of 3 pairs) | both engines `--max-running-requests 1 --context-length 140288 --max-total-tokens 786432 --chunked-prefill-size 8192 --disable-radix-cache`, `SGLANG_RAIDEN_HOST_POOL_GB=128`, compile batch sizes `[1]`, `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=7200`, `SGLANG_DISAGGREGATION_WAITING_TIMEOUT=7200` |
-| Recipes that work | the same 140k recipe with `--max-running-requests 2` (tested right after the third stall: 8k and 32k served normally); the 140k recipe with `--max-running-requests 8`; and the single-slot recipe with `--context-length 1056768 --max-total-tokens 1114112`, host pool 320 GiB |
+| Recipes that work | the same 140k recipe with `--max-running-requests 2` (tested right after the third stall: 8k, 32k and 131k served normally, 6 of 6); the 140k recipe with `--max-running-requests 8`; and the single-slot recipe with `--context-length 1056768 --max-total-tokens 1114112`, host pool 320 GiB |
+
+## Trigger conditions (observed)
+
+The stall is deterministic for one recipe and absent for every neighbouring recipe we ran. All pairs: gpt-oss-120b, raiden, radix cache off on
+the prefill, both engines freshly started, first request sent within a minute of the load balancer becoming healthy.
+
+| Pair | `--max-running-requests` (both engines) | `--context-length` / `--max-total-tokens` | `SGLANG_RAIDEN_HOST_POOL_GB` | Compile batch sizes | Requests | Outcome |
+|---|---|---|---|---|---|---|
+| F11_gpt-oss_A_128k_mr1 | 1 | 140,288 / 786,432 | 128 | [1] | 8k, 8k | **stall on the first request; the next stalls too** |
+| F12_…_mr1_try1 (fresh pair) | 1 | 140,288 / 786,432 | 128 | [1] | 8k, 8k, 32k | **stall on every request** |
+| F12_…_mr1_try2 (fresh pair) | 1 | 140,288 / 786,432 | 128 | [1] | 8k | **stall on the first request** |
+| F11_gpt-oss_A_128k_mr2 | 2 | 140,288 / 786,432 | 128 | [1, 2] | 8k, 32k, 131k | served, 6 of 6 |
+| Config A campaign (A_gptoss_128k_run1/run2) | 8 | 140,288 / 786,432 | 128 | [1, 2, 4, 8] | ~200 requests over two days | served |
+| A_gptoss_1m_run1/run2 | 1 | 1,056,768 / 1,114,112 | 320 | [1] | 1k, 8k (longer prompts hit F-11) | served |
+| F11_gpt-oss_A_1m_mr4 | 4 | 1,056,768 / 1,114,112 | 320 | [1, 2, 4] | 8k, 32k, 131k | served |
+
+What this says about the trigger:
+
+- **A single request slot on both engines is necessary.** Changing only `--max-running-requests` from 1 to 2 on the stalling recipe removes the
+  stall. A single slot also means a decode SWA pool of 512 tokens (768 rounded down to 8 pages), a request table of one row on each engine, and
+  compile batch size 1 only.
+- **A single slot is not sufficient.** The 1M-context recipe with one slot served 8k prompts on two different pairs. The remaining differences to
+  the stalling recipe are the context length (140k vs 1M), `max_total_tokens` (786k vs 1.1M) and the raiden host pool (128 vs 320 GiB).
+- **It does not depend on the prompt.** 8k (one chunk) and 32k prompts stall alike; the request is prefilled completely before the stall.
+- **It does not depend on warm-up state.** Three pairs started from scratch stalled on their very first request.
+- **It is not timing-sensitive in the usual sense.** The handshake never completes even after 30 minutes, so this is not a slow path but a
+  missed or misrouted handshake step.
+
+We did not isolate which of the three remaining differences matters. The next experiments, in order of cost: the stalling recipe with
+`SGLANG_RAIDEN_HOST_POOL_GB=320`; then with `--max-total-tokens 1114112`; then with `--context-length 1056768`. Each is one pair start and one
+request. With the handshake logging proposed in fix 3, one run would be enough.
 
 ## Code trace
 

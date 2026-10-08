@@ -1,0 +1,16 @@
+model=gpt-oss-120b kind=gptoss 11 cases, endpoints: a=http://10.128.15.217:8080
+case                  A st/fin/len                  B st/fin/len                  same  verdict notes
+-----------------------------------------------------------------------------------------------------
+plain_chat            200/stop/0c/251r              -                             -     PASS    
+reasoning_low         200/stop/0c/44r               -                             -     PASS    
+reasoning_medium      200/stop/0c/87r               -                             -     PASS    
+reasoning_high        200/stop/0c/525r              -                             -     PASS    
+multi_turn_3          200/length/0c/276r            -                             -     PASS    
+tool_call             200/stop/0c/61r               -                             -     FAIL    a: no tool_calls (finish_reason=stop)
+stop_string_chat      200/stop/0c/101r              -                             -     PASS    
+stream_with_usage     200/stop/0c/251r              -                             -     PASS    
+long_system_prompt    200/length/0c/496r            -                             -     PASS    
+empty_user_message    200/length/0c/235r            -                             -     PASS    
+oversized_max_tokens  400/None/0c/0r                -                             -     PASS    
+
+11 cases, 1 failed -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/chat.json

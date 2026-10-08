@@ -1,0 +1,136 @@
+2026-10-08T08:34:38Z F-11 control done; starting B/C/D/E chain
+2026-10-08T08:34:38Z [B/gpt-oss] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_B_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1
+2026-10-08T08:34:51Z a_holders=[] b_holders=[]
+2026-10-08 08:38:53 prefill /health ready after 241 s
+2026-10-08 08:38:53 decode /health ready after 0 s
+2026-10-08 08:38:54 LB /health_generate ready after 1 s
+2026-10-08T08:38:55Z [B/gpt-oss] pair up in 244 s
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T08:38:55Z [B/gpt-oss] (1) TC-1: c=1 greedy, 1024 tokens, 8k/32k/128k vs goldens in /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1
+   [isl8192_k0] tokens=1024 finish=length cached=0 ttft=352.95ms e2e=6481.64ms
+   [isl8192_k1] tokens=1024 finish=length cached=0 ttft=344.84ms e2e=5989.65ms
+   vs golden isl8192_k0    True     4530   1024  1.000   0.0000  PASS  
+   vs golden isl8192_k1    True     4624   1024  1.000   0.0000  PASS  
+   vs golden 2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/tc1_diff_8192.json
+   needles {"id": "isl8192_k0", "isl": 8192, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 306, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl8192_k1", "isl": 8192, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 208, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl32768_k0] tokens=1024 finish=length cached=0 ttft=1305.55ms e2e=7067.07ms
+   [isl32768_k1] tokens=1024 finish=length cached=0 ttft=1265.19ms e2e=7095.91ms
+   vs golden isl32768_k0   False     122     24  0.036   0.0380  FAIL  token prefix 24<256; agreement 0.036<0.95
+   vs golden isl32768_k1   False      11      3  0.014   0.0559  FAIL  token prefix 3<256; agreement 0.014<0.95
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/tc1_diff_32768.json
+   needles {"id": "isl32768_k0", "isl": 32768, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 207, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl32768_k1", "isl": 32768, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 223, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl131072_k0] tokens=1024 finish=length cached=0 ttft=6600.99ms e2e=12541.91ms
+   [isl131072_k1] tokens=1024 finish=length cached=0 ttft=6582.62ms e2e=12421.82ms
+   vs golden isl131072_k0  False      21      5  0.075   0.0505  FAIL  token prefix 5<256; agreement 0.075<0.95
+   vs golden isl131072_k1  False      76     14  0.024   0.1829  FAIL  token prefix 14<256; agreement 0.024<0.95
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/tc1_diff_131072.json
+   needles {"id": "isl131072_k0", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 279, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl131072_k1", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 293, "completion_tokens": 1024, "finish_reason": "length"}
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T08:39:48Z [B/gpt-oss] (2) tiny boundary sweep (160 tokens, c=1) + needles
+   tiny: 35 prompts, 7 problems ['tiny100', 'tiny192', 'tiny255', 'tiny256', 'tiny383', 'tiny385', 'tiny1025']
+2026-10-08T08:40:25Z [B/gpt-oss] (3) prefix-cache reuse: 32k prompts twice at c=1 (64 tokens); second pass should report cached_tokens>0 and identical text
+   isl32768_k0: pass1 cached=24576 ttft=6023.52ms | pass2 cached=32704 ttft=5712.1ms | identical_text=True first_logprob_delta=0.0339
+   isl32768_k1: pass1 cached=24576 ttft=5894.89ms | pass2 cached=32704 ttft=5649.79ms | identical_text=True first_logprob_delta=0.0009
+   prefill cache metrics: sglang:cache_hit_rate 0.998046875 
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T08:40:49Z [B/gpt-oss] (6) sampling-params matrix (n_2 excluded: F-6)
+2026-10-08T08:42:03Z [B/gpt-oss] params rc=1
+   regex                               500/None/None         -                     -    -    -    FAIL    a: http 500: Internal Server Error
+   stream_vs_nonstream                 500/None/None         -                     -    -    -    FAIL    a: stream error: Internal Server Error; a: http 500: Inte
+   18 cases, 8 failed -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/params.json
+2026-10-08T08:42:03Z [B/gpt-oss] !! an engine is down after the params matrix
+2026-10-08T08:42:03Z [B/gpt-oss] (7) chat suite
+2026-10-08T08:42:03Z [B/gpt-oss] chat rc=1
+   empty_user_message    None/None/0c/0r               -                             -     FAIL    a: http None ConnectionError: HTTPConnectionPool(host='10.128.15
+   oversized_max_tokens  None/None/0c/0r               -                             -     FAIL    a: http None ConnectionError: HTTPConnectionPool(host='10.128.15
+   11 cases, 11 failed -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/chat.json
+2026-10-08T08:42:03Z [B/gpt-oss] (8) concurrency sweep c=1,2,4 at ISL 131072 / OSL 256
+
+2026-10-08T08:44:40Z [B/gpt-oss] correction: the step-6 crash is F-5 itself (return_logprob_top5 sets logprob_start_len 0; same FAIL in Config A), not a new finding; case now excluded from the matrix
+2026-10-08T08:44:49Z F-11 control done; starting B/C/D/E chain
+2026-10-08T08:44:49Z [B/gpt-oss] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_B_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1
+2026-10-08T08:45:01Z a_holders=[] b_holders=[]
+2026-10-08 08:47:18 prefill /health ready after 135 s
+2026-10-08 08:47:18 decode /health ready after 0 s
+2026-10-08 08:47:19 LB /health_generate ready after 1 s
+2026-10-08T08:47:20Z [B/gpt-oss] pair up in 139 s
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T08:47:20Z [B/gpt-oss] (1) TC-1: c=1 greedy, 1024 tokens, 8k/32k/128k vs goldens in /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1
+   [isl8192_k0] tokens=1024 finish=length cached=0 ttft=337.14ms e2e=5968.45ms
+   [isl8192_k1] tokens=1024 finish=length cached=0 ttft=317.87ms e2e=5859.34ms
+   vs golden isl8192_k0    True     4530   1024  1.000   0.0000  PASS  
+   vs golden isl8192_k1    True     4624   1024  1.000   0.0000  PASS  
+   vs golden 2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/tc1_diff_8192.json
+   needles {"id": "isl8192_k0", "isl": 8192, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 306, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl8192_k1", "isl": 8192, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 208, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl32768_k0] tokens=1024 finish=length cached=0 ttft=1211.22ms e2e=6868.69ms
+   [isl32768_k1] tokens=1024 finish=length cached=0 ttft=1214.25ms e2e=6774.02ms
+   vs golden isl32768_k0   False     122     24  0.036   0.0380  FAIL  token prefix 24<256; agreement 0.036<0.95
+   vs golden isl32768_k1   False      11      3  0.014   0.0559  FAIL  token prefix 3<256; agreement 0.014<0.95
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/tc1_diff_32768.json
+   needles {"id": "isl32768_k0", "isl": 32768, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 207, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl32768_k1", "isl": 32768, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 223, "completion_tokens": 1024, "finish_reason": "length"}
+   [isl131072_k0] tokens=1024 finish=length cached=0 ttft=6596.62ms e2e=12496.68ms
+   [isl131072_k1] tokens=1024 finish=length cached=0 ttft=6585.04ms e2e=12294.7ms
+   vs golden isl131072_k0  False      21      5  0.075   0.0505  FAIL  token prefix 5<256; agreement 0.075<0.95
+   vs golden isl131072_k1  False      76     14  0.024   0.1829  FAIL  token prefix 14<256; agreement 0.024<0.95
+   vs golden 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/tc1_diff_131072.json
+   needles {"id": "isl131072_k0", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 279, "completion_tokens": 1024, "finish_reason": "length"}
+   needles {"id": "isl131072_k1", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 293, "completion_tokens": 1024, "finish_reason": "length"}
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T08:48:12Z [B/gpt-oss] (2) tiny boundary sweep (160 tokens, c=1) + needles
+   tiny: 35 prompts, 7 problems ['tiny100', 'tiny192', 'tiny255', 'tiny256', 'tiny383', 'tiny385', 'tiny1025']
+2026-10-08T08:48:47Z [B/gpt-oss] (3) prefix-cache reuse: 32k prompts twice at c=1 (64 tokens); second pass should report cached_tokens>0 and identical text
+   isl32768_k0: pass1 cached=24576 ttft=5992.92ms | pass2 cached=32704 ttft=5667.81ms | identical_text=True first_logprob_delta=0.0339
+   isl32768_k1: pass1 cached=24576 ttft=5808.23ms | pass2 cached=32704 ttft=5728.55ms | identical_text=True first_logprob_delta=0.0009
+   prefill cache metrics: sglang:cache_hit_rate 0.998046875 
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T08:49:11Z [B/gpt-oss] (6) sampling-params matrix (n_2 excluded: F-6; return_logprob_top5 excluded: F-5)
+2026-10-08T08:49:23Z [B/gpt-oss] params rc=0
+   regex                               400/None/None         -                     -    -    -    PASS    
+   stream_vs_nonstream                 200/128/length        -                     -    -    -    PASS    
+   17 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/params.json
+2026-10-08T08:49:23Z [B/gpt-oss] (7) chat suite
+2026-10-08T08:49:35Z [B/gpt-oss] chat rc=1
+   model=gpt-oss-120b kind=gptoss 11 cases, endpoints: a=http://10.128.15.217:8080
+   tool_call             200/stop/0c/61r               -                             -     FAIL    a: no tool_calls (finish_reason=stop)
+   11 cases, 1 failed -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/chat.json
+2026-10-08T08:49:35Z [B/gpt-oss] (8) concurrency sweep c=1,2,4 at ISL 131072 / OSL 256
+   c=1 Successful requests: 2 ;Output token throughput (tok/s): 49.95 ;Mean TTFT (ms): 3716.07 ;P99 TTFT (ms): 6574.11 ;Mean ITL (ms): 5.46 ;
+
+   c=2 Successful requests: 4 ;Output token throughput (tok/s): 57.07 ;Mean TTFT (ms): 5453.23 ;P99 TTFT (ms): 12508.38 ;Mean ITL (ms): 7.68 ;
+
+   c=4 Successful requests: 8 ;Output token throughput (tok/s): 65.31 ;Mean TTFT (ms): 8802.43 ;P99 TTFT (ms): 24298.47 ;Mean ITL (ms): 8.90 ;
+
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T08:51:17Z [B/gpt-oss] (9) GSM8K-100 via LB
+   [METRIC] gsm8k_score=0.99 labels={"model": "gpt-oss-120b", "eval": "gsm8k"}
+2026-10-08T08:52:26Z [B/gpt-oss] (10) decode-phase client aborts (3, two concurrent)
+2026-10-08T08:53:52Z [B/gpt-oss] abort decode rc=0
+   [+   85.84s] PASS: 6 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=131008), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/abort_deco
+   http://10.128.15.217:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+   http://10.128.0.90:30000 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 sglang:swa_token_usage 0.0 
+2026-10-08T08:53:52Z [B/gpt-oss] (11) compile audit (decode, prefill)
+   decode_B: ready_at_line=1135 total_lines=2409
+     startup : __recompiles=24  Compiling/compile=21  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+   prefill_B: ready_at_line=1375 total_lines=2603
+     startup : __recompiles=32  Compiling/compile=23  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+2026-10-08T08:53:53Z [B/gpt-oss] (12) LAST: prefill-phase client abort (crashes the prefill engine in Config A, F-8)
+2026-10-08T08:54:25Z [B/gpt-oss] abort prefill rc=0
+   prefill /health after prefill-abort: 200   decode: 200
+2026-10-08T08:54:41Z [B/gpt-oss] archiving logs
+2026-10-08T08:54:50Z [B/gpt-oss] === config B/gpt-oss done (relaunches: 0)
+2026-10-08T08:54:50Z [C/gpt-oss] === start: recipe /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_C_128k.json, goldens /home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1
+2026-10-08T08:55:03Z a_holders=[] b_holders=[]

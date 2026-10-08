@@ -1,0 +1,23 @@
+prompt=isl8192_k0 (43963 chars), 18 cases, endpoints: a=http://10.128.15.217:8080
+case                                A st/tok/fin          B st/tok/fin          txt  tok  fin  verdict notes
+------------------------------------------------------------------------------------------------------------
+greedy_baseline                     200/128/length        -                     -    -    -    PASS    
+top_k_1                             200/128/length        -                     -    -    -    PASS    
+repetition_penalty_1.3              200/128/length        -                     -    -    -    PASS    
+frequency_penalty_0.8               200/128/length        -                     -    -    -    PASS    
+presence_penalty_0.8                200/128/length        -                     -    -    -    PASS    
+min_new_tokens_100_ignore_eos_false 200/128/length        -                     -    -    -    PASS    
+stop_string                         200/103/stop          -                     -    -    -    PASS    
+stop_token_ids                      200/7/stop            -                     -    -    -    PASS    
+no_stop_trim                        200/103/stop          -                     -    -    -    PASS    
+logit_bias                          200/128/length        -                     -    -    -    PASS    
+return_logprob_top5                 500/None/None         -                     -    -    -    FAIL    a: http 500: Internal Server Error
+max_new_tokens_1                    500/None/None         -                     -    -    -    FAIL    a: http 500: Internal Server Error
+max_new_tokens_0                    500/None/None         -                     -    -    -    FAIL    a: http 500: Internal Server Error
+skip_special_tokens_false           500/None/None         -                     -    -    -    FAIL    a: http 500: Internal Server Error
+sampling_seed_42_temp0.7            500/None/None         -                     -    -    -    FAIL    a: info: seeded-rerun identical; a: http 500: Internal Server Error
+json_schema                         500/None/None         -                     -    -    -    FAIL    a: http 500: Internal Server Error
+regex                               500/None/None         -                     -    -    -    FAIL    a: http 500: Internal Server Error
+stream_vs_nonstream                 500/None/None         -                     -    -    -    FAIL    a: stream error: Internal Server Error; a: http 500: Internal Server Error
+
+18 cases, 8 failed -> /home/alisachen_google_com/pd_disagg/results/B/gpt-oss/params.json

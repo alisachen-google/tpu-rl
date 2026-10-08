@@ -18,3 +18,4 @@ aligning swa_max_total_num_tokens 17216 -> 16896
    ISL=8192: 0 of 2 completed in 45 s; 
    ISL=32768: 0 of 2 completed in 45 s; 
    ISL=131072: 0 of 2 completed in 45 s; 
+2026-10-08T08:34:31Z phase F11 control mr2 done

@@ -12,6 +12,19 @@ log(){ echo "$(date -u +%FT%TZ) [$CFG/$M] $*"; }
 state(){ for u in $PRE $DEC; do echo "   $u $(curl -s -m 10 $u/metrics | grep -E '^sglang:(num_running_reqs|num_queue_reqs|num_used_tokens|swa_token_usage)' | sed -E 's/\{[^}]*\}//' | sort -u | tr '\n' ' ')"; done; }
 prefill_log(){ $SSH_A "sudo -n cat /home/alisachen_google_com/pd_disagg/results/runs/$RUN/prefill/server.log" 2>/dev/null; }
 healthy(){ curl -sf -m 5 $PRE/health >/dev/null && curl -sf -m 5 $DEC/health >/dev/null; }
+RELAUNCHES=0
+ensure_up(){ # $1 = step label. If an engine died, archive the crash logs, restart the pair under the same RUN name, re-arm the watchdog.
+  healthy && return 0
+  RELAUNCHES=$((RELAUNCHES+1)); log "!! engine down after $1 (prefill $(curl -s -m 5 -o /dev/null -w '%{http_code}' $PRE/health), decode $(curl -s -m 5 -o /dev/null -w '%{http_code}' $DEC/health)); relaunch #$RELAUNCHES"
+  prefill_log | grep -E 'Scheduler hit an exception|Error:|AssertionError|NotImplementedError|RuntimeError' | grep -vE 'UserWarning' | tail -n 3 | cut -c1-200 | sed 's/^/   prefill: /'
+  grep -E 'Scheduler hit an exception|Error:|AssertionError|RuntimeError' $R/runs/$RUN/decode/server.log 2>/dev/null | grep -vE 'UserWarning|freeze_gc|ConnectionError|MaxRetryError' | tail -n 3 | cut -c1-200 | sed 's/^/   decode: /'
+  mkdir -p $R/logs/runs/$RUN; prefill_log | gzip -c > $R/logs/runs/$RUN/prefill_server.crash$RELAUNCHES.log.gz; gzip -c $R/runs/$RUN/decode/server.log > $R/logs/runs/$RUN/decode_server.crash$RELAUNCHES.log.gz 2>/dev/null
+  kill $WD 2>/dev/null; bash $S/pd.sh stop >/dev/null 2>&1; sleep 5
+  env -u TORCH_DEVICE_BACKEND_AUTOLOAD bash $S/pd.sh start $REC $RUN 2>&1 | tee -a $R/runs/$RUN.driver.log | grep -E 'ready|NOT'
+  if curl -sf -m 30 $LB/health_generate >/dev/null; then log "pair back up"; else log "!! relaunch failed; remaining steps will error"; fi
+  nohup $PY $S/pd_watchdog.py --server prefill=$PRE --server decode=$DEC --log decode=$R/runs/$RUN/decode/server.log --interval 10 --hang-secs 300 --out $OUT/watchdog_r$RELAUNCHES.csv > $OUT/watchdog_r$RELAUNCHES.out 2>&1 &
+  WD=$!
+}
 
 log "=== start: recipe $REC, goldens $GOLD"
 bash $S/pd.sh stop >/dev/null 2>&1; sleep 3; bash $S/tpu_free.sh || { log "TPU not free; skipping config"; exit 1; }
@@ -71,18 +84,18 @@ if [[ $CFG =~ [DE] ]]; then
 fi
 state
 
-log "(6) sampling-params matrix (n_2 excluded: F-6)"
-$PY $S/params_matrix.py --a $LB --prompt-file $P/8192.jsonl --cases greedy_baseline,top_k_1,repetition_penalty_1.3,frequency_penalty_0.8,presence_penalty_0.8,min_new_tokens_100_ignore_eos_false,stop_string,stop_token_ids,no_stop_trim,logit_bias,return_logprob_top5,max_new_tokens_1,max_new_tokens_0,skip_special_tokens_false,sampling_seed_42_temp0.7,json_schema,regex,stream_vs_nonstream --report $OUT/params.json --timeout 300 > $OUT/params.txt 2>&1; log "params rc=$?"; grep -E 'cases|FAIL|PASS' $OUT/params.txt | tail -n 3 | cut -c1-160 | sed 's/^/   /'
-healthy || log "!! an engine is down after the params matrix"
+log "(6) sampling-params matrix (n_2 excluded: F-6; return_logprob_top5 excluded: F-5)"
+$PY $S/params_matrix.py --a $LB --prompt-file $P/8192.jsonl --cases greedy_baseline,top_k_1,repetition_penalty_1.3,frequency_penalty_0.8,presence_penalty_0.8,min_new_tokens_100_ignore_eos_false,stop_string,stop_token_ids,no_stop_trim,logit_bias,max_new_tokens_1,max_new_tokens_0,skip_special_tokens_false,sampling_seed_42_temp0.7,json_schema,regex,stream_vs_nonstream --report $OUT/params.json --timeout 300 > $OUT/params.txt 2>&1; log "params rc=$?"; grep -E 'cases|FAIL|PASS' $OUT/params.txt | tail -n 3 | cut -c1-160 | sed 's/^/   /'
+ensure_up "params matrix"
 
-log "(7) chat suite"
+ensure_up "step 6"; log "(7) chat suite"
 $PY $S/chat_suite.py --model $MODEL_NAME --kind $KIND --a $LB --report $OUT/chat.json --timeout 600 > $OUT/chat.txt 2>&1; log "chat rc=$?"; grep -E 'cases|FAIL' $OUT/chat.txt | tail -n 3 | cut -c1-160 | sed 's/^/   /'
 if [[ $M == qwen3-vl ]]; then
   log "(7b) multimodal: 1x448 and 4x448 images"
   for n in 1 4; do $PY $S/mm_request.py --url $LB --model $MODEL_NAME --num-images $n --resolution 448x448 --max-tokens 48 --temperature 0 2>&1 | grep -E 'status=' | cut -c1-160 | sed "s/^/   ${n}x448: /"; done
 fi
 
-log "(8) concurrency sweep c=1,2,4 at ISL 131072 / OSL 256"
+ensure_up "chat suite"; log "(8) concurrency sweep c=1,2,4 at ISL 131072 / OSL 256"
 cd $HOME/sglang-torchtpu
 for c in 1 2 4; do
   $PY -m sglang.bench_serving --backend sglang --base-url $LB --dataset-name random --random-input-len 131072 --random-output-len 256 --random-range-ratio 1.0 \
@@ -93,18 +106,18 @@ done
 cd $HOME
 state
 
-log "(9) GSM8K-100 via LB"
+ensure_up "concurrency sweep"; log "(9) GSM8K-100 via LB"
 cd $HOME/sglang-torchtpu && $PY -m sglang.test.run_eval --base-url $LB --model $MODEL_NAME --eval-name gsm8k --num-examples 100 --num-threads $GSM_THR --api chat --max-tokens $GSM_TOK --temperature 0 > $OUT/gsm8k.log 2>&1; grep -E 'gsm8k_score|Traceback' $OUT/gsm8k.log | tail -n 2 | sed 's/^/   /'; cd $HOME
 
-log "(10) decode-phase client aborts (3, two concurrent)"
+ensure_up "GSM8K"; log "(10) decode-phase client aborts (3, two concurrent)"
 $PY $S/abort_test.py --url $LB --prompt-file $P/131072.jsonl --phase decode --abort-after 5 --repeat 3 --concurrent 2 --server-info $PRE --server-info $DEC --settle 60 --report $OUT/abort_decode.json > $OUT/abort_decode.txt 2>&1; log "abort decode rc=$?"; grep -E 'PASS|FAIL|problem' $OUT/abort_decode.txt | tail -n 2 | cut -c1-200 | sed 's/^/   /'
 state
 
-log "(11) compile audit (decode, prefill)"
+ensure_up "decode aborts"; log "(11) compile audit (decode, prefill)"
 bash $S/compile_audit.sh $R/runs/$RUN/decode/server.log decode_$CFG | head -n 3 | sed 's/^/   /'
 prefill_log > $OUT/prefill_server.log; bash $S/compile_audit.sh $OUT/prefill_server.log prefill_$CFG | head -n 3 | sed 's/^/   /'
 
-log "(12) LAST: prefill-phase client abort (crashes the prefill engine in Config A, F-8)"
+ensure_up "compile audit"; log "(12) LAST: prefill-phase client abort (crashes the prefill engine in Config A, F-8)"
 $PY $S/abort_test.py --url $LB --prompt-file $P/131072.jsonl --phase prefill --abort-after 2 --repeat 1 --server-info $PRE --server-info $DEC --settle 30 --report $OUT/abort_prefill.json > $OUT/abort_prefill.txt 2>&1; log "abort prefill rc=$?"
 sleep 15; echo "   prefill /health after prefill-abort: $(curl -s -m 5 -o /dev/null -w '%{http_code}' $PRE/health)   decode: $(curl -s -m 5 -o /dev/null -w '%{http_code}' $DEC/health)"
 prefill_log | grep -E 'Scheduler hit an exception|AssertionError|Error:' | grep -vE 'UserWarning' | tail -n 3 | cut -c1-200 | sed 's/^/   /'
@@ -112,4 +125,4 @@ prefill_log | grep -E 'Scheduler hit an exception|AssertionError|Error:' | grep 
 kill $WD 2>/dev/null
 log "archiving logs"; mkdir -p $R/logs/runs/$RUN; prefill_log | gzip -c > $R/logs/runs/$RUN/prefill_server.log.gz; gzip -c $R/runs/$RUN/decode/server.log > $R/logs/runs/$RUN/decode_server.log.gz; rm -f $OUT/prefill_server.log
 bash $S/pd.sh stop >/dev/null 2>&1
-log "=== config $CFG/$M done"
+log "=== config $CFG/$M done (relaunches: $RELAUNCHES)"

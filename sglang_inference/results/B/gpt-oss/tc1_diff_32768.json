@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8_rep2_c1/32768.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/B/gpt-oss/tc1_32768.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 1024,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl32768_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 24<256",
+    "agreement 0.036<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 122,
+   "token_prefix": 24,
+   "token_agreement": 0.0361328125,
+   "first_divergence_token": 24,
+   "first_divergence_char": 122,
+   "context_a": " secret code words: pepper-53ba (checkpo",
+   "context_b": " secret code words: \"pepper-53ba\" for ch",
+   "first_token_logprob_absdiff": 0.03804945945739746,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl32768_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 3<256",
+    "agreement 0.014<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 11,
+   "token_prefix": 3,
+   "token_agreement": 0.013671875,
+   "first_divergence_token": 3,
+   "first_divergence_char": 11,
+   "context_a": "We need to parse the huge text.",
+   "context_b": "We need to list secret code wor",
+   "first_token_logprob_absdiff": 0.05594867467880249,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

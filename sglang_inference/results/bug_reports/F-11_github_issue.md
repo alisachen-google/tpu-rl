@@ -37,7 +37,7 @@ Pool sizes as logged (`aligning swa_max_total_num_tokens`):
 | `--max-running-requests` | SWA pool from the cap | After TPU rounding | Free above two chunks | Observed |
 |---|---|---|---|---|
 | 1 | 16,832 | 16,384 | 0 | hang on every prompt > 16,384 tokens (4 of 4) |
-| 2 | 17,216 | 16,896 | 512 | 8k and 32k complete; third chunk 320 tokens |
+| 2 | 17,216 | 16,896 | 512 | 8k, 32k and 131k complete (6 to 12.6 s); third chunk 320 tokens |
 | 4 | 17,984 | 17,920 | 1,536 | 8k, 32k, 131k prompts complete in 7 to 13 s (6 of 6) |
 | 8 | 19,520 | 19,456 | 3,072 | 128k prompts complete; pool cycles 0.58 to 0.84 |
 
