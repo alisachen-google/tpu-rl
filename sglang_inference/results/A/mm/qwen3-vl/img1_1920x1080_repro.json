@@ -1,0 +1,12 @@
+{
+ "text": "",
+ "usage": null,
+ "ttft_ms": null,
+ "e2e_ms": 65405.5,
+ "status": 500,
+ "error": "HTTP 500: Internal Server Error",
+ "image_descriptions": [
+  "red circle labeled 'IMAGE 1'"
+ ],
+ "est_prompt_tokens": 677
+}

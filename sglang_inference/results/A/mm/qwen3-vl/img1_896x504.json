@@ -1,0 +1,61 @@
+{
+ "text": "This image displays a simple graphic featuring a large, solid red circle centered on a plain white background. In the top-left corner, the text \"IMAGE 1\" is visible in a black, pixelated font. The design is minimalist and",
+ "usage": {
+  "prompt_tokens": 469,
+  "total_tokens": 517,
+  "completion_tokens": 48,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "image_tokens": 448
+  },
+  "reasoning_tokens": 0
+ },
+ "ttft_ms": 13318.9,
+ "e2e_ms": 13318.9,
+ "status": 200,
+ "error": null,
+ "raw": {
+  "id": "ea082c7277f44bfb9a148676e685634b",
+  "object": "chat.completion",
+  "created": 1791434339,
+  "model": "qwen3-vl-30b",
+  "choices": [
+   {
+    "index": 0,
+    "message": {
+     "role": "assistant",
+     "content": "This image displays a simple graphic featuring a large, solid red circle centered on a plain white background. In the top-left corner, the text \"IMAGE 1\" is visible in a black, pixelated font. The design is minimalist and",
+     "reasoning_content": null,
+     "tool_calls": null
+    },
+    "logprobs": null,
+    "finish_reason": "length",
+    "matched_stop": null
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 469,
+   "total_tokens": 517,
+   "completion_tokens": 48,
+   "prompt_tokens_details": {
+    "cached_tokens": 0,
+    "image_tokens": 448
+   },
+   "reasoning_tokens": 0
+  },
+  "metadata": {
+   "weight_version": "default",
+   "weight_versions": [
+    {
+     "version": "default",
+     "start": 0,
+     "end": 48
+    }
+   ]
+  }
+ },
+ "image_descriptions": [
+  "red circle labeled 'IMAGE 1'"
+ ],
+ "est_prompt_tokens": 160
+}

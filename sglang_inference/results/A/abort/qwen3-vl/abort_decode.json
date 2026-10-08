@@ -9,7 +9,9 @@
  "server_info": {
   "baseline": {
    "http://10.128.15.217:30000": {
-    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
    },
    "http://10.128.0.90:30000": {
     "num_running_reqs": null,
@@ -19,7 +21,9 @@
   },
   "after_abort": {
    "http://10.128.15.217:30000": {
-    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
    },
    "http://10.128.0.90:30000": {
     "num_running_reqs": null,
@@ -29,7 +33,9 @@
   },
   "settled": {
    "http://10.128.15.217:30000": {
-    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
    },
    "http://10.128.0.90:30000": {
     "num_running_reqs": null,
@@ -39,7 +45,9 @@
   },
   "final": {
    "http://10.128.15.217:30000": {
-    "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
    },
    "http://10.128.0.90:30000": {
     "num_running_reqs": null,
@@ -51,124 +59,130 @@
  "aborts": [
   {
    "idx": 0,
-   "rid": "abort-0-1791411249313",
-   "status": null,
-   "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new ",
-   "first_token_s": null,
-   "aborted_s": null,
-   "chunks": 0,
-   "phase_actual": null,
+   "rid": "abort-0-1791433928302",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.962,
+   "aborted_s": 11.962,
+   "chunks": 67,
+   "phase_actual": "decode",
    "finished": false
   },
   {
    "idx": 1,
-   "rid": "abort-1-1791411249315",
-   "status": null,
-   "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new ",
-   "first_token_s": null,
-   "aborted_s": null,
-   "chunks": 0,
-   "phase_actual": null,
+   "rid": "abort-1-1791433940264",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.949,
+   "aborted_s": 11.949,
+   "chunks": 67,
+   "phase_actual": "decode",
    "finished": false
   }
  ],
  "follow_ups": [
   {
    "label": "short",
-   "ok": false,
-   "status": null,
-   "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new ",
-   "cached_tokens": null,
-   "completion_tokens": null,
-   "elapsed": 0.001
+   "ok": true,
+   "status": 200,
+   "error": null,
+   "cached_tokens": 0,
+   "completion_tokens": 16,
+   "elapsed": 7.617
   },
   {
    "label": "identical-prompt",
-   "ok": false,
-   "status": null,
-   "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new ",
-   "cached_tokens": null,
-   "completion_tokens": null,
-   "elapsed": 0.001
+   "ok": true,
+   "status": 200,
+   "error": null,
+   "cached_tokens": 0,
+   "completion_tokens": 32,
+   "elapsed": 6.745
   }
  ],
- "baseline_problems": [
-  "http://10.128.15.217:30000: poll error: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"
- ],
- "start_errors": 2,
- "pass": false,
+ "baseline_problems": [],
+ "start_errors": 0,
+ "pass": true,
  "timeline": [
   {
    "t": 0.002,
    "msg": "prompt id=isl32768_k0 isl=32768 chars=176813 phase=decode abort_after=10.0s repeat=2 concurrent=1"
   },
   {
-   "t": 0.003,
-   "msg": "server-info[baseline] http://10.128.15.217:30000: {'error': \"ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn\"}"
+   "t": 0.017,
+   "msg": "server-info[baseline] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 0.016,
+   "t": 0.029,
    "msg": "server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 0.016,
+   "t": 0.029,
    "msg": "round 1/2: launching 1 aborting request(s)"
   },
   {
-   "t": 0.018,
-   "msg": "req0: could not start: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new "
+   "t": 0.037,
+   "msg": "req0: sent (abort-0-1791433928302), headers after 0.01s"
   },
   {
-   "t": 0.018,
+   "t": 11.992,
+   "msg": "req0: aborted at 11.962s in decode (first_token=1.962s, chunks=67)"
+  },
+  {
+   "t": 11.992,
    "msg": "round 2/2: launching 1 aborting request(s)"
   },
   {
-   "t": 0.02,
-   "msg": "req1: could not start: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new "
+   "t": 12.0,
+   "msg": "req1: sent (abort-1-1791433940264), headers after 0.01s"
   },
   {
-   "t": 0.02,
-   "msg": "server-info[after-abort] http://10.128.15.217:30000: {'error': \"ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn\"}"
+   "t": 23.941,
+   "msg": "req1: aborted at 11.949s in decode (first_token=1.949s, chunks=67)"
   },
   {
-   "t": 0.032,
+   "t": 23.954,
+   "msg": "server-info[after-abort] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 24.028,
    "msg": "server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 0.032,
+   "t": 24.028,
    "msg": "waiting --settle 90.0s"
   },
   {
-   "t": 90.033,
-   "msg": "server-info[settled] http://10.128.15.217:30000: {'error': \"ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn\"}"
+   "t": 114.04,
+   "msg": "server-info[settled] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 90.044,
+   "t": 114.052,
    "msg": "server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 90.044,
+   "t": 114.052,
+   "msg": "WARN http://10.128.15.217:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
+  },
+  {
+   "t": 114.052,
    "msg": "WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
   },
   {
-   "t": 90.045,
-   "msg": "follow-up short: FAIL status=None tokens=None cached=None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new "
+   "t": 121.67,
+   "msg": "follow-up short: OK status=200 tokens=16 cached=0 "
   },
   {
-   "t": 90.046,
-   "msg": "follow-up identical-prompt: FAIL status=None tokens=None cached=None ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /generate (Caused by NewConnectionError(\"HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new "
+   "t": 128.415,
+   "msg": "follow-up identical-prompt: OK status=200 tokens=32 cached=0 "
   },
   {
-   "t": 90.047,
-   "msg": "server-info[final] http://10.128.15.217:30000: {'error': \"ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn\"}"
+   "t": 128.428,
+   "msg": "server-info[final] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 90.057,
+   "t": 128.575,
    "msg": "server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
-  },
-  {
-   "t": 90.057,
-   "msg": "FAIL not back to baseline: http://10.128.15.217:30000: poll error: ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=30000): Max retries exceeded with url: /get_server_info (Caused by NewConn"
   }
  ]
 }

@@ -44,3 +44,20 @@ bad_image_payload     400/None/0c/0r                -                           
 
 8 cases, 0 failed -> /home/alisachen_google_com/pd_disagg/results/A/chat/qwen3-vl/chat_pd_A.json
 2026-10-08T04:32:08Z (3) decode-phase aborts
+2026-10-08T04:34:16Z abort rc=0
+[+  121.67s] follow-up short: OK status=200 tokens=16 cached=0 
+[+  128.41s] follow-up identical-prompt: OK status=200 tokens=32 cached=0 
+[+  128.43s] server-info[final] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+  128.57s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+  128.58s] PASS: 2 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=0), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/res
+2026-10-08T04:34:31Z (4) F-10 repro LAST: new vision resolution 1920x1080 (expect prefill crash), then 896x504 (another non-square), relaunch between
+   1920x1080: payload: 16.4 KiB, 1 image(s) 1920x1080 (~661 tok each), est prompt tokens ~677, content parts=2
+   1920x1080: status=500 prompt_tokens=None completion_tokens=None cached_tokens=None ttft=Nonems e2e=65405.5ms
+   prefill /health after 1920x1080: 000
+2026-10-08T04:38:46Z prefill + LB back
+   896x504: payload: 6.3 KiB, 1 image(s) 896x504 (~144 tok each), est prompt tokens ~160, content parts=2
+   896x504: status=200 prompt_tokens=469 completion_tokens=48 cached_tokens=0 ttft=13318.9ms e2e=13318.9ms
+   prefill /health after 896x504: 200
+   http://10.128.15.217:30000 sglang:full_token_usage 0.0 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:full_token_usage 0.0 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-08T04:39:19Z phase A qwen redo done

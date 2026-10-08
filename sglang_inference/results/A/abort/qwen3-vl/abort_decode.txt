@@ -15,3 +15,7 @@
 [+  114.05s] WARN http://10.128.15.217:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
 [+  114.05s] WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
 [+  121.67s] follow-up short: OK status=200 tokens=16 cached=0 
+[+  128.41s] follow-up identical-prompt: OK status=200 tokens=32 cached=0 
+[+  128.43s] server-info[final] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+  128.57s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+  128.58s] PASS: 2 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=0), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/A/abort/qwen3-vl/abort_decode.json

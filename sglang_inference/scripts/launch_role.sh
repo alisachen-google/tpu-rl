@@ -12,6 +12,9 @@ export RUN_DIR
 # Disk guard: the inductor cache (~/.cache/sglang, $TORCHINDUCTOR_CACHE_DIR) grows 4-5 GB per launch; prune when the root disk is low.
 free_gb=$(df -BG --output=avail / | tail -1 | tr -dc 0-9)
 if (( free_gb < 20 )); then echo "[launch] root disk low (${free_gb} GB free): pruning inductor caches"; rm -rf "$HOME/.cache/sglang/inductor_dp1_dprank0_tp8" "$COMPILE_CACHE_ROOT/inductor"; df -h / | tail -1; fi
+# tmpfs guard: compile caches live in /dev/shm; prune the inductor cache when the tmpfs is above 300 GB used (a compiled MoE decoder adds ~65 GB).
+shm_used_gb=$(df -BG --output=used /dev/shm | tail -1 | tr -dc 0-9)
+if (( shm_used_gb > 300 )); then echo "[launch] /dev/shm at ${shm_used_gb} GB: pruning inductor cache"; rm -rf /dev/shm/alisachen_cache/inductor_dp1_dprank0_tp8 "$TORCHINDUCTOR_CACHE_DIR"; mkdir -p "$TORCHINDUCTOR_CACHE_DIR"; df -h /dev/shm | tail -1; fi
 # Refuse to start if another user's engine holds the TPU.
 holders=$(sudo -n fuser -v /dev/vfio/0 2>&1 | awk 'NR>1{print $(NF-3)}' | sort -u | grep -v "^$(id -un)$" || true)
 if [[ -n "$holders" ]]; then echo "[launch] REFUSING: TPU held by: $holders" >&2; exit 3; fi
