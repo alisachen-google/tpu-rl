@@ -8,7 +8,7 @@ m(){ curl -s -m 10 $PRE/metrics | grep -E '^sglang:(hicache_host_used_tokens|hic
 gen(){ $PY $S/golden_diff.py generate --prompts $P/32768.jsonl --url $LB --out $OUT/$1.jsonl --max-new-tokens 64 --ignore-eos --return-logprob --concurrency 1 --timeout 900 --stream > $OUT/$1.log 2>&1; grep -E 'ttft=' $OUT/$1.log | sed "s/^/   $1 /" | cut -c1-140; }
 hits(){ ssh -i $HOME/.ssh/google_compute_engine -o BatchMode=yes -o StrictHostKeyChecking=no sa_101411256518727260534@10.128.15.217 "sudo -n grep -E 'Prefill batch' /home/alisachen_google_com/pd_disagg/results/runs/$RUN/prefill/server.log | grep -oE '#new-token: [0-9]+, #cached-token: [0-9]+, #hbm-hit-token: [0-9]+, #host-hit-token: [0-9]+' | tail -n ${1:-2}" | sed 's/^/   prefill /'; }
 until grep -q 'phase BCDE done' $R/phase_BCDE.log 2>/dev/null; do sleep 120; done; log "chain done"
-bash $S/pd.sh stop >/dev/null 2>&1; sleep 3; bash $S/tpu_free.sh || { log "TPU not free"; exit 1; }
+bash $S/pd.sh stop >/dev/null 2>&1; sleep 3; until bash $S/tpu_free.sh >/dev/null 2>&1; do sleep 120; done; log "TPU free"
 RUN=C_gpt-oss_128k_hicache; env -u TORCH_DEVICE_BACKEND_AUTOLOAD bash $S/pd.sh start $HOME/pd_disagg/recipes/gpt-oss_C_128k.json $RUN 2>&1 | grep -E 'ready|NOT'
 curl -sf -m 30 $LB/health_generate >/dev/null || { log "pair did not come up"; bash $S/pd.sh stop; exit 2; }
 log "(1) cold: 32k prompts, c=1, streaming"; gen cold; hits
