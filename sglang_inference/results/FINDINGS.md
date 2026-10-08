@@ -343,3 +343,19 @@ harness now puts both caches under `/dev/shm/alisachen_cache/` (RAM-backed, 473 
 - Outputs are **not token-identical** to the eager server: divergence after 9–83 tokens, first-token log-prob Δ 0.03–0.25; tiny set 21/35 identical.
   Compiled and eager kernels differ numerically (expected), so an accuracy check is the right gate: GSM8K-100 compiled vs eager is queued.
 - Patch reverted; tree clean. Recommendation: upstream the registration; also budget compile time and cache space for this model.
+
+**F-11 isolation (2026-10-08 05:06–05:28 UTC, `results/F11/`) and root cause from code.**
+- 1M shape with `max_running_requests 4` (SWA pool 17,920 tokens): 8k, 32k and 131k prompts all complete (7–13 s). The pool cycles 0.54→0.91→0.54.
+  So neither the context length nor the pool size per se is the trigger; `max_running_requests 1` is.
+- SWA pool size comes from `SWAChunkCapPoolConfigurator` (`pool_configurator.py`, used when radix cache is off and `max_running_requests` is explicit):
+  `cap = 2 × chunked_prefill_size + (window 128 + eviction_interval 128 + page 64 + decode page 64) × max_running_requests + page 64`
+  → 16,832 (mrr 1), 17,984 (mrr 4), 19,520 (mrr 8). Observed logs match exactly.
+- TPU-only rounding (`kv_cache_configurator.py`: "SWA page count must be a multiple of 8") rounds DOWN to a multiple of 512 tokens: 16,832 → **16,384 = exactly two chunks**.
+  The 448 tokens of headroom the cap formula reserved are removed.
+- Scheduling of a chunked request (`prefill_budget.py` `_continuation_chunk_cap`): the next chunk may use `remaining_swa − (window + page) = remaining_swa − 192`, floored to a page.
+  Chunk 1 = 8192, chunk 2 = 8192 − 192 = **8000** (matches the log), leaving 192 free → chunk 3 cap = 0 → `fit_chunk` returns None → no chunk scheduled.
+- Out-of-window SWA pages of a chunked request are only freed inside `maybe_evict_swa` when the request's NEXT chunk is scheduled (and, with overlap scheduling, only from the third chunk on).
+  Deadlock: the eviction that would free ~16k slots runs only when a chunk is scheduled, and no chunk can be scheduled until slots are freed. No forward runs, so no watchdog fires.
+- With mrr ≥ 2 the rounding leaves ≥ 512 tokens of headroom → a small third chunk (e.g. 1,344 tokens in the mr4 run) gets scheduled, triggers the eviction, and the pool cycles. Only mrr 1 deadlocks.
+- Fix candidates: round the TPU alignment UP (`ceil`) or add the alignment slack to the cap; or evict the chunked request's out-of-window SWA pages before computing its continuation budget; or fail the request with an error when `fit_chunk` returns None and nothing else is running.
+- Open: in the 128k shape with mrr 1 (pool also 16,384) the FIRST 8k prompt (one chunk) also stalled: prefill holds it in the inflight queue (swa 0.5), the decode engine (mrr 1, SWA pool 768→512) never ran a batch and shows empty queues. Different symptom, not yet explained; the harness aborts at 900 s and continues with 32k.

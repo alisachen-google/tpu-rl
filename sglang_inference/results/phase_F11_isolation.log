@@ -14,3 +14,4 @@
 2026-10-08 05:16:54 decode /health ready after 0 s
 2026-10-08 05:16:55 LB /health_generate ready after 1 s
     gpt-oss_A_128k_mr1 mrr= 1 ctx= 140288 capacity= 786432 capacity_swa= 16384
+   ISL=8192: 0 of 2 completed in 1800 s; swa_usage now: sglang:swa_token_usage 0.5
