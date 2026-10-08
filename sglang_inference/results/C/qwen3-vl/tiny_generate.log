@@ -1,0 +1,3 @@
+35 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=False)
+[tiny1] tokens=160 finish=length cached=0 ttft=24612.61ms e2e=24615.59ms
+[tiny2] tokens=160 finish=length cached=0 ttft=28760.29ms e2e=28760.64ms
