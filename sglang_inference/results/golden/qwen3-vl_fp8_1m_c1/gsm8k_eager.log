@@ -5,4 +5,15 @@
 /home/alisachen_google_com/sglang-torchtpu/python/sglang/test/run_eval.py:367: DeprecationWarning: sglang.test.run_eval is deprecated; its legacy scorers will be removed. Use sglang.test.sgl_eval_utils.run_sgl_eval or `sgl-eval run` instead.
   run_eval(args)
 ChatCompletionSampler initialized with self.system_message=None self.temperature=0.0 self.max_tokens=1024 self.reasoning_effort=None self.extra_body=None self.stop=None self.record_meta_info=True
-  0%|          | 0/100 [00:00<?, ?it/s]  1%|          | 1/100 [01:49<3:00:32, 109.42s/it]  8%|▊         | 8/100 [05:21<57:29, 37.50s/it]    25%|██▌       | 25/100 [05:27<11:37,  9.30s/it] 26%|██▌       | 26/100 [05:41<11:49,  9.59s/it] 27%|██▋       | 27/100 [05:52<11:46,  9.68s/it] 29%|██▉       | 29/100 [06:03<10:29,  8.87s/it] 30%|███       | 30/100 [06:05<09:30,  8.15s/it] 31%|███       | 31/100 [06:12<09:08,  7.95s/it] 32%|███▏      | 32/100 [06:28<10:38,  9.40s/it]
+  0%|          | 0/100 [00:00<?, ?it/s]  1%|          | 1/100 [01:49<3:00:32, 109.42s/it]  8%|▊         | 8/100 [05:21<57:29, 37.50s/it]    25%|██▌       | 25/100 [05:27<11:37,  9.30s/it] 26%|██▌       | 26/100 [05:41<11:49,  9.59s/it] 27%|██▋       | 27/100 [05:52<11:46,  9.68s/it] 29%|██▉       | 29/100 [06:03<10:29,  8.87s/it] 30%|███       | 30/100 [06:05<09:30,  8.15s/it] 31%|███       | 31/100 [06:12<09:08,  7.95s/it] 32%|███▏      | 32/100 [06:28<10:38,  9.40s/it] 33%|███▎      | 33/100 [09:18<45:11, 40.47s/it] 48%|████▊     | 48/100 [09:25<07:07,  8.21s/it] 49%|████▉     | 49/100 [09:38<07:16,  8.56s/it] 52%|█████▏    | 52/100 [09:49<05:56,  7.43s/it] 53%|█████▎    | 53/100 [10:10<06:52,  8.77s/it] 54%|█████▍    | 54/100 [10:18<06:42,  8.74s/it] 56%|█████▌    | 56/100 [13:29<23:06, 31.51s/it] 74%|███████▍  | 74/100 [16:41<06:41, 15.44s/it] 95%|█████████▌| 95/100 [16:51<00:35,  7.02s/it] 96%|█████████▌| 96/100 [17:07<00:29,  7.33s/it] 98%|█████████▊| 98/100 [17:08<00:13,  6.69s/it] 99%|█████████▉| 99/100 [17:13<00:06,  6.60s/it]100%|██████████| 100/100 [17:23<00:00,  6.87s/it]100%|██████████| 100/100 [17:23<00:00, 10.43s/it]
+Total latency: 1043.493 s
+Score: 0.970
+Output throughput: 17.320 token/s
+[METRIC] gsm8k_score=0.97 labels={"model": "qwen3-vl-30b", "eval": "gsm8k"}
+[METRIC] gsm8k_latency=1043.493409654824 labels={"model": "qwen3-vl-30b", "eval": "gsm8k"}
+====================
+Speculative decoding: no per-request spec_accept_length in responses (non-speculative server, or --api completion which lacks return_meta_info).
+====================
+Writing report to /tmp/gsm8k_qwen3-vl-30b.html
+{'score:std': np.float64(0.17058722109231983), 'score': np.float64(0.97), 'latency': 1043.493409654824, 'output_throughput': 17.319706893001218}
+Writing results to /tmp/gsm8k_qwen3-vl-30b.json

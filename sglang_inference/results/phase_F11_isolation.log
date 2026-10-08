@@ -1,0 +1,16 @@
+2026-10-08T05:06:25Z 127999 golden done
+2026-10-08T05:06:39Z a_holders=[] b_holders=[]
+2026-10-08T05:06:39Z F-11 isolation: gpt-oss_A_1m_mr4
+2026-10-08 05:10:42 prefill /health ready after 241 s
+2026-10-08 05:10:42 decode /health ready after 0 s
+2026-10-08 05:10:43 LB /health_generate ready after 1 s
+    gpt-oss_A_1m_mr4 mrr= 4 ctx= 1056768 capacity= 1114112 capacity_swa= 17920
+   ISL=8192: 0 of 2 completed in 13 s; swa_usage now: sglang:swa_token_usage 0.0
+   ISL=32768: 0 of 2 completed in 14 s; swa_usage now: sglang:swa_token_usage 0.0
+   ISL=131072: 0 of 2 completed in 26 s; swa_usage now: sglang:swa_token_usage 0.0
+2026-10-08T05:12:51Z a_holders=[] b_holders=[]
+2026-10-08T05:12:51Z F-11 isolation: gpt-oss_A_128k_mr1
+2026-10-08 05:16:54 prefill /health ready after 241 s
+2026-10-08 05:16:54 decode /health ready after 0 s
+2026-10-08 05:16:55 LB /health_generate ready after 1 s
+    gpt-oss_A_128k_mr1 mrr= 1 ctx= 140288 capacity= 786432 capacity_swa= 16384

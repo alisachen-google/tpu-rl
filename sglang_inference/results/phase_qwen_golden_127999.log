@@ -11,3 +11,9 @@ isl127999_k1  True     4510   1024  1.000   0.0000  PASS
 
 2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/A/tc1/qwen3-vl/golden_diff_c1_127999.json
 2026-10-08T04:48:09Z GSM8K-100 on the EAGER Qwen golden (reference for the F-2 compiled-vs-eager accuracy check; slow)
+[METRIC] gsm8k_score=0.97 labels={"model": "qwen3-vl-30b", "eval": "gsm8k"}
+2026-10-08 05:05:39 stopping ours on a
+[cleanup] remaining sglang procs (all users): 0  TPU holders: 
+2026-10-08 05:05:44 stopping ours on b
+[cleanup] remaining sglang procs (all users): 0  TPU holders: 
+2026-10-08T05:05:48Z qwen 127999 golden done
