@@ -18,7 +18,7 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-11](F-11.md) | Chunked prefill deadlocks when the SWA continuation budget hits 0 before eviction (gpt-oss, 1 slot, TPU rounding) | bug (hang) | high | reproduced 4/4, root cause in code  none (#1067 would hit it) |
 | [F-12](F-12.md) | P/D handshake never completes; request held on both engines with no deadline | bug (hang) | high | reproduced on 3/3 fresh pairs (one recipe)  #1113/#1078 related (those expire) |
 | [F-13](F-13_github_issue.md) | `--kv-canary` kills every TPU engine at start-up (fused pool not supported by the canary) | bug (start-up crash, observability) | medium | 2/2 models  none |
-| [F-14](F-14_github_issue.md) | `--disaggregation-enable-kv-checksum` is CUDA-only; TPU prefill passes health then dies on first request | bug (crash, observability) | medium | 1/1  none |
+| [F-14](F-14_github_issue.md) | `--disaggregation-enable-kv-checksum` is CUDA-only; TPU prefill passes health then dies on first request | bug (crash, observability) | medium | 2/2 models  none |
 
 Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`). Production triage (severity, priority, filing order):
 `PRIORITIES.md`. Ready-to-file GitHub issue drafts with code traces: `F-1_github_issue.md`, `F-2_github_issue.md`, `F-5_github_issue.md`,

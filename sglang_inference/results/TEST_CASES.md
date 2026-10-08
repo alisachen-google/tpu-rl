@@ -211,7 +211,7 @@ Legend: PASS = met the pass criterion; NUM = numerical difference only (content 
 - Config D and E (gpt-oss): first D launch lost the TPU to another user's job starting at the same second (device nodes already open); requeued in `_phase_BCDE_resume.sh` behind `tpu_free`.
 - Config B and C for Qwen3-VL: done; identical to the golden at every length, prefix cache and HiCache write-through working, GSM8K 0.96.
 - HiCache reload timing on an idle pair: `_phase_hicache_reload.sh`, queued after the chain.
-- TC-15: canary runs failed at start-up (F-13); checksum-only gpt-oss run died on the first request (F-14); Qwen checksum-only run in progress (same path).
+- TC-15: canary runs failed at start-up (F-13); checksum-only gpt-oss run died on the first request (F-14); Qwen checksum-only run: identical crash (F-14 confirmed on both models).
 - HiCache host-hit timing: done (257 ms TTFT for a 32k host hit).
 - 1m shape for B–E: blocked by F-11 at 1 slot; plan is the 4-slot variant once memory headroom at 1M is measured.
 - Not covered on this hardware: multi-host engines (each host is a 4-chip slice), both engines on one host, the Rust router variant,

@@ -549,3 +549,5 @@ host-side or Pallas checksum. No open issue mentions the checksum. Draft: `bug_r
 progress (same code path expected).
 **TC-15 outcome:** neither built-in KV integrity check (canary F-13, checksum F-14) can run on TPU in this build; the P/D transfer is verified
 only by the differential tests (TC-1: Qwen bit-identical at all lengths; gpt-oss identical with SWA memory off) and GSM8K.
+- F-14 confirmed on Qwen3-VL (18:31 UTC, `A_qwen3-vl_128k_kvcheck_nocanary`): pair healthy, first TC-1 request → all prefill ranks die at
+  `checksum.py:105` (`is_cuda` assertion). 2/2 models.

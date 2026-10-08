@@ -20,7 +20,7 @@ the checksum and send `0`), and then the first real request kills all eight sche
 AssertionError
 ```
 
-Reproduced on gpt-oss-120b (the Qwen3-VL run follows the same code path). The checksum computer is constructed with `torch.device("cuda:…")`,
+Reproduced on gpt-oss-120b and on Qwen3-VL-30B-A3B (identical traceback on all ranks of both). The checksum computer is constructed with `torch.device("cuda:…")`,
 asserts `is_cuda` on its inputs and calls the CUDA Adler-32 kernels in `sglang.kernels.ops.memory.adler32`; there is no TPU implementation and
 no validation that rejects the flag on `--device tpu`.
 
@@ -35,7 +35,7 @@ A monitoring option must never let an engine pass its health checks and then die
 | TPU stack | torch-tpu 0.1.1+release.2026.9.22.20260927223741, libtpu 0.0.47, tpu-sync-torch 0.0.1.dev20261002213151, torch 2.11.0+cpu, transformers 5.8.1 |
 | Hardware | Two TPU v7x hosts (4 chips / 8 TensorCores each), prefill on host a, decode on host b, TP 8, EP 8, raiden transfer |
 | Flags that trigger it | `--disaggregation-enable-kv-checksum` on both engines (Config A recipe otherwise; `--kv-canary none`) |
-| Model | `openai/gpt-oss-120b` (MXFP4, fp8 KV, page 64) |
+| Models | `openai/gpt-oss-120b` (MXFP4, fp8 KV, page 64); `Qwen/Qwen3-VL-30B-A3B-Instruct` (bf16, fp8 KV, page 128) |
 
 ## Code trace
 
@@ -94,5 +94,6 @@ on all eight ranks at 18:24:52 with the traceback above. The decode engine staye
 
 ## Evidence
 
-In `alisachen-google/tpu-rl`, directory `sglang_inference/`: prefill log of `A_gpt-oss_128k_kvcheck_nocanary` (host a; compressed copy in
-`results/logs/runs/`), `results/phase_kv_checksum_gptoss.log`, `recipes/gpt-oss_A_128k_kvcheck_nocanary.json`, `results/FINDINGS.md` (F-14).
+In `alisachen-google/tpu-rl`, directory `sglang_inference/`: prefill logs of `A_gpt-oss_128k_kvcheck_nocanary` and `A_qwen3-vl_128k_kvcheck_nocanary`
+(compressed copies in `results/logs/runs/`), `results/phase_kv_checksum_gptoss.log`, `results/phase_kv_checksum_qwen.log`,
+`recipes/*_A_128k_kvcheck_nocanary.json`, `results/FINDINGS.md` (F-14).
