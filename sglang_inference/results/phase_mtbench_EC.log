@@ -3,3 +3,34 @@
 2026-10-08 21:28:29 prefill /health ready after 271 s
 2026-10-08 21:28:29 decode /health ready after 0 s
 2026-10-08 21:28:30 LB /health_generate ready after 1 s
+[E] c=1 questions=80 ok turn1=80 turn2=80 wall=289.4s output_tokens=68378 out_tok/s=236.3
+[E]   TTFT turn1 mean=521ms p50=440ms | turn2 mean=608ms p50=491ms
+[E]   turn2 cached_tokens mean=102 of prompt mean=570 (cached fraction 0.18); turn1 cached mean=25
+[E]   e2e per turn mean: turn1=1.71s turn2=1.90s; completion mean turn1=411 turn2=444
+[E]   spec accept_length mean=2.464 p50=2.405 min=1.652 max=3.789 (n=160)
+   prefill cache_hit_rate after c=1: sglang:cache_hit_rate 0.1032258064516129
+[E] c=4 questions=80 ok turn1=80 turn2=80 wall=94.2s output_tokens=68519 out_tok/s=727.1
+[E]   TTFT turn1 mean=612ms p50=504ms | turn2 mean=650ms p50=557ms
+[E]   turn2 cached_tokens mean=181 of prompt mean=573 (cached fraction 0.32); turn1 cached mean=101
+[E]   e2e per turn mean: turn1=2.20s turn2=2.39s; completion mean turn1=414 turn2=442
+[E]   spec accept_length mean=2.458 p50=2.393 min=1.834 max=3.789 (n=160)
+   prefill cache_hit_rate after c=4: sglang:cache_hit_rate 0.1032258064516129
+2026-10-08T21:35:14Z [mtbench] === E done
+2026-10-08T21:35:27Z [mtbench] === C: start /home/alisachen_google_com/pd_disagg/recipes/gpt-oss_C_128k.json
+2026-10-08 21:37:44 prefill /health ready after 136 s
+2026-10-08 21:37:44 decode /health ready after 0 s
+2026-10-08 21:37:45 LB /health_generate ready after 1 s
+[C] c=1 questions=80 ok turn1=80 turn2=80 wall=355.8s output_tokens=68191 out_tok/s=191.7
+[C]   TTFT turn1 mean=324ms p50=325ms | turn2 mean=354ms p50=342ms
+[C]   turn2 cached_tokens mean=102 of prompt mean=572 (cached fraction 0.18); turn1 cached mean=63
+[C]   e2e per turn mean: turn1=2.15s turn2=2.30s; completion mean turn1=414 turn2=438
+[C]   no spec_verify_ct (non-speculative server)
+   prefill cache_hit_rate after c=1: sglang:cache_hit_rate 0.1032258064516129
+[C] c=4 questions=80 ok turn1=80 turn2=80 wall=114.4s output_tokens=68002 out_tok/s=594.6
+[C]   TTFT turn1 mean=395ms p50=372ms | turn2 mean=401ms p50=394ms
+[C]   turn2 cached_tokens mean=109 of prompt mean=575 (cached fraction 0.19); turn1 cached mean=99
+[C]   e2e per turn mean: turn1=2.74s turn2=2.85s; completion mean turn1=417 turn2=433
+[C]   no spec_verify_ct (non-speculative server)
+   prefill cache_hit_rate after c=4: sglang:cache_hit_rate 0.1032258064516129
+2026-10-08T21:45:56Z [mtbench] === C done
+2026-10-08T21:45:56Z [mtbench] phase mtbench EC done

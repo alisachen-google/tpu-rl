@@ -214,7 +214,7 @@ Legend: PASS = met the pass criterion; NUM = numerical difference only (content 
 | Method | `scripts/mtbench_runner.py`: renders each turn with the gpt-oss chat template offline, sends it to `/generate` (greedy, 512 tokens), records per turn TTFT, prompt and cached tokens, completion tokens and `spec_verify_ct`; runs at concurrency 1 (latency) and 4 (throughput) |
 | Pairs | A (radix off) vs B (radix on): turn-2 cached fraction and TTFT, prefill `cache_hit_rate`. C_bf16 (= D without speculation) vs D (EAGLE3): output tok/s, per-request accept length, turn-2 effects combined with the cache |
 | Command | `bash $S/_phase_mtbench.sh` (queued after the 1M phase; results in `results/mtbench/<cfg>/summary.txt`) |
-| Results | **Speculation (D vs identical no-spec twin C_bf16):** 268 vs 187 tok/s single-stream (+43 %), 740 vs 590 at c=4 (+25 %); mean accept length 2.46 (median 2.41, 1.65–3.79); per-turn latency 1.50 vs 2.17 s; TTFT +115–240 ms. **Prefix caching (B vs A):** no measurable gain on short two-turn chat in PD mode: only the prompt is cached (18–22 % of turn 2) because the turn-1 answer's KV lives on the decode engine (O-3). 160/160 turns answered in every run. E and C on the same set: pending |
+| Results | **Speculation (D vs identical no-spec twin C_bf16):** 268 vs 187 tok/s single-stream (+43 %), 740 vs 590 at c=4 (+25 %); mean accept length 2.46 (median 2.41, 1.65–3.79); per-turn latency 1.50 vs 2.17 s; TTFT +115–240 ms. **Prefix caching (B vs A):** no measurable gain on short two-turn chat in PD mode: only the prompt is cached (18–22 % of turn 2) because the turn-1 answer's KV lives on the decode engine (O-3). 160/160 turns answered in every run. E (decode radix + decode HiCache): turn-2 cached 18 % at c=1 / 32 % at c=4, 236 and 727 tok/s (slower than D single-stream); C (host tier): identical to B. No configuration recovers the previous answer's KV for the prefill (O-3) |
 
 ## 4. Not yet run / pending
 
@@ -224,6 +224,6 @@ Legend: PASS = met the pass criterion; NUM = numerical difference only (content 
 - TC-15: canary runs failed at start-up (F-13); checksum-only gpt-oss run died on the first request (F-14); Qwen checksum-only run: identical crash (F-14 confirmed on both models).
 - HiCache host-hit timing: done (257 ms TTFT for a 32k host hit).
 - 1m shape: Config B and C with 2 slots running now (`_phase_1m_BC.sh`); single-slot 1M stalls (F-12), radix-on pool is ratio-sized so F-11 does not apply.
-- TC-16 MT-Bench: A, B, C_bf16, D done; E (decode radix) and C (host tier) running for the multi-turn cache question.
+- TC-16 MT-Bench: all six configurations done.
 - Not covered on this hardware: multi-host engines (each host is a 4-chip slice), both engines on one host, the Rust router variant,
   KV checksum / canary flags (`--disaggregation-enable-kv-checksum`, `--kv-canary`), fault injection (covered by a colleague's campaigns).

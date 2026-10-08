@@ -616,3 +616,7 @@ rely on the decode-side cache / host restore for this; Config E (decode radix + 
 - **Prefix caching (B vs A):** no measurable gain on short multi-turn chat in PD mode — only the prompt (18–22 %) is cached because the
   previous answer's KV lives on the decode (O-3). Config E (decode radix) and C (host tier) queued on the same set.
 - All 4 configs: 160/160 turns OK at both concurrencies; prefill hit rate 0.10 with the cache on.
+- MT-Bench E and C (21:24–21:46 UTC): **E** (decode radix + decode HiCache + EAGLE3) c=1 236 tok/s, TTFT 521/608 ms, turn-2 cached 18 %,
+  accept 2.46; c=4 727 tok/s, turn-2 cached 32 %. **C** (host tier) c=1 192 tok/s, turn-2 cached 18 %; c=4 595 tok/s, 19 %. Neither the
+  decode-side radix cache nor the host tier raises the prefill's cached fraction for the previous answer in this build: O-3 holds for every
+  configuration. E is ~12 % slower than D single-stream (decode-side cache bookkeeping overhead) with identical acceptance.
