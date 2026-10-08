@@ -504,3 +504,21 @@ holder check (09:12:00, still empty) and device open. Chain stopped; D, E and Qw
 The host-hit step did not measure a host hit: the eviction load (12 × 131k = 1.57M tokens) filled the 1.57M-token host pool and evicted the
 32k prefixes from the host tier too (`#host-hit-token: 0`, TTFT 1,242 ms = cold). Rerun queued with 8 prompts (`_phase_hicache_reload2.sh`).
 The earlier host hit in Config C (14 × 131k < pool) remains the evidence that reload works and is bit-exact.
+
+## F-13 — `--kv-canary` kills every engine at start-up on TPU (gpt-oss: `AttributeError: 'TpuFusedMHATokenToKVPool' object has no attribute 'k_buffer'`)
+
+**Symptom (2026-10-08 17:29 UTC, run `A_gpt-oss_128k_kvcheck`).** Config A gpt-oss with `kv_canary: log`, `kv_canary_real_data: partial`,
+`kv_canary_sweep_interval: 50` (+ `disaggregation_enable_kv_checksum`) on both engines: 6 s after `Load weight end`, all 8 ranks on both hosts
+raise in `kv_canary/pool_patcher/adapters/swa.py:65` (`_build_subpool_group`: `sub_pool.k_buffer[0]`), SIGQUIT → launcher kills the group
+(`exited with -9`). The TPU fused pool keeps a single fused 5-D `kv_buffer` (`hardware_backend/tpu/kv_pool.py:71`,
+`TpuFusedMHATokenToKVPool(MHATokenToKVPool)`), so neither `k_buffer` nor `v_buffer` exists. The attacher registry
+(`kv_canary/pool_patcher/api.py:26-30`) maps only `MHATokenToKVPool`, `MHATokenToKVPoolFP4`, `SWAKVPool`, `DeepSeekV4TokenToKVPool`; no TPU
+module registers the fused pool, and `attach_canary_buffers` looks up the exact type. gpt-oss hits the SWA adapter via `SWAKVPool` whose
+sub-pools are TPU fused pools; a non-SWA TPU model should hit `NotImplementedError: no attacher registered` (Qwen run pending).
+**Why it matters.** The canary is the build's own use-after-free / page-overlap detector; on TPU it cannot be turned on, and the failure is a
+crash at start-up rather than a validation error. **Fix:** register a TPU attacher that reads the fused layout (or make the SWA/MHA adapters use
+`get_fused_kv_buffer` when `k_buffer` is absent); until then reject `--kv-canary` on `--device tpu` at argument validation with a message.
+Not in the open-issue list (no issue mentions kv-canary).
+- F-13 confirmed on Qwen3-VL (18:00 UTC, `A_qwen3-vl_128k_kvcheck`): `NotImplementedError: kv-canary: no attacher registered for pool class
+  TpuFusedMHATokenToKVPool`. Both TPU pool shapes fail → `--kv-canary` unusable on TPU. Draft: `bug_reports/F-13_github_issue.md`.
+  Checksum-only TC-15 runs queued (`_phase_kv_checksum_gptoss.sh`, then Qwen).

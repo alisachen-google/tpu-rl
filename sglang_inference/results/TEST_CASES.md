@@ -204,14 +204,15 @@ Legend: PASS = met the pass criterion; NUM = numerical difference only (content 
 | Checks | both engines started with `disaggregation_enable_kv_checksum: true` (Adler-32 over each request's KV pages on the prefill, verified on the decode; a mismatch aborts that request with HTTP 500 and logs `KV checksum mismatch req=...`) and `kv_canary: log`, `kv_canary_real_data: partial`, `kv_canary_sweep_interval: 50` (pool canary: use-after-free / overlapping page writes are logged). Expected: zero mismatches and zero canary reports across TC-1 at 8k/32k/128k, concurrency 4 at 32k, and decode-phase aborts |
 | Why | TC-1's token comparison can mask corruption that greedy decoding tolerates; the checksum verifies the transferred bytes themselves and the canary verifies pool bookkeeping |
 | Command | `bash $S/_phase_kv_integrity.sh` (recipes `recipes/<model>_A_128k_kvcheck.json`, runs `A_<model>_128k_kvcheck`, results `results/A_kvcheck/<model>/`) |
-| Results | pending (queued after the HiCache timing test; gpt-oss then Qwen3-VL) |
+| Results | **Canary: both pairs fail to start (F-13).** gpt-oss: `AttributeError: 'TpuFusedMHATokenToKVPool' object has no attribute 'k_buffer'` in the SWA adapter; Qwen3-VL: `NotImplementedError: kv-canary: no attacher registered for pool class TpuFusedMHATokenToKVPool`. Checksum-only runs (canary off) queued for both models |
 
 ## 4. Not yet run / pending
 
 - Config D and E (gpt-oss): first D launch lost the TPU to another user's job starting at the same second (device nodes already open); requeued in `_phase_BCDE_resume.sh` behind `tpu_free`.
 - Config B and C for Qwen3-VL: done; identical to the golden at every length, prefix cache and HiCache write-through working, GSM8K 0.96.
 - HiCache reload timing on an idle pair: `_phase_hicache_reload.sh`, queued after the chain.
-- TC-15 KV checksum + canary runs: `_phase_kv_integrity.sh`, queued after the HiCache test.
+- TC-15: canary runs failed at start-up (F-13); checksum-only runs queued (`_phase_kv_checksum_gptoss.sh`, `_phase_kv_checksum_qwen.sh`).
+- HiCache host-hit timing: first idle run evicted the prefixes from the host too (load = host pool size); rerun with a smaller load queued (`_phase_hicache_reload2.sh`).
 - 1m shape for B–E: blocked by F-11 at 1 slot; plan is the 4-slot variant once memory headroom at 1M is measured.
 - Not covered on this hardware: multi-host engines (each host is a 4-chip slice), both engines on one host, the Rust router variant,
   KV checksum / canary flags (`--disaggregation-enable-kv-checksum`, `--kv-canary`), fault injection (covered by a colleague's campaigns).

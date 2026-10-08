@@ -9,3 +9,14 @@ AttributeError: 'TpuFusedMHATokenToKVPool' object has no attribute 'k_buffer'. D
 AttributeError: 'TpuFusedMHATokenToKVPool' object has no attribute 'k_buffer'. Did you mean: 'kv_buffer'?
     raise RuntimeError(
 RuntimeError: An engine or router exited with -9
+2026-10-08T17:59:07Z [kv-integrity] === qwen3-vl: start pair with kv checksum + canary
+2026-10-08T18:00:09Z [kv-integrity] pair did not come up
+NotImplementedError: kv-canary: no attacher registered for pool class TpuFusedMHATokenToKVPool; supported: ['DeepSeekV4TokenToKVPool', 'MHATokenToKVPool', 'MHATokenToKVPoolFP4', 'SWAKVPool']
+Traceback (most recent call last):
+    raise RuntimeError(
+RuntimeError: An engine or router exited with -9
+    raise NotImplementedError(
+NotImplementedError: kv-canary: no attacher registered for pool class TpuFusedMHATokenToKVPool; supported: ['DeepSeekV4TokenToKVPool', 'MHATokenToKVPool', 'MHATokenToKVPoolFP4', 'SWAKVPool']
+    raise RuntimeError(
+RuntimeError: An engine or router exited with -9
+2026-10-08T18:00:18Z [kv-integrity] phase kv integrity done

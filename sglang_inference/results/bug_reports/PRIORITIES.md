@@ -35,6 +35,7 @@ Overlap checked against the 69 open issues of `sgl-project/sglang-torchtpu` capt
 | F-6 | `n>1` never returns through the pair; all sub-requests share one bootstrap room | 3/3 | **S1** | **P1** | File `F-6_github_issue.md` | Parallel sampling is a standard API feature; each call leaks a decode slot until the client disconnects. Work-around: clients send n separate requests. Fix is an indexing change in the tokenizer manager |
 | F-2 | Qwen3-VL-30B MoE decoder never compiled on TPU (6 tok/s instead of 180) | every start | **S2** | **P1** | File `F-2_github_issue.md` with patch, reference #1069 | 30× decode slowdown with no warning; patch validated for speed (180 tok/s) and accuracy (GSM8K 0.99 vs 0.97 eager), 0 serving-time recompiles. Not an outage, hence S2 |
 | F-1 | SIGABRT when the shared tier-2 cache directory is owned by another user; default name shared by all users | 2/2 | **S3** | **P3** | File `F-1_github_issue.md` | Blocks every second user on a shared host, but single-tenant production hosts are unaffected and `chmod 1777` plus a unique cache name works around it. The misleading `exit code -6` costs debugging time |
+| F-13 | `--kv-canary` kills every TPU engine at start-up (no attacher for the TPU fused pool; SWA adapter assumes `k_buffer`) | 2/2 models | **S2** | **P1** | File `F-13_github_issue.md` | The build's own KV use-after-free detector cannot be enabled on TPU, and the failure is a start-up crash instead of a validation error. Two-line reject-up-front fix; real fix is a TPU attacher |
 | F-7 | Decode recovers ~2 min after the prefill engine dies | observed | S2 | — | **Comment on #1113** (same mechanism) | Duplicate in mechanism; our data adds the full-engine-death case |
 | F-4 | PD vs monolithic outputs differ for long gpt-oss prompts | 6/6 | S3 (informational) | — | **Closed**: numerical, no accuracy impact (GSM8K 0.98 vs 0.99); identical with `--disable-hybrid-swa-memory` | Chunk schedule depends on SWA pool headroom; documented in the F-11 issue as a side observation |
 | F-9 | Unaligned prompt lengths give a different first token in PD mode | 4/4 → 0/2 at c=1 | — | — | **Closed**: not a bug | Artefact of comparing against a concurrency-8 golden (F-3) |
@@ -44,12 +45,12 @@ Overlap checked against the 69 open issues of `sgl-project/sglang-torchtpu` capt
 
 1. F-8, F-5, F-10 (S0, single-request engine kills; all have complete drafts and located root causes).
 2. F-12 (deadline fix is clear even though the trigger is not), then F-11 and F-6.
-3. F-2 with the patch.
+3. F-2 with the patch; F-13 (canary unusable on TPU).
 4. F-1; comment on #1113 for F-7.
 
 ## Suggested title prefixes for the repo
 
-The repository marks priority in titles (`P0 [TPU/PD/Raiden] ...`). Proposed: `P0` for F-8, F-5, F-10, F-12; `P1` for F-11, F-6, F-2; no prefix for F-1.
+The repository marks priority in titles (`P0 [TPU/PD/Raiden] ...`). Proposed: `P0` for F-8, F-5, F-10, F-12; `P1` for F-11, F-6, F-2, F-13; no prefix for F-1.
 
 ## Cross-cutting recommendations (one sentence each, for the maintainers)
 
