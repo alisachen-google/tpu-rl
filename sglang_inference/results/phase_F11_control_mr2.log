@@ -8,3 +8,6 @@ grep: /home/alisachen_google_com/pd_disagg/results/runs/F11_gpt-oss_A_128k_mr2/p
 2026-10-08T08:12:02Z first two launches failed: recipe had a null 'name' field (launcher: Unknown P/D config fields); fixed, relaunching
 2026-10-08T08:12:15Z a_holders=[] b_holders=[]
 2026-10-08T08:12:15Z F-11 control: F11_gpt-oss_A_128k_mr2
+2026-10-08T08:27:51Z third launch failed: recipe was never copied to host a; recipes synced, relaunching
+2026-10-08T08:28:03Z a_holders=[] b_holders=[]
+2026-10-08T08:28:03Z F-11 control: F11_gpt-oss_A_128k_mr2

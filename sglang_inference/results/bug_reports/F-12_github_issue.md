@@ -18,19 +18,21 @@ Two pairs with other recipes started the same way (1M context with the same sing
 We have not isolated what makes this recipe deterministic for the stall, but the code explains why it never resolves:
 
 - The raiden **sender** (prefill) does not wait for the decode. It moves its room straight to `WaitingForInput` and bounds the handshake with
-  `fail_decode_silence(room, init_time, bootstrap_timeout)`, which returns early once the decode has "asked" for the room. That deadline did not
-  fire, so from the prefill's point of view the decode had engaged.
+  `fail_decode_silence(room, init_time, bootstrap_timeout)`, which returns early once the decode has "asked" for the room. Note that our recipe
+  sets `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT` and `SGLANG_DISAGGREGATION_WAITING_TIMEOUT` to 7200 s (to survive 1M-token prefills), so this
+  deadline could not have fired within our 30-minute observation even if the decode never asked; with the 300 s default it would have.
 - The raiden **receiver** (decode) has exactly one deadline, `_check_waiting_timeout`, and its clock `init_time` is set in `send_metadata`, which
   runs only after the room leaves `Bootstrapping`. While the room is still bootstrapping, `poll()` returns the status and nothing counts time.
   The decode prealloc queue treats `Bootstrapping` as "keep waiting".
 - `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT` (300 s) exists and is enforced by the Mooncake and Mori backends and by the raiden sender, but not
   by the raiden receiver.
 
-So whenever the two sides disagree about the handshake state, the request is held on both engines forever, and with one request slot the pair
-is unusable.
+So on the decode side nothing bounds a room that never leaves `Bootstrapping`, whatever the timeout settings; on the prefill side the bound is
+the bootstrap timeout, 7200 s in our recipe. With one request slot the pair is unusable for the whole period.
 
-**Expected behavior.** Either the handshake completes and the request is served, or one side gives up within the configured bootstrap timeout
-(300 s): the decode fails the request with a clear error, the prefill releases its pages, the client gets HTTP 500, and the next request works.
+**Expected behavior.** Either the handshake completes and the request is served, or both sides give up within the configured bootstrap timeout:
+the decode fails the request with a clear error, the prefill releases its pages, the client gets HTTP 500, and the next request works. Today the
+decode side has no such bound at all.
 
 ## Environment
 
@@ -40,7 +42,7 @@ is unusable.
 | TPU stack | torch-tpu 0.1.1+release.2026.9.22.20260927223741, libtpu 0.0.47, tpu-sync-torch 0.0.1.dev20261002213151, torch 2.11.0+cpu, transformers 5.8.1 |
 | Hardware | Two TPU v7x hosts (4 chips / 8 TensorCores each), prefill on host a, decode on host b, TP 8, EP 8 |
 | Model | `openai/gpt-oss-120b` (MXFP4), KV cache fp8_e4m3, page size 64 |
-| Recipe that stalls (3 of 3 pairs) | both engines `--max-running-requests 1 --context-length 140288 --max-total-tokens 786432 --chunked-prefill-size 8192 --disable-radix-cache`, `SGLANG_RAIDEN_HOST_POOL_GB=128`, compile batch sizes `[1]` |
+| Recipe that stalls (3 of 3 pairs) | both engines `--max-running-requests 1 --context-length 140288 --max-total-tokens 786432 --chunked-prefill-size 8192 --disable-radix-cache`, `SGLANG_RAIDEN_HOST_POOL_GB=128`, compile batch sizes `[1]`, `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=7200`, `SGLANG_DISAGGREGATION_WAITING_TIMEOUT=7200` |
 | Recipes that work | same flags with `--context-length 1056768 --max-total-tokens 1114112`, host pool 320 GiB (single slot); and the 140k recipe with `--max-running-requests 8` |
 
 ## Code trace
@@ -70,7 +72,8 @@ https://github.com/sgl-project/sglang-torchtpu/blob/09d1244c2641c3232ec0fcf5dd2d
 `fail_decode_silence` returns `False` as soon as the decode has asked for the room, after which no prefill-side deadline applies:
 https://github.com/sgl-project/sglang-torchtpu/blob/09d1244c2641c3232ec0fcf5dd2d3bd372d5d709/python/sglang/srt/disaggregation/raiden/sender.py#L286-L310
 
-The combination observed: the prefill believes the decode asked; the decode believes it is still bootstrapping; no clock is running on either side.
+Observed combination: the decode never left `Bootstrapping` (no clock runs there); the prefill's clock is the bootstrap timeout, which our
+recipe sets to 7200 s. Whether the decode had "asked" (which would also stop the prefill's clock) is not visible in the logs; see fix 3.
 
 ## How we detected it
 

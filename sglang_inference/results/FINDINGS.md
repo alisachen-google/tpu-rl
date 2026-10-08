@@ -429,3 +429,8 @@ prefix request (`max_new_tokens 0`) and two samples, all copied from `obj[i]` wi
 int room per HTTP request (mini_lb.py L490–513). Three requests, one room → collision in the per-room transfer state; decode holds one with
 128 used tokens (prompt pages), prefill idle; no deadline (same gap as F-12). Drafts written: F-1, F-5, F-6, F-12 (`bug_reports/*_github_issue.md`);
 triage file `bug_reports/PRIORITIES.md`.
+
+**Correction to F-12/F-6 (2026-10-08 08:40 UTC).** All our recipes set `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=7200` and
+`SGLANG_DISAGGREGATION_WAITING_TIMEOUT=7200` (to survive 1M-token prefills). So "no deadline fired in 30 min" is expected for every deadline
+that reads those variables (sender `fail_decode_silence`, receiver `_check_waiting_timeout`). The code gap that stands: the raiden receiver has
+no deadline at all while a room is in `Bootstrapping`. Drafts and PRIORITIES.md corrected.

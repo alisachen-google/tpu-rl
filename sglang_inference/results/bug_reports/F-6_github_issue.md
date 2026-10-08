@@ -98,9 +98,9 @@ Control: the same request against a monolithic server returns two completions.
    prefix request entirely when `disaggregation_mode != null` (the prefill's radix cache, if enabled, is warmed by the first sample anyway), or
    let the router drop prefill-only requests on the decode side.
 3. **Until fixed, validate.** Reject `n > 1` with HTTP 400 in disaggregated mode so clients get an immediate answer instead of a silent hold.
-4. **Bound the hold.** Independently of the above, a decode request that never receives its KV should fail at the existing bootstrap or waiting
-   timeout. Here it did not, which is the same gap as in our handshake-stall report (F-12): the decode has no deadline while a room is still in
-   `Bootstrapping`.
+4. **Bound the hold.** Independently of the above, a decode request that never receives its KV should fail at the bootstrap or waiting timeout.
+   Our recipe sets both to 7200 s, so the 120 s observation cannot say whether the waiting timeout would have fired; the raiden receiver has no
+   deadline at all while a room is still in `Bootstrapping` (see our handshake-stall report, F-12).
 
 ## Related
 
