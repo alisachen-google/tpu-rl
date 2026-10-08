@@ -1,0 +1,4 @@
+2026-10-08T21:47:43Z [boundary] mtbench done
+2026-10-08 21:50:12 prefill /health ready after 135 s
+2026-10-08 21:50:12 decode /health ready after 0 s
+2026-10-08 21:50:13 LB /health_generate ready after 1 s
