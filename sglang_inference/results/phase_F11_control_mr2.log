@@ -1,2 +1,3 @@
 2026-10-08T07:07:21Z a_holders=[] b_holders=[]
 2026-10-08T07:07:21Z F-11 control: F11_gpt-oss_A_128k_mr2
+2026-10-08T07:36:04Z control pair blocked: another user's servers started on both hosts at 07:07; requeued behind tpu_free

@@ -22,6 +22,20 @@ general release routine treats "release without a row" as legal only for Mamba-s
 The assertion did its job: it caught a double free instead of corrupting the pool. But a client disconnect is a routine event and must not take
 the engine down.
 
+**Expected behavior.** A disconnect ends one request and nothing else:
+
+1. No further chunks are launched for that request; the chunk already in flight completes and its result is discarded (this part works today).
+2. The request's KV pages, request slot, metadata buffer and transfer room are released **exactly once**, after the raiden transfer group has
+   drained, so no remote read is still touching the pages when they are reused.
+3. Every other request is unaffected: queued requests, requests in flight on the decode side, and the client's next request all proceed normally.
+4. Both engines stay healthy and the load balancer stays up; running requests and token usage return to their pre-request values within a
+   bounded time (our test uses 60 s), and a follow-up request succeeds.
+5. The event is logged at info level. If the abort bookkeeping fails for any reason, that one request is marked failed and the traceback is
+   logged; the exception never escapes the scheduler loop.
+
+Decode-phase disconnects in the same test already behave this way (6 of 6: usage back to baseline, follow-up request correct). A prefill-phase
+disconnect should look identical from the outside, only with the page release delayed until the transfer drain completes.
+
 ## Environment
 
 | Item | Value |
