@@ -6,7 +6,7 @@
 set -uo pipefail
 SRC=$HOME/pd_disagg; REPO=$HOME/tpu-rl; DST=$REPO/sglang_inference; MSG=${1:-"sglang_inference: sync campaign results $(date -u +%FT%TZ)"}
 mkdir -p $DST/results/logs
-rsync -a --delete --exclude 'compile_cache' --exclude '__pycache__' --exclude 'prompts' $SRC/scripts $SRC/recipes $SRC/README.md $DST/
+rsync -a --delete --exclude 'compile_cache' --exclude '__pycache__' --exclude 'prompts' $SRC/scripts $SRC/recipes $SRC/patches $SRC/README.md $DST/
 mkdir -p $DST/prompts/gpt-oss $DST/prompts/qwen3-vl; cp $SRC/prompts/gpt-oss/tiny.jsonl $DST/prompts/gpt-oss/ 2>/dev/null; cp $SRC/prompts/qwen3-vl/tiny.jsonl $DST/prompts/qwen3-vl/ 2>/dev/null
 # results: everything except raw server logs (gzipped separately) and anything > 20 MB
 rsync -a --delete --exclude 'compile_cache' --exclude '*.log' --exclude 'tpu_logs' --max-size=20m $SRC/results/ $DST/results/
