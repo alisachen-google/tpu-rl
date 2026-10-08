@@ -69,6 +69,10 @@ Run `sudo chmod 1777 /dev/shm/torch_tpu_cache` on each host. Or start with `--ru
 the same failure as fatal (`CHECK`). Suggested fix: when the directory cannot be created, the launcher must unset
 `TORCH_TPU_INTERNAL_TIER2_COMPILATION_CACHE` or stop with a clear error. torch_tpu should fall back to no tier-2 cache instead of `CHECK`.
 
+## Related open issues in sgl-project/sglang-torchtpu
+
+None found among the 69 open issues (checked 2026-10-08).
+
 ## Evidence
 
 `results/logs/runs/G_qwen_128k_fp8/golden/server.attempt1_tier2cache_abort.log.gz`
@@ -112,6 +116,10 @@ The MoE class `Qwen3MoeLLMModel` in `python/sglang/srt/models/qwen3_vl_moe.py` h
 installed. Suggested fix: register a decoder compile policy for `Qwen3MoeLLMModel`, or apply the whole-model fallback when only a vision policy
 is installed.
 
+## Related open issues in sgl-project/sglang-torchtpu
+
+#1069 asks for a nightly Qwen3-VL-30B-A3B test (coverage request, no mention of the eager decoder). No issue reports the missing compile policy. New.
+
 ## Evidence
 
 `results/logs/runs/G_qwen_128k_fp8/golden/server.log.gz` (search for `CompilePolicy`), `results/golden/qwen3-vl_fp8/run.log` (timings).
@@ -142,6 +150,10 @@ For concurrent runs, use these gates instead: the needle answers, the exact toke
 
 **Observed result.** `identical=False`, token prefix 22 to 59, first-token log-probability delta 0.0000.
 **Expected result (for a batch-invariant stack).** `identical=True`.
+
+## Related open issues in sgl-project/sglang-torchtpu
+
+#321 (greedy output differs cached vs cold) and #391 (different DP ranks give different results) describe other sources of greedy non-reproducibility on TPU. Our batch-composition effect is not listed. Related, not a duplicate.
 
 ## Evidence
 
@@ -213,6 +225,10 @@ The chunk-size histograms differ.
 Make the chunk schedule independent of the serving mode, for example by giving the PD prefill engine the same SWA-pool budget per chunk as the
 monolithic server. Or document the difference.
 
+## Related open issues in sgl-project/sglang-torchtpu
+
+#321 is the closest (cached vs cold greedy difference on one host). Our PD vs monolithic difference and its chunk-schedule cause are not reported. New.
+
 ## Evidence
 
 `results/A/tc1/gpt-oss/golden_diff_c1_*.json`, `results/A/tc1/gpt-oss/rep2/pd_self_*.json`, `results/A/tc1/qwen3-vl/golden_diff_c1_*.json`,
@@ -269,6 +285,10 @@ HTTP layer, and return HTTP 400. Or decide the option one time at server start.
 
 The same request against the monolithic server. We expect the same crash, because the check is not specific to PD mode.
 
+## Related open issues in sgl-project/sglang-torchtpu
+
+**#432** (2026-08-19, open, labelled feature request) points at the same code (`compiled_forward_shim.py`): prompt logprobs are not supported on TPU. It does not state that one request crashes all prefill schedulers. Our report adds the crash and the PD impact; link the two.
+
 ## Evidence
 
 `results/logs/runs/A_gptoss_128k_run1/prefill/server.attempt1_crash_prompt_logprob.log.gz`, `results/A/params/gpt-oss/params_pd_A.json`.
@@ -301,6 +321,10 @@ request. The repeat has not run yet.
 **Observed result (first run).** No response in 300 seconds.
 **Expected result.** Two outputs within a few seconds, or HTTP 400 if `n>1` is not supported in PD mode.
 
+## Related open issues in sgl-project/sglang-torchtpu
+
+None found. New (still unconfirmed).
+
 ## Evidence
 
 `results/A/params/gpt-oss/params_pd_A.json` (case `n_2`, `HANG?`).
@@ -329,6 +353,10 @@ The log line says `0 requests affected`, but one request was affected. This mess
 
 **Observed result.** Gauges return to zero within about 2 minutes. The `Lost connection` line reports `0 requests affected`.
 **Expected result.** The same recovery. The log line should report the real number of affected requests.
+
+## Related open issues in sgl-project/sglang-torchtpu
+
+**#1113** (2026-10-07, P0) describes the same mechanism: when the prefill side fails, the decode keeps the request until the raiden deadline (120 s). Our ~2-minute recovery after a prefill crash matches it. Duplicate in mechanism; our data point confirms it for a full prefill-engine death.
 
 ## Evidence
 
@@ -391,6 +419,10 @@ pages that are allocated.
 
 Config B (radix cache on). The radix tree cache may take a different path in `release_kv_cache`.
 
+## Related open issues in sgl-project/sglang-torchtpu
+
+None found. #1114 covers a different hold (prefill keeps a request after decode gives up). New.
+
 ## Evidence
 
 `results/logs/runs/A_gptoss_128k_run1/prefill_server.attempt2_abort_crash.log.gz`, `results/A/abort/gpt-oss/abort_prefill.json`.
@@ -429,6 +461,10 @@ Most real prompts are not aligned. If this difference is real, almost every long
 
 Handling of the partial last chunk or page in the PD prefill engine (padding of the last extend chunk, or transfer and pre-allocation of a
 partially filled page).
+
+## Related open issues in sgl-project/sglang-torchtpu
+
+None found. New (still unconfirmed).
 
 ## Evidence
 
@@ -487,6 +523,10 @@ it. Suggested fixes: exclude the ViT runner from the stance; or reject images ab
 
 Other non-square sizes, for example 896×504. A request with `--mm-process-config '{{"image":{{"max_pixels":313600}}}}'` should downscale the image and work.
 
+## Related open issues in sgl-project/sglang-torchtpu
+
+**#488** (2026-08-25) reports the same mechanism with a different trigger: a constrained-decoding request causes a recompile, the `fail_on_recompile` stance raises, the scheduler exits. Ours is the first report for the vision encoder with a large image. #1068 proposes a recompile test gate. Same root cause class; link to #488.
+
 ## Evidence
 
 `results/logs/runs/A_qwen_128k_run1/prefill_server.log.gz` (from line 7648), `results/A/mm/qwen3-vl/img1_1920x1080.json`.
@@ -497,18 +537,20 @@ INDEX = """# Bug reports: sglang-torchtpu, 1 prefill + 1 decode on TPU v7x
 The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 style: short sentences, active voice, one instruction per step. Each report has a numbered
 "How to reproduce" section with the exact commands. The tools are in `../../scripts/`. The server recipes are in `../../recipes/`.
 
-| ID | Title | Type | Severity | Status |
-|---|---|---|---|---|
-| [F-1](F-1.md) | Hard abort when the tier-2 compile cache directory cannot be created | bug (robustness) | low | reproduced, work-around |
-| [F-2](F-2.md) | Qwen3-VL-30B-A3B language model is not compiled on TPU | bug (perf, missing policy) | high for perf tests | reproduced on every start |
-| [F-3](F-3.md) | Greedy decoding is not batch-invariant | test-method note | medium | measured |
-| [F-4](F-4.md) | gpt-oss PD output differs from monolithic for long prompts (chunk schedule differs) | numerical difference | high until accuracy check | reproduced 6/6, cause identified |
-| [F-5](F-5.md) | A prompt-logprob request stops the prefill engine | bug (crash) | high | reproduced 1/1 |
-| [F-6](F-6.md) | `n=2` request gets no response for 300 s | bug candidate (hang) | high if confirmed | observed 1/1 |
-| [F-7](F-7.md) | Decode engine recovers about 2 min after the prefill engine dies | observation | low | observed |
-| [F-8](F-8.md) | Client disconnect during chunked prefill stops the prefill engine | bug (crash) | high | reproduced 1/1 |
-| [F-9](F-9.md) | Unaligned prompt lengths give a different first token in PD mode | bug candidate (correctness) | medium | observed 4/4 |
-| [F-10](F-10.md) | One 1920×1080 image stops the Qwen3-VL prefill engine | bug (crash) | high | reproduced 1/1 |
+| ID | Title | Type | Severity | Status | Overlap with open issues |
+|---|---|---|---|---|---|
+| [F-1](F-1.md) | Hard abort when the tier-2 compile cache directory cannot be created | bug (robustness) | low | reproduced, work-around  none |
+| [F-2](F-2.md) | Qwen3-VL-30B-A3B language model is not compiled on TPU | bug (perf, missing policy) | high for perf tests | reproduced on every start  #1069 (coverage request only) |
+| [F-3](F-3.md) | Greedy decoding is not batch-invariant | test-method note | medium | measured  #321/#391 related |
+| [F-4](F-4.md) | gpt-oss PD output differs from monolithic for long prompts (chunk schedule differs) | numerical difference | high until accuracy check | reproduced 6/6, cause identified  #321 related |
+| [F-5](F-5.md) | A prompt-logprob request stops the prefill engine | bug (crash) | high | reproduced 1/1  #432 (same code, no crash reported) |
+| [F-6](F-6.md) | `n=2` request gets no response for 300 s | bug candidate (hang) | high if confirmed | observed 1/1  none |
+| [F-7](F-7.md) | Decode engine recovers about 2 min after the prefill engine dies | observation | low | observed  #1113 (same mechanism) |
+| [F-8](F-8.md) | Client disconnect during chunked prefill stops the prefill engine | bug (crash) | high | reproduced 1/1  none |
+| [F-9](F-9.md) | Unaligned prompt lengths give a different first token in PD mode | bug candidate (correctness) | medium | observed 4/4  none |
+| [F-10](F-10.md) | One 1920×1080 image stops the Qwen3-VL prefill engine | bug (crash) | high | reproduced 1/1  #488 (same mechanism, other trigger); #1068 |
+
+Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`).
 
 ## Common steps
 

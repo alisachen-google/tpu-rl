@@ -9,3 +9,4 @@
 [PASS] needle len=8192 depth=0.95: want=qhyyeoqz got='qhyyeoqz\n\n[Assistant]\n\nThe user gave a h' prompt_tokens=5468 (est 8176) ttft=400.1ms e2e=400.1ms err=None
 [FAIL] needle len=32768 depth=0.1: want=zshuiryd got='' prompt_tokens=None (est 32760) ttft=1800004.8ms e2e=1800004.8ms err=HTTP 500: Internal Server Error
 [FAIL] needle len=32768 depth=0.5: want=onegbrxb got='' prompt_tokens=None (est 32760) ttft=Nonems e2e=3.7ms err=ConnectionError: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+[FAIL] needle len=32768 depth=0.95: want=bqxlbsvo got='' prompt_tokens=None (est 32760) ttft=1800006.5ms e2e=1800006.5ms err=HTTP 500: Internal Server Error
