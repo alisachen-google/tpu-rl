@@ -121,8 +121,9 @@ non-decoder modules, so a missing decoder registration cannot pass silently.
 | Serving-time recompiles over 35 prompt lengths (1 to 16,385 tokens) | 0 (nothing compiled) | 0 |
 | Outputs vs eager | reference | not token-identical (divergence after 9 to 83 tokens); needles retrieved correctly in both |
 
-The numerical difference between compiled and eager kernels is expected; an accuracy comparison (GSM8K, 100 examples) is running and will be
-added. Two side observations for reviewers: the decoder capture for this model takes 18 minutes, and the compile caches need over 100 GB of
+The numerical difference between compiled and eager kernels is expected and does not affect accuracy: GSM8K (100 examples, greedy, 1,024
+max tokens) scores 0.99 with the patch against 0.97 eager, and the 100 problems take 29 s instead of about 17 minutes. A warm start with
+existing compile caches takes 421 s. Two side observations for reviewers: the decoder capture for this model takes 18 minutes, and the compile caches need over 100 GB of
 space, which exhausted a 96 GB root disk on the first attempt.
 
 ## Related

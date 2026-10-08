@@ -388,3 +388,8 @@ fire here, so the prefill believed the decode had engaged. The raiden receiver's
 (`raiden/receiver.py` ~lines 1140–1170), and the decode prealloc queue treats `Bootstrapping` as "keep waiting" (`decode.py:1160`). So once the
 two sides disagree about the handshake state, nothing times out. Related: #1113 / #1078 (decode waits out transfer/reshard deadlines) — those at
 least expire; this one does not. Needs a repro with raiden debug logging to find why the decode never saw the prefill's per-request reply.
+
+**F-2 accuracy gate passed (2026-10-08 06:03–06:11 UTC, `results/F2_patch/gsm8k_compiled.log`).** Patched (compiled) Qwen3-VL-30B, GSM8K-100,
+greedy, 1,024 max tokens: **0.99** (eager reference 0.97, CI gate 0.80). Wall time 29 s for 100 problems vs ~17 min eager. Warm start with the
+caches from run 3: 421 s (cold: ~19 min). Serving-time recompiles: 0. The patch is ready to propose upstream; token non-identity vs eager is
+numerical only.
