@@ -1,0 +1,16 @@
+[SKIP] workers: mini-LB has no /workers (HTTP 404); only the Rust router exposes it
+[PASS] health: GET /health_generate -> HTTP 200 ('')
+[PASS] smoke: completion_tokens=32 ttft=656.8ms e2e=656.8ms text='\n\nThe three primary colors are red, blue, and yellow. These ' err=None
+[PASS] needle len=1024 depth=0.1: want=jqdyksgr got='jqdyksgr\n\nThe secret code word is "jqdyk' prompt_tokens=684 (est 1013) ttft=196.2ms e2e=196.2ms err=None
+[FAIL] needle len=1024 depth=0.5: want=rzqrbjzz got='The user asks: "What is the secret code ' prompt_tokens=685 (est 1013) ttft=188.3ms e2e=188.3ms err=None
+[PASS] needle len=1024 depth=0.95: want=buwsrozb got='buwsrozb\n\nThe text appears to be a rando' prompt_tokens=684 (est 1013) ttft=153.5ms e2e=153.5ms err=None
+[PASS] needle len=8192 depth=0.1: want=myorbnxk got='myorbnxk\n\nWe have a huge text. The quest' prompt_tokens=5468 (est 8176) ttft=450.8ms e2e=450.8ms err=None
+[PASS] needle len=8192 depth=0.5: want=lvtxcnsn got='The secret code word is "lvtxcnsn".\n\nThe' prompt_tokens=5468 (est 8176) ttft=398.6ms e2e=398.6ms err=None
+[PASS] needle len=8192 depth=0.95: want=utdymnic got='utdymnic\n\nThe user gave a huge text with' prompt_tokens=5466 (est 8176) ttft=433.8ms e2e=433.8ms err=None
+[PASS] needle len=32768 depth=0.1: want=iheydinl got='The secret code word is "iheydinl".\n\nThe' prompt_tokens=21876 (est 32760) ttft=968.3ms e2e=968.3ms err=None
+[PASS] needle len=32768 depth=0.5: want=rmdaiask got='rmdaiask\n\nThe user gave a huge text with' prompt_tokens=21876 (est 32760) ttft=972.2ms e2e=972.2ms err=None
+[PASS] needle len=32768 depth=0.95: want=shdawhje got='shdawhje\nThe user gave a huge block of t' prompt_tokens=21877 (est 32760) ttft=972.5ms e2e=972.5ms err=None
+[PASS] warm-cache: second: cached_tokens=0 prompt_tokens=21877 ttft1=972.5ms ttft2=971.8ms ratio=0.999
+
+=== summary: 11 passed, 1 failed, 1 skipped ===
+  FAIL needle len=1024 depth=0.5

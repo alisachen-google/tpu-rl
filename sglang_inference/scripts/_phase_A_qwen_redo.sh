@@ -5,7 +5,7 @@ LB=http://10.128.15.217:8080; PRE=http://10.128.15.217:30000; DEC=http://10.128.
 log(){ echo "$(date -u +%FT%TZ) $*"; }
 state(){ for u in $PRE $DEC; do echo "   $u $(curl -s -m 10 $u/metrics | grep -E '^sglang:(num_running_reqs|num_queue_reqs|full_token_usage|num_used_tokens)' | sed -E 's/\{[^}]*\}//' | sort -u | tr '\n' ' ')"; done; }
 relaunch_prefill(){ ssh -i $HOME/.ssh/google_compute_engine -o BatchMode=yes -o StrictHostKeyChecking=no sa_101411256518727260534@10.128.15.217 "sudo -n -iu alisachen_google_com bash -lc 'bash ~/pd_disagg/scripts/cleanup.sh >/dev/null 2>&1; mv ~/pd_disagg/results/runs/$1/prefill/server.log ~/pd_disagg/results/runs/$1/prefill/server.\$(date -u +%H%M%S).log; cd /tmp && exec >/dev/null 2>&1 </dev/null; setsid nohup bash ~/pd_disagg/scripts/launch_role.sh ~/pd_disagg/recipes/qwen3-vl_A_128k.json prefill $1 >> ~/pd_disagg/results/runs/$1/launcher_prefill.out 2>&1 </dev/null &'"; until curl -sf -m 5 $PRE/health >/dev/null && curl -sf -m 30 $LB/health_generate >/dev/null; do sleep 20; done; log "prefill + LB back"; }
-until grep -q 'phase A gpt-oss redo done' $R/phase_A_gptoss_redo.log 2>/dev/null; do sleep 60; done; log "gpt-oss redo done"
+until grep -q 'phase F2 patch test done' $R/phase_F2_patch_test.log 2>/dev/null; do sleep 60; done; log "F2 patch test done"
 bash $S/pd.sh stop; sleep 5; bash $S/tpu_free.sh || { log "TPU not free, abort"; exit 1; }
 RUN=A_qwen_128k_run2; log "PD Config A qwen 128k -> $RUN"
 env -u TORCH_DEVICE_BACKEND_AUTOLOAD bash $S/pd.sh start $HOME/pd_disagg/recipes/qwen3-vl_A_128k.json $RUN 2>&1 | tee $R/runs/$RUN.driver.log

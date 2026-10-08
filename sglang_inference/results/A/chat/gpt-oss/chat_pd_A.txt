@@ -1,13 +1,16 @@
 model=gpt-oss-120b kind=gptoss 11 cases, endpoints: a=http://10.128.15.217:8080
 case                  A st/fin/len                  B st/fin/len                  same  verdict notes
 -----------------------------------------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/alisachen_google_com/pd_disagg/scripts/chat_suite.py", line 314, in <module>
-    main()
-  File "/home/alisachen_google_com/pd_disagg/scripts/chat_suite.py", line 304, in main
-    print(f"{name:<22}{cell(row['a']):<30}{cell(row['b']):<30}{same:<6}{row['verdict']:<8}{'; '.join(row['notes'])}", flush=True)
-                       ^^^^^^^^^^^^^^
-  File "/home/alisachen_google_com/pd_disagg/scripts/chat_suite.py", line 250, in cell
-    return f"{r['status']}/{r['finish_reason']}/{len(r['content'])}c/{r['reasoning_len']}r"
-                                                     ~^^^^^^^^^^^
-KeyError: 'content'
+plain_chat            200/stop/0c/251r              -                             -     PASS    
+reasoning_low         200/stop/0c/44r               -                             -     PASS    
+reasoning_medium      200/stop/0c/87r               -                             -     PASS    
+reasoning_high        200/stop/0c/525r              -                             -     PASS    
+multi_turn_3          200/length/0c/276r            -                             -     PASS    
+tool_call             200/stop/0c/61r               -                             -     FAIL    a: no tool_calls (finish_reason=stop)
+stop_string_chat      200/stop/0c/101r              -                             -     PASS    
+stream_with_usage     200/stop/0c/251r              -                             -     PASS    
+long_system_prompt    200/length/0c/496r            -                             -     PASS    
+empty_user_message    200/length/0c/235r            -                             -     PASS    
+oversized_max_tokens  400/None/0c/0r                -                             -     PASS    
+
+11 cases, 1 failed -> /home/alisachen_google_com/pd_disagg/results/A/chat/gpt-oss/chat_pd_A.json

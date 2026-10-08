@@ -4,9 +4,13 @@
 S=$HOME/pd_disagg/scripts; R=$HOME/pd_disagg/results; PY=$HOME/venv/sglang/bin/python; export TORCH_DEVICE_BACKEND_AUTOLOAD=0
 REPO=$HOME/sglang-torchtpu; PATCH=$HOME/pd_disagg/patches/F-2_qwen3_vl_moe_decoder_compile_policy.patch; B=http://10.128.0.90:30000
 log(){ echo "$(date -u +%FT%TZ) $*"; }
-until grep -q 'qwen 127999 golden done' $R/phase_qwen_golden_127999.log 2>/dev/null; do sleep 60; done; log "previous phase done"
+until grep -q 'phase A gpt-oss redo done' $R/phase_A_gptoss_redo.log 2>/dev/null; do sleep 60; done; log "gpt-oss redo done"
 bash $S/pd.sh stop >/dev/null 2>&1; sleep 3; bash $S/tpu_free.sh || { log "TPU not free, abort"; exit 1; }
 cd $REPO && git apply --check $PATCH && git apply $PATCH && log "patch applied: $(git diff --stat | tail -1)" || { log "patch does not apply"; exit 1; }
+# In parallel on host a: gpt-oss golden with --disable-hybrid-swa-memory (clean counterpart for the A_noswamem PD run, F-4 isolation).
+A=http://10.128.15.217:30000; mkdir -p $R/runs/G_gptoss_128k_noswamem
+( env -u TORCH_DEVICE_BACKEND_AUTOLOAD bash $S/pd.sh golden $HOME/pd_disagg/recipes/gpt-oss_G_128k_fp8_e4m3_noswamem.json G_gptoss_128k_noswamem a > $R/runs/G_gptoss_128k_noswamem.driver.log 2>&1
+  bash $S/run_golden.sh gpt-oss $A $R/golden/gpt-oss_fp8_noswamem_c1 8192,32768,131072 1 1024 ) &
 RUN=G_qwen_128k_fp8_F2patch; OUT=$R/F2_patch; mkdir -p $OUT
 ENABLE_COMPILE_CACHE=0 env -u TORCH_DEVICE_BACKEND_AUTOLOAD bash $S/pd.sh golden $HOME/pd_disagg/recipes/qwen3-vl_G_128k_fp8_e4m3.json $RUN b > $R/runs/$RUN.driver.log 2>&1
 L=$R/runs/$RUN/golden/server.log
@@ -25,6 +29,8 @@ else
   log "server did not come up with the patch; last error lines:"; grep -vE 'UserWarning|warnings.warn|Ignore import' $L | grep -E 'Error|error|Traceback|died' | tail -n 6 | cut -c1-220
 fi
 cp $L $OUT/server.log 2>/dev/null
+wait; log "noswamem golden (host a) finished; F-4 isolation diff: PD noswamem vs golden noswamem, both c=1:"
+for Lx in 8192 32768 131072; do $PY $S/golden_diff.py diff --a $R/golden/gpt-oss_fp8_noswamem_c1/$Lx.jsonl --b $R/A_noswamem/tc1/gpt-oss/$Lx.jsonl --report $R/A_noswamem/golden_diff_noswamem_c1_$Lx.json --expect-tokens 1024 2>&1 | grep -E '^isl|ids,' | cut -c1-120; done
 bash $S/pd.sh stop >/dev/null 2>&1
 cd $REPO && git checkout -- python/sglang/srt/models/qwen3_vl_moe.py && log "patch reverted; tree clean: $(git status --short | wc -l) changes"
 log "phase F2 patch test done"

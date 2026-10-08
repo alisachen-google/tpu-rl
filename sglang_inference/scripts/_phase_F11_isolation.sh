@@ -4,7 +4,7 @@
 S=$HOME/pd_disagg/scripts; R=$HOME/pd_disagg/results; PY=$HOME/venv/sglang/bin/python; export TORCH_DEVICE_BACKEND_AUTOLOAD=0
 LB=http://10.128.15.217:8080; A=http://10.128.15.217:30000; OUT=$R/F11; mkdir -p $OUT
 log(){ echo "$(date -u +%FT%TZ) $*"; }
-until grep -q 'phase F2 patch test done' $R/phase_F2_patch_test.log 2>/dev/null; do sleep 60; done; log "F2 patch test done"
+until grep -q 'qwen 127999 golden done' $R/phase_qwen_golden_127999.log 2>/dev/null; do sleep 60; done; log "127999 golden done"
 for rec in gpt-oss_A_1m_mr4 gpt-oss_A_128k_mr1; do
   bash $S/pd.sh stop >/dev/null 2>&1; sleep 5; bash $S/tpu_free.sh || { log "TPU not free"; exit 1; }
   log "F-11 isolation: $rec"
