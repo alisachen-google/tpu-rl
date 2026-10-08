@@ -2,3 +2,16 @@
 2026-10-08 21:50:12 prefill /health ready after 135 s
 2026-10-08 21:50:12 decode /health ready after 0 s
 2026-10-08 21:50:13 LB /health_generate ready after 1 s
+using exact tokenizer from /mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a/tokenizer.json
+[PASS] health: GET /health_generate -> HTTP 200 ('')
+[PASS] smoke: completion_tokens=32 ttft=229.0ms e2e=229.0ms text='\n\nThe three primary colors are red, blue, and yellow. These ' err=None
+[FAIL] needle len=1024 depth=0.1: want=vxbmbyhn got='"\n\nWe need to find the secret code word.' prompt_tokens=1001 (est 1001) ttft=468.2ms e2e=468.2ms err=None
+[FAIL] needle len=1024 depth=0.5: want=zwmqdcnl got='The user asks: "What is the secret code ' prompt_tokens=1001 (est 1001) ttft=147.6ms e2e=147.6ms err=None
+[PASS] needle len=1024 depth=0.95: want=kslexpqy got='The secret code word is "kslexpqy".\n\nThe' prompt_tokens=1000 (est 1000) ttft=190.5ms e2e=190.5ms err=None
+[PASS] warm-cache: second: cached_tokens=0 prompt_tokens=1000 ttft1=190.5ms ttft2=148.8ms ratio=0.781
+[PASS] boundary ctx-1024 (139264 tok): status=200 prompt_tokens=139280 e2e=7662.7ms err=None
+[PASS] boundary ctx+1 (140289 tok, expect 4xx): status=400 e2e=211.8ms err=HTTP 400: {"error":{"message":"The input (140292 tokens) is longer than the model's context length (140288 tokens)."}}
+=== summary: 6 passed, 2 failed, 0 skipped ===
+  FAIL needle len=1024 depth=0.1
+  FAIL needle len=1024 depth=0.5
+2026-10-08T22:05:44Z [boundary] phase boundary exact done
