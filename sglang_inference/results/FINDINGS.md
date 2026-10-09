@@ -781,3 +781,6 @@ waiting behind the in-flight 255k prefill, O-7), 0 exceptions, used tokens back 
 **Filed upstream (08:20 UTC).** F-16 → https://github.com/sgl-project/sglang-torchtpu/issues/1188 ; F-15 → https://github.com/sgl-project/sglang-torchtpu/issues/1189 (both authored by alisachen-google from the drafts).
 
 **#1145 closed (08:30 UTC).** Closing comment posted (fixed by upstream PR #1138, verified with our six-abort reproduction on main 2cec1cf194); issue closed as completed.
+
+**PR #1181 test revision (08:45 UTC).** The gate test in `test_prefill_abort_result_cleanup.py` no longer uses `@patch`; it stubs the fake
+scheduler's `cache_unfinished_disagg_prefill` and `_release_swa_beyond_window` and asserts `req.kv.holds_kv` (reviewer feedback). Head fd82eab2f3; CI re-running.
