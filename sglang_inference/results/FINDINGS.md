@@ -715,3 +715,13 @@ slots (SWA pool 18,432 = cap 17,984 aligned up): 4 × 256k at c=4 → 4/4 in 81 
 **byte-identical** to the pre-fix pair (TC-1); image cases: the 1920×1080 image killed the prefill with the **F-10** recompile
 (`RuntimeError: Detected recompile when torch.compile stance is 'fail_on_recompile'`), so F-10 is still present on upstream main 2cec1cf194;
 the 4×448 and 16×448 cases then failed only because the engine was down. No exception anywhere else in S1–S5; all pairs healthy at the end.
+
+**#1161 preemption cases on the PD pair (05:24–05:32 UTC, `1161_ps_pre` threshold 10, `1161_ps_pre_t0` threshold 0).** C1 (priority diff =
+threshold): newcomer waits for a slot, no retraction (correct, strict >). C2 (diff = threshold+1, all 8 slots refilled with priority-0
+decodes): **no preemption either**, newcomer waited 11.1 s for a slot (`num_retracted_reqs` 0, holders all completed). Cause, by code reading:
+`preempt_to_schedule` is invoked only from `get_new_batch_prefill` when `running_batch.batch_is_full` (scheduler.py ~L4244), i.e. the
+prefill-admission path of a monolithic server or a prefill engine. A PD decode engine admits requests through the prealloc/transfer queues, so
+its running decodes are never candidates for priority preemption, whatever the flag says. Consequence for the 10/15 launch: the requirement
+"no preemption of a running decode" holds by construction in PD (observation O-6); `--disable-priority-preemption` is redundant there but
+harmless. Ordering (B2/B3) and no-preemption (B1) PASS in every PD configuration with the corrected probe. Monolithic preemption control
+queued (`_phase_1161g.sh`) to show the mechanism where it applies.

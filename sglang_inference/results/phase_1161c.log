@@ -24,3 +24,29 @@
    exceptions: prefill 0 decode 0; preempt/retract log lines (decode): 228
    health: prefill 200 decode 200
 2026-10-09T05:27:54Z [1161c] === ps_pre_t0 (gpt-oss_B_128k_ps_pre_t0, preemption on, threshold 0)
+2026-10-09 05:30:24 prefill /health ready after 136 s
+2026-10-09 05:30:24 decode /health ready after 0 s
+2026-10-09 05:30:25 LB /health_generate ready after 1 s
+   [A1-absent] PASS priority=None -> HTTP 200 
+   [A3-zero] PASS priority=0 -> HTTP 200 
+   [A3-neg] PASS priority=-1 -> HTTP 200 
+   [A3-max32] PASS priority=2147483647 -> HTTP 200 
+   [A3-min32] PASS priority=-2147483648 -> HTTP 200 
+   [A4-huge] FAIL priority=9223372036854775808 -> HTTP 200 
+   [A4-float] PASS priority=1.5 -> HTTP 400 {"object":"error","message":"1 validation error:\n  {'type': 'int_from_float', 'loc': ('body', 'prio
+   [A4-str] PASS priority='high' -> HTTP 400 {"object":"error","message":"1 validation error:\n  {'type': 'int_parsing', 'loc': ('body', 'priorit
+   [A4-health] PASS decode /health 200 after malformed priorities
+   [B1-setup] PASS running=8.0 of 8 slots held at priority 0
+   [C1-threshold] PASS priority 0 vs running 0 (diff = threshold): retracted 0.0->0.0, ttft=11.0s (waited for a slot)
+   [C2-preempt] FAIL priority 1 (diff = threshold+1) at running=8.0: ttft=11.1s (immediate = a running decode was preempted), retracted gauge 0.0->0.0, HTTP 200
+   [C2-victims-resume] PASS second holder set finished: 8/8 ok (preempted request resumed and completed)
+   [B1-holders] PASS held requests finished: 8/8 ok []
+   [B2-admissions] INFO all probes queued by t=14.4s; admissions (s after holders started): p7@19.5 p6@19.5 p5@19.6 p4@19.7 p3@19.8 tie0@19.8 tie1@19.9 tie2@20.0 tie3@20.1 p2@20.2 p1@20.2 p0@20.3
+   [B2-order] PASS admission order of distinct priorities: [7, 6, 5, 4, 3, 2, 1, 0] (expected [7, 6, 5, 4, 3, 2, 1, 0])
+   [B3-fifo-tie] PASS equal-priority admission order: [0, 1, 2, 3] (FIFO expected)
+   [B2-holders] PASS staggered holders finished: 8/8 ok
+   [end-retractions] INFO num_retracted_reqs gauge 0.0 -> 0.0
+   [end-idle] PASS decode num_used_tokens at end = 0.0
+   exceptions: prefill 0 decode 0; preempt/retract log lines (decode): 303
+   health: prefill 200 decode 200
+2026-10-09T05:32:07Z [1161c] phase 1161c done
