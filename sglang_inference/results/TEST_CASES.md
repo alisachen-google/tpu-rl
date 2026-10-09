@@ -248,14 +248,16 @@ Legend: ✔ covered (where), ◐ partial, ✘ gap, ⏳ queued in `_phase_boundar
 | Deadlock / hang | no-progress watchdog (300 s) on both engines during every phase | ✔ harness |
 | Resource return | engines back to baseline after every abort / phase | ✔ asserted by `abort_test.py` and `state` snapshots |
 
-## 4. Not yet run / pending
+## 4. Status of the queue (closed 2026-10-09 00:20 UTC)
 
-- Config D and E (gpt-oss): first D launch lost the TPU to another user's job starting at the same second (device nodes already open); requeued in `_phase_BCDE_resume.sh` behind `tpu_free`.
-- Config B and C for Qwen3-VL: done; identical to the golden at every length, prefix cache and HiCache write-through working, GSM8K 0.96.
-- HiCache reload timing on an idle pair: `_phase_hicache_reload.sh`, queued after the chain.
-- TC-15: canary runs failed at start-up (F-13); checksum-only gpt-oss run died on the first request (F-14); Qwen checksum-only run: identical crash (F-14 confirmed on both models).
-- HiCache host-hit timing: done (257 ms TTFT for a 32k host hit).
-- 1m shape: Config B and C with 2 slots running now (`_phase_1m_BC.sh`); single-slot 1M stalls (F-12), radix-on pool is ratio-sized so F-11 does not apply.
-- TC-16 MT-Bench: all six configurations done.
-- Not covered on this hardware: multi-host engines (each host is a 4-chip slice), both engines on one host, the Rust router variant,
-  KV checksum / canary flags (`--disaggregation-enable-kv-checksum`, `--kv-canary`), fault injection (covered by a colleague's campaigns).
+Everything planned has run. Summary of the items that were pending at some point:
+
+- Configs A–E for gpt-oss-120b and A–C for Qwen3-VL-30B-A3B: done (§2, §3). Config D's first launch lost the TPU to a colleague's job; rerun completed.
+- 1M shape: Config B with 2 slots served 32k…1M; single-slot pairs stall (F-12); Config C at 1M skipped for that reason.
+- TC-15 KV integrity: both built-in checks are unusable on TPU (F-13, F-14); no alternative integrity check was run.
+- TC-16 MT-Bench: all six configurations done (EAGLE3 +43 % / +25 %; prefix cache covers only the prompt in PD, O-3).
+- Boundary cases (§5): F-12 with 300 s deadlines, length/empty/duplicate/abort cases, decode-pool exhaustion: done. New results: F-15
+  (mini-LB 500), F-8 third kill, F-11 second trigger (pair-wide deadlock under decode back-pressure).
+- Not covered on this hardware: multi-host engines (each host is a 4-chip slice), both engines on one host, the Rust router variant, the
+  abort storm (needs the F-8 fix or radix on), decode engine death mid-stream, load-balancer restart, queue-limit overflow (429), fault
+  injection (covered by a colleague's campaigns), image patch count at exactly the 4,900 bucket edge, ISL = context + 1 at the 1M shape.
