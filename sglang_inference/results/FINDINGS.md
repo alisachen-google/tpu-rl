@@ -683,3 +683,7 @@ in the branch (`_swa_cap_tokens` used by both paths) and re-validated.
 2645aa14af, same single-owner approach as our branch); our branch is superseded; verification of upstream main against our abort reproduction
 queued (`_phase_f8_upstream_check.sh`); comment draft in `prs/COMMENT_1145_fixed_upstream.md`. #1161 (priority scheduling validation) test
 plan written: `TEST_PLAN_1161_priority_scheduling.md`.
+
+**Monolithic before/after for F-11 trigger 1 (03:33–04:14 UTC, `_phase_fix_validate_mono.sh`, recipe `gpt-oss_G_1m_mr1_noradix.json`).**
+Same engine on host b, radix off, 1 slot, 1M shape, 256k prompt, no P/D. main: SWA pool 16,384, chunks 8,192 → 8,000 at SWA 0.99, then no
+batch; client timed out at 1,800 s. Fix branch: pool 16,896, 1,024 tokens returned, TTFT 19.2 s, e2e 25.4 s. Added to PR #1181.

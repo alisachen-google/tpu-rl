@@ -9,3 +9,7 @@
 2026-10-09T03:39:20Z [fixval-mono] checked out main (09d1244c26)
 2026-10-09 03:43:48 golden(b) /health ready after 256 s
    SWA pool tokens: 16384
+   262144: [isl262144_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.0.90', port=30000): Read timed out. (1800s)
+   chunk trail: 8192@0.99 8000@0.99 8192@0.99 8000@0.99   batches=4
+   health: 200
+2026-10-09T04:13:57Z [fixval-mono] phase fix validate mono done (checkout: main)
