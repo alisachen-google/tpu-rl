@@ -1,1 +1,11 @@
 2026-10-09T06:35:24Z [1161h] === np2 + soak: gpt-oss Config B, priority scheduling, no preemption
+2026-10-09 06:37:53 prefill /health ready after 135 s
+2026-10-09 06:37:53 decode /health ready after 0 s
+2026-10-09 06:37:55 LB /health_generate ready after 1 s
+   [B5-starvation] PASS priority-0 request under a 60 s priority-10 stream (170 stream requests, 0 errors): served after 1.9s (stream ended at ~55s after submit); admitted while the stream ran
+   [B6-transfer-reorder] FAIL one free slot: high-priority 8k (sent 0.5 s later) first token at +6.9s, low-priority 131k at +6.8s (statuses 200/200)
+   [B7-prefix-across-priorities] FAIL 32k prompt warmed at priority 0, re-sent at priority 50: cached_tokens=32704, outputs identical=False, ttft 1.38s -> 0.57s
+   [F3-metrics-label-decode] PASS num_queue_reqs labels: sglang:num_queue_reqs{engine_type="decode",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",priority="",tp_rank="0"} 0.0
+   [F3-metrics-label-prefill] PASS num_queue_reqs labels: sglang:num_queue_reqs{engine_type="prefill",model_name="gpt-oss-120b",moe_ep_rank="0",pp_rank="0",priority="",tp_rank="0"} 0.0
+   [F4-abort-storm] PASS 20 aborts (10 concurrent, mixed priorities): client errors 0, decode used tokens 0.0->0.0, running 0.0, follow-up HTTP 200
+   exceptions: prefill 0 decode 0; health: prefill 200 decode 200

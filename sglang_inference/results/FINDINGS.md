@@ -737,3 +737,13 @@ simply unreachable on a PD decode (O-6). Low-values-first rerun on the pair (`11
 
 **PR #1181 ready for review (06:40 UTC).** All 28 CI checks succeeded (CPU shards, build, TPU unit tests, stage-B e2e on v7x); local unit
 tests, live validation and scenario battery green → draft converted to ready for review.
+
+**#1161 second battery, block 1 (06:38 UTC, `1161h_B_np`, Config B, priority scheduling, no preemption).** B5 starvation: under a 60 s
+stream of 10 priority-10 clients (170 requests) a priority-0 request was served in 1.9 s: no starvation; high-priority arrivals spend their
+wait in prefill/transfer, so the decode queue is rarely contended when a slot frees. B6: with one free slot, a priority-50 8k request sent
+0.5 s after a priority-0 131k request got its first token at the same time (6.9 s): the running chunked prefill is not interrupted, so a long
+low-priority prompt causes **head-of-line blocking on the prefill engine** (observation O-7; only preemption on the prefill could avoid it).
+B7: prefix reuse across priorities works (cached_tokens 32,704, TTFT 1.38 → 0.57 s) but the cached run's greedy output **differed from the
+cold run**; cause (cache hit vs priority) isolated by `_phase_1161i.sh`. F3: `priority` label present on prefill and decode gauges (our
+dashboard selects no priority label, so unaffected). F4: 20 mixed-priority streaming aborts (10 concurrent): 0 client errors, used tokens
+back to 0, follow-up served.
