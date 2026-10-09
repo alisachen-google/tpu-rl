@@ -1,0 +1,10 @@
+8 prompts -> http://10.128.15.217:8080 (concurrency=8, stream=True)
+[isl131072_k0_x0] tokens=1024 finish=length cached=0 ttft=6914.72ms e2e=13310.78ms
+[isl131072_k1_x1] tokens=1024 finish=length cached=0 ttft=13800.14ms e2e=20089.88ms
+[isl131072_k0_x2] tokens=1024 finish=length cached=0 ttft=20563.72ms e2e=26977.04ms
+[isl131072_k1_x3] tokens=1024 finish=length cached=0 ttft=27464.48ms e2e=33933.3ms
+[isl131072_k0_x4] tokens=1024 finish=length cached=0 ttft=34435.81ms e2e=40622.14ms
+[isl131072_k1_x5] tokens=1024 finish=length cached=0 ttft=41124.47ms e2e=47080.69ms
+[isl131072_k0_x6] tokens=1024 finish=length cached=0 ttft=47568.63ms e2e=53666.77ms
+[isl131072_k1_x7] tokens=1024 finish=length cached=0 ttft=54158.64ms e2e=59515.16ms
+done: 8 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S2_131k_c8.jsonl

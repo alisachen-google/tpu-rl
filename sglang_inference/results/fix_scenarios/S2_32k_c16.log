@@ -1,0 +1,18 @@
+16 prompts -> http://10.128.15.217:8080 (concurrency=16, stream=True)
+[isl32768_k0_x0] tokens=1024 finish=length cached=0 ttft=1266.21ms e2e=12062.07ms
+[isl32768_k1_x1] tokens=1024 finish=length cached=0 ttft=2414.01ms e2e=13498.62ms
+[isl32768_k0_x2] tokens=1024 finish=length cached=0 ttft=3563.88ms e2e=14368.31ms
+[isl32768_k1_x3] tokens=1024 finish=length cached=0 ttft=4718.38ms e2e=15258.35ms
+[isl32768_k0_x4] tokens=1024 finish=length cached=0 ttft=5865.22ms e2e=16148.35ms
+[isl32768_k1_x5] tokens=1024 finish=length cached=0 ttft=7019.54ms e2e=17073.27ms
+[isl32768_k0_x6] tokens=1024 finish=length cached=0 ttft=8164.72ms e2e=17923.32ms
+[isl32768_k1_x7] tokens=1024 finish=length cached=0 ttft=12235.74ms e2e=21600.32ms
+[isl32768_k0_x8] tokens=1024 finish=length cached=0 ttft=13634.53ms e2e=22987.96ms
+[isl32768_k1_x9] tokens=1024 finish=length cached=0 ttft=14503.35ms e2e=23843.06ms
+[isl32768_k0_x10] tokens=1024 finish=length cached=0 ttft=15400.8ms e2e=24645.37ms
+[isl32768_k1_x11] tokens=1024 finish=length cached=0 ttft=16284.98ms e2e=25436.59ms
+[isl32768_k0_x12] tokens=1024 finish=length cached=0 ttft=17215.57ms e2e=26131.52ms
+[isl32768_k1_x13] tokens=1024 finish=length cached=0 ttft=18063.88ms e2e=26775.8ms
+[isl32768_k0_x14] tokens=1024 finish=length cached=0 ttft=21742.11ms e2e=29083.07ms
+[isl32768_k1_x15] tokens=1024 finish=length cached=0 ttft=23135.19ms e2e=29977.87ms
+done: 16 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S2_32k_c16.jsonl

@@ -1,0 +1,4 @@
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl8192_k0] tokens=1024 finish=length cached=0 ttft=347.85ms e2e=5559.51ms
+[isl8192_k1] tokens=1024 finish=length cached=0 ttft=319.97ms e2e=5620.1ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S1_golden_8192.jsonl

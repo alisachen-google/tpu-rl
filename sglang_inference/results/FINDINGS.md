@@ -701,3 +701,9 @@ Draft `bug_reports/F-16_github_issue.md`; S2/P2. Monolithic control queued (`_ph
 rejected with HTTP **503** and the message "Using priority is disabled for this server. Please send a new request without priority";
 plain requests are served. Behaviour correct; observation O-4: the status is 503 (retryable) for what is a client error (400 would stop
 clients from retrying forever). Not filed.
+
+**PR #1181 scenario battery S1 (04:38 UTC, Config A 128k, PR head on both hosts, SWA pool 19,968).** Correctness: vs the c=1 monolithic golden
+(`golden/gpt-oss_fp8_rep2_c1`) the pair is **byte-identical at 8k** (both prompts, 1,024 tokens; also identical to the pre-fix pair's TC-1
+outputs). At 131k the output diverges after 11 chars (pre-fix pair: 21 / 77 chars) with needles 3/3 in both: the F-4 effect (chunk schedule
+changes numerics, no accuracy impact), expected because the pool size changes the chunk split. Note: the battery script compared against the
+c=8 golden first (`golden/gpt-oss_fp8`), which is the F-3/F-9 batch-invariance artefact, not a regression. 8 × 131k at c=8: 8/8 in 59 s.

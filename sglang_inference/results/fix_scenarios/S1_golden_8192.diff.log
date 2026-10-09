@@ -1,0 +1,10 @@
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl8192_k0    False     107      -  0.094        -  FAIL  char prefix 107<1000; agreement 0.094<0.95
+                a@107: 'e secret code words for checkpoint 1, 2,'
+                b: 'e secret code words embedded: "The secre'
+isl8192_k1    False     105      -  0.090        -  FAIL  char prefix 105<1000; agreement 0.090<0.95
+                a@105: 'xt, there are three mentions: checkpoint'
+                b: 'xt, there are three code words: checkpoi'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S1_golden_8192.report.json

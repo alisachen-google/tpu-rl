@@ -1,1 +1,37 @@
 2026-10-09T04:33:53Z [scen] PR head: 6dfd3d63a7
+   host a on 6dfd3d63a7
+2026-10-09T04:34:04Z [scen] local on 6dfd3d63a7
+2026-10-09T04:34:05Z [scen] === S1 Config A 128k (radix off, 8 slots): correctness vs golden, edges, aborts, 8x131k back-pressure
+2026-10-09 04:38:19 prefill /health ready after 241 s
+2026-10-09 04:38:19 decode /health ready after 0 s
+2026-10-09 04:38:20 LB /health_generate ready after 1 s
+   SWA pool: 19968 (expect 19968)
+   S1_golden_8192: completed 2/2 errors 0 in 11s
+   golden diff 8192 (monolithic golden vs PR pair, c=1): 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S1_golden_8192.report.json
+   S1_golden_131072: completed 2/2 errors 0 in 24s
+   golden diff 131072 (monolithic golden vs PR pair, c=1): 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S1_golden_131072.report.json
+   S1_8k: completed 2/2 errors 0 in 6s
+   S1_131k_c1: completed 2/2 errors 0 in 25s
+   S1_131k_c8: completed 8/8 errors 0 in 59s
+   needles: {"id": "isl131072_k1_x7", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 206, "completion_tokens": 1024, "finish_reason": "length"}
+   abort x2 concurrent: [+   62.01s] PASS: 6 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=0), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/fix_s
+   exceptions: prefill 0 decode 0; recompiles after warmup: prefill 168 decode 120
+   health: prefill 200 decode 200
+2026-10-09T04:41:33Z [scen] === S2 small decode pool, heavier: 8 x 131k at c=8 then 16 x 32k at c=16
+2026-10-09 04:44:02 prefill /health ready after 135 s
+2026-10-09 04:45:02 decode /health ready after 60 s
+2026-10-09 04:45:03 LB /health_generate ready after 1 s
+   S2_131k_c8: completed 8/8 errors 0 in 59s
+   S2_32k_c16: completed 16/16 errors 0 in 31s
+   exceptions: prefill 0 decode 0; recompiles after warmup: prefill 168 decode 120
+   health: prefill 200 decode 200
+2026-10-09T04:46:36Z [scen] === S3 1M shape, 4 slots (radix off): 4 x 256k at c=4, then 1M single
+2026-10-09 04:50:51 prefill /health ready after 241 s
+2026-10-09 04:50:51 decode /health ready after 0 s
+2026-10-09 04:50:52 LB /health_generate ready after 1 s
+   SWA pool: 18432
+   S3_256k_c4: completed 4/4 errors 0 in 81s
+   S3_1m: completed 2/2 errors 0 in 390s
+   exceptions: prefill 0 decode 0; recompiles after warmup: prefill 168 decode 80
+   health: prefill 200 decode 200
+2026-10-09T04:58:46Z [scen] === S4 regression on radix-on configs (fix is a no-op there): B and C 128k, golden + reuse

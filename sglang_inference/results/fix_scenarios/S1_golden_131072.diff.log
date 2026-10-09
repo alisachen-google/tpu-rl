@@ -1,0 +1,10 @@
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl131072_k0  False      11      -  0.063        -  FAIL  char prefix 11<1000; agreement 0.063<0.95
+                a@11: 'We need to parse the massive te'
+                b: 'We need to extract secret code '
+isl131072_k1  False     122      -  0.097        -  FAIL  char prefix 122<1000; agreement 0.097<0.95
+                a@122: ' secret code words: "falcon-f88b" for ch'
+                b: ' secret code words: checkpoint 1: falcon'
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S1_golden_131072.report.json

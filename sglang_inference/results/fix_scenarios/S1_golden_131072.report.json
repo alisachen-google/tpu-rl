@@ -1,0 +1,47 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8/131072.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/fix_scenarios/S1_golden_131072.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": null,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl131072_k0",
+   "gate_pass": false,
+   "notes": [
+    "char prefix 11<1000",
+    "agreement 0.063<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 11,
+   "char_agreement": 0.06302325581395349,
+   "first_divergence_char": 11,
+   "context_a": "We need to parse the massive te",
+   "context_b": "We need to extract secret code ",
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl131072_k1",
+   "gate_pass": false,
+   "notes": [
+    "char prefix 122<1000",
+    "agreement 0.097<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 122,
+   "char_agreement": 0.09683257918552036,
+   "first_divergence_char": 122,
+   "context_a": " secret code words: \"falcon-f88b\" for ch",
+   "context_b": " secret code words: checkpoint 1: falcon",
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

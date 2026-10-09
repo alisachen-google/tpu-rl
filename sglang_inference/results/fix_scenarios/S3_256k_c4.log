@@ -1,0 +1,6 @@
+4 prompts -> http://10.128.15.217:8080 (concurrency=4, stream=True)
+[isl262144_k0_x0] tokens=1024 finish=length cached=0 ttft=37304.68ms e2e=44099.74ms
+[isl262144_k1_x1] tokens=1024 finish=length cached=0 ttft=18881.77ms e2e=25974.78ms
+[isl262144_k0_x2] tokens=1024 finish=length cached=0 ttft=55712.56ms e2e=62595.9ms
+[isl262144_k1_x3] tokens=1024 finish=length cached=0 ttft=74120.24ms e2e=80351.52ms
+done: 4 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S3_256k_c4.jsonl

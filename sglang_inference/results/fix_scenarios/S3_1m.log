@@ -1,0 +1,4 @@
+2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
+[isl999999_k0] tokens=1024 finish=length cached=0 ttft=185453.37ms e2e=195022.11ms
+[isl999999_k1] tokens=1024 finish=length cached=0 ttft=185350.77ms e2e=194920.45ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S3_1m.jsonl
