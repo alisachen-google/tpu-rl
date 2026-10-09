@@ -1,0 +1,49 @@
+[
+  {
+    "url": "https://api.github.com/repos/sgl-project/sglang-torchtpu/issues/comments/6072163626",
+    "html_url": "https://github.com/sgl-project/sglang-torchtpu/issues/1142#issuecomment-6072163626",
+    "issue_url": "https://api.github.com/repos/sgl-project/sglang-torchtpu/issues/1142",
+    "id": 6072163626,
+    "node_id": "IC_kwDOSijetc8AAAABae3dKg",
+    "user": {
+      "login": "alisachen-google",
+      "id": 280552753,
+      "node_id": "U_kgDOELjlMQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/280552753?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/alisachen-google",
+      "html_url": "https://github.com/alisachen-google",
+      "followers_url": "https://api.github.com/users/alisachen-google/followers",
+      "following_url": "https://api.github.com/users/alisachen-google/following{/other_user}",
+      "gists_url": "https://api.github.com/users/alisachen-google/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/alisachen-google/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/alisachen-google/subscriptions",
+      "organizations_url": "https://api.github.com/users/alisachen-google/orgs",
+      "repos_url": "https://api.github.com/users/alisachen-google/repos",
+      "events_url": "https://api.github.com/users/alisachen-google/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/alisachen-google/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "created_at": "2026-10-09T01:07:06Z",
+    "updated_at": "2026-10-09T01:07:06Z",
+    "body": "## Second trigger: decode back-pressure, 8 slots, 128k shape (the whole pair deadlocks)\n\nThe single-slot case above is the simplest reproduction, but the same zero-budget loop is reached with the default `--max-running-requests 8` whenever the decode cannot pull a finished prefill promptly. Observed 2026-10-09 00:00 UTC with the decode's KV pool set to 262,144 tokens(prefill unchanged: 8 slots, 786k pool, radix off) and four 131,072-token prompts at concurrency 4:\n\n| Step | Prefill (SWA pool 19,456 tokens) | Decode (pool 262,144) |\n|---|---|---|\n| #1 | chunks 8,192 / 2,752 alternating, SWA usage 0.57 / 0.85; transferred | runs #1: 132,096 tokens used; #2 cannot be pre-allocated (130,048 free) |\n| #2 | prefilled normally, then **inflight**, waiting for the decode | still running #1 |\n| #3 | chunks 2,112 → 8,192 → **640**, SWA usage **0.96 → 0.99**; then no batch ever again | #1 finishes at 00:00:20; pre-allocates #2 and starts the pull |\n| after | loop spins in `get_next_disagg_prefill_batch_to_run` → `process_prefill_chunk` → `cache_unfinished_disagg_prefill` (py-spy) | loop spins in `pop_transferred` → `maybe_start_pull` / `_start_chunked_pull`; KV never arrives |\n\nAn 8-token request sent afterwards got no answer in 55 s; both `/health` endpoints return 200; no watchdog fires. Of the four client\nrequests one completed and three timed out after 1,200 s; the queues drained only when those clients disconnected.\n\n**Why 8 slots is not enough.** The pool is sized as two chunks plus a 384-token hold (`window + interval + 2 pages`) per slot. That hold is right for a request that is *between chunks*: its previous chunk's SWA pages were evicted when the next chunk ran. A request whose prefill has **finished** but whose KV the decode has not pulled has no next chunk, so nothing evicts its last chunk's SWA pages: the hold is ~8k tokens, not 384. One such inflight request plus the chunk in flight for the next request fills 19,456 tokens, the continuation budget `remaining_swa − (window + page)` is 0, no batch forms, and `maybe_evict_swa` never runs. The decode cannot pull until the prefill loop progresses, and the prefill cannot progress until the decode pulls, so the pair is wedged. Any decode back-pressure (a full decode pool, a slow decode, a held handshake such as our F-12) opens this window; a small decode pool only makes it easy to hit on demand.",
+    "author_association": "COLLABORATOR",
+    "pin": null,
+    "reactions": {
+      "url": "https://api.github.com/repos/sgl-project/sglang-torchtpu/issues/comments/6072163626/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "performed_via_github_app": null,
+    "minimized": null
+  }
+]

@@ -1,0 +1,4 @@
+2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[isl262144_k0] tokens=1024 finish=length cached=0 ttft=19179.29ms e2e=25438.66ms
+[isl262144_k1] tokens=1024 finish=length cached=0 ttft=19057.04ms e2e=25320.02ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/fix_validate/mono_G_1m_mr1_noradix_fix.jsonl

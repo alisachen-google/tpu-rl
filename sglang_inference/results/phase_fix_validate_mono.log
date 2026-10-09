@@ -1,0 +1,11 @@
+2026-10-09T03:33:52Z [fixval-mono] === (a) fix branch pd-fixes-validate
+2026-10-09T03:33:52Z [fixval-mono] checked out pd-fixes-validate (fbc79d88f4)
+2026-10-09 03:38:20 golden(b) /health ready after 255 s
+   SWA pool tokens: 16896
+   262144: [isl262144_k0] tokens=1024 finish=length cached=0 ttft=19179.29ms e2e=25438.66ms (51s)
+   chunk trail: 320@0.97 8064@0.51 320@0.97 8064@0.51 320@0.63 2304@0.63   batches=124
+   health: 200
+2026-10-09T03:39:20Z [fixval-mono] === (b) main (expected F-11 stall)
+2026-10-09T03:39:20Z [fixval-mono] checked out main (09d1244c26)
+2026-10-09 03:43:48 golden(b) /health ready after 256 s
+   SWA pool tokens: 16384

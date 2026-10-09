@@ -1,6 +1,6 @@
 # PR: [TPU/PD] Keep the chunked-prefill SWA continuation budget above zero
 
-**Branch:** `pd-swa-chunk-cap-deadlock` (1 commit on top of `09d1244c26`) · **Fixes:** the chunked-prefill deadlock with the radix cache off (our F-11 report, both triggers)
+**Branch:** `pd-swa-chunk-cap-deadlock` (1 commit, rebased on `2cec1cf194`) · **Fixes:** the chunked-prefill deadlock with the radix cache off (our F-11 report, both triggers)
 
 ## Problem
 

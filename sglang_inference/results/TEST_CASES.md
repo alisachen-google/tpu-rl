@@ -248,7 +248,7 @@ Legend: ✔ covered (where), ◐ partial, ✘ gap, ⏳ queued in `_phase_boundar
 | Deadlock / hang | no-progress watchdog (300 s) on both engines during every phase | ✔ harness |
 | Resource return | engines back to baseline after every abort / phase | ✔ asserted by `abort_test.py` and `state` snapshots |
 
-## 4. Status of the queue (closed 2026-10-09 00:20 UTC)
+## 4. Status of the queue (closed 2026-10-09 00:20 UTC; reopened for #1161, see `TEST_PLAN_1161_priority_scheduling.md`)
 
 Everything planned has run. Summary of the items that were pending at some point:
 
