@@ -64,3 +64,11 @@
    exceptions: prefill 0 decode 0; retract/preempt log lines (decode): 79
    health: prefill 200 decode 200
 2026-10-09T04:30:59Z [1161] === ps_dis (gpt-oss_B_128k_ps_dis, mode dis)
+2026-10-09 04:33:30 prefill /health ready after 135 s
+2026-10-09 04:33:30 decode /health ready after 0 s
+2026-10-09 04:33:31 LB /health_generate ready after 1 s
+   [A5-abort] FAIL priority with scheduling disabled + abort flag -> HTTP 503 {"object":"error","message":"Using priority is disabled for this server. Please send a new request w
+   [A5-plain] PASS no priority -> HTTP 200
+   exceptions: prefill 0 decode 0; retract/preempt log lines (decode): 1
+   health: prefill 200 decode 200
+2026-10-09T04:33:43Z [1161] phase 1161 done

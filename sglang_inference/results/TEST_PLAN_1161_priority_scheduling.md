@@ -43,9 +43,9 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 |---|---|---|
 | A1 | `priority` absent, no default | accepted; scheduled as priority 0 (verify via metrics label) |
 | A2 | `priority` absent with `--default-priority-value 5` | scheduled as 5 |
-| A3 | `priority` 0, 1, −1, 2^31−1, −2^31 | accepted; ordering follows the integer |
-| A4 | `priority` 2^63, float 1.5, string "high", null | clean 400 from the router and the engine, same message; engines unaffected |
-| A5 | PS-dis: priority given | 400 "priority scheduling is disabled"; without the flag: ignored, served |
+| A3 | `priority` 0, 1, −1, 2^31−1, −2^31 | accepted; ordering follows the integer. **Result:** all accepted |
+| A4 | `priority` 2^63, float 1.5, string "high", null | clean 400 from the router and the engine, same message; engines unaffected. **Result:** float and string → 400 with a validation message; **2^63 accepted** (no range check; low severity, O-5); engines healthy |
+| A5 | PS-dis: priority given | 400 "priority scheduling is disabled"; without the flag: ignored, served. **Result:** rejected with a clear message but HTTP 503 (O-4: should be 4xx); plain request served |
 | A6 | priority on chat completions, `/generate` batch (list of prompts), `n=1`, streaming | honoured on every API shape; batch items share the priority |
 | A7 | priority on a health-check request (`/health_generate`) | never preempts or evicts |
 
@@ -53,7 +53,7 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 
 | # | Case | Expect |
 |---|---|---|
-| B1 | Fill all slots with priority 0 decodes (long outputs); submit priority 100 | runs when a slot frees, **no running request preempted** (`num_retracted_reqs` 0, no retraction/requeue log) |
+| B1 | Fill all slots with priority 0 decodes (long outputs); submit priority 100 | runs when a slot frees, **no running request preempted** (`num_retracted_reqs` 0, no retraction/requeue log). **Result (PS-np, PS-low):** PASS, TTFT 10–11 s = wait for a free slot, 0 retractions |
 | B2 | 8 waiting requests with priorities 0…7 submitted low-first while slots are busy | admitted high-first; TTFT monotone in priority |
 | B3 | Same priority, 8 requests | FIFO (arrival order) |
 | B4 | PS-low: priorities 0…7 | admitted low-value-first (inverted B2) |

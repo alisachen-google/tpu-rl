@@ -1,0 +1,2 @@
+[A5-abort] FAIL priority with scheduling disabled + abort flag -> HTTP 503 {"object":"error","message":"Using priority is disabled for this server. Please send a new request w
+[A5-plain] PASS no priority -> HTTP 200

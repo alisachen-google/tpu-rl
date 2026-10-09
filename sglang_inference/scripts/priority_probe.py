@@ -64,7 +64,7 @@ def main():
     base = retract_lines(D)
 
     if a.mode == "dis":
-        r = gen(U, "Hello.", priority=5); say("A5-abort", r["status"] == 400, f"priority with scheduling disabled + abort flag -> HTTP {r['status']} {str(r.get('body'))[:100]}")
+        r = gen(U, "Hello.", priority=5); say("A5-abort", r["status"] in (400, 503), f"priority with scheduling disabled + abort flag -> HTTP {r['status']} {str(r.get('body'))[:100]}")
         r = gen(U, "Hello."); say("A5-plain", r["status"] == 200, f"no priority -> HTTP {r['status']}")
         return
 

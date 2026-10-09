@@ -696,3 +696,8 @@ follow-ups identical, baselines restored, both engines healthy. Closing comment 
 into a full queue of priority-5 requests all got 200; nothing evicted. Cause: `_add_request_to_queue` calls `_abort_on_queued_limit` only
 when `disaggregation_mode == NULL` (scheduler.py ~L3458), so the limit and the priority eviction are inert on prefill and decode engines.
 Draft `bug_reports/F-16_github_issue.md`; S2/P2. Monolithic control queued (`_phase_1161d.sh`).
+
+**#1161 battery, ps_dis (04:33 UTC).** With priority scheduling disabled and `--abort-on-priority-when-disabled`, a request carrying a priority is
+rejected with HTTP **503** and the message "Using priority is disabled for this server. Please send a new request without priority";
+plain requests are served. Behaviour correct; observation O-4: the status is 503 (retryable) for what is a client error (400 would stop
+clients from retrying forever). Not filed.
