@@ -1,0 +1,2 @@
+4 prompts -> http://10.128.15.217:8080 (concurrency=4, stream=True)
+[isl131072_k0_dup0] tokens=1024 finish=length cached=0 ttft=7048.15ms e2e=13857.68ms

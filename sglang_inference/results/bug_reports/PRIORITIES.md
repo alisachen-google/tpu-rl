@@ -1,6 +1,6 @@
 # Issue triage for production: priority and severity
 
-Scope: findings F-1 to F-12 from the 1-prefill + 1-decode validation campaign on TPU v7x (sglang-torchtpu `main` @ 09d1244c26, 2026-10-07/08).
+Scope: findings F-1 to F-15 from the 1-prefill + 1-decode validation campaign on TPU v7x (sglang-torchtpu `main` @ 09d1244c26, 2026-10-07/08).
 Overlap checked against the 69 open issues of `sgl-project/sglang-torchtpu` captured 2026-10-08 01:30 UTC (`OVERLAP.md`).
 
 ## Scales
@@ -37,6 +37,7 @@ Overlap checked against the 69 open issues of `sgl-project/sglang-torchtpu` capt
 | F-1 | SIGABRT when the shared tier-2 cache directory is owned by another user; default name shared by all users | 2/2 | **S3** | **P3** | File `F-1_github_issue.md` | Blocks every second user on a shared host, but single-tenant production hosts are unaffected and `chmod 1777` plus a unique cache name works around it. The misleading `exit code -6` costs debugging time |
 | F-13 | `--kv-canary` kills every TPU engine at start-up (no attacher for the TPU fused pool; SWA adapter assumes `k_buffer`) | 2/2 models | **S2** | **P1** | File `F-13_github_issue.md` | The build's own KV use-after-free detector cannot be enabled on TPU, and the failure is a start-up crash instead of a validation error. Two-line reject-up-front fix; real fix is a TPU attacher |
 | F-14 | `--disaggregation-enable-kv-checksum` is CUDA-only; TPU prefill passes health then dies on the first request | 2/2 models | **S2** | **P1** | File `F-14_github_issue.md` | Documented without platform caveat; the engine looks healthy and then crashes on the first user request. Companion to F-13: no built-in KV integrity check works on TPU |
+| F-15 | Mini-LB returns a bare 500 for an empty `input_ids` list (IndexError before forwarding); engines return 400 | 2/2 | **S3** | **P3** | File `F-15_github_issue.md` | Router-side validation gap: a client mistake surfaces as a 500 with no body, which is what operators alert on. Engines unaffected. One-line guard |
 | F-7 | Decode recovers ~2 min after the prefill engine dies | observed | S2 | — | **Comment on #1113** (same mechanism) | Duplicate in mechanism; our data adds the full-engine-death case |
 | F-4 | PD vs monolithic outputs differ for long gpt-oss prompts | 6/6 | S3 (informational) | — | **Closed**: numerical, no accuracy impact (GSM8K 0.98 vs 0.99); identical with `--disable-hybrid-swa-memory` | Chunk schedule depends on SWA pool headroom; documented in the F-11 issue as a side observation |
 | F-9 | Unaligned prompt lengths give a different first token in PD mode | 4/4 → 0/2 at c=1 | — | — | **Closed**: not a bug | Artefact of comparing against a concurrency-8 golden (F-3) |
@@ -47,11 +48,11 @@ Overlap checked against the 69 open issues of `sgl-project/sglang-torchtpu` capt
 1. F-8, F-5, F-10 (S0, single-request engine kills; all have complete drafts and located root causes).
 2. F-12 (deadline fix is clear even though the trigger is not), then F-11 and F-6.
 3. F-2 with the patch; F-13 and F-14 (neither built-in KV integrity check runs on TPU).
-4. F-1; comment on #1113 for F-7.
+4. F-1, F-15; comment on #1113 for F-7.
 
 ## Suggested title prefixes for the repo
 
-The repository marks priority in titles (`P0 [TPU/PD/Raiden] ...`). Proposed: `P0` for F-8, F-5, F-10, F-12; `P1` for F-11, F-6, F-2, F-13, F-14; no prefix for F-1.
+The repository marks priority in titles (`P0 [TPU/PD/Raiden] ...`). Proposed: `P0` for F-8, F-5, F-10, F-12; `P1` for F-11, F-6, F-2, F-13, F-14; no prefix for F-1, F-15.
 
 ## Cross-cutting recommendations (one sentence each, for the maintainers)
 

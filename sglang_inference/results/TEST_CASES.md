@@ -227,7 +227,7 @@ Legend: ✔ covered (where), ◐ partial, ✘ gap, ⏳ queued in `_phase_boundar
 | Input length | 256k / 512k / 1M and unaligned 255,123 / 511,777 / 999,999 | ✔ Config B at 1M (2 slots); A blocked by F-11 at 1 slot |
 | Input length | ISL = context − 1024 accepted; ISL = context + 1 → 4xx | ✔ 128k shape (exact tokenizer); ✘ 1M shape (heuristic run invalid; pair later wedged by F-12) |
 | Input length | ISL + max_new_tokens > context (prefill fits, decode would not) | ✔ (2a) 400 in 0.19 s; (2b) fits-exactly 200, engines back to baseline |
-| Input length | empty prompt, whitespace-only, empty `input_ids` | ◐ (2c) empty text 400, whitespace 200, empty `input_ids` **500** (validation gap, engines healthy) |
+| Input length | empty prompt, whitespace-only, empty `input_ids` | ✔ (2c) empty text 400, whitespace 200, empty `input_ids` **500 from the mini-LB** (engines return 400) → F-15 |
 | Input length | image patch count at the compiled bucket edge (4,900) and just above | ◐ F-10 covers 8,160 and 1,512; the exact 4,900/4,901 pair is not run |
 | Output length | `max_new_tokens` 0 and 1 | ✔ TC-6 |
 | Output length | `max_new_tokens` above the remaining context (chat path) → 400 | ✔ TC-9 `oversized_max_tokens` |

@@ -643,3 +643,8 @@ chunks** of prefill (log: `#pending-token: 2368`, token usage drops to 0.00, the
 the prefill died with `AssertionError: Only a mamba-capable tree cache allows freeing before alloc` from `_drain_deferred_chunked_sender_aborts`
 → `release_kv_cache`: **third reproduction of F-8** (now 3/3 with radix off), same traceback as the draft. The ~0.2 s window between the last
 chunk and the decode pull was not hit; a transfer-window abort proper remains partial coverage. (2f) abort storm skipped (prefill down).
+
+**F-15 (00:05 UTC): the empty-`input_ids` 500 is the mini load balancer, not the engine.** Same body sent to the prefill and decode `/generate`
+directly → `{"error":{"message":"input_ids cannot be empty."}}` HTTP 400. Via the mini-LB → `Internal Server Error` HTTP 500:
+`mini_lb.py:576 _get_request_batch_size` evaluates `input_ids[0]` on the empty list (`IndexError`). Not in the upstream open-issue snapshot.
+Draft `bug_reports/F-15_github_issue.md`; S3/P3.

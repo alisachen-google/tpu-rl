@@ -56,3 +56,6 @@
    prefill: AssertionError: Only a mamba-capable tree cache allows freeing before alloc
    prefill: RuntimeError: An engine or router exited with -9
 2026-10-08T23:56:35Z [boundary2] === (3) small decode pool (262,144 tokens, cpu_tensor retraction backup): 4 × 131k prompts, 1,024 tokens, c=4
+2026-10-08 23:59:04 prefill /health ready after 136 s
+2026-10-09 00:00:04 decode /health ready after 60 s
+2026-10-09 00:00:05 LB /health_generate ready after 1 s
