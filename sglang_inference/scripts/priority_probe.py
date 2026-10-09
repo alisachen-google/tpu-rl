@@ -81,11 +81,19 @@ def main():
         running = metric(D, "num_running_reqs", 'tp_rank="0"'); say("B1-setup", running is not None and running >= a.slots - 1, f"running={running} of {a.slots} slots held at priority 0")
         r0 = retract_lines(D)
         if a.mode == "pre":
-            # C1: diff == threshold must NOT preempt; C2: diff == threshold+1 must preempt.
+            # C1: diff == threshold must NOT preempt (strict >): the newcomer waits for a slot.
             r = gen(U, "Urgent question: what is 2+2?", priority=a.threshold, max_new_tokens=8, stream=True, timeout=900)
-            r1 = retract_lines(D); say("C1-threshold", (r1 or 0) == (r0 or 0), f"priority {a.threshold} vs running 0 (diff = threshold): retracted {r0}->{r1}, ttft={r['ttft'] and round(r['ttft'],1)}s")
+            r1 = retract_lines(D); say("C1-threshold", (r1 or 0) == (r0 or 0) and (r["ttft"] or 0) > 2, f"priority {a.threshold} vs running 0 (diff = threshold): retracted {r0}->{r1}, ttft={r['ttft'] and round(r['ttft'],1)}s (waited for a slot)")
+            # C2 needs every slot busy again: wait for the first holder set, start a fresh one, then send diff = threshold+1.
+            for t in ths: t.join(timeout=1500)
+            res2 = {}; ths = hold_slots(U, a.slots, 0, a.hold_tokens, res2); time.sleep(12)
+            running = metric(D, "num_running_reqs", 'tp_rank="0"'); r1 = retract_lines(D)
             r = gen(U, "Urgent question: what is 3+3?", priority=a.threshold + 1, max_new_tokens=8, stream=True, timeout=900)
-            r2 = retract_lines(D); say("C2-preempt", (r2 or 0) > (r1 or 0) or (r["ttft"] or 1e9) < 15, f"priority {a.threshold+1} (diff = threshold+1): retracted {r1}->{r2}, ttft={r['ttft'] and round(r['ttft'],1)}s, HTTP {r['status']}")
+            r2 = retract_lines(D)
+            say("C2-preempt", (r["ttft"] or 1e9) < 3 and r["status"] == 200, f"priority {a.threshold+1} (diff = threshold+1) at running={running}: ttft={r['ttft'] and round(r['ttft'],1)}s (immediate = a running decode was preempted), retracted gauge {r1}->{r2}, HTTP {r['status']}")
+            for t in ths: t.join(timeout=1800)
+            bad = [k for k, v in res2.items() if v.get("status") != 200 or (v.get("completion_tokens") not in (None, a.hold_tokens))]
+            say("C2-victims-resume", not [k for k, v in res2.items() if v.get("status") != 200], f"second holder set finished: {sum(1 for v in res2.values() if v.get('status')==200)}/{len(res2)} ok (preempted request resumed and completed)")
         else:
             r = gen(U, "Urgent question: what is 2+2?", priority=100, max_new_tokens=8, stream=True, timeout=900)
             r1 = retract_lines(D); say("B1-no-preempt", (r1 or 0) == (r0 or 0) and r["status"] == 200, f"priority 100 arrived at full occupancy: retracted {r0}->{r1}, ttft={r['ttft'] and round(r['ttft'],1)}s (waited for a free slot), HTTP {r['status']}")
