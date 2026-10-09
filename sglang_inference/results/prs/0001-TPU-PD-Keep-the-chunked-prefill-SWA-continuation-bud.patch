@@ -1,0 +1,238 @@
+From 7b5be34189afda8b76da0af6dc0611ea14a19f0a Mon Sep 17 00:00:00 2001
+From: alisachen-google <alisa888cl@gmail.com>
+Date: Fri, 9 Oct 2026 00:38:20 +0000
+Subject: [PATCH] [TPU/PD] Keep the chunked-prefill SWA continuation budget
+ above zero: align the chunk cap up on TPU and free a transfer-pending
+ request's SWA pages beyond the window
+
+gpt-oss-120b with the radix cache off (SWAChunkCapPoolConfigurator) deadlocked
+in chunked prefill: the next chunk's budget, remaining_swa - (window + page),
+reached 0 before the eviction that would raise it, and eviction only runs when a
+batch containing the request runs. Both engines stayed healthy and no watchdog
+fired. Two triggers were observed on a 1-prefill + 1-decode raiden pair:
+
+1. --max-running-requests 1 at the 1M-context shape: the cap is sized as two
+   chunks plus a 384-token hold per slot, then kv_cache_configurator rounds the
+   pool *down* to a multiple of 8 pages for the compiled TPU decode (19,520 ->
+   19,456 tokens). The 64 tokens the rounding removes are exactly the headroom
+   the third chunk needs, and the request waits forever.
+
+2. The default 8 slots whenever the decode cannot pull a finished prefill
+   promptly (full decode pool, slow decode, held handshake). A request whose
+   prefill finished but whose KV the decode has not pulled has no next chunk,
+   so nothing evicts its last chunk's SWA pages: it holds ~8k tokens of the
+   SWA pool instead of 384. One such request plus the chunk in flight exhausts
+   the pool, the next chunked prefill's budget hits 0, and prefill and decode
+   wait on each other.
+
+Fixes:
+- pool_configurator: on TPU, align the chunk cap up to the 8-page multiple
+  before sizing the full pool, so the later round-down is a no-op and the cap
+  is honoured after alignment (at most 7 extra pages). The multiple lives in
+  hardware_backend/tpu/kv_pool.py and kv_cache_configurator uses the same
+  constant.
+- disaggregation/prefill: free a finished prefill's SWA pages beyond the window
+  on every Raiden transfer, not only pipeline parallel. Raiden's SWA payload is
+  the window only (_swa_payload), so those pages are dead once prefill
+  finishes; _release_swa_beyond_window already did this for pp > 1.
+
+Tests (existing files): test_pool_configurator gains the TPU alignment case
+(cap 76 -> 96 tokens with page 4, cpu unchanged, memory within budget);
+test_prefill_abort_result_cleanup gains the Raiden/non-Raiden gate case for the
+early release.
+---
+ python/sglang/srt/disaggregation/prefill.py   | 12 ++---
+ .../srt/hardware_backend/tpu/kv_pool.py       |  6 +++
+ .../srt/mem_cache/kv_cache_configurator.py    |  4 +-
+ .../srt/model_executor/pool_configurator.py   | 11 ++++-
+ .../test_prefill_abort_result_cleanup.py      | 30 +++++++++++++
+ .../model_executor/test_pool_configurator.py  | 44 +++++++++++++++++++
+ 6 files changed, 100 insertions(+), 7 deletions(-)
+
+diff --git a/python/sglang/srt/disaggregation/prefill.py b/python/sglang/srt/disaggregation/prefill.py
+index 275607786a..d2cdd9d693 100644
+--- a/python/sglang/srt/disaggregation/prefill.py
++++ b/python/sglang/srt/disaggregation/prefill.py
+@@ -929,10 +929,12 @@ class SchedulerDisaggregationPrefillMixin:
+                         continue
+ 
+                 self.cache_unfinished_disagg_prefill(req)
+-                if (
+-                    self.transfer_backend == TransferBackend.RAIDEN
+-                    and get_parallel().pp_size > 1
+-                ):
++                if self.transfer_backend == TransferBackend.RAIDEN:
++                    # Raiden's SWA payload is the window only (``_swa_payload``),
++                    # so the pages beyond it are dead once prefill finishes. A
++                    # request waiting for the decode to pull otherwise keeps a
++                    # whole chunk of the SWA pool, and the next chunked prefill's
++                    # continuation budget drops to 0 with no eviction to raise it.
+                     self._release_swa_beyond_window(req)
+                 self.disagg_prefill_inflight_queue.append(req)
+                 if self.spec_algorithm.is_eagle() and draft_input is not None:
+@@ -1387,7 +1389,7 @@ class SchedulerDisaggregationPrefillMixin:
+ 
+     def _release_swa_beyond_window(self: Scheduler, req: Req) -> None:
+         """Free a finished prefill's SWA KV outside the sliding window while the
+-        transfer is pending; the Raiden pipeline transfer reads the window only."""
++        transfer is pending; Raiden transfers read the window only."""
+         if not (self.tree_cache.is_chunk_cache() and self.tree_cache.supports_swa()):
+             return
+         free_swa_out_of_window_slots(
+diff --git a/python/sglang/srt/hardware_backend/tpu/kv_pool.py b/python/sglang/srt/hardware_backend/tpu/kv_pool.py
+index be8ba137c3..3b826880a0 100644
+--- a/python/sglang/srt/hardware_backend/tpu/kv_pool.py
++++ b/python/sglang/srt/hardware_backend/tpu/kv_pool.py
+@@ -68,6 +68,12 @@ def _cdiv(a: int, b: int) -> int:
+     return (a + b - 1) // b
+ 
+ 
++# The hybrid-SWA two-pool cache miscompiles under torch.compile unless the SWA
++# sub-pool's allocatable page count is a multiple of the sublane tiling factor.
++# Pool sizing aligns the SWA pool to this many pages on TPU.
++SWA_POOL_PAGE_MULTIPLE = 8
++
++
+ class TpuFusedMHATokenToKVPool(MHATokenToKVPool):
+     """MHA KV pool with the fused 5D layout consumed by the Pallas kernel.
+ 
+diff --git a/python/sglang/srt/mem_cache/kv_cache_configurator.py b/python/sglang/srt/mem_cache/kv_cache_configurator.py
+index b1ce0db52b..d0e6425a01 100644
+--- a/python/sglang/srt/mem_cache/kv_cache_configurator.py
++++ b/python/sglang/srt/mem_cache/kv_cache_configurator.py
+@@ -514,7 +514,9 @@ class KVCacheConfigurator:
+         # backends are exempt, and the cost of refusing a working config is a
+         # startup error while the cost of missing one is a silent hang.
+         if self.device == "tpu" and swa_max_total_num_tokens is not None:
+-            align_tokens = self.pool_page_size * 8
++            from sglang.srt.hardware_backend.tpu.kv_pool import SWA_POOL_PAGE_MULTIPLE
++
++            align_tokens = self.pool_page_size * SWA_POOL_PAGE_MULTIPLE
+             aligned = (swa_max_total_num_tokens // align_tokens) * align_tokens
+             if aligned == 0:
+                 raise ValueError(
+diff --git a/python/sglang/srt/model_executor/pool_configurator.py b/python/sglang/srt/model_executor/pool_configurator.py
+index 077a08e7af..019293243a 100644
+--- a/python/sglang/srt/model_executor/pool_configurator.py
++++ b/python/sglang/srt/model_executor/pool_configurator.py
+@@ -1064,6 +1064,15 @@ class SWAChunkCapPoolConfigurator(HybridSWAPoolConfigurator):
+             window=kvc.sliding_window_size,
+             attn_dp_size=kvc.attn_dp_size,
+         )
++        self._swa_align_pages = 1
++        if kvc.device == "tpu":
++            from sglang.srt.hardware_backend.tpu.kv_pool import SWA_POOL_PAGE_MULTIPLE
++
++            # kv_cache_configurator later rounds the SWA pool *down* to this
++            # multiple; align the cap up here so the rounding cannot eat the
++            # headroom the cap guarantees (a chunked prefill whose next chunk
++            # budget hits 0 waits forever).
++            self._swa_align_pages = SWA_POOL_PAGE_MULTIPLE
+ 
+     @staticmethod
+     def is_applicable(kvc: KVCacheConfigurator) -> bool:
+@@ -1083,7 +1092,7 @@ class SWAChunkCapPoolConfigurator(HybridSWAPoolConfigurator):
+     ) -> MemoryPoolConfig:
+         # SWA pool sized tightly from the cap; the rest of the budget goes to full.
+         available_bytes -= self._dummy_page_bytes(page_size)
+-        swa_tokens = ceil_align(self._swa_cap, page_size)
++        swa_tokens = ceil_align(self._swa_cap, page_size * self._swa_align_pages)
+         fixed_swa_bytes = swa_tokens * (
+             self._swa_per_token * self._swa_layers_num
+             + self._draft_swa_per_token * self._draft_swa_layers_num
+diff --git a/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py b/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py
+index 4286a29f55..4354965914 100644
+--- a/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py
++++ b/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py
+@@ -270,3 +270,33 @@ def test_sampling_mask_abort_preserves_error_and_releases_once(
+ 
+ if __name__ == "__main__":
+     raise SystemExit(pytest.main([__file__, "-v"]))
++
++
++@patch("sglang.srt.disaggregation.prefill.release_kv_cache")
++@patch("sglang.srt.disaggregation.prefill.maybe_cache_unfinished_req")
++def test_finished_prefill_frees_swa_beyond_window_on_raiden(
++    maybe_cache_unfinished_req, release_kv_cache
++):
++    """A finished prefill waiting for the decode to pull keeps only its sliding
++    window on every Raiden transfer (not just pipeline parallel): the payload
++    reads the window only, and a whole retained chunk starves the next chunked
++    prefill's SWA continuation budget."""
++    from sglang.srt.disaggregation.utils import TransferBackend
++
++    for backend, expect_release in (
++        (TransferBackend.RAIDEN, True),
++        (TransferBackend.MOONCAKE, False),
++    ):
++        scheduler = _Scheduler()
++        scheduler.transfer_backend = backend
++        scheduler._release_swa_beyond_window = Mock()
++        req = _Req(inflight_middle_chunks=0)
++        req.to_finish = None  # not aborted: the normal transfer path
++        req.time_stats = Mock()
++        req.extend_range = SimpleNamespace(end=len(req.origin_input_ids))
++
++        scheduler.process_batch_result_disagg_prefill(_batch(req), _result())
++
++        assert scheduler.disagg_prefill_inflight_queue == [req]
++        assert scheduler._release_swa_beyond_window.called is expect_release, backend
++        release_kv_cache.assert_not_called()
+diff --git a/test/registered/unit/model_executor/test_pool_configurator.py b/test/registered/unit/model_executor/test_pool_configurator.py
+index a25c640b39..8b7d461aa7 100644
+--- a/test/registered/unit/model_executor/test_pool_configurator.py
++++ b/test/registered/unit/model_executor/test_pool_configurator.py
+@@ -713,6 +713,50 @@ class TestHybridSWAConfigurator(CustomTestCase):
+         self.assertEqual(config.swa_max_total_num_tokens, 76)
+         self.assertLessEqual(_actual_memory_used(mr, config), available)
+ 
++    def test_chunk_cache_cap_tpu_aligns_up_to_eight_pages(self):
++        """On TPU the SWA pool must be a multiple of 8 pages; the chunk cap is
++        aligned *up* so the later round-down cannot eat its headroom (a chunked
++        prefill whose next-chunk budget hits 0 waits forever)."""
++        from sglang.srt.hardware_backend.tpu.kv_pool import SWA_POOL_PAGE_MULTIPLE
++
++        available, page_size = 1_000_000, 4
++        kwargs = dict(
++            is_hybrid_swa=True,
++            full_attention_layer_ids=[0],
++            swa_attention_layer_ids=[1],
++            swa_num_kv_heads=4,
++            swa_full_tokens_ratio=0.5,
++            disable_radix_cache=True,
++            chunked_prefill_size=16,
++            sliding_window_size=8,
++            page_size=page_size,
++            max_running_requests=2,
++            disaggregation_mode="prefill",
++            disable_overlap_schedule=False,
++        )
++        sizes = {}
++        for device in ("cpu", "tpu"):
++            mr = _make_model_runner(self, **kwargs)
++            mr.device = device
++            with mock_cpu_env():
++                from sglang.srt.model_executor.pool_configurator import (
++                    SWAChunkCapPoolConfigurator,
++                    create_memory_pool_configurator,
++                )
++
++                cfg = create_memory_pool_configurator(mr)
++                self.assertIsInstance(cfg, SWAChunkCapPoolConfigurator)
++                config = cfg.calculate_pool_sizes(available, page_size=page_size)
++            self.assertLessEqual(_actual_memory_used(mr, config), available)
++            sizes[device] = config.swa_max_total_num_tokens
++
++        cap = 76  # see test_chunk_cache_cap_prefill_holds_window_plus_chunk
++        align = page_size * SWA_POOL_PAGE_MULTIPLE
++        self.assertEqual(sizes["cpu"], cap)
++        self.assertEqual(sizes["tpu"], -(-cap // align) * align)  # 96
++        self.assertGreaterEqual(sizes["tpu"], cap)
++        self.assertEqual(sizes["tpu"] % align, 0)
++
+     def test_chunk_cache_cap_holds_a_chunk_per_pipeline_slot(self):
+         # Under pipeline parallelism a stage's scheduler has one micro-batch per
+         # pipeline slot (pp_size + async depth) in flight, each holding a
+-- 
+2.43.0
+

@@ -1,0 +1,30 @@
+2026-10-09T00:41:04Z [fixval] === (1) F-8: aborts during chunked prefill on Config A (radix off), 131k prompt, 3 at 6.4 s then 3 at 2.0 s
+2026-10-09 00:43:33 prefill /health ready after 135 s
+2026-10-09 00:43:33 decode /health ready after 0 s
+2026-10-09 00:43:35 LB /health_generate ready after 1 s
+   prefill SWA pool tokens: 19456 (was 19456 before the fix)
+   abort@6.4: [+   72.13s] PASS: 3 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=0), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/fix_validate/f8_abort_6.4
+   health: prefill 200 decode 200
+   abort@2.0: [+   58.65s] PASS: 3 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=0), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/fix_validate/f8_abort_2.0
+   health: prefill 200 decode 200
+   prefill scheduler exceptions: 0
+2026-10-09T00:45:49Z [fixval] (1b) follow-up correctness: 8k golden prompts still served
+   8k prompts completed: 0
+   http://10.128.15.217:30000 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-09T00:46:00Z [fixval] === (2) F-11 trigger 2: small decode pool (262,144), 4 x 131k prompts, 1,024 tokens, c=4 (deadlocked before the fix: 1 of 4)
+2026-10-09 00:48:30 prefill /health ready after 136 s
+2026-10-09 00:48:30 decode /health ready after 0 s
+2026-10-09 00:48:31 LB /health_generate ready after 1 s
+   prefill SWA pool tokens: 19456
+   completed: 4 of 4 in 33s; errors: 0
+   chunks@swa: 1@0.00 1@0.00 8192@0.84 8192@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.55 2368@0.43 8192@0.85 8192@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0.84 8064@0.58 2880@0
+   {"id": "isl131072_k1_dup3", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 276, "completion_tokens": 1024, "finish_reason": "length"}
+   health: prefill 200 decode 200
+   http://10.128.15.217:30000 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+   http://10.128.0.90:30000 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_running_reqs 0.0 sglang:num_used_tokens 0.0 
+2026-10-09T00:49:07Z [fixval] === (3) F-11 trigger 1: single slot, 1M shape; 256k, 512k, 1M prompts (deadlocked at the third chunk before the fix)
+2026-10-09 00:52:21 prefill /health ready after 181 s
+2026-10-09 00:52:21 decode /health ready after 0 s
+2026-10-09 00:52:22 LB /health_generate ready after 1 s
+   prefill SWA pool tokens: 16384 (was 16384 before the fix)

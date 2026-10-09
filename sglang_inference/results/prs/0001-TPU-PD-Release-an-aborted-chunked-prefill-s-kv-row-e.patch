@@ -1,0 +1,366 @@
+From 4729a54d51d497a7889b28dd2b428f85ae5fe9a5 Mon Sep 17 00:00:00 2001
+From: alisachen-google <alisa888cl@gmail.com>
+Date: Fri, 9 Oct 2026 00:31:39 +0000
+Subject: [PATCH] [TPU/PD] Release an aborted chunked prefill's kv row exactly
+ once when the raiden sender must drain
+
+A client disconnect during chunked prefill on a raiden prefill engine with the
+radix cache off killed the engine:
+
+    _drain_deferred_chunked_sender_aborts -> release_kv_cache
+    AssertionError: Only a mamba-capable tree cache allows freeing before alloc
+
+process_pending_chunked_abort parks the aborted request on
+_deferred_chunked_sender_aborts because the transfer group still has native
+I/O in flight, so its pages must stay allocated until raiden drains. The
+in-flight chunk's result then reaches _retire_aborted_prefill_result, which
+released the kv row anyway; on the next step the drain released it again and
+ChunkCache's release precondition fired, taking every rank down.
+
+Make the deferred list the single owner of the release:
+_retire_aborted_prefill_result skips release_kv_cache while the request is
+parked, and the drain guards the release the way the other abort sites already
+do. Pages are no longer freed while raiden may still read them, and a parked
+request whose row is already gone cannot assert.
+
+Tests (existing files): the chunked-abort race test gains the drain orderings
+(release exactly once, in the drain, for the overlap and non-overlap orderings;
+immediate release when no drain is needed; two parked requests release
+independently); the prefill abort-result cleanup test gains the parked case.
+---
+ python/sglang/srt/disaggregation/prefill.py   |   9 +-
+ python/sglang/srt/managers/scheduler.py       |   3 +-
+ .../test_prefill_abort_result_cleanup.py      |  23 ++
+ .../test_scheduler_chunked_abort_race.py      | 200 +++++++++++++++++-
+ 4 files changed, 228 insertions(+), 7 deletions(-)
+
+diff --git a/python/sglang/srt/disaggregation/prefill.py b/python/sglang/srt/disaggregation/prefill.py
+index 275607786a..74816e799b 100644
+--- a/python/sglang/srt/disaggregation/prefill.py
++++ b/python/sglang/srt/disaggregation/prefill.py
+@@ -1219,7 +1219,14 @@ class SchedulerDisaggregationPrefillMixin:
+         maybe_release_metadata_buffer(req, self.req_to_metadata_buffer_idx_allocator)
+         req.pending_bootstrap = False
+         self.tree_cache.finish(req.cache_request_handle, CacheRequestOutcome.ABORT)
+-        if req.kv.holds_kv or req.kv.holds_mamba:
++        # process_pending_chunked_abort may have parked this request until the
++        # raiden transfer group is quiescent; _drain_deferred_chunked_sender_aborts
++        # then owns the single release. Releasing here as well frees the row
++        # twice, and the second release asserts.
++        parked_for_drain = any(
++            held is req for held in self._deferred_chunked_sender_aborts
++        )
++        if (req.kv.holds_kv or req.kv.holds_mamba) and not parked_for_drain:
+             release_kv_cache(req, self.tree_cache, is_insert=False)
+         return True
+ 
+diff --git a/python/sglang/srt/managers/scheduler.py b/python/sglang/srt/managers/scheduler.py
+index da7af38449..b6c9d821df 100644
+--- a/python/sglang/srt/managers/scheduler.py
++++ b/python/sglang/srt/managers/scheduler.py
+@@ -3792,7 +3792,8 @@ class Scheduler(
+                 still_held.append(req)
+                 continue
+             sender.clear()
+-            release_kv_cache(req, self.tree_cache, is_insert=False)
++            if req.kv.holds_kv or req.kv.holds_mamba:
++                release_kv_cache(req, self.tree_cache, is_insert=False)
+         self._deferred_chunked_sender_aborts = still_held
+ 
+     def _build_hisparse_decode_batch(self, reqs):
+diff --git a/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py b/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py
+index 4286a29f55..35037448ab 100644
+--- a/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py
++++ b/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py
+@@ -74,6 +74,7 @@ class _Scheduler(SchedulerDisaggregationPrefillMixin):
+         self.req_to_metadata_buffer_idx_allocator = Mock()
+         self.enable_hicache_storage = True
+         self.chunked_req = None
++        self._deferred_chunked_sender_aborts = []
+ 
+ 
+ def _batch(req):
+@@ -217,6 +218,28 @@ def test_aborted_result_releases_mamba_allocated_before_kv():
+     scheduler.output_streamer.stream_output.assert_called_once_with([req], False)
+ 
+ 
++@patch("sglang.srt.disaggregation.prefill.release_kv_cache", side_effect=_free_req)
++def test_aborted_result_parked_for_sender_drain_keeps_kv_row(release_kv_cache):
++    """process_pending_chunked_abort parked the request until raiden drains; the
++    result retirement must finish the request without freeing the row, which
++    the drain then releases exactly once (double free asserted in ChunkCache)."""
++    scheduler = _Scheduler()
++    req = _Req(inflight_middle_chunks=0)
++    scheduler._deferred_chunked_sender_aborts = [req]
++
++    scheduler.process_batch_result_disagg_prefill(_batch(req), _result())
++
++    release_kv_cache.assert_not_called()
++    assert req.kv.holds_kv
++    assert req.finished()
++    assert req.metadata_buffer_index == -1
++    scheduler.output_streamer.stream_output.assert_called_once_with([req], False)
++    assert req.rid not in scheduler.disagg_prefill_pending_chunk_rids
++    # The drain owns the release; nothing else touches the row afterwards.
++    scheduler.process_batch_result_disagg_prefill(_batch(req), _result())
++    release_kv_cache.assert_not_called()
++
++
+ @pytest.mark.parametrize("transport_error", [False, True])
+ @pytest.mark.parametrize(
+     "status,http_status,err_type",
+diff --git a/test/registered/unit/managers/test_scheduler_chunked_abort_race.py b/test/registered/unit/managers/test_scheduler_chunked_abort_race.py
+index 2d2868c188..1fe260b398 100644
+--- a/test/registered/unit/managers/test_scheduler_chunked_abort_race.py
++++ b/test/registered/unit/managers/test_scheduler_chunked_abort_race.py
+@@ -2,7 +2,7 @@
+ 
+ import unittest
+ from types import SimpleNamespace
+-from unittest.mock import Mock
++from unittest.mock import Mock, patch
+ 
+ from sglang.test.ci.ci_register import register_cpu_ci
+ from sglang.test.test_utils import (
+@@ -14,26 +14,65 @@ from sglang.test.test_utils import (
+ 
+ maybe_stub_sgl_kernel()
+ 
++from sglang.srt.disaggregation.utils import DisaggregationMode  # noqa: E402
+ from sglang.srt.managers.scheduler import Scheduler  # noqa: E402
+ 
+ register_cpu_ci(est_time=9, suite="base-a-test-cpu")
+ 
+ 
++class _FakeSender:
++    """Raiden-like kv sender: the group needs a drain and drains after N polls."""
++
++    def __init__(self, *, requires_drain: bool, polls_until_drained: int):
++        self.group_failure_requires_drain = requires_drain
++        self._polls_left = polls_until_drained
++        self.abort_calls = 0
++        self.clear_calls = 0
++
++    def abort(self):
++        self.abort_calls += 1
++
++    def poll(self):
++        self._polls_left = max(0, self._polls_left - 1)
++
++    def drained(self) -> bool:
++        return self._polls_left == 0
++
++    def clear(self):
++        self.clear_calls += 1
++
++
+ class _FakeReq:
+     """Minimal stand-in for Req: only the fields the abort paths touch."""
+ 
+-    def __init__(self, rid: str):
++    def __init__(self, rid: str, sender: _FakeSender | None = None):
+         self.rid = rid
+         # Mirrors Req.kv; the abort paths read only these two predicates.
+         self.kv = SimpleNamespace(holds_kv=True, holds_mamba=False)
+         self.to_finish = None
++        self.finished_reason = None
++        self.return_logprob = False
++        self.metadata_buffer_index = -1
++        self.pending_bootstrap = True
++        self.cache_request_handle = object()
++        self.disagg_kv_sender = sender
++        self.time_stats = SimpleNamespace(
++            trace_ctx=Mock(), set_completion_time=Mock()
++        )
++        self.output_ids = []
+         self._finished = False
+ 
+     def finished(self):
+-        return self._finished
++        # Mirrors Req.finished(): prepare_abort sets finished_reason.
++        return self._finished or self.finished_reason is not None
+ 
++    def update_finish_state(self):
++        self._finished = True
+ 
+-def _make_scheduler(pending_req, *, chunked_req, running_reqs) -> Scheduler:
++
++def _make_scheduler(
++    pending_req, *, chunked_req, running_reqs, disaggregation_mode=None
++) -> Scheduler:
+     sched = Scheduler.__new__(Scheduler)
+     sched.chunked_req = chunked_req
+     sched._pending_chunked_abort_req = pending_req
+@@ -41,11 +80,15 @@ def _make_scheduler(pending_req, *, chunked_req, running_reqs) -> Scheduler:
+     sched.waiting_queue = []
+     sched.dllm_config = None
+     sched.grammar_manager = Mock()
+-    sched.disaggregation_mode = None
++    sched.disaggregation_mode = disaggregation_mode
+     sched.enable_hicache_storage = False
+     sched.mm_receiver = None
+     sched.running_batch = SimpleNamespace(reqs=running_reqs)
+     sched.last_batch = None
++    sched.tree_cache = Mock()
++    sched.req_to_metadata_buffer_idx_allocator = Mock()
++    sched.ipc_channels = Mock()
++    sched.disagg_prefill_pending_chunk_rids = set()
+     return sched
+ 
+ 
+@@ -73,5 +116,152 @@ class TestPendingChunkedAbortRace(CustomTestCase):
+         self.assertIsNone(sched._pending_chunked_abort_req)
+ 
+ 
++def _release(req, tree_cache, is_insert=True):
++    """Stand-in for release_kv_cache with the real precondition."""
++    assert req.kv.holds_kv, f"{req.rid}: kv row released twice"
++    req.kv.holds_kv = False
++
++
++class TestChunkedAbortDeferredRelease(CustomTestCase):
++    """A chunked-prefill abort whose raiden sender must drain releases its kv row once.
++
++    Regression for ``AssertionError: Only a mamba-capable tree cache allows
++    freeing before alloc``: ``process_pending_chunked_abort`` parked the request
++    on the deferred drain list, the in-flight chunk's result then retired it
++    (freeing the row), and the drain freed it a second time.
++    """
++
++    def setUp(self):
++        enter_scope(self, published_topology())
++        patches = [
++            patch(
++                "sglang.srt.managers.scheduler.release_kv_cache", side_effect=_release
++            ),
++            patch(
++                "sglang.srt.disaggregation.prefill.release_kv_cache",
++                side_effect=_release,
++            ),
++            patch(
++                "sglang.srt.managers.scheduler._make_abort_req",
++                side_effect=lambda req, *a, **k: Mock(),
++            ),
++        ]
++        self.release_sched, self.release_prefill, _ = [p.start() for p in patches]
++        for p in patches:
++            self.addCleanup(p.stop)
++
++    def _releases(self) -> int:
++        return self.release_sched.call_count + self.release_prefill.call_count
++
++    def _prefill_scheduler(self, req) -> Scheduler:
++        return _make_scheduler(
++            req,
++            chunked_req=req,
++            running_reqs=[],
++            disaggregation_mode=DisaggregationMode.PREFILL,
++        )
++
++    def test_drain_required_release_happens_once_in_drain(self):
++        sender = _FakeSender(requires_drain=True, polls_until_drained=2)
++        req = _FakeReq("chunked", sender)
++        req.metadata_buffer_index = 3
++        sched = self._prefill_scheduler(req)
++
++        # Step N: the abort is applied at the top of the scheduling step.
++        sched.process_pending_chunked_abort()
++        self.assertEqual(sched._deferred_chunked_sender_aborts, [req])
++        self.assertEqual(
++            self._releases(), 0, "pages must stay allocated until raiden drains"
++        )
++        self.assertTrue(req.kv.holds_kv)
++        self.assertEqual(req.metadata_buffer_index, -1)
++        self.assertEqual(sender.abort_calls, 1)
++
++        # Step N, later: the in-flight chunk's result lands and retires the request.
++        self.assertTrue(sched._retire_aborted_prefill_result(req))
++        self.assertEqual(
++            self._releases(), 0, "retirement must not free pages the drain owns"
++        )
++        self.assertTrue(req.kv.holds_kv)
++        self.assertTrue(req.finished())
++
++        # Steps N+1, N+2: the drain polls until the sender is quiescent, then frees once.
++        sched.process_pending_chunked_abort()  # poll 1: still held
++        self.assertEqual(sched._deferred_chunked_sender_aborts, [req])
++        self.assertEqual(self._releases(), 0)
++        sched.process_pending_chunked_abort()  # poll 2: drained
++        self.assertEqual(sched._deferred_chunked_sender_aborts, [])
++        self.assertEqual(self._releases(), 1)
++        self.assertFalse(req.kv.holds_kv)
++        self.assertEqual(sender.clear_calls, 1)
++
++        # Idempotent afterwards.
++        sched.process_pending_chunked_abort()
++        self.assertEqual(self._releases(), 1)
++
++    def test_retire_in_same_step_then_drain_is_single_release(self):
++        """Result lands in the step of the abort (overlap off): still one release."""
++        sender = _FakeSender(requires_drain=True, polls_until_drained=1)
++        req = _FakeReq("same_step", sender)
++        sched = self._prefill_scheduler(req)
++        sched.process_pending_chunked_abort()
++        self.assertTrue(sched._retire_aborted_prefill_result(req))
++        sched.process_pending_chunked_abort()
++        self.assertEqual(self._releases(), 1)
++        self.assertEqual(sched._deferred_chunked_sender_aborts, [])
++
++    def test_no_drain_required_releases_immediately_and_retire_is_noop(self):
++        sender = _FakeSender(requires_drain=False, polls_until_drained=0)
++        req = _FakeReq("immediate", sender)
++        sched = self._prefill_scheduler(req)
++        sched.process_pending_chunked_abort()
++        self.assertEqual(self._releases(), 1)
++        self.assertFalse(req.kv.holds_kv)
++        self.assertEqual(sched._deferred_chunked_sender_aborts, [])
++        # The chunk result may still arrive; nothing is owned any more.
++        self.assertFalse(sched._retire_aborted_prefill_result(req))
++        self.assertEqual(self._releases(), 1)
++
++    def test_already_drained_sender_releases_at_abort_time(self):
++        sender = _FakeSender(requires_drain=True, polls_until_drained=0)
++        req = _FakeReq("drained", sender)
++        sched = self._prefill_scheduler(req)
++        sched.process_pending_chunked_abort()
++        self.assertEqual(self._releases(), 1)
++        self.assertEqual(sched._deferred_chunked_sender_aborts, [])
++        self.assertFalse(sched._retire_aborted_prefill_result(req))
++        self.assertEqual(self._releases(), 1)
++
++    def test_drain_tolerates_row_already_freed(self):
++        """Defensive guard: a parked request whose row is gone must not assert."""
++        sender = _FakeSender(requires_drain=True, polls_until_drained=0)
++        req = _FakeReq("gone", sender)
++        req.kv.holds_kv = False
++        sched = _make_scheduler(None, chunked_req=None, running_reqs=[])
++        sched._deferred_chunked_sender_aborts = [req]
++        sched._drain_deferred_chunked_sender_aborts()
++        self.assertEqual(self._releases(), 0)
++        self.assertEqual(sched._deferred_chunked_sender_aborts, [])
++        self.assertEqual(sender.clear_calls, 1)
++
++    def test_two_parked_requests_release_independently(self):
++        fast = _FakeReq(
++            "fast", _FakeSender(requires_drain=True, polls_until_drained=1)
++        )
++        slow = _FakeReq(
++            "slow", _FakeSender(requires_drain=True, polls_until_drained=3)
++        )
++        sched = _make_scheduler(None, chunked_req=None, running_reqs=[])
++        sched._deferred_chunked_sender_aborts = [fast, slow]
++        sched._drain_deferred_chunked_sender_aborts()
++        self.assertEqual(sched._deferred_chunked_sender_aborts, [slow])
++        self.assertFalse(fast.kv.holds_kv)
++        self.assertTrue(slow.kv.holds_kv)
++        sched._drain_deferred_chunked_sender_aborts()
++        sched._drain_deferred_chunked_sender_aborts()
++        self.assertEqual(sched._deferred_chunked_sender_aborts, [])
++        self.assertEqual(self._releases(), 2)
++
++
+ if __name__ == "__main__":
+     unittest.main(verbosity=2)
+-- 
+2.43.0
+
