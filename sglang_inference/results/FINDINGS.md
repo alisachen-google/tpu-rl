@@ -784,3 +784,13 @@ waiting behind the in-flight 255k prefill, O-7), 0 exceptions, used tokens back 
 
 **PR #1181 test revision (08:45 UTC).** The gate test in `test_prefill_abort_result_cleanup.py` no longer uses `@patch`; it stubs the fake
 scheduler's `cache_unfinished_disagg_prefill` and `_release_swa_beyond_window` and asserts `req.kv.holds_kv` (reviewer feedback). Head fd82eab2f3; CI re-running.
+
+**Fix PRs opened as drafts (08:55–09:10 UTC), CI requested with `/tag-run-ci-label`.**
+- #1191 for #1188 (F-16): prefill applies `--max-queued-requests` over bootstrap + waiting queues; priority eviction from the waiting queue;
+  decode untouched. Tests in `test_priority_scheduling_disaggregation.py` (50 passed with related files).
+- #1192 for #1147 (F-6): one bootstrap room per parallel-sampling sub-request (`r_i + k * batch_size`), prefix request skipped in PD mode.
+  Tests in `test_tokenizer_manager_rid_cleanup.py` (91 passed with io_struct tests).
+- #1193 for #1176 (F-13): `hardware_backend/tpu/kv_canary_tpu.py` fused-pool attacher (MLA-style single canary pair per slot), lazy TPU
+  registration in the patcher, SWA adapter delegates fused sub-pools. Tests in `test_kv_canary_headroom.py` (7 passed).
+- #1181 (F-11): imports moved to module top per review; gate test without `@patch`; head 309bc399af, CI re-running.
+Live validation of all three on the pair: `_phase_fix_validate_v2.sh` → `results/fix_validate_v2/`.

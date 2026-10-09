@@ -1,0 +1,4 @@
+2026-10-09T09:53:42Z [fixv2] validate head: 7459baaf46
+   host a on 7459baaf46c
+2026-10-09T09:53:54Z [fixv2] local on 7459baaf46
+2026-10-09T09:53:55Z [fixv2] === V1 #1188 queue limit on the pair: Config C + --max-queued-requests 4 + priority scheduling
