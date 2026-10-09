@@ -23,3 +23,7 @@
    prefill SWA pool tokens: 16896 (main: 16384)
    262144: [isl262144_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out. (3000s); prefill chunks: 126; last: 2304@0.01
    health: prefill 200 decode 200
+   999999: [isl999999_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out. (3001s); prefill chunks: 602; last: 2367@0.01
+   health: prefill 200 decode 200
+   scheduler exceptions: prefill 0 decode 0
+2026-10-09T23:07:38Z [1181-head] phase 1181 head done

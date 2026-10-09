@@ -838,3 +838,9 @@ D2 priority 9 → evicted the newest priority-5 filler (3) with "aborted by a hi
 (no burst rejection); 0 exceptions; end-idle used 0. Matches the monolithic reference. PR body updated; mark ready once CI is green.
 
 **PR #1191 ready for review (21:15 UTC):** CI 28/28 green on 97737b8375, live probe PASS (fixv5), unit tests in the existing file.
+
+**PR #1181 current head re-validation (`_phase_1181_head.sh`, 21:14–23:07 UTC, ae27ba40a5 = code of 01f2a4fb82, `results/fix_validate_1181_head/`).**
+(1) Monolithic 1M shape, 1 slot, radix off: SWA pool 16,896 (main 16,384 → stall); 256k prompt → 1,024 tokens, TTFT 19.1 s, e2e 25.7 s,
+0 exceptions. (2) Pair, decode pool 262k, 4 × 131k at c=4: 4/4 in 33 s, needles 3/3, 0 exceptions, both healthy (main: 1 of 4, wedged).
+(3) Pair, 1 slot, 1M shape: prefill completed every chunk of the 256k (126 batches) and 1M (602 batches) prompts, last chunk at SWA 0.01, 0
+exceptions; the e2e answers timed out at 3,000 s because of F-12 (single-slot handshake hold), not F-11. All three F-11 cases PASS on the head.
