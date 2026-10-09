@@ -1,2 +1,4 @@
 2 prompts -> http://10.128.15.217:8080 (concurrency=1, stream=True)
 [isl262144_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out.
+[isl262144_k1] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out.
+done: 2 prompts, 2 errors -> /home/alisachen_google_com/pd_disagg/results/fix_validate/1m_262144.jsonl

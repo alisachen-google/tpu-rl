@@ -3,3 +3,5 @@
 2026-10-09 01:03:43 decode /health ready after 0 s
 2026-10-09 01:03:44 LB /health_generate ready after 1 s
    prefill SWA pool tokens: 16384 (was 16384 before the fix)
+   262144: [isl262144_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out. (3001s)
+   health: prefill 200 decode 200
