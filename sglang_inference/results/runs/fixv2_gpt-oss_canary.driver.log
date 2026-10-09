@@ -3,3 +3,4 @@ monitoring: grafana http://10.128.0.90:3000/d/sglang-pd  prometheus :9090
 850940
 2026-10-09 10:29:45 starting prefill on a (10.128.15.217)
 2026-10-09 11:59:59 prefill /health NOT ready after 5400 s
+2026-10-09 13:30:11 decode /health NOT ready after 5400 s
