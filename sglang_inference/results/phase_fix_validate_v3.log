@@ -1,5 +1,8 @@
+scp: dest open "/tmp/q.bundle": Permission denied
+scp: failed to upload file /tmp/q.bundle to /tmp/q.bundle
    host a on 6e139c7e32c
-fatal: 'pd-queue-limit-prefill' is already used by worktree at '/home/alisachen_google_com/wt-1188'
-2026-10-09T19:53:35Z [fixv3] === #1191 queue limit on both engines: Config C + --max-queued-requests 4 + priority scheduling
-/home/alisachen_google_com/pd_disagg/scripts/_phase_fix_validate_v3.sh: line 15: syntax error near unexpected token `done'
-/home/alisachen_google_com/pd_disagg/scripts/_phase_fix_validate_v3.sh: line 15: `20; done'
+2026-10-09T19:55:06Z [fixv3] local on 6e139c7e32
+2026-10-09T19:55:06Z [fixv3] === #1191 queue limit on both engines: Config C + --max-queued-requests 4 + priority scheduling
+2026-10-09 19:57:35 prefill /health ready after 136 s
+2026-10-09 19:57:35 decode /health ready after 0 s
+2026-10-09 19:57:51 LB /health_generate ready after 16 s
