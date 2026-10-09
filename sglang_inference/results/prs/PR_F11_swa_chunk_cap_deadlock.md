@@ -37,6 +37,6 @@ Combined fix branch deployed on both hosts.
 | Case | Before the fix | With the fix |
 |---|---|---|
 | Trigger 2: decode pool 262,144 tokens, 4 × 131k prompts, 1,024 output tokens, concurrency 4 (`gpt-oss_A_128k_smallpool.json`) | 1 of 4 completed; 3 hung to the 1,200 s client timeout; prefill spinning at SWA usage 0.99, chunks 2,112 → 640 → none | **4 of 4 in 33 s**, 0 errors, needles 3/3 on every answer; chunk trail stays at the healthy 8,192 / 2,880 alternation (SWA usage 0.58 / 0.84), no stall |
-| Trigger 1: single slot, 1M shape, 256k / 512k / 1M prompts (`gpt-oss_A_1m.json`) | 4 of 4 prompts never finished (third chunk budget 0; SWA pool 16,384) | see rerun results below |
+| Trigger 1: single slot, 1M shape, 256k / 512k / 1M prompts (`gpt-oss_A_1m.json`) | prefill never finished any prompt: third chunk budget 0 at SWA pool 16,384 (4 of 4) | SWA pool **16,896** (cap 16,832 aligned up); **prefill completed all three prompts** (850 chunks, 8,192 / 320 alternation, `#pending-token` reaches 0 each time, no stall). The responses still did not reach the client: the decode ran 0 batches and its handshake ended only on the client abort, which is the single-slot handshake hold we report separately (F-12), not this bug |
 
 Evidence: `results/fix_validate/smallpool.log`, `smallpool_out.jsonl`, prefill log of run `A_128k_smallpool_fixval`, `results/phase_fix_validate3.log`.

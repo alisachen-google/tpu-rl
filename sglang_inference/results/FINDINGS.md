@@ -668,3 +668,12 @@ pulls, the pair is wedged. Any decode back-pressure (full decode pool, slow deco
 window easy to hit. F-11 severity raised to P0 for PD. **Client outcome:** 1 of 4 completed (13.9 s); the other three got `Read timed out` at the client's 1,200 s limit; `num_retracted_reqs` stayed 0
 (the retraction path was never reached because nothing was ever admitted to retract). After the clients disconnected the prefill's queues
 drained (`inflight 0, queue 0`), i.e. the wedge is released only by client aborts, exactly as F-12's hold.
+
+**Fix validation (00:41–03:12 UTC, branches `pd-chunked-abort-single-release` + `pd-swa-chunk-cap-deadlock` deployed on both hosts,
+`results/fix_validate/`, `phase_fix_validate*.log`).** F-8: 6 client aborts during chunked prefill of a 131k prompt (3 at 6.4 s, 3 at 2.0 s):
+PASS, 0 scheduler exceptions, engines back to baseline, follow-ups served (before: engine dead on the first abort). F-11 trigger 2 (decode pool
+262k, 4 × 131k, c=4): 4 of 4 in 33 s, needles 3/3, healthy chunk trail (before: 1 of 4, pair wedged). F-11 trigger 1 (1 slot, 1M shape): SWA
+pool 16,896 (cap aligned up from 16,832); prefill completed 256k, 512k and 1M (850 chunks, no stall; before: never past chunk 3). E2E
+responses still time out on this pair because of F-12 (decode ran 0 batches; handshake ended only on client abort), unrelated to the fix.
+Note: the first validation round left the pool at 19,456/16,384 because the `--max-total-tokens` sizing path bypassed the alignment; fixed
+in the branch (`_swa_cap_tokens` used by both paths) and re-validated.
