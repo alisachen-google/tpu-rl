@@ -822,3 +822,7 @@ running 5 / transfer 3 / used 16768 after the other 5 finished). The decode then
 (D1/D3/D2 FAIL for the wrong reason). Conclusion: only the decode can shed load on a pair; PR re-scoped to decode-only (prefill intake
 unchanged). Re-validation queued as fixv4. Side note: this is the F-12 hold triggered from the prefill side — any prefill-side abort before
 the KV handshake leaves the decode twin hanging with no timeout.
+
+**PR #1193 live check (canary_refuse_qwen, 20:17 UTC): PASS.** With the re-scoped branch, `--kv-canary log` on the Qwen3-VL pair makes
+both engines exit 28 s after launch with `kv-canary: the canary runtime is not available on TPU yet (--kv-canary log); start with
+--kv-canary none.` — no NotImplementedError, no stall, no segfault. Remaining: CI on the re-authored head, then mark ready.
