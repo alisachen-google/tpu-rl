@@ -677,3 +677,9 @@ pool 16,896 (cap aligned up from 16,832); prefill completed 256k, 512k and 1M (8
 responses still time out on this pair because of F-12 (decode ran 0 batches; handshake ended only on client abort), unrelated to the fix.
 Note: the first validation round left the pool at 19,456/16,384 because the `--max-total-tokens` sizing path bypassed the alignment; fixed
 in the branch (`_swa_cap_tokens` used by both paths) and re-validated.
+
+**Upstream (04:15 UTC).** PR for F-11 / #1142 opened: https://github.com/sgl-project/sglang-torchtpu/pull/1181 (branch
+`pd-swa-chunk-cap-deadlock`, rebased on 2cec1cf194). F-8 / #1145 was fixed upstream on 10-07/10-08 (bab49bcec2 + 7366de9460 +
+2645aa14af, same single-owner approach as our branch); our branch is superseded; verification of upstream main against our abort reproduction
+queued (`_phase_f8_upstream_check.sh`); comment draft in `prs/COMMENT_1145_fixed_upstream.md`. #1161 (priority scheduling validation) test
+plan written: `TEST_PLAN_1161_priority_scheduling.md`.
