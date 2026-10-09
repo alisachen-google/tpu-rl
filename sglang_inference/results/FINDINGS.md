@@ -794,3 +794,13 @@ scheduler's `cache_unfinished_disagg_prefill` and `_release_swa_beyond_window` a
   registration in the patcher, SWA adapter delegates fused sub-pools. Tests in `test_kv_canary_headroom.py` (7 passed).
 - #1181 (F-11): imports moved to module top per review; gate test without `@patch`; head 309bc399af, CI re-running.
 Live validation of all three on the pair: `_phase_fix_validate_v2.sh` → `results/fix_validate_v2/`.
+
+**Live validation of the fix PRs (`_phase_fix_validate_v2.sh`, 09:53–14:03 UTC, `results/fix_validate_v2/`).**
+- #1192 (n>1 rooms): **PASS** on Config A: `n=2` → 2 outputs in 1.2 s, `n=3` → 3 outputs in 1.1 s, chat `n=2` → 2 choices; 0 exceptions, both
+  engines idle afterwards (before: no response until the client timed out).
+- #1191 (queue limit on the prefill): probe still FAIL (D1/D3 200, nothing evicted). With short prompts the prefill is never contended; the
+  backlog sits in the decode's waiting queue after transfer, which the prefill-side limit does not see. The decode's waiting queue is the
+  analogue of the single-engine queue → the limit (with KV release for newcomer and victim) must also apply there. Rework in progress.
+- #1193 (canary attacher): attaching now succeeds on both pools (`attach_tpu_fused` for Qwen's fused pool, `attach_swa` with fused sub-pools
+  for gpt-oss), but the gpt-oss prefill never reached `/health` (5,400 s) and the Qwen pair hung on `/health_generate` → the canary's torch
+  reference path or the spliced transfer buffer list stalls on TPU; diagnosing.
