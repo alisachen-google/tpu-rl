@@ -734,3 +734,6 @@ Confirms F-16 as a PD-only gap.
 (no preemption). C2 diff = threshold+1 at full occupancy → admitted in 0.1 s (a running priority-0 decode was preempted); the preempted holder
 resumed and all 4 holders completed with full output. Ordering 7→0 and FIFO ties PASS. So the mechanism works on a single engine and is
 simply unreachable on a PD decode (O-6). Low-values-first rerun on the pair (`1161_ps_low_b`): order 0→7, ties FIFO, no preemption, PASS.
+
+**PR #1181 ready for review (06:40 UTC).** All 28 CI checks succeeded (CPU shards, build, TPU unit tests, stage-B e2e on v7x); local unit
+tests, live validation and scenario battery green → draft converted to ready for review.
