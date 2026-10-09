@@ -687,3 +687,7 @@ plan written: `TEST_PLAN_1161_priority_scheduling.md`.
 **Monolithic before/after for F-11 trigger 1 (03:33–04:14 UTC, `_phase_fix_validate_mono.sh`, recipe `gpt-oss_G_1m_mr1_noradix.json`).**
 Same engine on host b, radix off, 1 slot, 1M shape, 256k prompt, no P/D. main: SWA pool 16,384, chunks 8,192 → 8,000 at SWA 0.99, then no
 batch; client timed out at 1,800 s. Fix branch: pool 16,896, 1,024 tokens returned, TTFT 19.2 s, e2e 25.4 s. Added to PR #1181.
+
+**#1145 (F-8) verified fixed on upstream main 2cec1cf194 (04:18–04:22 UTC, `_phase_f8_upstream_check.sh`, `results/fix_validate/f8_upstream_abort_*.txt`).**
+Config A pair built from origin/main on both hosts: 3 aborts at 2.0 s and 3 at 6.4 s during chunked prefill of a 131k prompt, all PASS,
+follow-ups identical, baselines restored, both engines healthy. Closing comment ready in `prs/COMMENT_1145_fixed_upstream.md` (not posted).

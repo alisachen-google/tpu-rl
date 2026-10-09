@@ -2,3 +2,13 @@ branch 'upstream-main-check' set up to track 'origin/main'.
 2026-10-09T04:14:13Z [f8-upstream] bundle: 2cec1cf194
 host a on 2cec1cf194
 2026-10-09T04:14:24Z [f8-upstream] local on 2cec1cf194
+2026-10-09 04:18:38 prefill /health ready after 241 s
+2026-10-09 04:18:38 decode /health ready after 0 s
+2026-10-09 04:18:39 LB /health_generate ready after 1 s
+   abort@2.0: [+   58.75s] PASS: 3 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=0), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/fix_validate/f8_upstream_
+   health: prefill 200 decode 200
+   abort@6.4: [+   72.14s] PASS: 3 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=0), 0 baseline problem(s) -> /home/alisachen_google_com/pd_disagg/results/fix_validate/f8_upstream_
+   health: prefill 200 decode 200
+   prefill scheduler exceptions: 0
+host a restored to 09d1244c26
+2026-10-09T04:21:02Z [f8-upstream] phase f8 upstream check done (local on main)
