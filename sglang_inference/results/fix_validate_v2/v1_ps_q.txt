@@ -10,3 +10,5 @@
 [D1-low-rejected] FAIL newcomer priority 3 into a full queue of 5s -> HTTP 200 
 [D3-equal-rejected] FAIL newcomer priority 5 (equal) -> HTTP 200
 [D2-evict-lowest] FAIL newcomer priority 9: evicted [] (expect exactly one, the newest priority-5 filler = 3), newcomer HTTP 200 msg=[]
+[end-retractions] INFO num_retracted_reqs gauge 0.0 -> 0.0
+[end-idle] FAIL decode num_used_tokens at end = 19712.0
