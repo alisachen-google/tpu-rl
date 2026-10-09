@@ -691,3 +691,8 @@ batch; client timed out at 1,800 s. Fix branch: pool 16,896, 1,024 tokens return
 **#1145 (F-8) verified fixed on upstream main 2cec1cf194 (04:18–04:22 UTC, `_phase_f8_upstream_check.sh`, `results/fix_validate/f8_upstream_abort_*.txt`).**
 Config A pair built from origin/main on both hosts: 3 aborts at 2.0 s and 3 at 6.4 s during chunked prefill of a 131k prompt, all PASS,
 follow-ups identical, baselines restored, both engines healthy. Closing comment ready in `prs/COMMENT_1145_fixed_upstream.md` (not posted).
+
+**F-16 (04:35 UTC, #1161 battery, `1161_ps_q`).** `--max-queued-requests 4` with priority scheduling on a PD pair: newcomers of priority 3, 5 and 9
+into a full queue of priority-5 requests all got 200; nothing evicted. Cause: `_add_request_to_queue` calls `_abort_on_queued_limit` only
+when `disaggregation_mode == NULL` (scheduler.py ~L3458), so the limit and the priority eviction are inert on prefill and decode engines.
+Draft `bug_reports/F-16_github_issue.md`; S2/P2. Monolithic control queued (`_phase_1161d.sh`).

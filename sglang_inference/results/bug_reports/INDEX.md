@@ -20,6 +20,7 @@ The chronological raw log is `../FINDINGS.md`. These reports use ASD-STE100 styl
 | [F-13](F-13_github_issue.md) | `--kv-canary` kills every TPU engine at start-up (fused pool not supported by the canary) | bug (start-up crash, observability) | medium | 2/2 models  none |
 | [F-14](F-14_github_issue.md) | `--disaggregation-enable-kv-checksum` is CUDA-only; TPU prefill passes health then dies on first request | bug (crash, observability) | medium | 2/2 models  none |
 | [F-15](F-15_github_issue.md) | mini-LB returns a bare 500 for an empty `input_ids` list (IndexError); engines return 400 | bug (validation) | S3 | draft ready | none |
+| [F-16](F-16_github_issue.md) | `--max-queued-requests` + priority eviction ignored in PD mode | bug (silent no-op) | S2 | draft ready | none (relates to #1161) |
 
 Overlap check: all 69 open issues read on 2026-10-08 (`results/bug_reports/OVERLAP.md`). Production triage (severity, priority, filing order):
 `PRIORITIES.md`. Ready-to-file GitHub issue drafts with code traces: `F-1_github_issue.md`, `F-2_github_issue.md`, `F-5_github_issue.md`,

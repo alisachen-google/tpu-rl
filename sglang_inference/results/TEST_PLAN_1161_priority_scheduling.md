@@ -84,6 +84,9 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 
 ### D. Queue limit (PS-q: `--max-queued-requests 4`)
 
+**Result 2026-10-09:** not enforceable in PD. `_abort_on_queued_limit` only runs when `disaggregation_mode == NULL`, so D1–D3 returned 200 with no
+eviction on the pair (F-16). D1–D3 are re-run on a monolithic server as the control (`_phase_1161d.sh`).
+
 | # | Case | Expect |
 |---|---|---|
 | D1 | Queue full of priority 5; newcomer priority 3 | newcomer 503 "queue is full" |
