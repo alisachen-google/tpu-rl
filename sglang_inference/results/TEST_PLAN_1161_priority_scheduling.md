@@ -140,3 +140,8 @@ Config B, concurrency 1, 256 greedy tokens, 8k and 32k prompts, with priority sc
 run is byte-identical to the cold run in all four cases, and a second hit is identical again. Prefix caching does not change greedy output in
 this build, with or without priorities. The B7/B8 differences seen in the second battery came from an `ignore_eos` mismatch between the two
 requests in the probe, not from the server.
+
+### 3.x Fix validation for O-? / F-16 (#1188) — PR #1191, 2026-10-09 20:42 UTC
+With PR #1191 deployed on both hosts (Config C, max_queued_requests=4): D1 **PASS** (503 queue full), D3 **PASS** (503), D2 **PASS**
+(newest priority-5 filler evicted with the "higher priority request" message, newcomer 200), end-idle PASS. The limit now applies on the
+decode where the client's response comes from; the earlier prefill-side variant left rejected requests' decode twins hanging (see FINDINGS).

@@ -1,0 +1,13 @@
+2026-10-09T20:40:21Z [fixv5] local on 97737b8375
+2026-10-09T20:40:21Z [fixv5] === #1191 queue limit on the decode (decode-only, backlog net of free slots): Config C + --max-queued-requests 4 + priority scheduling
+2026-10-09 20:42:50 prefill /health ready after 135 s
+2026-10-09 20:42:51 decode /health ready after 1 s
+2026-10-09 20:42:52 LB /health_generate ready after 1 s
+   [A4-health] PASS decode /health 200 after malformed priorities
+   [D1-low-rejected] PASS newcomer priority 3 into a full queue of 5s -> HTTP 503 {"object":"error","message":"The request queue is full.","type":"503","param":nu
+   [D3-equal-rejected] PASS newcomer priority 5 (equal) -> HTTP 503
+   [D2-evict-lowest] PASS newcomer priority 9: evicted [3] (expect exactly one, the newest priority-5 filler = 3), newcomer HTTP 200 msg=['{"object":"error","message":"The request is aborted by a higher priority request.","type":"
+   [end-retractions] INFO num_retracted_reqs gauge 0.0 -> 0.0
+   [end-idle] PASS decode num_used_tokens at end = 0.0
+   exceptions: prefill 0 decode 0; used tokens decode 0.0; health prefill 200 decode 200
+2026-10-09T20:43:29Z [fixv5] phase fix validate v5 done
