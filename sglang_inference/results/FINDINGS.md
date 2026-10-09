@@ -836,3 +836,5 @@ Everything else was clean: 0 exceptions, end-idle used 0 (no more hung twins). R
 **#1188 / PR #1191 fixv5 (decode-only, backlog net of free slots, 20:42 UTC): PASS.** D1 priority 3 → 503 "queue is full"; D3 equal → 503;
 D2 priority 9 → evicted the newest priority-5 filler (3) with "aborted by a higher priority request", newcomer 200; all 8 holders admitted
 (no burst rejection); 0 exceptions; end-idle used 0. Matches the monolithic reference. PR body updated; mark ready once CI is green.
+
+**PR #1191 ready for review (21:15 UTC):** CI 28/28 green on 97737b8375, live probe PASS (fixv5), unit tests in the existing file.

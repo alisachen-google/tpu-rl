@@ -1,0 +1,4 @@
+2 prompts -> http://10.128.0.90:30000 (concurrency=1, stream=True)
+[isl262144_k0] tokens=1024 finish=length cached=0 ttft=19083.99ms e2e=25702.7ms
+[isl262144_k1] tokens=1024 finish=length cached=0 ttft=19064.61ms e2e=25401.52ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/fix_validate_1181_head/mono_262144.jsonl

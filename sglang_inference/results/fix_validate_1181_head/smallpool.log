@@ -1,0 +1,6 @@
+4 prompts -> http://10.128.15.217:8080 (concurrency=4, stream=True)
+[isl131072_k0_dup0] tokens=1024 finish=length cached=0 ttft=6831.74ms e2e=13173.28ms
+[isl131072_k1_dup1] tokens=1024 finish=length cached=0 ttft=13660.56ms e2e=19628.12ms
+[isl131072_k0_dup2] tokens=1024 finish=length cached=0 ttft=20126.29ms e2e=26338.52ms
+[isl131072_k1_dup3] tokens=1024 finish=length cached=0 ttft=26829.03ms e2e=32274.06ms
+done: 4 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/fix_validate_1181_head/smallpool_out.jsonl

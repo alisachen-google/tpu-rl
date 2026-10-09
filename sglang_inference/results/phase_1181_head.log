@@ -1,0 +1,23 @@
+   host a on ae27ba40a55
+2026-10-09T21:14:55Z [1181-head] local on ae27ba40a5 ([TPU/PD] Keep the chunked-prefill SWA continuation budget ab)
+2026-10-09T21:14:55Z [1181-head] === (1) F-11 trigger 1, monolithic (no F-12): gpt-oss 1M shape, radix off, 1 slot, host b; 256k prompt (main stalls at chunk 3)
+2026-10-09 21:19:23 golden(b) /health ready after 256 s
+   SWA pool tokens: 16896 (main: 16384 -> stall; fix: 16896)
+   262144: [isl262144_k0] tokens=1024 finish=length cached=0 ttft=19083.99ms e2e=25702.7ms (51s)
+   chunk trail: 8064@0.51 320@0.97 8064@0.51 320@0.63 2304@0.63 
+   health: 200; exceptions: 0
+2026-10-09T21:20:14Z [1181-head] === (2) F-11 trigger 2, pair: decode pool 262,144, 4 x 131k prompts, 1,024 tokens, c=4 (main: 1 of 4, pair wedged)
+2026-10-09 21:22:44 prefill /health ready after 135 s
+2026-10-09 21:22:44 decode /health ready after 0 s
+2026-10-09 21:22:45 LB /health_generate ready after 1 s
+   prefill SWA pool tokens: 19968
+   completed: 4 of 4 in 33s; errors: 0
+   {"id": "isl131072_k1_dup3", "isl": 131072, "needles": 3, "found": 3, "missing": [], "answer_region_chars": 275, "completion_tokens": 1024, "finish_reason": "length"}
+   chunk trail: 3264@0.83 8192@0.58 3264@0.83 8192@0.42 128@0.01 
+   health: prefill 200 decode 200
+   scheduler exceptions: prefill 0 decode 0
+2026-10-09T21:23:21Z [1181-head] === (3) F-11 trigger 1, pair: 1 slot, 1M shape; 256k and 1M prompts (main: prefill never past chunk 3; e2e limited by F-12 on 1 slot)
+2026-10-09 21:27:21 prefill /health ready after 226 s
+2026-10-09 21:27:21 decode /health ready after 0 s
+2026-10-09 21:27:22 LB /health_generate ready after 1 s
+   prefill SWA pool tokens: 16896 (main: 16384)
