@@ -151,6 +151,7 @@ def build_payload(args):
         content.append({"type": "text", "text": post})
     content.append({"type": "text", "text": args.question})
     payload = {"model": args.model, "messages": [{"role": "user", "content": content}],
+               **({"priority": args.priority} if args.priority is not None else {}),
                "max_tokens": args.max_tokens, "temperature": args.temperature, "stream": args.stream}
     if args.ignore_eos:
         payload["ignore_eos"] = True
@@ -223,6 +224,7 @@ def main():
     ap.add_argument("--image-straddle-chunk", type=int, default=None, metavar="CH",
                     help="place first image after ~CH filler tokens (needs --target-tokens > CH)")
     ap.add_argument("--max-tokens", type=int, default=256)
+    ap.add_argument("--priority", type=int, default=None, help="request priority (needs --enable-priority-scheduling)")
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--stream", action="store_true")
     ap.add_argument("--ignore-eos", action="store_true")
