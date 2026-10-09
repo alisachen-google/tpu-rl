@@ -49,8 +49,11 @@ introduced with "Fix metrics and request tracing (TimeStats)" (2d62af6be5). `max
 
 Issue #1161 battery, queue-limit configuration (`gpt-oss_C_128k_ps_q.json`): 8 slots held by priority-5 decodes, 4 priority-5 fillers
 queued, then newcomers with priority 3 (expect 503), 5 (expect 503) and 9 (expect one filler evicted). All three newcomers returned 200 and
-nothing was evicted; both engines' logs contain no "queue is full" line. The same probe on a monolithic server with the same flags is the
-control (results in `results/1161/mono_ps_q.txt`).
+nothing was evicted; both engines' logs contain no "queue is full" line. The same probe on a monolithic server with the same flags
+(`gpt-oss_G_128k_ps_q.json`: 4 slots, `--max-queued-requests 4`, priority scheduling, no preemption) behaves as documented: newcomer priority 3
+→ **503 "The request queue is full."**, newcomer priority 5 (equal) → 503, newcomer priority 9 → the newest priority-5 waiting request is evicted
+with **"The request is aborted by a higher priority request."** and the newcomer is served (`results/1161/mono_ps_q.txt`). The gap is therefore
+PD-specific.
 
 ## How to reproduce
 

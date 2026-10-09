@@ -725,3 +725,7 @@ its running decodes are never candidates for priority preemption, whatever the f
 "no preemption of a running decode" holds by construction in PD (observation O-6); `--disable-priority-preemption` is redundant there but
 harmless. Ordering (B2/B3) and no-preemption (B1) PASS in every PD configuration with the corrected probe. Monolithic preemption control
 queued (`_phase_1161g.sh`) to show the mechanism where it applies.
+
+**#1161 monolithic queue-limit control (05:38 UTC, `1161_mono_ps_q`).** D1 lower newcomer → 503 "The request queue is full."; D3 equal → 503;
+D2 higher newcomer → the newest priority-5 waiting request evicted ("The request is aborted by a higher priority request."), newcomer served.
+Confirms F-16 as a PD-only gap.

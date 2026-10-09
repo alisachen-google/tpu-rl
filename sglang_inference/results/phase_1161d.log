@@ -1,1 +1,18 @@
 2026-10-09T05:32:25Z [1161d] === mono ps_q (monolithic gpt-oss 128k, 4 slots, max_queued_requests 4, priority scheduling, no preemption)
+2026-10-09 05:37:53 golden(b) /health ready after 315 s
+   [A1-absent] PASS priority=None -> HTTP 200 
+   [A3-zero] PASS priority=0 -> HTTP 200 
+   [A3-neg] PASS priority=-1 -> HTTP 200 
+   [A3-max32] PASS priority=2147483647 -> HTTP 200 
+   [A3-min32] PASS priority=-2147483648 -> HTTP 200 
+   [A4-huge] FAIL priority=9223372036854775808 -> HTTP 200 
+   [A4-float] PASS priority=1.5 -> HTTP 400 {"object":"error","message":"1 validation error:\n  {'type': 'int_from_float', 'loc': ('body', 'prio
+   [A4-str] PASS priority='high' -> HTTP 400 {"object":"error","message":"1 validation error:\n  {'type': 'int_parsing', 'loc': ('body', 'priorit
+   [A4-health] PASS decode /health 200 after malformed priorities
+   [D1-low-rejected] PASS newcomer priority 3 into a full queue of 5s -> HTTP 503 {"object":"error","message":"The request queue is full.","type":"503","param":nu
+   [D3-equal-rejected] PASS newcomer priority 5 (equal) -> HTTP 503
+   [D2-evict-lowest] PASS newcomer priority 9: evicted [3] (expect exactly one, the newest priority-5 filler = 3), newcomer HTTP 200 msg=['{"object":"error","message":"The request is aborted by a higher priority request.","type":"
+   [end-retractions] INFO num_retracted_reqs gauge 0.0 -> 0.0
+   [end-idle] PASS decode num_used_tokens at end = 256.0
+   exceptions: 0; queue-full aborts logged: 0
+2026-10-09T05:38:24Z [1161d] phase 1161d done
