@@ -1,1 +1,23 @@
 2026-10-09T07:07:28Z [1161h2] === c2: gpt-oss Config C (HiCache), priority scheduling, no preemption
+2026-10-09 07:10:12 prefill /health ready after 151 s
+2026-10-09 07:10:12 decode /health ready after 0 s
+2026-10-09 07:10:13 LB /health_generate ready after 1 s
+   [B8-hicache-across-priorities] FAIL 8 x 131k warmed (8/8 ok, > device pool so the first ones are evicted to host); doc 0 re-sent at priority 50: cached_tokens=131072, ttft=0.91s, output identical=False (host-hit lines: see prefill log)
+   prefill host-hit lines: #hbm-hit-token: 0, #host-hit-token: 131072
+   exceptions: prefill 0 decode 0; health: prefill 200 decode 200
+2026-10-09T07:11:09Z [1161h2] === mm: Qwen3-VL Config B, priority scheduling, no preemption (E3 mixed priorities, E5 image prefix reuse)
+2026-10-09 07:14:10 prefill /health ready after 166 s
+2026-10-09 07:14:10 decode /health ready after 0 s
+2026-10-09 07:14:31 LB /health_generate ready after 21 s
+   E3 priority 0: status=200 prompt_tokens=818 completion_tokens=48 cached_tokens=0 ttft=25037.4ms e2e=25037.5ms needle MISSING: plover 
+   E3 priority 10: status=200 prompt_tokens=818 completion_tokens=48 cached_tokens=0 ttft=30248.9ms e2e=30248.9ms needle MISSING: plover 
+   E3 priority 50: status=200 prompt_tokens=818 completion_tokens=48 cached_tokens=0 ttft=30268.1ms e2e=30268.1ms needle MISSING: plover 
+   E5 same images, priority 0 then 50: cached_tokens=768 -> cached_tokens=768; needles: /home/alisachen_google_com/pd_disagg/results/1161/h_mm_e5a.log:0 /home/alisachen_google_com/pd_disagg/results/1161/h_mm_e5b.log:0 
+   exceptions: prefill 0 decode 0; health: prefill 200 decode 200
+2026-10-09T07:15:55Z [1161h2] === pre2: monolithic gpt-oss, preemption on (C9 C10 C15)
+2026-10-09 07:18:53 golden(b) /health ready after 165 s
+   [C9-abort-preemptor] PASS priority-11 newcomer first token 0.35s (preempted a holder), aborted after 2 s; holders completed 4/4; used tokens after: 0.0
+   [C10-abort-victims] PASS holders' streams closed right after the preemption: newcomer HTTP 200 ttft=2.9s; used=0.0 running=0.0
+   [C15-repeated-preemption] PASS newcomers (priority, HTTP, ttft): [(11, 200, 0.12), (12, 200, 0.09), (13, 200, 0.07)]; holders completed 4/4; used after 64.0
+   exceptions: 0; health 200
+2026-10-09T07:20:45Z [1161h2] phase 1161h2 done

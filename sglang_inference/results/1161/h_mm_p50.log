@@ -1,0 +1,8 @@
+payload: 18.6 KiB, 4 image(s) 448x448 (~64 tok each), est prompt tokens ~280, content parts=6
+  image 1: red circle labeled 'IMAGE 1'
+  image 2: green square labeled 'IMAGE 2'
+  image 3: blue triangle labeled 'IMAGE 3'
+  image 4: orange diamond labeled 'IMAGE 4'
+status=200 prompt_tokens=818 completion_tokens=48 cached_tokens=0 ttft=30268.1ms e2e=30268.1ms
+text: 'Of course. Here is a brief description of each image, followed by the secret word.\n\n- **IMAGE 1:** This image displays a solid red circle centered on a light gray background. The label "IMAGE 1" is in the'
+needle MISSING: plover

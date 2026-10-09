@@ -751,3 +751,19 @@ back to 0, follow-up served.
 **#1161 F1 soak (06:42–06:57 UTC, Config B, priority scheduling, no preemption).** 15 min, 12 closed-loop clients, prompts 1k/8k/32k, outputs
 64–256, priorities 0/5/10/50 uniformly: 5,035 requests, 0 errors, 8 running with 2–4 waiting throughout, used tokens and running back to 0 at
 the end, 0 exceptions. Mean TTFT by priority: 0 → 3.3 s, 5 → 1.9 s, 10 → 1.8 s, 50 → 1.7 s: lower priority waits longer, none starved.
+
+**#1161 B8 HiCache across priorities (07:10 UTC, `1161h_C_np`, Config C).** 8 distinct 131k documents warmed at priority 0 (exceeds the 786k
+device pool, so the earliest are evicted to host); document 0 re-sent at priority 50: `cached_tokens=131072`, prefill log
+`#hbm-hit-token: 0, #host-hit-token: 131072`, TTFT 0.91 s. Mechanism PASS. The cached run's greedy text differed from the cold run, the same
+symptom as B7 (HBM hit); whether this is a priority effect or the cached-prefix numerics is isolated by `_phase_1161i.sh` (cold vs cached,
+with and without priority scheduling).
+
+**#1161 E3/E5 Qwen3-VL multimodal with priorities (07:14 UTC, `1161h_qwen_B_np`, Config B).** Three concurrent 4-image requests at
+priorities 0/10/50: all 200, 48 tokens each (needle not reached within the 48-token budget; output-length matter). E5 same images, priority 0
+then 50: `cached_tokens` 768 of 818 on both (the image span, shared with the E3 requests): image prefix reuse across priorities works. 0
+exceptions.
+
+**#1161 monolithic preemption aborts (07:19 UTC, `1161h2_mono_pre`, 4 slots, threshold 10).** C9 abort the preemptor 2 s after it preempted
+(first token 0.35 s): all 4 victims resumed and completed, used tokens 0. C10 close all victims' streams right after a preemption: newcomer
+served (TTFT 2.9 s), used 0, running 0. C15 three successive newcomers (11, 12, 13) each admitted in ≤0.12 s, all 4 holders completed. 0
+exceptions.

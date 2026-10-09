@@ -1,0 +1,1 @@
+[B8-hicache-across-priorities] FAIL 8 x 131k warmed (8/8 ok, > device pool so the first ones are evicted to host); doc 0 re-sent at priority 50: cached_tokens=131072, ttft=0.91s, output identical=False (host-hit lines: see prefill log)

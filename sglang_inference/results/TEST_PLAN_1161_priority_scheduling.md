@@ -57,10 +57,10 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 | B2 | 8 waiting requests with priorities 0…7 submitted low-first while slots are busy | admitted high-first; TTFT monotone in priority. **Result (PS-np):** PASS, admission order 7→0 once the first slot freed (probe needs staggered holder lengths; see §5) |
 | B3 | Same priority, 8 requests | FIFO (arrival order). **Result (PS-np):** PASS, 4 equal-priority probes admitted FIFO between the priority-3 and priority-2 probes |
 | B4 | PS-low: priorities 0…7 | admitted low-value-first (inverted B2). **Result:** PASS (0→7, ties FIFO) |
-| B5 | Starvation: continuous priority-10 stream at full occupancy plus one priority-0 request | the priority-0 request is served once the stream pauses; never lost; its TTFT recorded |
-| B6 | PD: high-priority request arrives while a low-priority 131k transfer is in the decode prealloc/transfer queue | prealloc queue reorders; high-priority request admitted first once pre-allocable; the long transfer still completes |
-| B7 | Prefix cache (Config B): low-priority request warms a 32k prefix; high-priority request with the same prefix | `cached_tokens` ≈ 32k; correctness vs golden |
-| B8 | HiCache (Config C): prefix evicted to host under pressure; high-priority request with that prefix | `#host-hit-token` in the prefill log; identical output |
+| B5 | Starvation: continuous priority-10 stream at full occupancy plus one priority-0 request | the priority-0 request is served once the stream pauses; never lost; its TTFT recorded. **Result:** served in 1.9 s under a 10-client stream (170 requests): no starvation; high-priority arrivals wait in prefill/transfer, so the decode queue is rarely contended |
+| B6 | PD: high-priority request arrives while a low-priority 131k transfer is in the decode prealloc/transfer queue | prealloc queue reorders; high-priority request admitted first once pre-allocable; the long transfer still completes. **Result:** both got their first token at 6.9 s: the running 131k chunked prefill is not interrupted → prefill-side head-of-line blocking (O-7) |
+| B7 | Prefix cache (Config B): low-priority request warms a 32k prefix; high-priority request with the same prefix | `cached_tokens` ≈ 32k; correctness vs golden. **Result:** cached_tokens 32,704, TTFT 1.38 → 0.57 s; cached text differed from cold (see §6 identity check) |
+| B8 | HiCache (Config C): prefix evicted to host under pressure; high-priority request with that prefix | `#host-hit-token` in the prefill log; identical output. **Result:** `#host-hit-token: 131072`, cached_tokens 131,072, TTFT 0.91 s; text differed from cold (see §6) |
 
 ### C. Preemption on — OUT OF SCOPE (kept for reference; production disables preemption)
 
@@ -74,13 +74,13 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 | C6 | Preempt a request that is mid **chunked prefill** on the prefill engine (131k prompt, radix on) | abort/requeue bookkeeping clean (this is the F-8/F-11 code area); re-prefill hits the radix cache |
 | C7 | Preempted request's re-admission on the **decode**: KV re-transferred from the prefill (re-bootstrap) | handshake completes; `is_rebootstrap` path; output identical; no handshake hold (F-12 watch) |
 | C8 | Preempt while the victim is in the transfer window (prefilled, not yet pulled) | no double release; pages freed once |
-| C9 | Client aborts the **preempting** request right after preemption | victims resume; nothing leaks |
-| C10 | Client aborts the **victim** while it is requeued | its state fully released; no "state was deleted" storm |
+| C9 | Client aborts the **preempting** request right after preemption | victims resume; nothing leaks. **Result (monolithic):** PASS |
+| C10 | Client aborts the **victim** while it is requeued | its state fully released; no "state was deleted" storm. **Result (monolithic):** PASS |
 | C11 | Preemption under HiCache (Config C): victim's prefix is in host memory | re-prefill reloads from host; `#host-hit-token`; output identical |
 | C12 | gpt-oss SWA: victim at seqlen beyond the window | sliding-window pages freed and re-created correctly (needle check on resumed output) |
 | C13 | Preempt a request with `max_new_tokens` 1 and one with `n`… (n>1 is F-6, skip) | single-token request handled |
 | C14 | Preemption with speculative decoding (Config D) | draft/verify state reset; acceptance stats sane |
-| C15 | Repeated preemption of the same victim (3×) | resumes each time; completion identical |
+| C15 | Repeated preemption of the same victim (3×) | resumes each time; completion identical. **Result (monolithic):** PASS (three newcomers admitted in ≤0.12 s, all holders completed) |
 
 ### D. Queue limit (PS-q: `--max-queued-requests 4`)
 
@@ -102,18 +102,18 @@ waiting request evicted with "aborted by a higher priority request" for a higher
 |---|---|---|
 | E1 | Image request priority 0 running; text request priority 100 arrives (PS-np) | no preemption; admitted when a slot frees; both outputs identical to golden |
 | E2 | Video request (many frames, near the compiled patch bucket) with high priority behind a full batch | no recompile (F-10 area), identical output |
-| E3 | Mixed batch: 4 image + 4 text, priorities interleaved | ordering as specified; mm cache hits reported |
+| E3 | Mixed batch: 4 image + 4 text, priorities interleaved | ordering as specified; mm cache hits reported. **Result:** 3 concurrent 4-image requests at priorities 0/10/50 all served |
 | E4 | 256k context: 200k-token text + image prompt, priority high, arriving while a 256k low-priority decode runs (PS-np) | no preemption; admitted when the slot frees |
-| E5 | Image prefix reuse across priorities (same image, different question) | `cached_tokens` covers the image tokens |
+| E5 | Image prefix reuse across priorities (same image, different question) | `cached_tokens` covers the image tokens. **Result:** 768 of 818 tokens cached at both priorities |
 
 ### F. Stability and resource return
 
 | # | Case | Expect |
 |---|---|---|
-| F1 | 30 min open-loop mixed priorities (0/5/10/50), PS-np, both models | no error responses, no stuck requests, used tokens return to 0 at idle, no recompiles |
+| F1 | 30 min open-loop mixed priorities (0/5/10/50), PS-np, both models | no error responses, no stuck requests, used tokens return to 0 at idle, no recompiles. **Result (gpt-oss, 15 min, 12 clients):** 5,035 requests, 0 errors, idle at end; mean TTFT 3.3 s (p0) vs 1.7–1.9 s (p5/10/50) |
 | F2 | Same soak with `num_retracted_reqs` watched | must stay 0 (no preemption, no retraction) |
-| F3 | Metrics | `priority` label present on queue/running gauges; dashboard panels adjusted (`priority=~".*"`) |
-| F4 | Disconnect storm (F-8 fix verified) with priorities | no engine exception |
+| F3 | Metrics | `priority` label present on queue/running gauges; dashboard panels adjusted (`priority=~".*"`). **Result:** label present on both engines |
+| F4 | Disconnect storm (F-8 fix verified) with priorities | no engine exception. **Result:** 20 aborts, 10 concurrent, mixed priorities: 0 errors, used tokens back to 0 |
 
 ## 4. Harness
 
