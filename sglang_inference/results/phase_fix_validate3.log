@@ -5,3 +5,5 @@
    prefill SWA pool tokens: 16384 (was 16384 before the fix)
    262144: [isl262144_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out. (3001s)
    health: prefill 200 decode 200
+   524288: [isl524288_k0] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out. (3000s)
+   health: prefill 200 decode 200
