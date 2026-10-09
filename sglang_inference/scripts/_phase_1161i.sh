@@ -3,7 +3,7 @@
 S=$HOME/pd_disagg/scripts; R=$HOME/pd_disagg/results; PY=$HOME/venv/sglang/bin/python; export TORCH_DEVICE_BACKEND_AUTOLOAD=0
 LB=http://10.128.15.217:8080; OUT=$R/1161; P=$HOME/pd_disagg/prompts/gpt-oss
 log(){ echo "$(date -u +%FT%TZ) [1161i] $*"; }
-while pgrep -f '[_]phase_1161h.sh' >/dev/null; do sleep 30; done
+while pgrep -f '[_]phase_1161h2.sh' >/dev/null; do sleep 30; done
 cd $HOME/sglang-torchtpu && git checkout -q main
 for cfg in "gpt-oss_B_128k_ps_np:--priority" "gpt-oss_B_128k:"; do rec=${cfg%%:*}; flag=${cfg#*:}
   log "=== $rec"; bash $S/pd.sh stop >/dev/null 2>&1; sleep 3; until bash $S/tpu_free.sh >/dev/null 2>&1; do sleep 120; done
