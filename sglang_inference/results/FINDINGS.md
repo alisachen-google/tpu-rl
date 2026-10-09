@@ -729,3 +729,8 @@ queued (`_phase_1161g.sh`) to show the mechanism where it applies.
 **#1161 monolithic queue-limit control (05:38 UTC, `1161_mono_ps_q`).** D1 lower newcomer → 503 "The request queue is full."; D3 equal → 503;
 D2 higher newcomer → the newest priority-5 waiting request evicted ("The request is aborted by a higher priority request."), newcomer served.
 Confirms F-16 as a PD-only gap.
+
+**#1161 monolithic preemption control (05:45 UTC, `1161_mono_ps_pre`: 4 slots, threshold 10).** C1 diff = threshold → waits 6.6 s for a slot
+(no preemption). C2 diff = threshold+1 at full occupancy → admitted in 0.1 s (a running priority-0 decode was preempted); the preempted holder
+resumed and all 4 holders completed with full output. Ordering 7→0 and FIFO ties PASS. So the mechanism works on a single engine and is
+simply unreachable on a PD decode (O-6). Low-values-first rerun on the pair (`1161_ps_low_b`): order 0→7, ties FIFO, no preemption, PASS.

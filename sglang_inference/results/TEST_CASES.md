@@ -248,6 +248,27 @@ Legend: ✔ covered (where), ◐ partial, ✘ gap, ⏳ queued in `_phase_boundar
 | Deadlock / hang | no-progress watchdog (300 s) on both engines during every phase | ✔ harness |
 | Resource return | engines back to baseline after every abort / phase | ✔ asserted by `abort_test.py` and `state` snapshots |
 
+
+### TC-17 PR #1181 (F-11 fix) validation battery
+
+| Field | Value |
+|---|---|
+| Goal | Validate the SWA chunk-cap fix (align the TPU cap up; free a transfer-pending request's SWA pages beyond the window) across configurations |
+| Commands | `scripts/_phase_fix_validate.sh`, `_phase_fix_validate3.sh`, `_phase_fix_validate_mono.sh`, `_phase_fix_scenarios.sh` (PR head deployed to both hosts via git bundle) |
+| Pass | No deadlock in the former trigger scenarios; outputs identical to pre-fix where the pool is unchanged; no exceptions; radix-on configs unchanged |
+| Result | PASS. Trigger 1 (1 slot, 1M): prefill completes 256k–1M; monolithic before/after: main stalls 1,800 s, fix answers in 25 s. Trigger 2 (decode pool 262k): 4/4, 8/8, 16/16. Config A 8k byte-identical to the c=1 golden; 131k F-4-class numeric drift with needles 3/3; 1M shape 4 slots 4 × 256k + 1M served; B/C unchanged (`cached=122880`); Qwen text identical; Qwen images hit pre-existing F-10 |
+| Evidence | `results/fix_validate/`, `results/fix_scenarios/`, `phase_fix_*.log`, PR https://github.com/sgl-project/sglang-torchtpu/pull/1181 |
+
+### TC-18 Priority scheduling with PD (#1161, first battery)
+
+| Field | Value |
+|---|---|
+| Goal | `--enable-priority-scheduling` with PD, prefix caching (B) and HiCache (C): validation boundaries, ordering, no-preemption constraint, preemption threshold, queue limit |
+| Commands | `scripts/priority_probe.py --mode np|pre|low|q|dis`, phases `_phase_1161.sh`, `_phase_1161b..g.sh`; recipes `gpt-oss_{B,C}_128k_ps_*.json`, `gpt-oss_G_128k_ps_{q,pre}.json` |
+| Pass | See `TEST_PLAN_1161_priority_scheduling.md` §3 |
+| Result | PD: ordering 7→0 / 0→7 (low-first) and FIFO ties PASS; a high-priority arrival at full occupancy never preempts a running decode (also with preemption enabled and threshold 0: O-6, structural); float/string priority → 400, 2^63 accepted (O-5); disabled + abort flag → 503 with a clear message (O-4); **F-16**: `--max-queued-requests` and priority eviction inert in PD (monolithic control passes all three queue cases). Monolithic preemption control: threshold boundary and preemption PASS, victims resume |
+| Evidence | `results/1161/*.txt`, `phase_1161*.log`, `bug_reports/F-16_github_issue.md` |
+
 ## 4. Status of the queue (closed 2026-10-09 00:20 UTC; reopened for #1161, see `TEST_PLAN_1161_priority_scheduling.md`)
 
 Everything planned has run. Summary of the items that were pending at some point:

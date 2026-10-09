@@ -56,7 +56,7 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 | B1 | Fill all slots with priority 0 decodes (long outputs); submit priority 100 | runs when a slot frees, **no running request preempted** (`num_retracted_reqs` 0, no retraction/requeue log). **Result (PS-np, PS-low):** PASS, TTFT 10–11 s = wait for a free slot, 0 retractions |
 | B2 | 8 waiting requests with priorities 0…7 submitted low-first while slots are busy | admitted high-first; TTFT monotone in priority. **Result (PS-np):** PASS, admission order 7→0 once the first slot freed (probe needs staggered holder lengths; see §5) |
 | B3 | Same priority, 8 requests | FIFO (arrival order). **Result (PS-np):** PASS, 4 equal-priority probes admitted FIFO between the priority-3 and priority-2 probes |
-| B4 | PS-low: priorities 0…7 | admitted low-value-first (inverted B2) |
+| B4 | PS-low: priorities 0…7 | admitted low-value-first (inverted B2). **Result:** PASS (0→7, ties FIFO) |
 | B5 | Starvation: continuous priority-10 stream at full occupancy plus one priority-0 request | the priority-0 request is served once the stream pauses; never lost; its TTFT recorded |
 | B6 | PD: high-priority request arrives while a low-priority 131k transfer is in the decode prealloc/transfer queue | prealloc queue reorders; high-priority request admitted first once pre-allocable; the long transfer still completes |
 | B7 | Prefix cache (Config B): low-priority request warms a 32k prefix; high-priority request with the same prefix | `cached_tokens` ≈ 32k; correctness vs golden |
