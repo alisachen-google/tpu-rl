@@ -1,1 +1,13 @@
 2026-10-09T07:21:01Z [1161i] === gpt-oss_B_128k_ps_np
+2026-10-09 07:23:30 prefill /health ready after 135 s
+2026-10-09 07:23:30 decode /health ready after 0 s
+2026-10-09 07:23:31 LB /health_generate ready after 1 s
+   [prefix-identity 8192 prio] cold cached=0 ttft=0.68 | hit cached=8192 ttft=0.32 identical=True first_div_char=993/993 | hit2 cached=8192 identical_to_hit=True
+   [prefix-identity 32768 prio] cold cached=0 ttft=1.52 | hit cached=32768 ttft=0.45 identical=True first_div_char=1092/1092 | hit2 cached=32768 identical_to_hit=True
+2026-10-09T07:23:43Z [1161i] === gpt-oss_B_128k
+2026-10-09 07:26:12 prefill /health ready after 135 s
+2026-10-09 07:26:12 decode /health ready after 0 s
+2026-10-09 07:26:13 LB /health_generate ready after 1 s
+   [prefix-identity 8192] cold cached=0 ttft=0.59 | hit cached=8192 ttft=0.34 identical=True first_div_char=1040/1040 | hit2 cached=8192 identical_to_hit=True
+   [prefix-identity 32768] cold cached=0 ttft=1.49 | hit cached=32768 ttft=0.47 identical=True first_div_char=1028/1028 | hit2 cached=32768 identical_to_hit=True
+2026-10-09T07:26:34Z [1161i] phase 1161i done

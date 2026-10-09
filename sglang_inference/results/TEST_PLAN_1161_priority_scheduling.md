@@ -59,8 +59,8 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 | B4 | PS-low: priorities 0…7 | admitted low-value-first (inverted B2). **Result:** PASS (0→7, ties FIFO) |
 | B5 | Starvation: continuous priority-10 stream at full occupancy plus one priority-0 request | the priority-0 request is served once the stream pauses; never lost; its TTFT recorded. **Result:** served in 1.9 s under a 10-client stream (170 requests): no starvation; high-priority arrivals wait in prefill/transfer, so the decode queue is rarely contended |
 | B6 | PD: high-priority request arrives while a low-priority 131k transfer is in the decode prealloc/transfer queue | prealloc queue reorders; high-priority request admitted first once pre-allocable; the long transfer still completes. **Result:** both got their first token at 6.9 s: the running 131k chunked prefill is not interrupted → prefill-side head-of-line blocking (O-7) |
-| B7 | Prefix cache (Config B): low-priority request warms a 32k prefix; high-priority request with the same prefix | `cached_tokens` ≈ 32k; correctness vs golden. **Result:** cached_tokens 32,704, TTFT 1.38 → 0.57 s; cached text differed from cold (see §6 identity check) |
-| B8 | HiCache (Config C): prefix evicted to host under pressure; high-priority request with that prefix | `#host-hit-token` in the prefill log; identical output. **Result:** `#host-hit-token: 131072`, cached_tokens 131,072, TTFT 0.91 s; text differed from cold (see §6) |
+| B7 | Prefix cache (Config B): low-priority request warms a 32k prefix; high-priority request with the same prefix | `cached_tokens` ≈ 32k; correctness vs golden. **Result:** cached_tokens 32,704, TTFT 1.38 → 0.57 s; PASS (the first run's 'text differed' was a probe artefact: `ignore_eos` mismatch; the identity check in §6 shows cold and cached outputs byte-identical) |
+| B8 | HiCache (Config C): prefix evicted to host under pressure; high-priority request with that prefix | `#host-hit-token` in the prefill log; identical output. **Result:** `#host-hit-token: 131072`, cached_tokens 131,072, TTFT 0.91 s; PASS (same `ignore_eos` probe artefact as B7) |
 
 ### C. Preemption on — OUT OF SCOPE (kept for reference; production disables preemption)
 
@@ -133,3 +133,10 @@ waiting request evicted with "aborted by a higher priority request" for a higher
 - Each 8-token probe cycles through a freed slot in ~70 ms, so twelve queued probes are admitted within a second in queue order; TTFT at the
   client is the first token emitted at decode admission.
 - `--max-queued-requests` cannot be exercised on a PD pair (F-16); use the monolithic control.
+
+## 6. Cold vs cached output identity (`_phase_1161i.sh`)
+
+Config B, concurrency 1, 256 greedy tokens, 8k and 32k prompts, with priority scheduling on (priority 0 cold, 50 cached) and off: the cached
+run is byte-identical to the cold run in all four cases, and a second hit is identical again. Prefix caching does not change greedy output in
+this build, with or without priorities. The B7/B8 differences seen in the second battery came from an `ignore_eos` mismatch between the two
+requests in the probe, not from the server.

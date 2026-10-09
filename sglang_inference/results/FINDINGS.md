@@ -767,3 +767,9 @@ exceptions.
 (first token 0.35 s): all 4 victims resumed and completed, used tokens 0. C10 close all victims' streams right after a preemption: newcomer
 served (TTFT 2.9 s), used 0, running 0. C15 three successive newcomers (11, 12, 13) each admitted in ≤0.12 s, all 4 holders completed. 0
 exceptions.
+
+**Cold vs cached identity (07:23–07:27 UTC, `_phase_1161i.sh`, Config B with and without priority scheduling, c=1, 256 tokens).** 8k and 32k
+prompts: cached run byte-identical to the cold run in all four cases (full-prompt hits, TTFT 0.68 → 0.32 s and 1.52 → 0.45 s with priority,
+0.59 → 0.34 s and 1.49 → 0.47 s without); a second hit identical again. The B7/B8 "output differed" lines were a probe artefact: the
+re-sent request omitted `ignore_eos` while the cold one had it, so the texts diverged at the end-of-sequence point. Corrected: B7 and B8
+PASS (prefix reuse and HiCache host reload across priorities, identical output).
