@@ -747,3 +747,7 @@ B7: prefix reuse across priorities works (cached_tokens 32,704, TTFT 1.38 → 0.
 cold run**; cause (cache hit vs priority) isolated by `_phase_1161i.sh`. F3: `priority` label present on prefill and decode gauges (our
 dashboard selects no priority label, so unaffected). F4: 20 mixed-priority streaming aborts (10 concurrent): 0 client errors, used tokens
 back to 0, follow-up served.
+
+**#1161 F1 soak (06:42–06:57 UTC, Config B, priority scheduling, no preemption).** 15 min, 12 closed-loop clients, prompts 1k/8k/32k, outputs
+64–256, priorities 0/5/10/50 uniformly: 5,035 requests, 0 errors, 8 running with 2–4 waiting throughout, used tokens and running back to 0 at
+the end, 0 exceptions. Mean TTFT by priority: 0 → 3.3 s, 5 → 1.9 s, 10 → 1.8 s, 50 → 1.7 s: lower priority waits longer, none starved.

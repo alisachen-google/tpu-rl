@@ -1,1 +1,16 @@
 [soak] t+60s requests=319 errors=0 running=8.0 queue=4.0 prealloc=0.0
+[soak] t+120s requests=645 errors=0 running=8.0 queue=3.0 prealloc=0.0
+[soak] t+180s requests=984 errors=0 running=8.0 queue=2.0 prealloc=0.0
+[soak] t+240s requests=1310 errors=0 running=8.0 queue=4.0 prealloc=0.0
+[soak] t+300s requests=1645 errors=0 running=8.0 queue=4.0 prealloc=0.0
+[soak] t+361s requests=1978 errors=0 running=8.0 queue=3.0 prealloc=0.0
+[soak] t+421s requests=2319 errors=0 running=8.0 queue=3.0 prealloc=0.0
+[soak] t+481s requests=2666 errors=0 running=8.0 queue=4.0 prealloc=0.0
+[soak] t+541s requests=3032 errors=0 running=7.0 queue=1.0 prealloc=0.0
+[soak] t+602s requests=3378 errors=0 running=8.0 queue=4.0 prealloc=0.0
+[soak] t+662s requests=3712 errors=0 running=8.0 queue=4.0 prealloc=0.0
+[soak] t+722s requests=4037 errors=0 running=8.0 queue=4.0 prealloc=0.0
+[soak] t+782s requests=4354 errors=0 running=8.0 queue=3.0 prealloc=0.0
+[soak] t+842s requests=4698 errors=0 running=8.0 queue=2.0 prealloc=0.0
+[soak] t+903s requests=5035 errors=0 running=0.0 queue=0.0 prealloc=0.0
+[F1-soak] PASS 15 min mixed priorities, 12 closed-loop clients: 5035 requests, 0 errors; per priority (count, mean TTFT s): {0: (1296, 3.3), 5: (1245, 1.9), 10: (1230, 1.8), 50: (1264, 1.7)}; end used=0.0 running=0.0
