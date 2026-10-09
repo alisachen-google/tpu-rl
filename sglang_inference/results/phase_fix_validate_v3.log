@@ -1,0 +1,5 @@
+   host a on 6e139c7e32c
+fatal: 'pd-queue-limit-prefill' is already used by worktree at '/home/alisachen_google_com/wt-1188'
+2026-10-09T19:53:35Z [fixv3] === #1191 queue limit on both engines: Config C + --max-queued-requests 4 + priority scheduling
+/home/alisachen_google_com/pd_disagg/scripts/_phase_fix_validate_v3.sh: line 15: syntax error near unexpected token `done'
+/home/alisachen_google_com/pd_disagg/scripts/_phase_fix_validate_v3.sh: line 15: `20; done'

@@ -804,3 +804,13 @@ Live validation of all three on the pair: `_phase_fix_validate_v2.sh` → `resul
 - #1193 (canary attacher): attaching now succeeds on both pools (`attach_tpu_fused` for Qwen's fused pool, `attach_swa` with fused sub-pools
   for gpt-oss), but the gpt-oss prefill never reached `/health` (5,400 s) and the Qwen pair hung on `/health_generate` → the canary's torch
   reference path or the spliced transfer buffer list stalls on TPU; diagnosing.
+
+**PR #1192 ready for review (19:45 UTC):** CI 25/25 green, unit tests in the existing file, live validation on the pair recorded in the PR.
+
+**#1176 / PR #1193 live results (09:53–14:03 and 19:34–19:50 UTC).** With the attacher, `--kv-canary log` attaches on both pools (logged
+`attach_tpu_fused` for Qwen's fused pool, `attach_swa` with fused sub-pools for gpt-oss). Then: with the compiled decode graph the gpt-oss
+prefill stalls at "Capture target decode TPU graph begin" (never healthy in 5,400 s) and the Qwen pair hangs on the first generation; with
+`enable_torch_compile=false` the Qwen prefill scheduler dies during initialization with exit code **-11 (SIGSEGV)**. The canary's torch
+reference launchers are not functional on TPU in either mode, so the attacher alone cannot make the feature work. PR #1193 re-scoped: keep
+the attacher (correct, tested, prerequisite for the runtime port) and make `install_canary` refuse on TPU with a clear message instead of
+dying mid-start, which is the issue's documented alternative.
