@@ -826,3 +826,9 @@ the KV handshake leaves the decode twin hanging with no timeout.
 **PR #1193 live check (canary_refuse_qwen, 20:17 UTC): PASS.** With the re-scoped branch, `--kv-canary log` on the Qwen3-VL pair makes
 both engines exit 28 s after launch with `kv-canary: the canary runtime is not available on TPU yet (--kv-canary log); start with
 --kv-canary none.` — no NotImplementedError, no stall, no segfault. Remaining: CI on the re-authored head, then mark ready.
+
+**#1188 / PR #1191 fixv4 (decode-only, 20:34–20:40 UTC): mechanism works, counting wrong.** The decode rejected 2 of the 8 holders with
+503 at 20:36:54 although only 6 were running: transferred requests pop from the transfer queue in a burst and pass through `waiting_queue`
+for one scheduling step even when running slots are free, so a plain `len(waiting_queue)` over-counts. Fix: count the backlog net of free
+running slots (`len(waiting_queue) - (min(pool.size, max_running) - running)`), apply the limit only to the part that must wait.
+Everything else was clean: 0 exceptions, end-idle used 0 (no more hung twins). Re-validation queued as fixv5.
