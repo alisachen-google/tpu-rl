@@ -5,12 +5,12 @@ LB=http://10.128.15.217:8080; PRE=http://10.128.15.217:30000; DEC=http://10.128.
 SSH_A="ssh -i $HOME/.ssh/google_compute_engine -o BatchMode=yes -o StrictHostKeyChecking=no sa_101411256518727260534@10.128.15.217"
 GA="sudo -n -u alisachen_google_com git -C /home/alisachen_google_com/sglang-torchtpu -c safe.directory=*"
 log(){ echo "$(date -u +%FT%TZ) [fixv4] $*"; }
-while pgrep -f '[_]phase_canary_eager.sh' >/dev/null; do sleep 30; done
-cd $HOME/sglang-torchtpu && git checkout -q main && git bundle create /tmp/q.bundle pd-queue-limit-prefill 2>/dev/null
-scp -q -i $HOME/.ssh/google_compute_engine -o BatchMode=yes -o StrictHostKeyChecking=no /tmp/q.bundle sa_101411256518727260534@10.128.15.217:/tmp/q.bundle
-$SSH_A "sudo -n chown alisachen_google_com /tmp/q.bundle; $GA fetch -q /tmp/q.bundle pd-queue-limit-prefill:pd-queue-limit-prefill && $GA checkout -q pd-queue-limit-prefill && echo '   host a on' \$($GA log -1 --format=%h)"
+while pgrep -f 'canary_refus''e' >/dev/null; do sleep 30; done
+cd $HOME/sglang-torchtpu && git checkout -q main && git bundle create /tmp/q4.bundle pd-queue-limit-prefill 2>/dev/null
+scp -q -i $HOME/.ssh/google_compute_engine -o BatchMode=yes -o StrictHostKeyChecking=no /tmp/q4.bundle sa_101411256518727260534@10.128.15.217:/tmp/q4.bundle
+$SSH_A "sudo -n chown alisachen_google_com /tmp/q4.bundle; $GA fetch -q /tmp/q4.bundle pd-queue-limit-prefill:pd-queue-limit-prefill && $GA checkout -q pd-queue-limit-prefill && echo '   host a on' \$($GA log -1 --format=%h)"
 git checkout -q --detach pd-queue-limit-prefill && log "local on $(git log -1 --format=%h)"
-log "=== #1191 queue limit on both engines: Config C + --max-queued-requests 4 + priority scheduling"
+log "=== #1191 queue limit on the decode (decode-only design): Config C + --max-queued-requests 4 + priority scheduling"
 bash $S/pd.sh stop >/dev/null 2>&1; sleep 3; until bash $S/tpu_free.sh >/dev/null 2>&1; do sleep 120; done
 env -u TORCH_DEVICE_BACKEND_AUTOLOAD bash $S/pd.sh start $HOME/pd_disagg/recipes/gpt-oss_C_128k_ps_q.json fixv4_C_ps_q 2>&1 | grep -E 'ready|NOT'
 if curl -sf -m 30 $LB/health_generate >/dev/null; then

@@ -1,0 +1,8 @@
+   host a on 19750f8de84
+2026-10-09T20:17:14Z [canary-refuse] local on 19750f8de8
+2026-10-09T20:17:14Z [canary-refuse] === Qwen3-VL Config A with --kv-canary log: expect fast refusal
+   launcher returned after 900s
+   prefill (host a): kv-canary: the canary runtime is not available on TPU yet (--kv-canary log); start with --kv-canary none.
+   decode: kv-canary: the canary runtime is not available on TPU yet (--kv-canary log); start with --kv-canary none.
+   segfaults: prefill 0 decode 0
+2026-10-09T20:32:37Z [canary-refuse] phase canary refuse done
