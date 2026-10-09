@@ -43,12 +43,13 @@ def metric(dec, name, must=None):
 def retract_lines(dec):
     return metric(dec, "num_retracted_reqs", 'tp_rank="0"')
 
-def hold_slots(url, n, prio, tokens, results):
-    """Occupy n slots with long decodes of the given priority (streaming so TTFT is observable)."""
+def hold_slots(url, n, prio, tokens, results, stagger=0):
+    """Occupy n slots with long decodes of the given priority (streaming so TTFT is observable).
+    With stagger > 0 the holders have lengths tokens, tokens+stagger, ... so slots free one at a time."""
     ths = []
     for i in range(n):
         def w(i=i):
-            results[f"hold{i}"] = gen(url, f"Write a very long story about slot {i}. " * 20, priority=prio, max_new_tokens=tokens, stream=True, timeout=900)
+            results[f"hold{i}"] = gen(url, f"Write a very long story about slot {i}. " * 20, priority=prio, max_new_tokens=tokens + stagger * i, stream=True, timeout=1800)
         t = threading.Thread(target=w, daemon=True); t.start(); ths.append(t)
     return ths
 
@@ -88,28 +89,38 @@ def main():
         else:
             r = gen(U, "Urgent question: what is 2+2?", priority=100, max_new_tokens=8, stream=True, timeout=900)
             r1 = retract_lines(D); say("B1-no-preempt", (r1 or 0) == (r0 or 0) and r["status"] == 200, f"priority 100 arrived at full occupancy: retracted {r0}->{r1}, ttft={r['ttft'] and round(r['ttft'],1)}s (waited for a free slot), HTTP {r['status']}")
-        # B2/B3/B4: ordering of waiting requests while slots are busy.
+        for t in ths: t.join(timeout=1500)
+        bad = [k for k, v in res.items() if v.get("status") != 200]; say("B1-holders", not bad, f"held requests finished: {len(res)-len(bad)}/{len(res)} ok {bad[:3]}")
+        # B2/B3/B4: ordering of waiting requests. Slots must free one at a time (staggered holder lengths), otherwise every
+        # waiting request is admitted in the same batch and TTFT order says nothing about the queue order.
+        # Holders: 2500, 3000, ... tokens so the first slot frees well after every probe is queued and later slots free
+        # several seconds apart; admission time = sent + ttft (the first token is emitted when the decode admits the request).
+        res = {}; t_hold = time.time(); ths = hold_slots(U, a.slots, 0, 2500, res, stagger=500); time.sleep(12)
         order = {}; lock = threading.Lock(); ths2 = []
-        prios = [0, 1, 2, 3, 4, 5, 6, 7] if a.mode != "np" or True else []
+        prios = [0, 1, 2, 3, 4, 5, 6, 7]
+        def adm(r): return (r["sent"] + r["ttft"] - t_hold) if r.get("status") == 200 and r.get("ttft") is not None else None
         for p in prios:
             def w(p=p):
-                r = gen(U, f"Ordering probe priority {p}. Count to three.", priority=p, max_new_tokens=8, stream=True, timeout=900)
-                with lock: order[p] = r["ttft"] if r["status"] == 200 else None
-            t = threading.Thread(target=w, daemon=True); t.start(); ths2.append(t); time.sleep(0.3)
+                r = gen(U, f"Ordering probe priority {p}. Count to three.", priority=p, max_new_tokens=8, stream=True, timeout=1800)
+                with lock: order[p] = adm(r)
+            t = threading.Thread(target=w, daemon=True); t.start(); ths2.append(t); time.sleep(0.2)
         same = {}
         for k in range(4):
             def w2(k=k):
-                r = gen(U, f"Tie probe {k}. Count to three.", priority=3, max_new_tokens=8, stream=True, timeout=900)
-                with lock: same[k] = r["ttft"] if r["status"] == 200 else None
-            t = threading.Thread(target=w2, daemon=True); t.start(); ths2.append(t); time.sleep(0.3)
-        for t in ths2: t.join(timeout=1200)
+                r = gen(U, f"Tie probe {k}. Count to three.", priority=3, max_new_tokens=8, stream=True, timeout=1800)
+                with lock: same[k] = adm(r)
+            t = threading.Thread(target=w2, daemon=True); t.start(); ths2.append(t); time.sleep(0.2)
+        q_done = time.time() - t_hold
+        for t in ths2: t.join(timeout=1800)
+        adm_all = sorted([(t, f"p{p}") for p, t in order.items() if t is not None] + [(t, f"tie{k}") for k, t in same.items() if t is not None])
+        say("B2-admissions", None, f"all probes queued by t={q_done:.1f}s; admissions (s after holders started): " + " ".join(f"{n}@{t:.1f}" for t, n in adm_all))
         got = [p for p, _ in sorted(((p, t) for p, t in order.items() if t is not None), key=lambda x: x[1])]
-        expect = sorted(prios, reverse=(a.mode != "low")); first = got[: len(expect)]
-        say("B2-order" if a.mode != "low" else "B4-order-low", first == expect, f"admission order by TTFT: {got} (expected {expect})")
+        expect = sorted(prios, reverse=(a.mode != "low"))
+        say("B2-order" if a.mode != "low" else "B4-order-low", got == expect, f"admission order of distinct priorities: {got} (expected {expect})")
         tie = [k for k, _ in sorted(((k, t) for k, t in same.items() if t is not None), key=lambda x: x[1])]
-        say("B3-fifo-tie", tie == sorted(tie), f"equal priority admission order: {tie} (FIFO expected)")
-        for t in ths: t.join(timeout=1500)
-        bad = [k for k, v in res.items() if v.get("status") != 200]; say("B1-holders", not bad, f"held requests finished: {len(res)-len(bad)}/{len(res)} ok {bad[:3]}")
+        say("B3-fifo-tie", tie == sorted(tie), f"equal-priority admission order: {tie} (FIFO expected)")
+        for t in ths: t.join(timeout=1800)
+        bad = [k for k, v in res.items() if v.get("status") != 200]; say("B2-holders", not bad, f"staggered holders finished: {len(res)-len(bad)}/{len(res)} ok")
 
     if a.mode == "q":
         res = {}; ths = hold_slots(U, a.slots, 5, a.hold_tokens, res); time.sleep(12)
