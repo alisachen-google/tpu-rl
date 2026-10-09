@@ -269,7 +269,19 @@ Legend: ✔ covered (where), ◐ partial, ✘ gap, ⏳ queued in `_phase_boundar
 | Result | PD: ordering 7→0 / 0→7 (low-first) and FIFO ties PASS; a high-priority arrival at full occupancy never preempts a running decode (also with preemption enabled and threshold 0: O-6, structural); float/string priority → 400, 2^63 accepted (O-5); disabled + abort flag → 503 with a clear message (O-4); **F-16**: `--max-queued-requests` and priority eviction inert in PD (monolithic control passes all three queue cases). Second battery: no starvation under a high-priority stream; long low-priority prefill blocks a later high-priority short prompt on the prefill engine (O-7); prefix reuse (B) and HiCache host reload (C) across priorities work with byte-identical output; `priority` metrics label present; 20-abort storm clean; 15-min soak 5,035 requests 0 errors with TTFT ordered by priority; Qwen image requests at all priorities served with image-prefix reuse; monolithic: preemption, aborting the preemptor or the victims, repeated preemption all clean |
 | Evidence | `results/1161/*.txt`, `phase_1161*.log`, `bug_reports/F-16_github_issue.md` |
 
-## 4. Status of the queue (closed 2026-10-09 00:20 UTC; reopened for #1161, see `TEST_PLAN_1161_priority_scheduling.md`)
+## 4. Status of the queue (closed 2026-10-09 07:30 UTC)
+
+Close-out of every planned item:
+
+| Item | State |
+|---|---|
+| Configs A–E gpt-oss, A–C Qwen3-VL, 1M shape, MT-Bench, boundary cases, KV integrity | done (§2, §3, §5) |
+| F-11 fix (#1142) | PR #1181 ready for review, 28/28 CI green, scenario battery TC-17 PASS |
+| F-8 (#1145) | fixed upstream (bab49bcec2 + follow-ups), verified with our reproduction; closing comment drafted (`prs/COMMENT_1145_fixed_upstream.md`), posting is the owner's call |
+| #1161 priority scheduling | first and second battery done (TC-18, plan §3/§5/§6); F-16 drafted; O-4–O-7 recorded; C6–C8 and D1–D3 unreachable on PD by construction (documented), run on the monolithic control instead |
+| F-15, F-16 upstream filing | drafts ready; filing is the owner's call |
+| Not covered on this hardware | multi-host engines, both engines on one host, Rust router, decode engine death mid-stream, LB restart, fault injection (colleague), image patch count at exactly 4,900, ISL = context + 1 at 1M, Qwen 256k with priorities (recipe exists, not run) |
+
 
 Everything planned has run. Summary of the items that were pending at some point:
 
