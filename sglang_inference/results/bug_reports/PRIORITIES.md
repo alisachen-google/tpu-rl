@@ -31,7 +31,7 @@ Overlap checked against the 69 open issues of `sgl-project/sglang-torchtpu` capt
 | F-5 | One prompt-logprob request kills the engine (rejection raised inside the forward) | 2/2 | **S0** | **P0** | File `F-5_github_issue.md`, reference #432 | Any client with a plain JSON body takes the engine down. Fix is a validation check that already exists for a sibling case |
 | F-10 | One large image kills the Qwen3-VL prefill engine (recompile under `fail_on_recompile`) | 2/2 | **S0** | **P0** for multimodal deployments | File `F-10_github_issue.md`, reference #488, #1068 | Default config accepts images the compiled range cannot serve. Sibling vision policies already have the eager fallback; porting it is the fix |
 | F-12 | P/D handshake never completes; request held on both engines with no deadline | 5 pairs (4 single-slot on first request; 1 two-slot 1M pair after long requests) | **S1** | **P0** for PD deployments | File `F-12_github_issue.md`, reference #1113, #1078 | Reproduced on six pairs including a two-slot 1M pair after long requests. With default 300 s deadlines the prefill recovers but the decode holds the request and the client sees a hang until its own timeout. The raiden receiver has no deadline while bootstrapping, so any handshake fault is a permanent hold (our recipe's 7200 s timeouts also hide the sender's deadline). The deadline fix is independent of the trigger |
-| F-11 | Chunked prefill deadlocks when the SWA continuation budget hits 0 before eviction (gpt-oss, 1 slot, TPU rounding) | 4/4; controls with 2 and 4 slots pass, 320-token third chunk observed as predicted | **S1** | **P1** | File `F-11_github_issue.md`, reference #1067 | Hits exactly the 1M-context single-slot configuration the long-context work targets. Root cause fully located; three fixes proposed. Narrow trigger (one slot) keeps it below P0 |
+| F-11 | Chunked prefill deadlocks when the SWA continuation budget hits 0 before eviction (gpt-oss; 1 slot at 1M, or 8 slots under decode back-pressure) | 4/4 at 1 slot; 1/1 at 8 slots with a full decode pool (whole pair wedged, py-spy evidence) | **S1** | **P0** for PD | File `F-11_github_issue.md`, reference #1067 | Initially rated P1 for its single-slot trigger. The boundary phase showed the same loop at the default 8 slots whenever the decode cannot pull a finished prefill (full decode pool, slow decode, F-12 hold): an inflight request keeps its last chunk's SWA pages, the pool is exhausted, and prefill and decode wait on each other with both `/health` green. Any sustained load that fills the decode pool triggers it |
 | F-6 | `n>1` never returns through the pair; all sub-requests share one bootstrap room | 3/3 | **S1** | **P1** | File `F-6_github_issue.md` | Parallel sampling is a standard API feature; each call leaks a decode slot until the client disconnects. Work-around: clients send n separate requests. Fix is an indexing change in the tokenizer manager |
 | F-2 | Qwen3-VL-30B MoE decoder never compiled on TPU (6 tok/s instead of 180) | every start | **S2** | **P1** | File `F-2_github_issue.md` with patch, reference #1069 | 30× decode slowdown with no warning; patch validated for speed (180 tok/s) and accuracy (GSM8K 0.99 vs 0.97 eager), 0 serving-time recompiles. Not an outage, hence S2 |
 | F-1 | SIGABRT when the shared tier-2 cache directory is owned by another user; default name shared by all users | 2/2 | **S3** | **P3** | File `F-1_github_issue.md` | Blocks every second user on a shared host, but single-tenant production hosts are unaffected and `chmod 1777` plus a unique cache name works around it. The misleading `exit code -6` costs debugging time |
@@ -46,16 +46,16 @@ Overlap checked against the 69 open issues of `sgl-project/sglang-torchtpu` capt
 ## Filing order
 
 1. F-8, F-5, F-10 (S0, single-request engine kills; all have complete drafts and located root causes).
-2. F-12 (deadline fix is clear even though the trigger is not), then F-11 and F-6.
+2. F-11 (pair-wide deadlock under decode back-pressure at the default slot count) and F-12 (deadline fix is clear even though the trigger is not), then F-6.
 3. F-2 with the patch; F-13 and F-14 (neither built-in KV integrity check runs on TPU).
 4. F-1, F-15; comment on #1113 for F-7.
 
 ## Suggested title prefixes for the repo
 
-The repository marks priority in titles (`P0 [TPU/PD/Raiden] ...`). Proposed: `P0` for F-8, F-5, F-10, F-12; `P1` for F-11, F-6, F-2, F-13, F-14; no prefix for F-1, F-15.
+The repository marks priority in titles (`P0 [TPU/PD/Raiden] ...`). Proposed: `P0` for F-8, F-5, F-10, F-11, F-12; `P1` for F-6, F-2, F-13, F-14; no prefix for F-1, F-15.
 
 ## Cross-cutting recommendations (one sentence each, for the maintainers)
 
 - A per-request failure must never escape the scheduler event loop; F-5, F-8 and F-10 are three different exceptions with the same outcome.
 - Every wait in the P/D path needs a deadline that is armed from the moment the request exists, not from a later state transition (F-12, F-6).
-- The TPU SWA pool alignment should round up, and chunked-prefill eviction should run before the continuation budget is computed (F-11).
+- The TPU SWA pool alignment should round up, chunked-prefill eviction should run before the continuation budget is computed, and a finished-but-not-yet-pulled request must not keep a whole chunk of SWA pages (F-11).

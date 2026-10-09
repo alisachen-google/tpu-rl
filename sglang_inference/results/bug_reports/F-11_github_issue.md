@@ -1,6 +1,6 @@
 # GitHub issue draft for sgl-project/sglang-torchtpu
 
-**Title:** [TPU/PD] Chunked prefill deadlocks when the SWA continuation budget reaches 0 before window eviction runs (hit by gpt-oss-120b with `--max-running-requests 1`)
+**Title:** [TPU/PD] Chunked prefill deadlocks when the SWA continuation budget reaches 0 before window eviction runs (gpt-oss-120b: `--max-running-requests 1`, or any slot count under decode back-pressure)
 
 **Labels:** bug, tpu, pd
 
@@ -112,6 +112,32 @@ the mini load balancer with a 1,800 s client timeout and a watchdog that polls b
   0.91 as chunks were admitted and windows were evicted.
 - The three pool sizes in the log (16,384 / 17,920 / 19,456) and the chunk sizes (8,192 / 8,000 / 1,344) match the formulas in the code trace
   exactly, which is how we located the mechanism.
+
+## Second trigger: decode back-pressure, 8 slots, 128k shape (the whole pair deadlocks)
+
+The single-slot case above is the simplest reproduction, but the same zero-budget loop is reached with the default `--max-running-requests 8`
+whenever the decode cannot pull a finished prefill promptly. Observed 2026-10-09 00:00 UTC with the decode's KV pool set to 262,144 tokens
+(prefill unchanged: 8 slots, 786k pool, radix off) and four 131,072-token prompts at concurrency 4:
+
+| Step | Prefill (SWA pool 19,456 tokens) | Decode (pool 262,144) |
+|---|---|---|
+| #1 | chunks 8,192 / 2,752 alternating, SWA usage 0.57 / 0.85; transferred | runs #1: 132,096 tokens used; #2 cannot be pre-allocated (130,048 free) |
+| #2 | prefilled normally, then **inflight**, waiting for the decode | still running #1 |
+| #3 | chunks 2,112 → 8,192 → **640**, SWA usage **0.96 → 0.99**; then no batch ever again | #1 finishes at 00:00:20; pre-allocates #2 and starts the pull |
+| after | loop spins in `get_next_disagg_prefill_batch_to_run` → `process_prefill_chunk` → `cache_unfinished_disagg_prefill` (py-spy) | loop spins in `pop_transferred` → `maybe_start_pull` / `_start_chunked_pull`; KV never arrives |
+
+An 8-token request sent afterwards got no answer in 55 s; both `/health` endpoints return 200; no watchdog fires.
+
+**Why 8 slots is not enough.** The pool is sized as two chunks plus a 384-token hold (`window + interval + 2 pages`) per slot. That hold is
+right for a request that is *between chunks*: its previous chunk's SWA pages were evicted when the next chunk ran. A request whose prefill has
+**finished** but whose KV the decode has not pulled has no next chunk, so nothing evicts its last chunk's SWA pages: the hold is ~8k tokens,
+not 384. One such inflight request plus the chunk in flight for the next request fills 19,456 tokens, the continuation budget
+`remaining_swa − (window + page)` is 0, no batch forms, and `maybe_evict_swa` never runs. The decode cannot pull until the prefill loop
+progresses, and the prefill cannot progress until the decode pulls, so the pair is wedged. Any decode back-pressure (a full decode pool, a slow
+decode, a held handshake such as our F-12) opens this window; a small decode pool only makes it easy to hit on demand.
+
+Evidence: `results/boundary2/stacks/*.txt` (py-spy of 3 prefill and 3 decode ranks), `runs/A_128k_smallpool/{prefill,decode}/server.log`,
+`results/phase_boundary2.log` case (3), recipe `recipes/gpt-oss_A_128k_smallpool.json`.
 
 ## How to reproduce
 

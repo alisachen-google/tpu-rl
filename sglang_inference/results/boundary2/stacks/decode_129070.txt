@@ -1,0 +1,25 @@
+Process 129070: /home/alisachen_google_com/venv/sglang/bin/python -u -m sglang.launch_server --device tpu --dtype bfloat16 --host 0.0.0.0 --port 30000 --grammar-backend none --model-path /mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a --served-model-name gpt-oss-120b --tp-size 8 --ep-size 8 --attention-backend pallas_tpu_rpa_v3 --page-size 64 --kv-cache-dtype fp8_e4m3 --context-length 140288 --max-total-tokens 262144 --max-running-requests 8 --chunked-prefill-size 8192 --max-prefill-tokens 8192 --tpu-compile-tokens 512 1024 2048 4096 8192 --tpu-compile-bs 1 2 4 8 --enable-torch-compile --torch-compile-max-bs 8 --mem-fraction-static 0.45 --sampling-backend pytorch --skip-server-warmup --enable-metrics --enable-cache-report --watchdog-timeout 3600 --reasoning-parser gpt-oss --disaggregation-mode decode --disaggregation-transfer-backend raiden --hicache-io-backend raiden --hicache-mem-layout page_first_fused --disaggregation-decode-retraction-backup cpu_tensor --nnodes 1
+Python v3.12.3 (/usr/bin/python3.12)
+
+Thread 129070 (idle): "MainThread"
+    run (asyncio/runners.py:118)
+    run (asyncio/runners.py:194)
+    run (uvicorn/server.py:86)
+    _setup_and_run_http_server (http_server.py:2769)
+    launch_server (http_server.py:2931)
+    run_server (sglang/launch_server.py:67)
+    <module> (sglang/launch_server.py:84)
+    _run_code (<frozen runpy>:88)
+    _run_module_as_main (<frozen runpy>:198)
+Thread 129913 (idle): "Thread-1 (monitor)"
+    monitor (cpu_monitor.py:21)
+    run (threading.py:1010)
+    _bootstrap_inner (threading.py:1073)
+    _bootstrap (threading.py:1030)
+Thread 153562 (idle): "subprocess-watchdog"
+    wait (threading.py:359)
+    wait (threading.py:655)
+    _monitor_loop (utils/watchdog.py:205)
+    run (threading.py:1010)
+    _bootstrap_inner (threading.py:1073)
+    _bootstrap (threading.py:1030)

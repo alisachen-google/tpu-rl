@@ -648,3 +648,21 @@ chunk and the decode pull was not hit; a transfer-window abort proper remains pa
 directly → `{"error":{"message":"input_ids cannot be empty."}}` HTTP 400. Via the mini-LB → `Internal Server Error` HTTP 500:
 `mini_lb.py:576 _get_request_batch_size` evaluates `input_ids[0]` on the empty list (`IndexError`). Not in the upstream open-issue snapshot.
 Draft `bug_reports/F-15_github_issue.md`; S3/P3.
+
+**Boundary phase 3: decode KV pool exhaustion deadlocks the whole pair through F-11 (00:00–00:20 UTC, `A_128k_smallpool`: decode pool
+262,144 tokens, prefill unchanged at 8 slots / 786k, radix off; 4 × 131,072-token prompts, 1,024 output tokens, c=4; `results/boundary2/`).**
+Timeline from the logs: #1 prefilled and transferred, decode runs it (132,096 of 262,144 used, so #2 cannot be pre-allocated); the prefill
+prefills #2 (8,192/2,752 alternating chunks, SWA usage 0.57/0.85, normal) and #2 goes **inflight** waiting for the decode. The moment #2 leaves
+chunking, the prefill's SWA usage jumps to **0.96–0.99** and #3's chunks collapse: 2,112 → 8,192 → **640 → none** (`#pending-token: 253312`
+never moves again). #1 finished on the decode at 00:00:20, the same second the last prefill batch ran; nothing ran afterwards on either engine.
+A fresh 8-token request through the LB got no response in 55 s. `py-spy` dumps (`results/boundary2/stacks/`): prefill ranks spin in
+`get_next_disagg_prefill_batch_to_run` → `process_prefill_chunk` → `cache_unfinished_disagg_prefill` / `resolve_waiting_queue_bootstrap`
+(the F-11 zero-budget loop); decode ranks spin in `pop_transferred` → `maybe_start_pull` / `_start_chunked_pull` and
+`pop_preallocated` → `_update_handshake_waiters` (waiting for KV the prefill never sends). Both `/health` return 200; no watchdog fires.
+**Mechanism.** The SWA pool is 19,456 tokens = 2 × 8,192 + 8 × 384 + 64 rounded down to 512, i.e. two chunks plus a 384-token hold per slot.
+A request whose prefill has finished but whose KV the decode has not pulled keeps its *last chunk's* SWA pages (nothing evicts them: eviction
+only runs when that request's next chunk runs, and there is none), so an inflight hold is ~8k tokens, not 384. One such hold plus the chunk
+in flight exhausts the pool, the continuation budget `remaining_swa − (window + page)` hits 0, no batch forms, eviction never runs: F-11, now
+at 8 slots. Because the decode can only pull once the prefill loop makes progress, and the prefill only makes progress once the decode
+pulls, the pair is wedged. Any decode back-pressure (full decode pool, slow decode, F-12 hold) reproduces it; the small pool only made the
+window easy to hit. F-11 severity raised to P0 for PD. Client outcome recorded below when the 1,200 s client timeout fires.

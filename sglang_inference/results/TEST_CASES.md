@@ -242,7 +242,7 @@ Legend: ✔ covered (where), ◐ partial, ✘ gap, ⏳ queued in `_phase_boundar
 | Deadlock / hang | SWA pool continuation deadlock at 1 slot (F-11) + 2- and 4-slot controls | ✔ |
 | Deadlock / hang | P/D handshake hold (F-12): 1 slot fresh pairs, 2 slots after long requests | ✔ 6 pairs; (1) with 300 s deadlines: prefill times out (decode never asked for KV), decode holds until client disconnect, client hangs to its own timeout |
 | Deadlock / hang | `n=2` request never returns (F-6) | ✔ |
-| Deadlock / hang | decode KV pool exhaustion: retraction / prealloc pressure (ISL+OSL > pool) | ◐ TC-8 retraction test never triggered retraction (decode admitted ≤5); ⏳ (3) small decode pool forces it |
+| Deadlock / hang | decode KV pool exhaustion: retraction / prealloc pressure (ISL+OSL > pool) | ✔ (3) 262k decode pool, 4 × 131k prompts: no retraction; **pair-wide deadlock** via F-11 (inflight request's SWA hold exhausts the prefill pool at 8 slots); py-spy stacks in `boundary2/stacks/` |
 | Deadlock / hang | duplicate request id concurrently | ✔ (2d) one 400, one 200 |
 | Deadlock / hang | queue limit (`max_queued_requests`) overflow → 429 | ✘ |
 | Deadlock / hang | no-progress watchdog (300 s) on both engines during every phase | ✔ harness |
