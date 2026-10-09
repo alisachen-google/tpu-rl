@@ -2,8 +2,8 @@
 
 Ask (wyzhang): validate `--enable-priority-scheduling` combined with PD disaggregation, prefix caching and KV offload to host RAM, on
 GPT-OSS-120B (sliding-window attention, 128K) and Qwen3-VL (images, video; 128K and 256K). Goal: no correctness or stability issues.
-Constraint from the issue thread: for the 10/15 launch a new request must **not** preempt a running decode, i.e. production runs with
-`--disable-priority-preemption`; preemption-on behaviour is tested as well so its failure modes are known.
+Constraint from the issue thread (and confirmed by the user on 2026-10-09): the launch runs **without preemption**
+(`--disable-priority-preemption`), so the preemption cases in §3.C are **out of scope** and not queued; they stay listed for when preemption is enabled.
 
 ## 1. How the feature works in this build (what the tests target)
 
@@ -24,8 +24,7 @@ Constraint from the issue thread: for the 10/15 launch a new request must **not*
 |---|---|---|
 | PS-off | B (radix on) | none; control |
 | PS-np | B, C | `--enable-priority-scheduling --disable-priority-preemption` (launch configuration) |
-| PS-pre | B, C | `--enable-priority-scheduling` (preemption on, threshold 10) |
-| PS-pre-t0 | B | `--enable-priority-scheduling --priority-scheduling-preemption-threshold 0` (any higher priority preempts) |
+| ~~PS-pre~~ | – | preemption on: **out of scope** (not used in production) |
 | PS-low | B | `--enable-priority-scheduling --schedule-low-priority-values-first` |
 | PS-q | C | PS-np plus `--max-queued-requests 4` |
 | PS-dis | B | scheduling disabled, `--abort-on-priority-when-disabled` |
@@ -63,7 +62,7 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 | B7 | Prefix cache (Config B): low-priority request warms a 32k prefix; high-priority request with the same prefix | `cached_tokens` ≈ 32k; correctness vs golden |
 | B8 | HiCache (Config C): prefix evicted to host under pressure; high-priority request with that prefix | `#host-hit-token` in the prefill log; identical output |
 
-### C. Preemption on (PS-pre, PS-pre-t0; Config B then C)
+### C. Preemption on — OUT OF SCOPE (kept for reference; production disables preemption)
 
 | # | Case | Expect |
 |---|---|---|
@@ -97,8 +96,8 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 
 | # | Case | Expect |
 |---|---|---|
-| E1 | Image request priority 0 running; text request priority 11 preempts it (PS-pre) | vision embeddings recomputed or cached on resume; output identical to golden |
-| E2 | Video request (many frames, near the compiled patch bucket) preempted and resumed | no recompile (F-10 area), identical output |
+| E1 | Image request priority 0 running; text request priority 100 arrives (PS-np) | no preemption; admitted when a slot frees; both outputs identical to golden |
+| E2 | Video request (many frames, near the compiled patch bucket) with high priority behind a full batch | no recompile (F-10 area), identical output |
 | E3 | Mixed batch: 4 image + 4 text, priorities interleaved | ordering as specified; mm cache hits reported |
 | E4 | 256k context: 200k-token text + image prompt, priority high, arriving while a 256k low-priority decode runs (PS-np) | no preemption; admitted when the slot frees |
 | E5 | Image prefix reuse across priorities (same image, different question) | `cached_tokens` covers the image tokens |
@@ -108,7 +107,7 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 | # | Case | Expect |
 |---|---|---|
 | F1 | 30 min open-loop mixed priorities (0/5/10/50), PS-np, both models | no error responses, no stuck requests, used tokens return to 0 at idle, no recompiles |
-| F2 | Same with PS-pre, preemption rate recorded | all requests complete; `num_retracted_reqs` matches preemption log count; no leak |
+| F2 | Same soak with `num_retracted_reqs` watched | must stay 0 (no preemption, no retraction) |
 | F3 | Metrics | `priority` label present on queue/running gauges; dashboard panels adjusted (`priority=~".*"`) |
 | F4 | Disconnect storm (F-8 fix verified) with priorities | no engine exception |
 

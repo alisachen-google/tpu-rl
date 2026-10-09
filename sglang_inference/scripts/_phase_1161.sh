@@ -9,7 +9,7 @@ cd $HOME/sglang-torchtpu && git checkout -q main
 rsync -a -e "ssh -i $HOME/.ssh/google_compute_engine -o BatchMode=yes -o StrictHostKeyChecking=no" --rsync-path='sudo rsync' $HOME/pd_disagg/recipes/ sa_101411256518727260534@10.128.15.217:/home/alisachen_google_com/pd_disagg/recipes/
 start(){ bash $S/pd.sh stop >/dev/null 2>&1; sleep 3; until bash $S/tpu_free.sh >/dev/null 2>&1; do sleep 120; done; env -u TORCH_DEVICE_BACKEND_AUTOLOAD bash $S/pd.sh start $1 $2 2>&1 | tee $R/runs/$2.driver.log | grep -E 'ready|NOT'; curl -sf -m 30 $LB/health_generate >/dev/null; }
 excs(){ echo "   exceptions: prefill $($SSH_A "sudo -n grep -cE 'Scheduler hit an exception' /home/alisachen_google_com/pd_disagg/results/runs/$1/prefill/server.log") decode $(grep -cE 'Scheduler hit an exception' $R/runs/$1/decode/server.log); retract/preempt log lines (decode): $(grep -ciE 'preempt|retract' $R/runs/$1/decode/server.log | head -n 1)"; }
-for cfg in ps_np:np:gpt-oss_B_128k_ps_np ps_pre:pre:gpt-oss_B_128k_ps_pre ps_low:low:gpt-oss_B_128k_ps_low ps_q:q:gpt-oss_C_128k_ps_q ps_dis:dis:gpt-oss_B_128k_ps_dis; do
+for cfg in ps_np:np:gpt-oss_B_128k_ps_np ps_low:low:gpt-oss_B_128k_ps_low ps_q:q:gpt-oss_C_128k_ps_q ps_dis:dis:gpt-oss_B_128k_ps_dis; do
   name=${cfg%%:*}; rest=${cfg#*:}; mode=${rest%%:*}; rec=${rest#*:}
   log "=== $name ($rec, mode $mode)"
   if start $HOME/pd_disagg/recipes/$rec.json 1161_$name; then
