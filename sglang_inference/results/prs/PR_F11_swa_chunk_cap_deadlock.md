@@ -40,4 +40,11 @@ Combined fix branch deployed on both hosts.
 | Trigger 1, **monolithic control** (same engine, radix off, 1 slot, 1M shape, 256k prompt; no P/D so no handshake effects) | main `09d1244c26`: SWA pool 16,384; chunks 8,192 → 8,000 at SWA usage 0.99, then no batch; client read timed out after 1,800 s | fix: SWA pool 16,896; **1,024 tokens returned**, TTFT 19.2 s, e2e 25.4 s, chunk trail 320 / 8,064 alternation |
 | Trigger 1: single slot, 1M shape, 256k / 512k / 1M prompts (`gpt-oss_A_1m.json`) | prefill never finished any prompt: third chunk budget 0 at SWA pool 16,384 (4 of 4) | SWA pool **16,896** (cap 16,832 aligned up); **prefill completed all three prompts** (850 chunks, 8,192 / 320 alternation, `#pending-token` reaches 0 each time, no stall). The responses still did not reach the client: the decode ran 0 batches and its handshake ended only on the client abort, which is the single-slot handshake hold we report separately (F-12), not this bug |
 
+| Scenario battery on the PR head (upstream `2cec1cf194` + this branch), both hosts | | |
+| S1 Config A 128k, 8 slots (SWA pool 19,968) | – | byte-identical to the c=1 monolithic golden at 8k; 131k diverges numerically as before the fix (chunk schedule, F-4 class), needles 3/3; 8 × 131k at c=8 in 59 s; 6 client aborts (2 concurrent) handled, 0 exceptions |
+| S2 decode pool 262k, heavier | 1 of 4 before | 8 × 131k at c=8: 8/8 in 59 s; 16 × 32k at c=16: 16/16 in 31 s |
+| S3 1M shape, 4 slots (pool 18,432 = cap 17,984 aligned up) | – | 4 × 256k at c=4: 4/4 in 81 s; 1M prompts served |
+| S4 radix on (B, C): fix is a no-op | – | 131k served, reuse `cached_tokens` 122,880, 0 exceptions |
+| S5 Qwen3-VL Config A (no SWA) | – | 8k text byte-identical to the pre-fix pair; image cases hit the pre-existing F-10 recompile crash (also on upstream main), unrelated to this change |
+
 Evidence: `results/fix_validate/smallpool.log`, `smallpool_out.jsonl`, prefill log of run `A_128k_smallpool_fixval`, `results/phase_fix_validate3.log`.

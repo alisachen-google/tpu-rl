@@ -34,6 +34,9 @@ range cannot serve, and the result is an engine outage rather than a slow answer
 
 ## Environment
 
+Still reproduces on `main` @ `2cec1cf194` (2026-10-09, 1920×1080 image through a PD pair: `RuntimeError: Detected recompile when
+torch.compile stance is 'fail_on_recompile'`, prefill engine exits).
+
 | Item | Value |
 |---|---|
 | sglang-torchtpu | `main` @ 09d1244c2641c3232ec0fcf5dd2d3bd372d5d709 (2026-10-07), sglang 0.5.13.dev7249 |

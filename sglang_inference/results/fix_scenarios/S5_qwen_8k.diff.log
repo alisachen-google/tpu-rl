@@ -1,0 +1,10 @@
+id            ident    cpfx   tpfx  agree      dlp  gate  notes
+---------------------------------------------------------------
+isl8192_k0    False     319      -  0.139        -  FAIL  char prefix 319<1000; agreement 0.139<0.95
+                a@319: 'cient lighthouse of Beacon Point. For ge'
+                b: 'cient lighthouse of Sentinel Point. For '
+isl8192_k1    False     370      -  0.141        -  FAIL  char prefix 370<1000; agreement 0.141<0.95
+                a@370: ' the lighthouse had been a beacon of hop'
+                b: ' the lighthouse had guided ships safely '
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S5_qwen_8k.report.json

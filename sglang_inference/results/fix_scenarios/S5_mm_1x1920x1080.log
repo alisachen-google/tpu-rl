@@ -1,0 +1,6 @@
+payload: 16.5 KiB, 1 image(s) 1920x1080 (~661 tok each), est prompt tokens ~685, content parts=3
+  image 1: red circle labeled 'IMAGE 1'
+ERROR HTTP 500: Internal Server Error
+status=500 prompt_tokens=None completion_tokens=None cached_tokens=None ttft=Nonems e2e=66046.1ms
+text: ''
+needle MISSING: plover

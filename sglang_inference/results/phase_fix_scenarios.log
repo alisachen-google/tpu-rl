@@ -35,3 +35,32 @@
    exceptions: prefill 0 decode 0; recompiles after warmup: prefill 168 decode 80
    health: prefill 200 decode 200
 2026-10-09T04:58:46Z [scen] === S4 regression on radix-on configs (fix is a no-op there): B and C 128k, golden + reuse
+2026-10-09 05:02:47 prefill /health ready after 226 s
+2026-10-09 05:02:47 decode /health ready after 0 s
+2026-10-09 05:02:48 LB /health_generate ready after 1 s
+   S4_B_131k: completed 2/2 errors 0 in 25s
+   S4_B_131k_reuse: completed 2/2 errors 0 in 13s
+   reuse cached_tokens: cached=122880
+   exceptions: prefill 0 decode 0; recompiles after warmup: prefill 168 decode 120
+   health: prefill 200 decode 200
+2026-10-09 05:05:58 prefill /health ready after 135 s
+2026-10-09 05:05:58 decode /health ready after 0 s
+2026-10-09 05:05:59 LB /health_generate ready after 1 s
+   S4_C_131k: completed 2/2 errors 0 in 25s
+   S4_C_131k_reuse: completed 2/2 errors 0 in 12s
+   reuse cached_tokens: cached=122880
+   exceptions: prefill 0 decode 0; recompiles after warmup: prefill 168 decode 120
+   health: prefill 200 decode 200
+2026-10-09T05:06:39Z [scen] === S5 Qwen3-VL Config A 128k (no SWA: alignment path not taken; raiden early release applies): text + image
+2026-10-09 05:11:40 prefill /health ready after 285 s
+2026-10-09 05:13:11 decode /health ready after 91 s
+2026-10-09 05:13:14 LB /health_generate ready after 3 s
+   S5_qwen_8k: completed 2/2 errors 0 in 337s
+   golden diff qwen 8k: 2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/fix_scenarios/S5_qwen_8k.report.json
+   mm 1x1920x1080: needle MISSING: plover
+   mm 4x448x448: needle MISSING: plover
+   mm 16x448x448: needle MISSING: plover
+   exceptions: prefill 8 decode 0; recompiles after warmup: prefill 3976 decode 3960
+   health: prefill 000 decode 200
+   host a restored to 09d1244c26
+2026-10-09T05:20:10Z [scen] phase fix scenarios done (local on main)

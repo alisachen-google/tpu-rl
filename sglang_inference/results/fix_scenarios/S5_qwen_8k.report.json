@@ -1,0 +1,47 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/qwen3-vl_fp8/8192.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/fix_scenarios/S5_qwen_8k.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": null,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl8192_k0",
+   "gate_pass": false,
+   "notes": [
+    "char prefix 319<1000",
+    "agreement 0.139<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 319,
+   "char_agreement": 0.13854505971769815,
+   "first_divergence_char": 319,
+   "context_a": "cient lighthouse of Beacon Point. For ge",
+   "context_b": "cient lighthouse of Sentinel Point. For ",
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl8192_k1",
+   "gate_pass": false,
+   "notes": [
+    "char prefix 370<1000",
+    "agreement 0.141<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 370,
+   "char_agreement": 0.14067541406754142,
+   "first_divergence_char": 370,
+   "context_a": " the lighthouse had been a beacon of hop",
+   "context_b": " the lighthouse had guided ships safely ",
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

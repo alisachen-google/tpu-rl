@@ -707,3 +707,11 @@ clients from retrying forever). Not filed.
 outputs). At 131k the output diverges after 11 chars (pre-fix pair: 21 / 77 chars) with needles 3/3 in both: the F-4 effect (chunk schedule
 changes numerics, no accuracy impact), expected because the pool size changes the chunk split. Note: the battery script compared against the
 c=8 golden first (`golden/gpt-oss_fp8`), which is the F-3/F-9 batch-invariance artefact, not a regression. 8 × 131k at c=8: 8/8 in 59 s.
+
+**PR #1181 scenario battery S2–S5 (04:41–05:20 UTC, PR head = upstream 2cec1cf194 + F-11 fix, `results/fix_scenarios/`).**
+S2 small decode pool (262k): 8 × 131k at c=8 → 8/8 in 59 s; 16 × 32k at c=16 → 16/16 in 31 s (before the fix 1 of 4 completed). S3 1M shape, 4
+slots (SWA pool 18,432 = cap 17,984 aligned up): 4 × 256k at c=4 → 4/4 in 81 s; 2 × 1M → 2/2 in 390 s. S4 radix-on regressions: B and C serve
+131k, reuse pass 12–13 s with `cached=122880`, no exceptions (fix is a no-op with the radix cache on). S5 Qwen3-VL Config A: 8k text outputs
+**byte-identical** to the pre-fix pair (TC-1); image cases: the 1920×1080 image killed the prefill with the **F-10** recompile
+(`RuntimeError: Detected recompile when torch.compile stance is 'fail_on_recompile'`), so F-10 is still present on upstream main 2cec1cf194;
+the 4×448 and 16×448 cases then failed only because the engine was down. No exception anywhere else in S1–S5; all pairs healthy at the end.

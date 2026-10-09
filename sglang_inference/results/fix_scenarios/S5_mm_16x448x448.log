@@ -1,0 +1,21 @@
+payload: 75.6 KiB, 16 image(s) 448x448 (~64 tok each), est prompt tokens ~1048, content parts=18
+  image 1: red circle labeled 'IMAGE 1'
+  image 2: green square labeled 'IMAGE 2'
+  image 3: blue triangle labeled 'IMAGE 3'
+  image 4: orange diamond labeled 'IMAGE 4'
+  image 5: purple star labeled 'IMAGE 5'
+  image 6: teal circle labeled 'IMAGE 6'
+  image 7: yellow square labeled 'IMAGE 7'
+  image 8: pink triangle labeled 'IMAGE 8'
+  image 9: red diamond labeled 'IMAGE 9'
+  image 10: green star labeled 'IMAGE 10'
+  image 11: blue circle labeled 'IMAGE 11'
+  image 12: orange square labeled 'IMAGE 12'
+  image 13: purple triangle labeled 'IMAGE 13'
+  image 14: teal diamond labeled 'IMAGE 14'
+  image 15: yellow star labeled 'IMAGE 15'
+  image 16: pink circle labeled 'IMAGE 16'
+ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError("HTTPConnection(host='10.128.15.217', port=8080): Failed to establish a new connection: [Errno 111] Connection refused"))
+status=None prompt_tokens=None completion_tokens=None cached_tokens=None ttft=Nonems e2e=1.9ms
+text: ''
+needle MISSING: plover
