@@ -6,3 +6,10 @@ scp: failed to upload file /tmp/q.bundle to /tmp/q.bundle
 2026-10-09 19:57:35 prefill /health ready after 136 s
 2026-10-09 19:57:35 decode /health ready after 0 s
 2026-10-09 19:57:51 LB /health_generate ready after 16 s
+Terminated
+   [A4-health] PASS decode /health 200 after malformed priorities
+   [D1-low-rejected] FAIL newcomer priority 3 into a full queue of 5s -> HTTP 200 
+   [D3-equal-rejected] FAIL newcomer priority 5 (equal) -> HTTP 200
+   [D2-evict-lowest] FAIL newcomer priority 9: evicted [] (expect exactly one, the newest priority-5 filler = 3), newcomer HTTP 200 msg=[]
+   exceptions: prefill 0 decode 0; used tokens decode 16768.0; health prefill 200 decode 200
+2026-10-09T20:13:41Z [fixv3] phase fix validate v3 done

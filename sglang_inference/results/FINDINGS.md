@@ -814,3 +814,11 @@ prefill stalls at "Capture target decode TPU graph begin" (never healthy in 5,40
 reference launchers are not functional on TPU in either mode, so the attacher alone cannot make the feature work. PR #1193 re-scoped: keep
 the attacher (correct, tested, prerequisite for the runtime port) and make `install_canary` refuse on TPU with a clear message instead of
 dying mid-start, which is the issue's documented alternative.
+
+**#1188 / PR #1191 live re-run (fixv3, 19:55–20:15 UTC) — prefill-side rejection is harmful.** With the limit at the prefill's intake,
+3 of the 8 holder requests got 503 from the prefill (its bootstrap backlog hit 4). The mini-LB returns the *decode's* response and discards
+the prefill's, so the client never saw the 503; the 3 decode twins sat in the decode transfer queue waiting for KV forever (gauges frozen at
+running 5 / transfer 3 / used 16768 after the other 5 finished). The decode then had free slots, so the probe's fillers and newcomers all ran
+(D1/D3/D2 FAIL for the wrong reason). Conclusion: only the decode can shed load on a pair; PR re-scoped to decode-only (prefill intake
+unchanged). Re-validation queued as fixv4. Side note: this is the F-12 hold triggered from the prefill side — any prefill-side abort before
+the KV handshake leaves the decode twin hanging with no timeout.

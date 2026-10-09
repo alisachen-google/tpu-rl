@@ -1,0 +1,5 @@
+scp: dest open "/tmp/q.bundle": Permission denied
+scp: failed to upload file /tmp/q.bundle to /tmp/q.bundle
+   host a on 6e139c7e32c
+2026-10-09T20:15:20Z [fixv4] local on e81c001aa5
+2026-10-09T20:15:20Z [fixv4] === #1191 queue limit on both engines: Config C + --max-queued-requests 4 + priority scheduling
