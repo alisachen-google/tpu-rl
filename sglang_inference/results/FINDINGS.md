@@ -665,4 +665,6 @@ only runs when that request's next chunk runs, and there is none), so an infligh
 in flight exhausts the pool, the continuation budget `remaining_swa − (window + page)` hits 0, no batch forms, eviction never runs: F-11, now
 at 8 slots. Because the decode can only pull once the prefill loop makes progress, and the prefill only makes progress once the decode
 pulls, the pair is wedged. Any decode back-pressure (full decode pool, slow decode, F-12 hold) reproduces it; the small pool only made the
-window easy to hit. F-11 severity raised to P0 for PD. Client outcome recorded below when the 1,200 s client timeout fires.
+window easy to hit. F-11 severity raised to P0 for PD. **Client outcome:** 1 of 4 completed (13.9 s); the other three got `Read timed out` at the client's 1,200 s limit; `num_retracted_reqs` stayed 0
+(the retraction path was never reached because nothing was ever admitted to retract). After the clients disconnected the prefill's queues
+drained (`inflight 0, queue 0`), i.e. the wedge is released only by client aborts, exactly as F-12's hold.

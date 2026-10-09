@@ -59,3 +59,14 @@
 2026-10-08 23:59:04 prefill /health ready after 136 s
 2026-10-09 00:00:04 decode /health ready after 60 s
 2026-10-09 00:00:05 LB /health_generate ready after 1 s
+   completed: 1 of 4 in 1201s; errors: 3
+   [isl131072_k1_dup1] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out.
+   [isl131072_k0_dup2] ERROR ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out.
+   decode retraction/pause lines: 26  metrics: sglang:num_retracted_reqs 0.0 sglang:num_paused_reqs 0.0 
+   decode: [2026-10-09 00:00:19 TP0 EP0] Decode batch, #running-req: 1, #full token: 132032, full token usage: 0.50, #swa token: 192, swa token usage: 0.03, pre-allocated usage: 0.00, #prealloc-req: 3, #transfer
+   decode: [2026-10-09 00:00:20 TP0 EP0] Decode batch, #running-req: 1, #full token: 132096, full token usage: 0.50, #swa token: 256, swa token usage: 0.04, pre-allocated usage: 0.00, #prealloc-req: 3, #transfer
+   decode: [2026-10-09 00:00:20 TP0 EP0] Decode batch, #running-req: 1, #full token: 132096, full token usage: 0.50, #swa token: 256, swa token usage: 0.04, pre-allocated usage: 0.00, #prealloc-req: 3, #transfer
+   {"id": "isl131072_k1_dup3", "status": "ERROR", "error": "ConnectionError: HTTPConnectionPool(host='10.128.15.217', port=8080): Read timed out."}
+   http://10.128.15.217:30000 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 1.0 sglang:num_used_tokens 64.0 
+   http://10.128.0.90:30000 sglang:num_decode_prealloc_queue_reqs 3.0 sglang:num_prefill_inflight_queue_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_retracted_reqs 0.0 sglang:num_running_reqs 1.0 sglang:num_used_tokens 132096.0 
+2026-10-09T00:20:16Z [boundary2] phase boundary2 done

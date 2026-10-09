@@ -126,7 +126,8 @@ whenever the decode cannot pull a finished prefill promptly. Observed 2026-10-09
 | #3 | chunks 2,112 → 8,192 → **640**, SWA usage **0.96 → 0.99**; then no batch ever again | #1 finishes at 00:00:20; pre-allocates #2 and starts the pull |
 | after | loop spins in `get_next_disagg_prefill_batch_to_run` → `process_prefill_chunk` → `cache_unfinished_disagg_prefill` (py-spy) | loop spins in `pop_transferred` → `maybe_start_pull` / `_start_chunked_pull`; KV never arrives |
 
-An 8-token request sent afterwards got no answer in 55 s; both `/health` endpoints return 200; no watchdog fires.
+An 8-token request sent afterwards got no answer in 55 s; both `/health` endpoints return 200; no watchdog fires. Of the four client
+requests one completed and three timed out after 1,200 s; the queues drained only when those clients disconnected.
 
 **Why 8 slots is not enough.** The pool is sized as two chunks plus a 384-token hold (`window + interval + 2 pages`) per slot. That hold is
 right for a request that is *between chunks*: its previous chunk's SWA pages were evicted when the next chunk ran. A request whose prefill has
