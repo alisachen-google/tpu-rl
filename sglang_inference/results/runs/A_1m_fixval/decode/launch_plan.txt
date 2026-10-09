@@ -1,4 +1,4 @@
-[launch] 2026-10-09T00:49:20Z host=t1v-n-eb299eb1-w-1 role=decode run=A_1m_fixval recipe=/home/alisachen_google_com/pd_disagg/recipes/gpt-oss_A_1m.json sglang=cf18fe9b4e compile_cache=1
+[launch] 2026-10-09T00:59:57Z host=t1v-n-eb299eb1-w-1 role=decode run=A_1m_fixval recipe=/home/alisachen_google_com/pd_disagg/recipes/gpt-oss_A_1m.json sglang=fbc79d88f4 compile_cache=1
 [launch] env: SGLANG_LAUNCHER_HOSTNAMES=10.128.15.217,10.128.0.90 RANK=1 LB_PORT=8080 RAIDEN_TIMEOUT=600
 {
   "command": [

@@ -1,0 +1,5 @@
+2026-10-09T00:59:44Z [fixval] === (3) F-11 trigger 1: single slot, 1M shape; 256k, 512k, 1M prompts (deadlocked at the third chunk before the fix)
+2026-10-09 01:03:43 prefill /health ready after 226 s
+2026-10-09 01:03:43 decode /health ready after 0 s
+2026-10-09 01:03:44 LB /health_generate ready after 1 s
+   prefill SWA pool tokens: 16384 (was 16384 before the fix)

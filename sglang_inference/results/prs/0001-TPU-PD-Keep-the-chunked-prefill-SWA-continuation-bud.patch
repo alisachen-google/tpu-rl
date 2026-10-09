@@ -1,4 +1,4 @@
-From 7b5be34189afda8b76da0af6dc0611ea14a19f0a Mon Sep 17 00:00:00 2001
+From 750fe0c5e37261a57bba306826760cacab6f63ef Mon Sep 17 00:00:00 2001
 From: alisachen-google <alisa888cl@gmail.com>
 Date: Fri, 9 Oct 2026 00:38:20 +0000
 Subject: [PATCH] [TPU/PD] Keep the chunked-prefill SWA continuation budget
@@ -41,13 +41,13 @@ Tests (existing files): test_pool_configurator gains the TPU alignment case
 test_prefill_abort_result_cleanup gains the Raiden/non-Raiden gate case for the
 early release.
 ---
- python/sglang/srt/disaggregation/prefill.py   | 12 ++---
+ python/sglang/srt/disaggregation/prefill.py   | 12 +++--
  .../srt/hardware_backend/tpu/kv_pool.py       |  6 +++
  .../srt/mem_cache/kv_cache_configurator.py    |  4 +-
- .../srt/model_executor/pool_configurator.py   | 11 ++++-
- .../test_prefill_abort_result_cleanup.py      | 30 +++++++++++++
- .../model_executor/test_pool_configurator.py  | 44 +++++++++++++++++++
- 6 files changed, 100 insertions(+), 7 deletions(-)
+ .../srt/model_executor/pool_configurator.py   | 17 ++++++-
+ .../test_prefill_abort_result_cleanup.py      | 30 +++++++++++
+ .../model_executor/test_pool_configurator.py  | 51 +++++++++++++++++++
+ 6 files changed, 112 insertions(+), 8 deletions(-)
 
 diff --git a/python/sglang/srt/disaggregation/prefill.py b/python/sglang/srt/disaggregation/prefill.py
 index 275607786a..d2cdd9d693 100644
@@ -112,10 +112,10 @@ index b1ce0db52b..d0e6425a01 100644
              if aligned == 0:
                  raise ValueError(
 diff --git a/python/sglang/srt/model_executor/pool_configurator.py b/python/sglang/srt/model_executor/pool_configurator.py
-index 077a08e7af..019293243a 100644
+index 077a08e7af..c59ff5e282 100644
 --- a/python/sglang/srt/model_executor/pool_configurator.py
 +++ b/python/sglang/srt/model_executor/pool_configurator.py
-@@ -1064,6 +1064,15 @@ class SWAChunkCapPoolConfigurator(HybridSWAPoolConfigurator):
+@@ -1064,6 +1064,19 @@ class SWAChunkCapPoolConfigurator(HybridSWAPoolConfigurator):
              window=kvc.sliding_window_size,
              attn_dp_size=kvc.attn_dp_size,
          )
@@ -128,18 +128,31 @@ index 077a08e7af..019293243a 100644
 +            # headroom the cap guarantees (a chunked prefill whose next chunk
 +            # budget hits 0 waits forever).
 +            self._swa_align_pages = SWA_POOL_PAGE_MULTIPLE
++
++    def _swa_cap_tokens(self, page_size: int) -> int:
++        """The request cap aligned to the device's SWA pool page multiple."""
++        return ceil_align(self._swa_cap, page_size * self._swa_align_pages)
  
      @staticmethod
      def is_applicable(kvc: KVCacheConfigurator) -> bool:
-@@ -1083,7 +1092,7 @@ class SWAChunkCapPoolConfigurator(HybridSWAPoolConfigurator):
+@@ -1083,7 +1096,7 @@ class SWAChunkCapPoolConfigurator(HybridSWAPoolConfigurator):
      ) -> MemoryPoolConfig:
          # SWA pool sized tightly from the cap; the rest of the budget goes to full.
          available_bytes -= self._dummy_page_bytes(page_size)
 -        swa_tokens = ceil_align(self._swa_cap, page_size)
-+        swa_tokens = ceil_align(self._swa_cap, page_size * self._swa_align_pages)
++        swa_tokens = self._swa_cap_tokens(page_size)
          fixed_swa_bytes = swa_tokens * (
              self._swa_per_token * self._swa_layers_num
              + self._draft_swa_per_token * self._draft_swa_layers_num
+@@ -1117,7 +1130,7 @@ class SWAChunkCapPoolConfigurator(HybridSWAPoolConfigurator):
+         self, max_total_num_tokens: int, page_size: int
+     ) -> MemoryPoolConfig:
+         # Constrained max_total goes to the full pool; SWA stays at its cap.
+-        swa_tokens = ceil_align(self._swa_cap, page_size)
++        swa_tokens = self._swa_cap_tokens(page_size)
+         full_tokens = (max_total_num_tokens // page_size) * page_size
+         return self._make_pool_config(
+             full_tokens, min(swa_tokens, max_total_num_tokens)
 diff --git a/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py b/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py
 index 4286a29f55..4354965914 100644
 --- a/test/registered/unit/disaggregation/test_prefill_abort_result_cleanup.py
@@ -179,10 +192,10 @@ index 4286a29f55..4354965914 100644
 +        assert scheduler._release_swa_beyond_window.called is expect_release, backend
 +        release_kv_cache.assert_not_called()
 diff --git a/test/registered/unit/model_executor/test_pool_configurator.py b/test/registered/unit/model_executor/test_pool_configurator.py
-index a25c640b39..8b7d461aa7 100644
+index a25c640b39..a040ed63a8 100644
 --- a/test/registered/unit/model_executor/test_pool_configurator.py
 +++ b/test/registered/unit/model_executor/test_pool_configurator.py
-@@ -713,6 +713,50 @@ class TestHybridSWAConfigurator(CustomTestCase):
+@@ -713,6 +713,57 @@ class TestHybridSWAConfigurator(CustomTestCase):
          self.assertEqual(config.swa_max_total_num_tokens, 76)
          self.assertLessEqual(_actual_memory_used(mr, config), available)
  
@@ -220,7 +233,14 @@ index a25c640b39..8b7d461aa7 100644
 +                cfg = create_memory_pool_configurator(mr)
 +                self.assertIsInstance(cfg, SWAChunkCapPoolConfigurator)
 +                config = cfg.calculate_pool_sizes(available, page_size=page_size)
++                # --max-total-tokens takes the constrained path; same alignment.
++                constrained = cfg.calculate_pool_sizes_from_max_tokens(
++                    10_000, page_size=page_size
++                )
 +            self.assertLessEqual(_actual_memory_used(mr, config), available)
++            self.assertEqual(
++                constrained.swa_max_total_num_tokens, config.swa_max_total_num_tokens
++            )
 +            sizes[device] = config.swa_max_total_num_tokens
 +
 +        cap = 76  # see test_chunk_cache_cap_prefill_holds_window_plus_chunk

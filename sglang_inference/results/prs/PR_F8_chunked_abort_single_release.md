@@ -34,4 +34,12 @@ pytest test/registered/unit/managers/test_scheduler_chunked_abort_race.py test/r
 
 ## Live validation (TPU v7x, 1 prefill + 1 decode, gpt-oss-120b, Config A: radix off, raiden)
 
-See "Validation results" below (filled from `results/fix_validate/`).
+Combined fix branch deployed on both hosts, Config A pair (`gpt-oss_A_128k.json`), `scripts/abort_test.py`:
+
+| Case | Before the fix | With the fix |
+|---|---|---|
+| 131k prompt, client aborts 6.4 s after submit (last chunks), 3 repeats | prefill engine dead on the first abort (`AssertionError … freeing before alloc`) | PASS: 3 aborts, engines back to baseline, follow-up requests identical to golden |
+| 131k prompt, client aborts 2.0 s after submit (mid-prefill), 3 repeats | same crash (2 of 2 earlier) | PASS: 3 aborts, baseline restored |
+| after the aborts | – | 0 scheduler exceptions in the prefill log; two 8k requests served (1,024 tokens each); `/health` 200 on both engines |
+
+Evidence: `results/fix_validate/f8_abort_6.4.txt`, `f8_abort_2.0.txt`, `f8_followup.log`, prefill log of run `A_128k_fixval`.
