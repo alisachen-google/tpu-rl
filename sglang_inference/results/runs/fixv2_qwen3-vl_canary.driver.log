@@ -1,0 +1,6 @@
+monitoring: grafana http://10.128.0.90:3000/d/sglang-pd  prometheus :9090
+2026-10-09 13:45:28 starting decode on b (10.128.0.90)
+881712
+2026-10-09 13:45:28 starting prefill on a (10.128.15.217)
+2026-10-09 13:48:29 prefill /health ready after 180 s
+2026-10-09 13:48:29 decode /health ready after 0 s

@@ -26,3 +26,13 @@
    health: prefill 200 decode 200; used: prefill 0.0 decode 0.0
    decode rooms seen for n-requests (distinct bootstrap_room values in decode log tail): 0
 2026-10-09T10:29:31Z [fixv2] === V3 #1176 --kv-canary log: gpt-oss Config A (SWA pool) then Qwen3-VL Config A (fused pool)
+2026-10-09 11:59:59 prefill /health NOT ready after 5400 s
+2026-10-09 13:30:11 decode /health NOT ready after 5400 s
+2026-10-09 13:45:14 LB /health_generate NOT ready after 900 s
+2026-10-09T13:45:14Z [fixv2] V3 gpt-oss pair did not come up
+   prefill: KeyError: '/loky-696481-s2akozmy'
+   prefill:     raise RuntimeError(
+   prefill: RuntimeError: An engine or router exited with -9
+   decode:   Hint: Use `torch._assert()` to raise a hard AssertionError when the check fails. This error will propagate back the user code that called the compiled function (i.e. Dynamo will not trace any exception handling).
+   decode:     raise RuntimeError(
+   decode: RuntimeError: An engine or router exited with -9
