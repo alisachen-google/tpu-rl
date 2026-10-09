@@ -103,7 +103,7 @@ waiting request evicted with "aborted by a higher priority request" for a higher
 | E1 | Image request priority 0 running; text request priority 100 arrives (PS-np) | no preemption; admitted when a slot frees; both outputs identical to golden |
 | E2 | Video request (many frames, near the compiled patch bucket) with high priority behind a full batch | no recompile (F-10 area), identical output |
 | E3 | Mixed batch: 4 image + 4 text, priorities interleaved | ordering as specified; mm cache hits reported. **Result:** 3 concurrent 4-image requests at priorities 0/10/50 all served |
-| E4 | 256k context: 200k-token text + image prompt, priority high, arriving while a 256k low-priority decode runs (PS-np) | no preemption; admitted when the slot frees |
+| E4 | 256k context: 200k-token text + image prompt, priority high, arriving while a 256k low-priority decode runs (PS-np) | no preemption; admitted when the slot frees. **Result:** 255k low-priority text + priority-50 image request both served, no preemption, image TTFT 33 s behind the long prefill (O-7), 0 exceptions |
 | E5 | Image prefix reuse across priorities (same image, different question) | `cached_tokens` covers the image tokens. **Result:** 768 of 818 tokens cached at both priorities |
 
 ### F. Stability and resource return

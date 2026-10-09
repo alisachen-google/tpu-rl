@@ -1,0 +1,8 @@
+2026-10-09T07:38:40Z [1161j] === E4: Qwen3-VL Config B 256k, priority scheduling, no preemption
+2026-10-09 07:41:39 prefill /health ready after 165 s
+2026-10-09 07:41:39 decode /health ready after 0 s
+2026-10-09 07:42:01 LB /health_generate ready after 22 s
+   high-priority 4-image request (sent 20 s after the 255k low-priority prompt): status=200 prompt_tokens=818 completion_tokens=48 cached_tokens=0 ttft=33227.9ms e2e=33227.9ms
+   low-priority 255k text: [isl255123_k0] tokens=1024 finish=length cached=0 ttft=40577.84ms e2e=218033.42ms (total 405s)
+   exceptions: prefill 0 decode 0; used tokens 0.0; health prefill 200 decode 200
+2026-10-09T07:48:57Z [1161j] phase 1161j done

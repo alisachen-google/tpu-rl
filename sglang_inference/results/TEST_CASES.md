@@ -278,9 +278,9 @@ Close-out of every planned item:
 | Configs A–E gpt-oss, A–C Qwen3-VL, 1M shape, MT-Bench, boundary cases, KV integrity | done (§2, §3, §5) |
 | F-11 fix (#1142) | PR #1181 ready for review, 28/28 CI green, scenario battery TC-17 PASS |
 | F-8 (#1145) | fixed upstream (bab49bcec2 + follow-ups), verified with our reproduction; closing comment drafted (`prs/COMMENT_1145_fixed_upstream.md`), posting is the owner's call |
-| #1161 priority scheduling | first and second battery done (TC-18, plan §3/§5/§6); F-16 drafted; O-4–O-7 recorded; C6–C8 and D1–D3 unreachable on PD by construction (documented), run on the monolithic control instead |
+| #1161 priority scheduling | first and second battery plus E4 (Qwen 256k) done (TC-18, plan §3/§5/§6); F-16 drafted; O-4–O-7 recorded; C6–C8 and D1–D3 unreachable on PD by construction (documented), run on the monolithic control instead |
 | F-15, F-16 upstream filing | drafts ready; filing is the owner's call |
-| Not covered on this hardware | multi-host engines, both engines on one host, Rust router, decode engine death mid-stream, LB restart, fault injection (colleague), image patch count at exactly 4,900, ISL = context + 1 at 1M, Qwen 256k with priorities (recipe exists, not run) |
+| Not covered on this hardware | multi-host engines, both engines on one host, Rust router, decode engine death mid-stream, LB restart, fault injection (colleague), image patch count at exactly 4,900, ISL = context + 1 at 1M |
 
 
 Everything planned has run. Summary of the items that were pending at some point:
