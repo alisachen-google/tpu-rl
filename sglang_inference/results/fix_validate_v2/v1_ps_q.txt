@@ -1,0 +1,12 @@
+[A1-absent] PASS priority=None -> HTTP 200 
+[A3-zero] PASS priority=0 -> HTTP 200 
+[A3-neg] PASS priority=-1 -> HTTP 200 
+[A3-max32] PASS priority=2147483647 -> HTTP 200 
+[A3-min32] PASS priority=-2147483648 -> HTTP 200 
+[A4-huge] FAIL priority=9223372036854775808 -> HTTP 200 
+[A4-float] PASS priority=1.5 -> HTTP 400 {"object":"error","message":"1 validation error:\n  {'type': 'int_from_float', 'loc': ('body', 'prio
+[A4-str] PASS priority='high' -> HTTP 400 {"object":"error","message":"1 validation error:\n  {'type': 'int_parsing', 'loc': ('body', 'priorit
+[A4-health] PASS decode /health 200 after malformed priorities
+[D1-low-rejected] FAIL newcomer priority 3 into a full queue of 5s -> HTTP 200 
+[D3-equal-rejected] FAIL newcomer priority 5 (equal) -> HTTP 200
+[D2-evict-lowest] FAIL newcomer priority 9: evicted [] (expect exactly one, the newest priority-5 filler = 3), newcomer HTTP 200 msg=[]
