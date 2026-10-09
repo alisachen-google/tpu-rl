@@ -777,3 +777,5 @@ PASS (prefix reuse and HiCache host reload across priorities, identical output).
 **#1161 E4 Qwen3-VL 256k with priorities (07:42 UTC, `1161j_qwen_B_256k`, Config B 256k shape, 4 slots, no preemption).** A priority-0
 255k text prompt (1,024 tokens: TTFT 40.6 s, e2e 218 s) and, 20 s later, a priority-50 4-image request: both served (image request TTFT 33 s,
 waiting behind the in-flight 255k prefill, O-7), 0 exceptions, used tokens back to 0, both engines healthy.
+
+**Filed upstream (08:20 UTC).** F-16 → https://github.com/sgl-project/sglang-torchtpu/issues/1188 ; F-15 → https://github.com/sgl-project/sglang-torchtpu/issues/1189 (both authored by alisachen-google from the drafts).

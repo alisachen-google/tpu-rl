@@ -12,7 +12,7 @@ It was written on 2026-10-09 at about 04:30 UTC from `TEST_CASES.md`, `FINDINGS.
 | PR #1181 (F-11 fix, issue #1142) | **Ready for review**, all 28 CI checks green (CPU shards, build, TPU unit tests, stage-B e2e); scenario battery TC-17 PASS (A, small decode pool, 1M four slots, B/C regression, Qwen text); monolithic before/after: main stalls 1,800 s, fix answers in 25 s |
 | Issue #1145 (F-8) | fixed upstream by PR #1138 (bab49bcec2 + follow-ups), verified with our six-abort reproduction on main 2cec1cf194; closing comment drafted (`prs/COMMENT_1145_fixed_upstream.md`) |
 | Issue #1161 (priority scheduling) | first and second battery plus E4 complete (TC-18): ordering in both directions and FIFO ties PASS; no starvation; no preemption of running decodes in PD by construction (O-6); prefill head-of-line blocking by a long low-priority prompt (O-7); prefix reuse, HiCache host reload and image-prefix reuse across priorities with byte-identical output; `priority` metrics label; 20-abort storm clean; 15-min soak 5,035 requests, 0 errors, TTFT ordered by priority; monolithic preemption, preemptor/victim aborts and repeated preemption clean; **F-16**: `--max-queued-requests` and priority eviction inert in PD (monolithic control passes) |
-| New drafts | F-15 (mini-LB 500 on empty `input_ids`), F-16 (queue limit inert in PD) in `bug_reports/`; not yet filed |
+| New issues | F-16 (queue limit inert in PD) filed as #1188; F-15 (mini-LB 500 on empty `input_ids`) filed as #1189 |
 | F-10 | confirmed still present on upstream main 2cec1cf194 (1920×1080 image kills the Qwen3-VL prefill) |
 | Monitoring | Prometheus + Grafana on the decode host (`monitoring/`), 37-panel PD dashboard, started with every pair launch |
 
