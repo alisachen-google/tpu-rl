@@ -76,18 +76,69 @@ a watchdog polls both engines' `/metrics` every few seconds.
 
 ## How to reproduce
 
-1. Start a gpt-oss-120b pair (prefill + decode, raiden, mini-LB).
-2. Send:
-   ```
-   curl -s -m 60 $LB/generate -H 'Content-Type: application/json' \
-     -d '{"text":"The three primary colors are","sampling_params":{"temperature":0,"max_new_tokens":32,"n":2}}'
-   ```
-3. While it waits: `curl -s http://<decode>:30000/metrics | grep -E 'num_running_reqs|num_used_tokens'`.
+Reproduced 3 of 3 on the configuration below (gpt-oss-120b; the mechanism is model-independent). Filed as #1147; fix in PR #1192.
 
-**Observed.** Step 2 times out. Step 3 shows one running request with 128 used tokens and no progress; the prefill shows nothing running.
-**Expected.** Two completions in a few seconds.
+**Topology.** Two TPU v7x hosts: host a = prefill engine + mini load balancer + bootstrap server, host b = decode engine. One engine
+per host, `tp_size 8`, `ep_size 8`, raiden KV transfer. The same request through a single (non-disaggregated) engine returns `n`
+completions, so a monolithic server is the control.
 
-Control: the same request against a monolithic server returns two completions.
+**1. Launch the pair** (the fields below are the recipe for `benchmark.tpu.launch_server`; the plain `sglang.launch_server` flags are
+the same names with dashes).
+
+Prefill engine (host a):
+```
+python -m sglang.launch_server --device tpu --dtype bfloat16 --host 0.0.0.0 --port 30000 \
+  --model-path openai/gpt-oss-120b --tp-size 8 --ep-size 8 --attention-backend pallas_tpu_rpa_v3 \
+  --page-size 64 --kv-cache-dtype fp8_e4m3 --context-length 140288 --max-total-tokens 786432 \
+  --max-running-requests 8 --chunked-prefill-size 8192 --disable-radix-cache \
+  --disaggregation-mode prefill --disaggregation-transfer-backend raiden --disaggregation-bootstrap-port 8998 \
+  --enable-metrics
+```
+Decode engine (host b): identical flags with `--disaggregation-mode decode` (no bootstrap port).
+Environment on both: `SGLANG_RAIDEN_KV_PORT=31000`, `SGLANG_RAIDEN_TIMEOUT_S=600`, `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=7200`,
+`SGLANG_DISAGGREGATION_WAITING_TIMEOUT=7200` (the long deadlines only make the hold visible; the default 300 s ends it with an error).
+Mini load balancer on host a: `python -m sglang_router.mini_lb --prefill http://<a>:30000 --decode http://<b>:30000 --host 0.0.0.0 --port 8080`
+(our launcher starts it once both engines pass `/health`). Wait for `curl http://<a>:8080/health_generate` to return 200.
+
+**2. Confirm the pair serves `n = 1`** (sanity, ~1 s):
+```
+curl -s -m 60 http://<a>:8080/generate -H 'Content-Type: application/json' \
+  -d '{"text":"The three primary colors are","sampling_params":{"temperature":0,"max_new_tokens":32}}'
+```
+
+**3. Send the failing request** (`n = 2`; `n = 3`, temperature 0.7, and `"n": 2` on `/v1/chat/completions` behave the same):
+```
+time curl -s -m 120 http://<a>:8080/generate -H 'Content-Type: application/json' \
+  -d '{"text":"The three primary colors are","sampling_params":{"temperature":0,"max_new_tokens":32,"n":2}}'
+```
+Observed: no bytes are returned; curl exits on its own 120 s timeout (`exit 28`). Expected: a JSON list with two completions in about a
+second.
+
+**4. Observe the hold while the client waits** (second terminal):
+```
+curl -s http://<b>:30000/metrics | grep -E '^sglang:(num_running_reqs|num_used_tokens|num_queue_reqs|num_decode_prealloc_queue_reqs)'
+curl -s http://<a>:30000/metrics | grep -E '^sglang:(num_running_reqs|num_prefill_inflight_queue_reqs|num_used_tokens)'
+```
+Observed on the decode: `num_running_reqs 1`, `num_used_tokens 128` (the prompt's KV, never decoded), `num_queue_reqs 0`; no new
+`Decode batch` log line. Observed on the prefill: nothing running, nothing inflight. Both `/health` return 200 and no error is logged.
+
+**5. Confirm the shared bootstrap room** (the root cause):
+```
+grep -oE "bootstrap_room=[0-9]+" <prefill server.log> | tail -n 3
+grep -oE "bootstrap_room=[0-9]+" <decode server.log>  | tail -n 3
+```
+Observed: the three requests the tokenizer manager produced for one `n = 2` call (the `max_new_tokens = 0` prefix request plus two
+samples) carry the **same** `bootstrap_room` on both engines. With `n = 1` every request has a distinct room.
+
+**6. Release.** Press Ctrl-C on the client (or let curl time out). The decode then logs
+`Decode handshake failed ... with exception Aborted by AbortReq.` and `num_used_tokens` returns to 0; the pair serves `n = 1` requests
+again. Nothing else frees the slot.
+
+**Control.** The same `n = 2` request against a monolithic server (`--disaggregation-mode null`, otherwise identical flags) returns two
+completions in ~1 s.
+
+**After PR #1192** (one room per sub-request, no prefix request through a pair): steps 3 and 4 return two completions, the decode shows
+`num_running_reqs 2` while they decode, and step 5 shows two distinct rooms per `n = 2` call.
 
 ## Fix proposal
 
