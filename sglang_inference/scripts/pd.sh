@@ -31,6 +31,7 @@ wait_url() { # url deadline_s label
 case "${1:-}" in
 start)
   recipe=${2:?recipe}; run=${3:?RUN}
+  bash "$HOME/pd_disagg/monitoring/start.sh" 2>/dev/null || log "monitoring stack not started (see monitoring/start.sh)"
   mkdir -p "$HOME/pd_disagg/results/runs/$run"; on_a "mkdir -p /home/$ME/pd_disagg/results/runs/$run"
   cp "$recipe" "$HOME/pd_disagg/results/runs/$run/recipe.json"
   log "starting decode on b ($DECODE_IP)"; spawn_b "$recipe" decode "$run"

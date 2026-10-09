@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 15s
+scrape_configs:
+  - job_name: sglang
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["10.128.15.217:30000"]
+        labels: { role: prefill, host: a }
+      - targets: ["10.128.0.90:30000"]
+        labels: { role: decode, host: b }

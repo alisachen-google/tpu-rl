@@ -1,0 +1,30 @@
+# Prometheus + Grafana for the PD pair. Both on the host network so Prometheus reaches the engines on 10.128.x
+# and Grafana reaches Prometheus on localhost:9090. UI: Grafana http://<this VM>:3000 (anonymous viewer; admin/admin), Prometheus :9090.
+services:
+  prometheus:
+    image: prom/prometheus:v3.4.1
+    container_name: pd-prometheus
+    network_mode: host
+    restart: unless-stopped
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=30d", "--web.listen-address=0.0.0.0:9090"]
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom-data:/prometheus
+  grafana:
+    image: grafana/grafana-oss:11.6.0
+    container_name: pd-grafana
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      GF_SERVER_HTTP_PORT: "3000"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_DEFAULT_THEME: light
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+volumes:
+  prom-data:
+  grafana-data:
