@@ -54,8 +54,8 @@ no recompile after warm-up (`fail_on_recompile`), greedy output of an undisturbe
 | # | Case | Expect |
 |---|---|---|
 | B1 | Fill all slots with priority 0 decodes (long outputs); submit priority 100 | runs when a slot frees, **no running request preempted** (`num_retracted_reqs` 0, no retraction/requeue log). **Result (PS-np, PS-low):** PASS, TTFT 10–11 s = wait for a free slot, 0 retractions |
-| B2 | 8 waiting requests with priorities 0…7 submitted low-first while slots are busy | admitted high-first; TTFT monotone in priority |
-| B3 | Same priority, 8 requests | FIFO (arrival order) |
+| B2 | 8 waiting requests with priorities 0…7 submitted low-first while slots are busy | admitted high-first; TTFT monotone in priority. **Result (PS-np):** PASS, admission order 7→0 once the first slot freed (probe needs staggered holder lengths; see §5) |
+| B3 | Same priority, 8 requests | FIFO (arrival order). **Result (PS-np):** PASS, 4 equal-priority probes admitted FIFO between the priority-3 and priority-2 probes |
 | B4 | PS-low: priorities 0…7 | admitted low-value-first (inverted B2) |
 | B5 | Starvation: continuous priority-10 stream at full occupancy plus one priority-0 request | the priority-0 request is served once the stream pauses; never lost; its TTFT recorded |
 | B6 | PD: high-priority request arrives while a low-priority 131k transfer is in the decode prealloc/transfer queue | prealloc queue reorders; high-priority request admitted first once pre-allocable; the long transfer still completes |
@@ -123,3 +123,12 @@ eviction on the pair (F-16). D1–D3 are re-run on a monolithic server as the co
 - Phase script `_phase_1161.sh`: one block per configuration, `ensure_up` relaunch, waits on `tpu_free.sh`; results into `results/1161/`.
 - Oracles: golden diff at c=1 for undisturbed requests; needle check for resumed requests; identical-output check for preempted requests
   (greedy; batch-composition caveat F-3 noted, so compare after resumption at c=1).
+
+## 5. Probe design notes
+
+- Admission order is observable only when slots free one at a time and every probe is already queued: use holders of staggered length
+  (2,500 + 500·i tokens) and submit the probes before the shortest holder ends. With equal-length holders all slots free in the same step and
+  the probes are admitted in one batch, which made the first B2/B3 runs meaningless.
+- Each 8-token probe cycles through a freed slot in ~70 ms, so twelve queued probes are admitted within a second in queue order; TTFT at the
+  client is the first token emitted at decode admission.
+- `--max-queued-requests` cannot be exercised on a PD pair (F-16); use the monolithic control.

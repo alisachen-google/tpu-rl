@@ -1,0 +1,18 @@
+[A1-absent] PASS priority=None -> HTTP 200 
+[A3-zero] PASS priority=0 -> HTTP 200 
+[A3-neg] PASS priority=-1 -> HTTP 200 
+[A3-max32] PASS priority=2147483647 -> HTTP 200 
+[A3-min32] PASS priority=-2147483648 -> HTTP 200 
+[A4-huge] FAIL priority=9223372036854775808 -> HTTP 200 
+[A4-float] PASS priority=1.5 -> HTTP 400 {"object":"error","message":"1 validation error:\n  {'type': 'int_from_float', 'loc': ('body', 'prio
+[A4-str] PASS priority='high' -> HTTP 400 {"object":"error","message":"1 validation error:\n  {'type': 'int_parsing', 'loc': ('body', 'priorit
+[A4-health] PASS decode /health 200 after malformed priorities
+[B1-setup] PASS running=8.0 of 8 slots held at priority 0
+[B1-no-preempt] PASS priority 100 arrived at full occupancy: retracted 0.0->0.0, ttft=10.9s (waited for a free slot), HTTP 200
+[B1-holders] PASS held requests finished: 8/8 ok []
+[B2-admissions] INFO all probes queued by t=14.4s; admissions (s after holders started): p7@18.7 p6@18.7 p5@18.8 p4@18.9 p3@19.0 tie0@19.0 tie1@19.1 tie2@19.2 tie3@19.3 p2@19.3 p1@19.4 p0@19.5
+[B2-order] PASS admission order of distinct priorities: [7, 6, 5, 4, 3, 2, 1, 0] (expected [7, 6, 5, 4, 3, 2, 1, 0])
+[B3-fifo-tie] PASS equal-priority admission order: [0, 1, 2, 3] (FIFO expected)
+[B2-holders] PASS staggered holders finished: 8/8 ok
+[end-retractions] INFO num_retracted_reqs gauge 0.0 -> 0.0
+[end-idle] PASS decode num_used_tokens at end = 0.0
