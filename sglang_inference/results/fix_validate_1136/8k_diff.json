@@ -1,0 +1,57 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/fix_validate_1136/8k_main.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/fix_validate_1136/8k_fix.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": 64,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl8192_k0",
+   "gate_pass": false,
+   "notes": [
+    "char prefix 662<1000",
+    "agreement 0.212<0.95",
+    "structural:completion_tokens=1024!=64,completion_tokens=1024!=64"
+   ],
+   "identical": false,
+   "char_prefix": 662,
+   "char_agreement": 0.2117775354416576,
+   "first_divergence_char": 662,
+   "context_a": "as the lighthouse's beam.\n\nElias lived i",
+   "context_b": "as the lighthouse's rhythm.\n\nElias lived",
+   "structural_a": [
+    "completion_tokens=1024!=64"
+   ],
+   "structural_b": [
+    "completion_tokens=1024!=64"
+   ]
+  },
+  {
+   "id": "isl8192_k1",
+   "gate_pass": false,
+   "notes": [
+    "char prefix 0<1000",
+    "agreement 0.072<0.95",
+    "structural:completion_tokens=1024!=64,completion_tokens=1024!=64"
+   ],
+   "identical": false,
+   "char_prefix": 0,
+   "char_agreement": 0.07185761957730812,
+   "first_divergence_char": 0,
+   "context_a": "The secret code word",
+   "context_b": "\n:\n\nThe secret code ",
+   "structural_a": [
+    "completion_tokens=1024!=64"
+   ],
+   "structural_b": [
+    "completion_tokens=1024!=64"
+   ]
+  }
+ ]
+}

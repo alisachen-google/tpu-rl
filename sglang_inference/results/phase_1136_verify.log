@@ -10,3 +10,14 @@
 2026-10-10 00:01:23 golden(b) /health ready after 436 s
    compile policies:  8 VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder;
    policy lines (TP0): VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder on ViTTpuCompileRunner.forward.|VisionTpuCompilePolicy.run: compiled-fn arg shapes=((196, 1, 1152), (2,), (196, 36), (196, 36), (1, 196))|VisionTpuCompilePolicy.precompile: submitted; 0 deferred warmups.|
+   story 1024 tokens: completion 1024 e2e_ms 161501 wall 161.5s
+   decode gen throughput (last 3 batches): 7.35 6.45 6.95 
+   8k prompts: 0 completed; ttft=9924.46ms; e2e=154309.41ms; errors 0
+   recompiles after warmup: 3696; exceptions: 0; health 200
+2026-10-10T00:09:15Z [1136] === output identity (fix vs main, 8k prompts, 64 greedy tokens)
+                   a@0: 'The secret code word'
+                   b: '\n:\n\nThe secret code '
+   
+   2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/fix_validate_1136/8k_diff.json
+   story text identical: False | main e2e 161.5 s; fix e2e 6.3 s
+2026-10-10T00:09:15Z [1136] phase 1136 verify done

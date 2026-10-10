@@ -846,3 +846,10 @@ D2 priority 9 → evicted the newest priority-5 filler (3) with "aborted by a hi
 exceptions; the e2e answers timed out at 3,000 s because of F-12 (single-slot handshake hold), not F-11. All three F-11 cases PASS on the head.
 
 **PR #1193 ready for review (23:33 UTC):** CI 28/28 green on dca4afd17a, live refusal check PASS, unit tests in the existing file.
+
+**#1136 fix (PR #1237, `_phase_1136_verify.sh`, 23:37–00:09 UTC, `results/fix_validate_1136/`).** Monolithic Qwen3-VL-30B-A3B bf16 on host b,
+same recipe/prompts, main 6187d8bbc9 vs branch `qwen3-vl-moe-decoder-compile`. Main: vision policy only, 1,024-token story 161.5 s,
+decode 6.5–7.4 tok/s, 8k TTFT 9.9 s. Fix: `Qwen3VLDecoderTpuCompilePolicy` installed on `Qwen3MoeLLMModel.forward` (15 EXTEND variants),
+story **6.3 s**, decode **177–191 tok/s**, 8k TTFT 0.35 s / e2e 5.8 s; start-up 947 s (vs 436 s) because the decoder graphs now compile.
+0 fail_on_recompile, 0 recompiles after warm-up, 0 exceptions on both. Needles 6/6 on both (checker is case-sensitive; fix bolds them).
+Greedy text diverges after 100–650 chars (compiled vs eager numerics), both coherent. PR stays draft until CI is green.
