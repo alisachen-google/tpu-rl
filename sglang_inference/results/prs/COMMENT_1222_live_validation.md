@@ -4,11 +4,11 @@ Head 4914689cb1 deployed; control = upstream main 4f7aae5369. Launch time is fro
 
 | # | Launch | main | this PR |
 |---|---|---|---|
-| A1 | monolithic, `--kv-canary log` | __MAIN_LOG__ | rejected at argument validation **in the same second as launch**: `ValueError: --kv-canary log is not supported on TPU: the canary cannot attach to the TPU fused KV pools. Use --kv-canary none.`; weights never loaded; no leftover scheduler processes |
+| A1 | monolithic, `--kv-canary log` | weights load (90 s), memory pool built, then every rank dies with `AttributeError: 'TpuFusedMHATokenToKVPool' object has no attribute 'k_buffer'` (the #1176 crash) | rejected at argument validation **in the same second as launch**: `ValueError: --kv-canary log is not supported on TPU: the canary cannot attach to the TPU fused KV pools. Use --kv-canary none.`; weights never loaded; no leftover scheduler processes |
 | A2 | monolithic, `--kv-canary raise` | – | same rejection, same timing |
 | A3 | monolithic, `--kv-canary bogus` | – | argparse rejects it first (`invalid choice: 'bogus'`), before the TPU check |
 | A4 | monolithic, `--kv-canary none` (explicit) | – | starts normally (healthy after 331 s), `/generate` → 200 |
-| B | P/D pair, `--kv-canary log` on the **decode only** (prefill `none`) | – | __PAIR__ |
+| B | P/D pair, `--kv-canary log` on the **decode only** (prefill `none`) | – | decode rejected at launch with the same message; the prefill (canary `none`) came up healthy and unaffected (`/health` 200) |
 
 No scheduler exceptions in any run; the default (flag unset) path is exercised by every other run in our campaign and is unchanged.
 

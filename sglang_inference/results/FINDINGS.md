@@ -908,3 +908,8 @@ the deadline path is evidenced by B3 (unreachable bootstrap host → 60.0 s, KVP
 **#1222/A (11:22 UTC, head 4914689cb1, monolithic gpt-oss G):** `--kv-canary log` → rejected at argument validation in the same second as
 launch (`ValueError: --kv-canary log is not supported on TPU: the canary cannot attach to the TPU fused KV pools. Use --kv-canary none.`),
 weights never loaded, no leftover processes. (Our launcher waits for /health and hit its 900 s guard, so each failing case costs 15 min.)
+**#1222 live validation complete (11:22–12:45 UTC):** PR head rejects `--kv-canary log|raise` at argument validation within the launch second
+(no weights loaded, no leftovers); `bogus` caught by argparse; `none` starts and serves; pair with canary on the decode only → decode rejected,
+prefill healthy. Main control: weights load (90 s), memory pool built, then all ranks die with `AttributeError: 'TpuFusedMHATokenToKVPool' has
+no attribute 'k_buffer'` (the #1176 crash). Comment posted on #1222. Note: `canary_launch log` reused run dir `v1222_log` for the main control
+(log appended) — harmless but keep distinct names next time.
