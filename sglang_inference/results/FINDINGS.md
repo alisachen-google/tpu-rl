@@ -853,3 +853,10 @@ decode 6.5–7.4 tok/s, 8k TTFT 9.9 s. Fix: `Qwen3VLDecoderTpuCompilePolicy` ins
 story **6.3 s**, decode **177–191 tok/s**, 8k TTFT 0.35 s / e2e 5.8 s; start-up 947 s (vs 436 s) because the decoder graphs now compile.
 0 fail_on_recompile, 0 recompiles after warm-up, 0 exceptions on both. Needles 6/6 on both (checker is case-sensitive; fix bolds them).
 Greedy text diverges after 100–650 chars (compiled vs eager numerics), both coherent. PR stays draft until CI is green.
+
+**F-5 filed upstream as #1244 (2026-10-10 ~00:50 UTC).** Not a duplicate: #432 is the feature request (feature landed behind
+`SGLANG_TPU_ENABLE_PROMPT_LOGPROB` in PR #597), #638 fixed the sibling crash on the enabled path, #137 introduced the guard. Code path unchanged
+on main 6187d8bbc9. Fix PR: validate at request intake (tokenizer manager, TPU helper in the TPU subdir), branch `tpu-prompt-logprob-validate`
+(~/wt-f5).
+**F-5 fix PR #1245 opened (draft, 2026-10-10 ~01:10 UTC):** TPU helper `hardware_backend/tpu/prompt_logprob.py` + intake validation in the
+tokenizer manager; shim delegates. 131 unit tests pass. Live verification `_phase_f5_verify.sh` running (fix flag-off, fix flag-on, main).
