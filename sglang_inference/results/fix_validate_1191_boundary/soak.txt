@@ -1,0 +1,4 @@
+[start] INFO decode used tokens 0.0, running 0.0
+[S1-soak-evictions] PASS victim per cycle: ['fill3', 'fill2', 'fill1', 'fill0', 'n0', 'n1'] (expected ['fill3', 'fill2', 'fill1', 'fill0', 'n0', 'n1'])
+[S2-survivors-served] PASS remaining newcomers (priority 11-14) served after the holders: {'n2': 200, 'n3': 200, 'n4': 200, 'n5': 200}
+[S-end-idle] PASS idle=True decode num_used_tokens at end = 0.0

@@ -916,3 +916,12 @@ no attribute 'k_buffer'` (the #1176 crash). Comment posted on #1222. Note: `cana
 **#1230/E (13:04 UTC, WAITING_TIMEOUT 90):** orphans against the real prefill → 500 at 90.0 s ("Decode transfer failed … timed out"), 16 at once
 likewise, decode clean; B3 still 60 s via the new deadline; normal traffic unaffected. Both windows bounded by their own knob. Live-validation
 COMMENT POSTED on #1230 (incl. the B6 regression risk: decode-side pool-pressure waits > BOOTSTRAP_TIMEOUT now fail).
+
+**#1191 live validation COMPLETE (13:24 UTC).** Reruns: base2 all PASS (Q7 redesigned: client abort of a queued request frees its place after
+~52 s through the mini-LB, newcomer admitted; Q10 superseded by `soak`), q0b PASS (limit-0 guard), retract2 PASS on the PR head and retract_main
+PASS → the 10:05 stall is intermittent (1 of 4 pool-pressure runs; KV free fence held the whole pool while the decode idled; before our code
+path) → unfiled upstream observation. soak PASS: six rising-priority newcomers evict fill3, fill2, fill1, fill0, n0, n1 in order; survivors
+served; 6 × 503; 0 exceptions. Full table in PR #1191 (Live validation) and results/bug_reports/F-16_github_issue.md.
+Unfiled upstream observations from this campaign: (a) monolithic intake rejects bursts into an idle server when `--max-queued-requests` is
+set (Q2 mono); (b) client abort of a queued P/D request takes ~52 s to free its place via the mini-LB (3 s single-engine); (c) intermittent
+KV-free-fence hold under pool pressure (1/4); (d) #1230 B6 regression risk (reported in its comment).

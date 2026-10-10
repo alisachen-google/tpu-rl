@@ -1,0 +1,5 @@
+[start] INFO decode used tokens 0.0, running 0.0
+[R1-long-holders] PASS 8 x 131k holders under a 262k decode pool: {'long0': 200, 'long1': 200, 'long2': 200, 'long3': 200, 'long4': 200, 'long5': 200, 'long6': 200, 'long7': 200}
+[R2-fillers-and-newcomer] PASS fillers {'fill0': 200, 'fill1': 200, 'fill2': 200, 'fill3': 200}, newcomer 200 (every request answered)
+[R3-retractions] INFO num_retracted_reqs 0.0 -> 0.0
+[R-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
