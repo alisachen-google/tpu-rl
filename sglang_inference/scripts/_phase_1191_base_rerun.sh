@@ -24,4 +24,13 @@ if curl -sf -m 30 $LB/health_generate >/dev/null; then
   $PY $S/queue_limit_probe.py --url $LB --decode $DEC --mode q0 --slots 8 > $OUT/q0b.txt 2>&1; sed 's/^/   /' $OUT/q0b.txt | cut -c1-260
   echo "   scheduler exceptions: prefill $($SSH_A "sudo -n grep -cE 'Scheduler hit an exception|AssertionError' /home/alisachen_google_com/pd_disagg/results/runs/b1191_q0b/prefill/server.log") decode $(grep -cE 'Scheduler hit an exception|AssertionError' $R/runs/b1191_q0b/decode/server.log); health prefill $(curl -s -m 5 -o /dev/null -w '%{http_code}' $PRE/health) decode $(curl -s -m 5 -o /dev/null -w '%{http_code}' $DEC/health)"
 fi
-bash $S/pd.sh stop >/dev/null 2>&1; $SSH_A "$GA checkout -q main"; cd $HOME/sglang-torchtpu && git checkout -q main && log "phase 1191 base rerun done"
+log "=== retract control on upstream main (same recipe/probe): is the KV-pressure stall pre-existing?"
+bash $S/pd.sh stop >/dev/null 2>&1; $SSH_A "$GA checkout -q main"; cd $HOME/sglang-torchtpu && git checkout -q main
+sleep 3; until bash $S/tpu_free.sh >/dev/null 2>&1; do sleep 120; done
+env -u TORCH_DEVICE_BACKEND_AUTOLOAD timeout 3600 bash $S/pd.sh start $HOME/pd_disagg/recipes/gpt-oss_A_128k_smallpool_ps_q.json b1191_retract_main 2>&1 | grep -E 'ready|NOT'
+if curl -sf -m 30 $LB/health_generate >/dev/null; then
+  $PY $S/queue_limit_probe.py --url $LB --decode $DEC --mode retract --slots 8 > $OUT/retract_main.txt 2>&1; sed 's/^/   /' $OUT/retract_main.txt | cut -c1-300
+  echo "   decode: last batch $(grep -E 'Decode batch' $R/runs/b1191_retract_main/decode/server.log | tail -n 1 | grep -oE '^\[[^]]+\]|#prealloc-req: [0-9]+' | tr '\n' ' '); fence: $(grep -E 'KV free fence' $R/runs/b1191_retract_main/decode/server.log | tail -n 1 | grep -oE 'pages held [0-9]+')"
+  echo "   scheduler exceptions: prefill $($SSH_A "sudo -n grep -cE 'Scheduler hit an exception|AssertionError' /home/alisachen_google_com/pd_disagg/results/runs/b1191_retract_main/prefill/server.log") decode $(grep -cE 'Scheduler hit an exception|AssertionError' $R/runs/b1191_retract_main/decode/server.log)"
+fi
+bash $S/pd.sh stop >/dev/null 2>&1; log "phase 1191 base rerun done"

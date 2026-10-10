@@ -878,3 +878,15 @@ input logprobs. #1191's Change section rewritten for readability.
 **q0 found a real bug:** `--max-queued-requests 0` + priority scheduling → `_abort_on_queued_limit` runs `max()` over the empty waiting queue
 (ValueError) → every decode rank died (HTTP 500 to the client). Latent upstream bug (same path in NULL mode); fixed in #1191 (bb5bbe6c1b): the
 eviction branch now requires a non-empty waiting queue, newcomer gets 503; two unit tests added (decode and NULL paths); q0 rerun queued.
+
+**#1192 CI (2026-10-10 ~10:30 UTC):** the "flaky" shard was real: upstream added `TestLoRARequestLifecycle` after the branch's base; its fake
+tokenized request has no `bootstrap_room` and the shared fixture sets `disaggregation_mode = "none"` (string), so on the merge the new code
+raised inside the coroutine and the test timed out. Rebased; both fakes made faithful (`bootstrap_room=None`, `DisaggregationMode.NULL`);
+`_handle_batch_request` gained `request`/`request_states` upstream → test helper updated. 42 pass. Pushed 6cbe5495d2.
+
+**#1191 matrix, KV-pressure case (`retract`, 10:05–10:40 UTC) — stall, probably upstream.** Decode pool 262k, 8 × 131k/1024 at c=8 via the LB:
+2 holders completed, then the decode stopped forming batches with 6 requests in the prealloc queue for 30 min (0 exceptions); clients got LB
+read timeouts. The TPU KV free fence reported `pages held 4166` (= the whole pool) over 1794 s and `held now 0` only once the clients
+disconnected: the finished requests' pages stayed held behind the last in-flight forward, no new request could be pre-allocated without them,
+so no forward ran to release them. Our change is not on this path (prealloc, before transfer). Main control with the same recipe/probe queued
+(`_phase_1191_base_rerun.sh`); if it stalls too → file as F-17 (pool-pressure deadlock in the KV free fence when the decode goes idle).
