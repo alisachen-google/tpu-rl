@@ -869,3 +869,12 @@ outside the TPU directory. F-5 live verification (fixv1244): main crash (8 ranks
 input logprobs. #1191's Change section rewritten for readability.
 
 **PR #1237 ready for review (07:37 UTC):** CI 31/31 green on d8bf41e221 (platform-factory head), live verification 161.5 s → 6.3 s.
+
+**PR #1245 ready for review (09:40 UTC):** CI 31/31 green on 958e64b09b (platform-hook head), live: main crash / fix 400 / flag-on 200.
+
+**#1191 boundary matrix (2026-10-10 09:30– UTC, `_phase_1191_boundary.sh`, `results/fix_validate_1191_boundary/`).** base: Q1–Q6, Q8, Q9 PASS
+(burst into idle, 12 at the limit edge, equal/lower newcomers 503, two-step eviction cascade evicts the newest two, streaming filler evicted,
+8k filler's KV freed); Q7/Q10 were probe-design errors (fillers only finish when holders end), redesigned and queued for rerun. low: L1/L2 PASS.
+**q0 found a real bug:** `--max-queued-requests 0` + priority scheduling → `_abort_on_queued_limit` runs `max()` over the empty waiting queue
+(ValueError) → every decode rank died (HTTP 500 to the client). Latent upstream bug (same path in NULL mode); fixed in #1191 (bb5bbe6c1b): the
+eviction branch now requires a non-empty waiting queue, newcomer gets 503; two unit tests added (decode and NULL paths); q0 rerun queued.

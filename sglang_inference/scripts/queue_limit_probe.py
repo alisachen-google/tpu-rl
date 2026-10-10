@@ -115,13 +115,20 @@ def main():
         say("Q6-eviction-frees-kv", None, f"decode num_used_tokens before eviction {used_before}, after first eviction {used_after1}")
         for t in th: t.join(1500)
         end_check("Q")
-        # Q7: a waiting filler is aborted by its client -> a place frees; the next equal newcomer is admitted
+        # Q7: a waiting filler is aborted by its client -> its place frees (how fast through the mini-LB?) and an equal newcomer is admitted
         st = {}; th = holders(U, S, 5, H, st); assert wait_running(D, S)
-        f = fill(U, 3, 5, st); time.sleep(3)
-        r_short = gen(U, "Filler that gives up.", priority=5, timeout=4)  # client abort after 4 s while waiting
-        say("Q7a-client-abort-waiting", r_short["status"] == "ERR", f"4th filler aborted by client while waiting: {r_short['status']} {str(r_short.get('error'))[:60]}")
-        time.sleep(3)
-        r = gen(U, "Newcomer after abort.", priority=5, timeout=900); say("Q7b-admitted-after-abort", r["status"] == 200, f"equal newcomer after the abort -> HTTP {r['status']} (queue had room again)")
+        f = fill(U, 4, 5, st); time.sleep(3); q_full = metric(D, "num_queue_reqs")
+        r_short = gen(U, "Filler that gives up.", priority=5, timeout=4)  # a 5th waiter -> this one gets 503 (queue full); abort one of the queued instead:
+        say("Q7a-fifth-waiter", r_short["status"] == 503, f"5th waiter -> HTTP {r_short['status']} (queue {q_full})")
+        aborter = {}; ta = spawn(U, aborter, "ab", "Queued then abandoned.", priority=9, timeout=6)  # priority 9 evicts fill3 and takes its place
+        ta.join(30)
+        say("Q7b-client-abort-waiting", aborter["ab"]["status"] == "ERR", f"priority-9 waiter aborted by its client after 6s: {aborter['ab']['status']}")
+        t0 = time.time(); freed = None
+        while time.time() - t0 < 90:
+            if (metric(D, "num_queue_reqs") or 0) < 4: freed = round(time.time() - t0, 1); break
+            time.sleep(1)
+        say("Q7c-place-freed", freed is not None, f"waiting count dropped below 4 {freed}s after the client abort (None = not within 90s)")
+        r = gen(U, "Newcomer after abort.", priority=5, timeout=900); say("Q7d-admitted-after-abort", r["status"] == 200, f"equal newcomer after the abort -> HTTP {r['status']}")
         for t in f: t.join(1200)
         for t in th: t.join(1500)
         end_check("Q7")
@@ -146,18 +153,17 @@ def main():
         say("Q9-long-filler-evicted", r["status"] == 200 and len(ev) == 1 and used_before is not None and used_after is not None and used_after < used_before, f"waiting before {waiting}; used tokens {used_before} -> {used_after} after evicting {ev} (8k prompt)")
         for t in th: t.join(1500)
         end_check("Q9")
-        # Q10: soak - 6 fill/evict cycles, then everything idle and no leak
+        # Q10: soak - queue kept full; each cycle adds one filler (tops the queue to 4) and one priority-9 newcomer that must evict it
         st = {}; th = holders(U, S, 5, H + 6000, st); assert wait_running(D, S)
-        cyc = []
+        f = fill(U, 3, 5, st); time.sleep(3)
+        cyc = []; fs = {}; hs = {}
         for c in range(6):
-            fs = {}; f = fill(U, 4, 5, fs, gap=0.2); time.sleep(3)
-            r = gen(U, f"High newcomer {c}.", priority=9)
-            for t in f: t.join(900)
-            cyc.append((r["status"], sorted(k for k in fs if fs[k]["status"] == 503)))
-            # let the remaining fillers drain before the next cycle
-            while (metric(D, "num_queue_reqs") or 0) > 0 and time.time(): time.sleep(1); break
-            time.sleep(8)
-        say("Q10-soak-cycles", all(s == 200 and len(e) == 1 for s, e in cyc), f"6 cycles (newcomer status, evicted): {cyc}")
+            tf = spawn(U, fs, f"f{c}", f"Cycle filler {c}.", priority=5); time.sleep(1.5)
+            r = gen(U, f"High newcomer {c}.", priority=9); tf.join(30)
+            cyc.append((r["status"], fs.get(f"f{c}", {}).get("status"), metric(D, "num_queue_reqs")))
+        ok = all(s_new == 200 and s_f == 503 for s_new, s_f, _ in cyc)
+        say("Q10-soak-cycles", ok, f"6 cycles of (newcomer, that cycle's filler, waiting after): {cyc}")
+        for t in f: t.join(1500)
         for t in th: t.join(1800)
         end_check("Q10")
         say("exceptions", None, "see phase log")

@@ -3,3 +3,16 @@
 [Q2-burst-limit-edge] PASS 12 holders (limit 4): rejected none
 [Q3-equal-into-full] PASS newcomer priority 5 -> HTTP 503 {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":
 [Q4-lower-into-full] PASS newcomer priority 3 -> HTTP 503
+[Q5-eviction-cascade] PASS evicted ['fill2', 'fill3'] (expect newest two: fill2, fill3); newcomers 200, 200; evicted msg: {"object":"error","message":"The request is aborted by a higher priority request
+[Q6-eviction-frees-kv] INFO decode num_used_tokens before eviction 8768.0, after first eviction 11776.0
+[Q-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+[Q7a-client-abort-waiting] PASS 4th filler aborted by client while waiting: ERR HTTPConnectionPool(host='10.128.15.217', port=8080): Read ti
+[Q7b-admitted-after-abort] FAIL equal newcomer after the abort -> HTTP 503 (queue had room again)
+[Q7-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+[Q8-streaming-filler-evicted] PASS newcomer 200; streaming fillers: {'fill0': (200, None), 'fill1': (200, None), 'fill2': (200, None), 'fill3': (503, None)}
+[Q8-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+[Q9-long-filler-evicted] PASS waiting before 4.0; used tokens 60928.0 -> 0.0 after evicting ['fill3'] (8k prompt)
+[Q9-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+[Q10-soak-cycles] FAIL 6 cycles (newcomer status, evicted): [(200, ['fill3']), (200, []), (200, []), (200, []), (200, []), (200, [])]
+[Q10-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+[exceptions] INFO see phase log
