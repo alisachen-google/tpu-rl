@@ -1,0 +1,5 @@
+[start] INFO timeout 60.0s; decode used 0.0 prealloc 0.0
+[B6-pressure-snapshot] INFO at +20s: running 1.0, prealloc queue 6.0, transfer 0.0, used 131328.0
+[B6-kv-pressure-vs-deadline] INFO 8 x 131k/2048 under a 262k pool, timeout 60.0s: ok 5, handshake-timeouts 0, other 3; {0: (200, 20.8), 1: (200, 33.7), 2: (200, 46.3), 3: (200, 58.9), 4: (200, 70.4), 5: (500, 65.2), 6: (500, 60.3), 7: (500, 60.4)}
+[B6-verdict] PASS no legitimately waiting request was timed out
+[B6-idle] PASS decode used 0.0, health P 200 D 200

@@ -4,3 +4,45 @@
 2026-10-10 10:54:05 prefill /health ready after 150 s
 2026-10-10 10:55:05 decode /health ready after 60 s
 2026-10-10 10:55:06 LB /health_generate ready after 1 s
+   [start] INFO timeout 60.0s; decode used 0.0 prealloc 0.0
+   [B1-orphan-times-out] FAIL status ERR after 240.1s; body: ReadTimeout: HTTPConnectionPool(host='10.128.0.90', port=30000): Read timed out. (read timeout=240.0)
+   [B1-decode-clean] PASS prealloc queue 0.0, health 200
+   [B2-16-orphans] FAIL in prealloc queue while waiting: 0.0; e2e spread 240..240s; statuses ['ERR']
+   [B2-decode-clean] PASS prealloc 0.0, used 0.0, health 200
+   [B3-unreachable-host] PASS status 500 after 60.0s; body: {"object":"error","message":"Decode handshake failed for request rank=0 decode_req.req.rid='5ac376478f2d4307b63d9a4456ba7403' decode_req.req.bootstrap_room=1581283167811901393 with exception Request 1
+   [B4a-client-abort-early] PASS client timed out at 10s: ERR ReadTimeout: HTTPConnectionPool(host='10.128.0.90', port=300
+   [B4b-clean-after-deadline] PASS 75s later: prealloc 0.0, health 200 (exceptions counted by the phase)
+   [B5-normal-traffic] PASS statuses {'8k0': (200, 1.9), '8k2': (200, 2.4), '8k1': (200, 2.4), '8k3': (200, 2.4), '32k': (200, 1.6), '131k': (200, 7.4)}
+   [B5-idle] PASS decode used 0.0, health P 200 D 200
+   scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200; prefill inflight 0.0
+   decode log, timeout messages: 1; sample: Request 1581283167811901393 timed out after 60.0s in KVPoll.Bootstrapping before its KV metadata was sent to the prefill
+2026-10-10T11:05:52Z [1230/1222] === 1230/B KV pressure: decode pool 262k, 8 x 131k, BOOTSTRAP_TIMEOUT 60
+2026-10-10 11:08:37 prefill /health ready after 151 s
+2026-10-10 11:09:37 decode /health ready after 60 s
+2026-10-10 11:09:38 LB /health_generate ready after 1 s
+   [start] INFO timeout 60.0s; decode used 0.0 prealloc 0.0
+   [B6-pressure-snapshot] INFO at +20s: running 1.0, prealloc queue 6.0, transfer 0.0, used 131328.0
+   [B6-kv-pressure-vs-deadline] INFO 8 x 131k/2048 under a 262k pool, timeout 60.0s: ok 5, handshake-timeouts 0, other 3; {0: (200, 20.8), 1: (200, 33.7), 2: (200, 46.3), 3: (200, 58.9), 4: (200, 70.4), 5: (500, 65.2), 6: (500, 60.3), 7: (500, 60.4)}
+   [B6-verdict] PASS no legitimately waiting request was timed out
+   [B6-idle] PASS decode used 0.0, health P 200 D 200
+   scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200; prefill inflight 0.0
+   decode log, timeout messages: 18
+2026-10-10T11:10:55Z [1230/1222] === 1230/C the F-12 trigger: single slot 128k, BOOTSTRAP/WAITING 300 (before: request hung until the client gave up)
+2026-10-10 11:15:10 prefill /health ready after 241 s
+2026-10-10 11:15:10 decode /health ready after 0 s
+2026-10-10 11:15:11 LB /health_generate ready after 1 s
+   first 8k request: HTTP 200 after 1s; body: {"text":"We need to parse the prompt. The user gave a huge block of repeated sentences, with secret code words for checkpoint 1, 2, 3 embedded. The user asks: \"List the secret code words for every checkpoint mentioned above, in order, then
+   scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200; prefill inflight 0.0
+   decode timeout messages: 0; prefill 'timed out .* waiting for the decode': 0
+   second request: HTTP 200 after 0s; body: {"text":" This request should be rejected.\n```\n\n**Explanation:**\n\n- The first request","output_ids":[1328,2616,1757,413,36420,558,26178,38193,410,113499,25
+   scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200; prefill inflight 0.0
+2026-10-10T11:15:21Z [1230/1222] === 1230/D control on main: one orphan room, BOOTSTRAP_TIMEOUT 60 (expect: no deadline, client gives up at 240 s)
+2026-10-10 11:17:52 prefill /health ready after 136 s
+2026-10-10 11:18:07 decode /health ready after 15 s
+2026-10-10 11:18:08 LB /health_generate ready after 1 s
+   main orphan: HTTP 000 after 240s (000 = client timed out); body: 
+   decode prealloc queue after client gave up: 0.0; timeout messages in decode log: 0
+   scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200; prefill inflight 0.0
+   host a on 4914689cb1b
+2026-10-10T11:22:37Z [1230/1222] local on 4914689cb1 [TPU] Reject --kv-canary on TPU at argument validation
+2026-10-10T11:22:37Z [1230/1222] === 1222/A monolithic launches on the PR head

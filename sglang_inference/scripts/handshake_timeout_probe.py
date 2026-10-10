@@ -37,14 +37,17 @@ def health(u):
     except Exception: return "ERR"
 def long_text(path):
     with open(path) as f: rec = json.loads(f.readline()); return rec.get("text") or rec.get("prompt")
-def timed_out(r): return r["status"] == 500 and r.get("body") and "timed out" in r["body"] and "KV metadata" in r["body"]
+MESSAGE = "KV metadata"  # overridden by --message for the waiting-timeout window
+def timed_out(r): return r["status"] == 500 and r.get("body") and "timed out" in r["body"] and MESSAGE in r["body"]
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--lb", required=True); ap.add_argument("--decode", required=True); ap.add_argument("--prefill", required=True)
     ap.add_argument("--prefill-host", required=True); ap.add_argument("--bootstrap-port", type=int, default=8998)
     ap.add_argument("--timeout", type=float, required=True, help="SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT the pair runs with")
+    ap.add_argument("--message", default="KV metadata", help="substring the timeout error must carry")
     ap.add_argument("--mode", required=True, choices=["orphans", "pressure"]); ap.add_argument("--prompts", default="/home/alisachen_google_com/pd_disagg/prompts/gpt-oss")
     a = ap.parse_args(); LB, D, P, T = a.lb, a.decode, a.prefill, a.timeout
+    global MESSAGE; MESSAGE = a.message
     say("start", None, f"timeout {T}s; decode used {metric(D,'num_used_tokens')} prealloc {metric(D,'num_decode_prealloc_queue_reqs')}")
 
     if a.mode == "orphans":

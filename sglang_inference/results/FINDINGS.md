@@ -890,3 +890,17 @@ read timeouts. The TPU KV free fence reported `pages held 4166` (= the whole poo
 disconnected: the finished requests' pages stayed held behind the last in-flight forward, no new request could be pre-allocated without them,
 so no forward ran to release them. Our change is not on this path (prealloc, before transfer). Main control with the same recipe/probe queued
 (`_phase_1191_base_rerun.sh`); if it stalls too → file as F-17 (pool-pressure deadlock in the KV free fence when the decode goes idle).
+
+**#1230 live validation (`_phase_1230_1222.sh`, 10:51– UTC, `results/fix_validate_1230_1222/`).** Head 683a25e34f on both hosts, Config A,
+BOOTSTRAP_TIMEOUT 60. B3 unreachable bootstrap host → 500 after 60.0 s with "timed out after 60.0s in KVPoll.Bootstrapping before its KV
+metadata was sent to the prefill" (the PR's path, PASS). B1/B2 orphan rooms against the real prefill pass the handshake and send metadata at once,
+so they wait in the KV window (bounded by WAITING_TIMEOUT, 7200 here → client read timeout 240 s): not this PR's window; follow-up run with
+WAITING_TIMEOUT 90 queued. B4 client abort before the deadline: clean 75 s later. B5 normal traffic unaffected (8k×4, 32k, 131k all 200).
+**B6 regression risk (the probe's PASS line is wrong — truncated body):** decode pool 262k, 8 × 131k/2048 at c=8: requests 0–4 served
+sequentially (20–70 s), requests 5–7 **failed with HTTP 500 at ~60 s** with "timed out after 60.0s in KVPoll.WaitingForInput before its KV
+metadata was sent" (18 log lines). They were waiting for decode KV room, not for a dead prefill: the new deadline runs from receiver creation
+(intake) to send_metadata (after pre-allocation), so decode-side pool-pressure waits longer than BOOTSTRAP_TIMEOUT (default 300 s) now fail.
+Note: no fence stall here (Config A, no priority/limit) — the #1191 retract stall needs the main control to attribute.
+**#1230/C (11:10 UTC):** the F-12 single-slot trigger (`gpt-oss_A_128k_mr1_t300`) did **not** reproduce on head 683a25e34f (1/1 fresh pair): first
+8k request 200 in 1 s, second 200; 0 exceptions. Stalled 5/5 pairs on 10-08/09 → either fixed upstream since (raiden changes) or intermittent;
+the deadline path is evidenced by B3 (unreachable bootstrap host → 60.0 s, KVPoll.Bootstrapping message). Main control (1230/D) running.
