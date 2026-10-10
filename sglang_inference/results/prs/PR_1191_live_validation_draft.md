@@ -1,6 +1,6 @@
 ## Live validation (TPU v7x, 1 prefill + 1 decode, gpt-oss-120b, raiden, mini-LB)
 
-Head 2f67d8b701 on both hosts for the matrix; the limit-0 fix (bb5bbe6c1b) re-validated afterwards. Config C = radix + HiCache on the prefill, 8 running slots. Probe: `sglang_inference/scripts/queue_limit_probe.py` in alisachen-google/tpu-rl; outputs in `results/fix_validate_1191_boundary/`.
+Head 2f67d8b701 on both hosts for the matrix; the limit-0 fix (bb5bbe6c1b) re-validated afterwards. Config C = radix + HiCache on the prefill, 8 running slots.
 
 ### Limit 4, priority scheduling on (high values first) — Config C
 

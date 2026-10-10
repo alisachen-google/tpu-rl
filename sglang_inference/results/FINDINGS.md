@@ -925,3 +925,8 @@ served; 6 × 503; 0 exceptions. Full table in PR #1191 (Live validation) and res
 Unfiled upstream observations from this campaign: (a) monolithic intake rejects bursts into an idle server when `--max-queued-requests` is
 set (Q2 mono); (b) client abort of a queued P/D request takes ~52 s to free its place via the mini-LB (3 s single-engine); (c) intermittent
 KV-free-fence hold under pool pressure (1/4); (d) #1230 B6 regression risk (reported in its comment).
+
+**#1217 (teammate fix for #1147) live validation (22:08–22:22 UTC, head 8bbf44e392):** n=2/3/8, batch 2×n2 and 3×n3, five repeats, chat n=2, n=1
+all return the full sample sets in ≤1.3 s; prefill scheduled 41 sequences for 39 sub-requests + 2 warm-ups and saw 0 zero-token requests
+(prefix request skipped on the pair); decode used tokens 0, 0 exceptions. Main control: n=2 no response in 90 s (the hang). Monolithic on the
+PR head: n=2/n=3 fine. Comment posted on #1217 (no results-repo references, per the new rule; earlier upstream posts scrubbed).

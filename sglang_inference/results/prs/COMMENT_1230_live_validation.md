@@ -1,6 +1,6 @@
 ## Live validation on a TPU v7x P/D pair (1 prefill + 1 decode, gpt-oss-120b, raiden, mini-LB)
 
-Head 683a25e34f deployed on both hosts; control = upstream main 4f7aae5369. "Orphan room" = a request sent straight to the decode with bootstrap fields no prefill will serve. Probe and recipes: `sglang_inference/scripts/handshake_timeout_probe.py` in alisachen-google/tpu-rl.
+Head 683a25e34f deployed on both hosts; control = upstream main 4f7aae5369. "Orphan room" = a request sent straight to the decode with bootstrap fields no prefill will serve.
 
 | # | Case (BOOTSTRAP_TIMEOUT = 60 s unless noted) | main | this PR |
 |---|---|---|---|
@@ -15,4 +15,3 @@ Zero scheduler exceptions on either engine in every run (12 pair launches).
 
 **Regression risk (B6).** The deadline runs from receiver creation at intake until `send_metadata`, and `send_metadata` happens only after pre-allocation. So any decode-side wait for KV room longer than `SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT` (default 300 s) now fails the request, where before it would have completed once room freed. Under sustained pool pressure with long prompts this is reachable in production. Two ways out: start the clock when the handshake completes rather than at receiver creation (so only the Bootstrapping window is bounded), or exclude `WaitingForInput` from `_check_handshake_timeout` and leave that window to the waiting timeout.
 
-Evidence: `results/fix_validate_1230_1222/` (probe outputs, server logs) in alisachen-google/tpu-rl.

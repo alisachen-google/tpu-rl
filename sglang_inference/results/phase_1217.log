@@ -1,0 +1,34 @@
+   host a on 8bbf44e392b3
+2026-10-10T22:08:37Z [1217] local on 8bbf44e392
+2026-10-10T22:08:37Z [1217] === 1217/A n>1 through the pair on the PR head (Config A)
+2026-10-10 22:11:06 prefill /health ready after 135 s
+2026-10-10 22:11:36 decode /health ready after 30 s
+2026-10-10 22:11:37 LB /health_generate ready after 1 s
+   n2: HTTP 200 outputs=2 in 0.3s tokens [32, 32]
+      prefill POSTs 2 decode POSTs 1 (expect prefill = decode = 2: no prefix request in PD)
+   n3: HTTP 200 outputs=3 in 0.3s tokens [32, 32, 32]
+   n8: HTTP 200 outputs=8 in 1.2s tokens [16, 16, 16, 16, 16, 16, 16, 16]
+   batch2_n2: HTTP 200 outputs=4 in 1.1s tokens [16, 16, 16, 16]
+   batch3_n3: HTTP 200 outputs=9 in 0.6s tokens [16, 16, 16, 16, 16, 16, 16, 16, 16]
+   repeat1_n2: HTTP 200 outputs=2 in 0.1s tokens [8, 8]
+   repeat2_n2: HTTP 200 outputs=2 in 0.1s tokens [8, 8]
+   repeat3_n2: HTTP 200 outputs=2 in 0.1s tokens [8, 8]
+   repeat4_n2: HTTP 200 outputs=2 in 0.1s tokens [8, 8]
+   repeat5_n2: HTTP 200 outputs=2 in 0.1s tokens [8, 8]
+   chat n=2: HTTP 200 choices=2
+   n1: HTTP 200 outputs=1 in 0.1s tokens [16]
+   scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200; decode used tokens 0.0
+      totals: prefill POSTs 22 decode POSTs 11
+2026-10-10T22:11:51Z [1217] === 1217/B control on main: n=2 through the pair (before: no response until the client gives up)
+2026-10-10 22:14:31 prefill /health ready after 136 s
+2026-10-10 22:14:46 decode /health ready after 15 s
+2026-10-10 22:14:47 LB /health_generate ready after 1 s
+   main_n2: HTTP 000 outputs=? in 90.0s 
+   scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200; decode used tokens 0.0
+      prefill POSTs 1 decode POSTs 0
+2026-10-10T22:16:23Z [1217] === 1217/C monolithic on the PR head: non-PD path keeps working (n=2, n=3 with the prefix request)
+2026-10-10 22:20:51 golden(b) /health ready after 256 s
+   mono_n2: HTTP 200 outputs=2 in 1.3s tokens [32, 32]
+   mono_n3: HTTP 200 outputs=3 in 0.9s tokens [32, 32, 32]
+   mono POSTs: 2 (2 requests); exceptions 0; health 200
+2026-10-10T22:21:03Z [1217] phase 1217 done

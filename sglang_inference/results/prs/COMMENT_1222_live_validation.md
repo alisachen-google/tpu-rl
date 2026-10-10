@@ -14,4 +14,3 @@ No scheduler exceptions in any run; the default (flag unset) path is exercised b
 
 Note on overlap: #1193 (ours) also handles #1176, by attaching the canary to the fused pools and refusing at `install_canary` through a platform capability flag. If both merge, this PR's argument-time rejection fires first and the install-time refusal becomes unreachable on TPU, which is fine; the attacher code in #1193 remains the prerequisite for running the canary on TPU later.
 
-Evidence: `results/fix_validate_1230_1222/` (server logs, launcher logs) in alisachen-google/tpu-rl.
