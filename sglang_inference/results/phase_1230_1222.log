@@ -46,3 +46,5 @@
    host a on 4914689cb1b
 2026-10-10T11:22:37Z [1230/1222] local on 4914689cb1 [TPU] Reject --kv-canary on TPU at argument validation
 2026-10-10T11:22:37Z [1230/1222] === 1222/A monolithic launches on the PR head
+   kv_canary=log: launcher rc=124 after 900s; health 000; message: kv-canary log is not supported on TPU: the canary cannot attach to the TPU fused KV pools. Use --kv-canary none.; weights loaded before exit: 0; leftover sglang procs: 0
+   kv_canary=raise: launcher rc=124 after 900s; health 000; message: kv-canary raise is not supported on TPU: the canary cannot attach to the TPU fused KV pools. Use --kv-canary none.; weights loaded before exit: 0; leftover sglang procs: 0

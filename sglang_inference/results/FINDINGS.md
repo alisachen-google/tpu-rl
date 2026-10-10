@@ -904,3 +904,7 @@ Note: no fence stall here (Config A, no priority/limit) — the #1191 retract st
 **#1230/C (11:10 UTC):** the F-12 single-slot trigger (`gpt-oss_A_128k_mr1_t300`) did **not** reproduce on head 683a25e34f (1/1 fresh pair): first
 8k request 200 in 1 s, second 200; 0 exceptions. Stalled 5/5 pairs on 10-08/09 → either fixed upstream since (raiden changes) or intermittent;
 the deadline path is evidenced by B3 (unreachable bootstrap host → 60.0 s, KVPoll.Bootstrapping message). Main control (1230/D) running.
+**#1230/D main control (11:17 UTC):** orphan room against the real prefill on main → no deadline, client gave up at 240 s, 0 timeout messages.
+**#1222/A (11:22 UTC, head 4914689cb1, monolithic gpt-oss G):** `--kv-canary log` → rejected at argument validation in the same second as
+launch (`ValueError: --kv-canary log is not supported on TPU: the canary cannot attach to the TPU fused KV pools. Use --kv-canary none.`),
+weights never loaded, no leftover processes. (Our launcher waits for /health and hit its 900 s guard, so each failing case costs 15 min.)
