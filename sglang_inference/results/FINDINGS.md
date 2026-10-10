@@ -913,3 +913,6 @@ weights never loaded, no leftover processes. (Our launcher waits for /health and
 prefill healthy. Main control: weights load (90 s), memory pool built, then all ranks die with `AttributeError: 'TpuFusedMHATokenToKVPool' has
 no attribute 'k_buffer'` (the #1176 crash). Comment posted on #1222. Note: `canary_launch log` reused run dir `v1222_log` for the main control
 (log appended) — harmless but keep distinct names next time.
+**#1230/E (13:04 UTC, WAITING_TIMEOUT 90):** orphans against the real prefill → 500 at 90.0 s ("Decode transfer failed … timed out"), 16 at once
+likewise, decode clean; B3 still 60 s via the new deadline; normal traffic unaffected. Both windows bounded by their own knob. Live-validation
+COMMENT POSTED on #1230 (incl. the B6 regression risk: decode-side pool-pressure waits > BOOTSTRAP_TIMEOUT now fail).

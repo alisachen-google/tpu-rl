@@ -1,3 +1,19 @@
    host a on 683a25e34f5
 2026-10-10T13:04:03Z [1230wt] local on 683a25e34f
 2026-10-10T13:04:04Z [1230wt] === 1230/E orphans with WAITING_TIMEOUT 90 (BOOTSTRAP 60): the post-metadata window
+2026-10-10 13:06:48 prefill /health ready after 151 s
+2026-10-10 13:07:53 decode /health ready after 65 s
+2026-10-10 13:07:56 LB /health_generate ready after 3 s
+   [start] INFO timeout 90.0s; decode used 0.0 prealloc 0.0
+   [B1-orphan-times-out] PASS status 500 after 90.0s; body: {"object":"error","message":"Decode transfer failed for request rank=0 decode_req.req.rid='3f4e3f497cd14b73a7f065e7d4639631' decode_req.req.bootstrap_room=1163165512591363233 with exception Request 11
+   [B1-decode-clean] PASS prealloc queue 0.0, health 200
+   [B2-16-orphans] FAIL in prealloc queue while waiting: 0.0; e2e spread 90..90s; statuses ['500']
+   [B2-decode-clean] PASS prealloc 0.0, used 0.0, health 200
+   [B3-unreachable-host] PASS status 500 after 60.0s; body: {"object":"error","message":"Decode handshake failed for request rank=0 decode_req.req.rid='6c72a2433ca24df587eff30ec1e4a4f7' decode_req.req.bootstrap_room=3484313546587894406 with exception Request 3
+   [B4a-client-abort-early] PASS client timed out at 10s: ERR ReadTimeout: HTTPConnectionPool(host='10.128.0.90', port=300
+   [B4b-clean-after-deadline] PASS 105s later: prealloc 0.0, health 200 (exceptions counted by the phase)
+   [B5-normal-traffic] PASS statuses {'8k0': (200, 1.9), '8k1': (200, 2.3), '8k3': (200, 2.4), '8k2': (200, 2.4), '32k': (200, 1.7), '131k': (200, 7.4)}
+   [B5-idle] PASS decode used 0.0, health P 200 D 200
+   decode log: handshake-window messages 5; waiting-window messages 154; sample: Request 1163165512591363233 timed out after 90.0s in KVPoll.WaitingForInput
+   scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200
+2026-10-10T13:14:21Z [1230wt] phase 1230 wt done
