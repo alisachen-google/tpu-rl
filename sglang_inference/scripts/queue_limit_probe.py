@@ -75,7 +75,7 @@ def long_text(path):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--url", required=True); ap.add_argument("--decode", required=True)
-    ap.add_argument("--mode", required=True, choices=["base", "low", "q0", "q1", "nops", "nolimit", "retract"])
+    ap.add_argument("--mode", required=True, choices=["base", "low", "q0", "q1", "nops", "nolimit", "retract", "soak"])
     ap.add_argument("--slots", type=int, default=8); ap.add_argument("--hold-tokens", type=int, default=9000)
     ap.add_argument("--prompts", default="/home/alisachen_google_com/pd_disagg/prompts/gpt-oss")
     a = ap.parse_args(); U, D, S, H = a.url, a.decode, a.slots, a.hold_tokens
@@ -167,6 +167,23 @@ def main():
         for t in th: t.join(1800)
         end_check("Q10")
         say("exceptions", None, "see phase log")
+
+    elif a.mode == "soak":
+        # Queue kept full; six newcomers of rising priority (9..14) each evict exactly one waiter:
+        # the newest priority-5 filler first (fill3, fill2, fill1, fill0), then the oldest newcomers (9, 10).
+        st = {}; th = holders(U, S, 5, H + 6000, st); assert wait_running(D, S), "holders did not all start"
+        f = fill(U, 4, 5, st); time.sleep(4)
+        expected = ["fill3", "fill2", "fill1", "fill0", "n0", "n1"]; obs = []
+        for c in range(6):
+            spawn(U, st, f"n{c}", f"Soak newcomer {c}.", priority=9 + c); time.sleep(4)
+            victims = [k for k in list(st) if (k.startswith("fill") or k.startswith("n")) and st[k].get("status") == 503]
+            obs.append(victims[-1] if len(victims) == c + 1 else f"got {victims}")
+        say("S1-soak-evictions", obs == expected, f"victim per cycle: {obs} (expected {expected})")
+        for t in th: t.join(1800)
+        time.sleep(5)
+        survivors = {k: st.get(k, {}).get("status") for k in ("n2", "n3", "n4", "n5")}
+        say("S2-survivors-served", all(v == 200 for v in survivors.values()), f"remaining newcomers (priority 11-14) served after the holders: {survivors}")
+        end_check("S")
 
     elif a.mode == "low":
         st = {}; th = holders(U, S, 5, H, st); assert wait_running(D, S)

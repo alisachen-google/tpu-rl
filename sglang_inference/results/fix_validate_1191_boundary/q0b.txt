@@ -1,0 +1,5 @@
+[start] INFO decode used tokens 0.0, running 0.0
+[Z1-burst-into-idle] PASS limit 0: 8 holders into idle -> [200]
+[Z2-any-waiter-rejected] PASS limit 0, slots full: newcomer -> HTTP 503
+[Z3-nothing-to-evict] PASS limit 0: priority 9 with an empty queue -> HTTP 503 (no waiter to evict)
+[Z-end-idle] PASS idle=True decode num_used_tokens at end = 0.0

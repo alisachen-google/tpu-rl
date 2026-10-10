@@ -1,3 +1,49 @@
    host a on bb5bbe6c1bb
 2026-10-10T12:45:41Z [1191b2] local on bb5bbe6c1b
 2026-10-10T12:45:41Z [1191b2] === base rerun (Q7/Q10 redesigned): recipe gpt-oss_C_128k_ps_q
+2026-10-10 12:48:26 prefill /health ready after 151 s
+2026-10-10 12:48:41 decode /health ready after 15 s
+2026-10-10 12:48:42 LB /health_generate ready after 1 s
+   [start] INFO decode used tokens 0.0, running 0.0
+   [Q1-burst-idle] PASS 8 holders into an idle decode: statuses [200] (rejected: [])
+   [Q2-burst-limit-edge] PASS 12 holders (limit 4): rejected none
+   [Q3-equal-into-full] PASS newcomer priority 5 -> HTTP 503 {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":
+   [Q4-lower-into-full] PASS newcomer priority 3 -> HTTP 503
+   [Q5-eviction-cascade] PASS evicted ['fill2', 'fill3'] (expect newest two: fill2, fill3); newcomers 200, 200; evicted msg: {"object":"error","message":"The request is aborted by a higher priority request
+   [Q6-eviction-frees-kv] INFO decode num_used_tokens before eviction 8640.0, after first eviction 12160.0
+   [Q-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   [Q7a-fifth-waiter] PASS 5th waiter -> HTTP 503 (queue 4.0)
+   [Q7b-client-abort-waiting] PASS priority-9 waiter aborted by its client after 6s: ERR
+   [Q7c-place-freed] PASS waiting count dropped below 4 52.0s after the client abort (None = not within 90s)
+   [Q7d-admitted-after-abort] PASS equal newcomer after the abort -> HTTP 200
+   [Q7-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   [Q8-streaming-filler-evicted] PASS newcomer 200; streaming fillers: {'fill0': (200, None), 'fill1': (200, None), 'fill2': (200, None), 'fill3': (503, None)}
+   [Q8-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   [Q9-long-filler-evicted] PASS waiting before 4.0; used tokens 62272.0 -> 0.0 after evicting ['fill3'] (8k prompt)
+   [Q9-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   [Q10-soak-cycles] FAIL 6 cycles of (newcomer, that cycle's filler, waiting after): [(200, 503, 4.0), (200, 200, 0.0), (200, 200, 0.0), (200, 200, 0.0), (200, 200, 0.0), (200, 200, 0.0)]
+   [Q10-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   [exceptions] INFO see phase log
+   scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200
+2026-10-10T12:55:15Z [1191b2] === q0 rerun (empty-queue eviction guard): recipe gpt-oss_C_128k_ps_q0
+2026-10-10 12:58:00 prefill /health ready after 150 s
+2026-10-10 12:58:15 decode /health ready after 15 s
+2026-10-10 12:58:16 LB /health_generate ready after 1 s
+   [start] INFO decode used tokens 0.0, running 0.0
+   [Z1-burst-into-idle] PASS limit 0: 8 holders into idle -> [200]
+   [Z2-any-waiter-rejected] PASS limit 0, slots full: newcomer -> HTTP 503
+   [Z3-nothing-to-evict] PASS limit 0: priority 9 with an empty queue -> HTTP 503 (no waiter to evict)
+   [Z-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200
+2026-10-10T12:59:29Z [1191b2] === retract control on upstream main (same recipe/probe): is the KV-pressure stall pre-existing?
+2026-10-10 13:02:01 prefill /health ready after 136 s
+2026-10-10 13:02:16 decode /health ready after 15 s
+2026-10-10 13:02:17 LB /health_generate ready after 1 s
+   [start] INFO decode used tokens 0.0, running 0.0
+   [R1-long-holders] PASS 8 x 131k holders under a 262k decode pool: {'long0': 200, 'long1': 200, 'long2': 200, 'long3': 200, 'long4': 200, 'long5': 200, 'long6': 200, 'long7': 200}
+   [R2-fillers-and-newcomer] PASS fillers {'fill0': 200, 'fill1': 200, 'fill2': 200, 'fill3': 200}, newcomer 200 (every request answered)
+   [R3-retractions] INFO num_retracted_reqs 0.0 -> 0.0
+   [R-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   decode: last batch [2026-10-10 13:03:24 TP0 EP0] #prealloc-req: 0 ; fence: 
+   scheduler exceptions: prefill 0 decode 0
+2026-10-10T13:03:34Z [1191b2] phase 1191 base rerun done
