@@ -867,3 +867,5 @@ folder; use the platform interface), #1181, #1193, #1237 and #1245 were rerouted
 `validate_generate_request()`; #1191/#1192 needed nothing. All branches rebased onto main 4f7aae5369, unit tests green, 0 TPU references added
 outside the TPU directory. F-5 live verification (fixv1244): main crash (8 ranks NotImplementedError), fix 400 + healthy, flag-on 200 with 5
 input logprobs. #1191's Change section rewritten for readability.
+
+**PR #1237 ready for review (07:37 UTC):** CI 31/31 green on d8bf41e221 (platform-factory head), live verification 161.5 s → 6.3 s.
