@@ -1,0 +1,12 @@
+2026-10-09T23:37:27Z [1136] === fix: checked out 71fb6a23bb [TPU] Qwen3-VL-MoE: compile the language model with --enable-torch-compile (WIP
+2026-10-09 23:53:26 golden(b) /health ready after 947 s
+   compile policies:  8 Qwen3VLDecoderTpuCompilePolicy on Qwen3MoeLLMModel; 8 VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder;
+   policy lines (TP0): VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder on ViTTpuCompileRunner.forward.|VisionTpuCompilePolicy.run: compiled-fn arg shapes=((196, 1, 1152), (2,), (196, 36), (196, 36), (1, 196))|VisionTpuCompilePolicy.precompile: submitted; 0 deferred warmups.|[TPU] [decoder compile policy] _install_forward_shim for Qwen3MoeLLMModel (is_draft=False, is_eagle3_draft=False, shim_target=forward)|[TPU] [decoder compile policy] Installed Qwen3VLDecoderTpuCompilePolicy on Qwen3MoeLLMModel.forward (t-bucketer=TokenBucketer, b-bucketer=BatchSizeBuc|[TPU] [decoder compile policy] VL EXTEND: 15 graph variants (batch_caps=[('EXTEND', 4)], token_buckets=[512, 1024, 2048, 4096, 8192], variants=('deeps|
+   story 1024 tokens: completion 1024 e2e_ms 6327 wall 6.4s
+   decode gen throughput (last 3 batches): 177.17 182.17 191.40 
+   8k prompts: 0 completed; ttft=349.53ms; e2e=5823.84ms; errors 0
+   recompiles after warmup: 23472; exceptions: 0; health 200
+2026-10-09T23:53:55Z [1136] === main: checked out 6187d8bbc9 [TPU][DeepSeek-V4] Part 1.4a: Add C4/C128 compressor and Top-K indexer TPU cust
+2026-10-10 00:01:23 golden(b) /health ready after 436 s
+   compile policies:  8 VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder;
+   policy lines (TP0): VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder on ViTTpuCompileRunner.forward.|VisionTpuCompilePolicy.run: compiled-fn arg shapes=((196, 1, 1152), (2,), (196, 36), (196, 36), (1, 196))|VisionTpuCompilePolicy.precompile: submitted; 0 deferred warmups.|

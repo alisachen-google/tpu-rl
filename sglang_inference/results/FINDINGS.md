@@ -844,3 +844,5 @@ D2 priority 9 → evicted the newest priority-5 filler (3) with "aborted by a hi
 0 exceptions. (2) Pair, decode pool 262k, 4 × 131k at c=4: 4/4 in 33 s, needles 3/3, 0 exceptions, both healthy (main: 1 of 4, wedged).
 (3) Pair, 1 slot, 1M shape: prefill completed every chunk of the 256k (126 batches) and 1M (602 batches) prompts, last chunk at SWA 0.01, 0
 exceptions; the e2e answers timed out at 3,000 s because of F-12 (single-slot handshake hold), not F-11. All three F-11 cases PASS on the head.
+
+**PR #1193 ready for review (23:33 UTC):** CI 28/28 green on dca4afd17a, live refusal check PASS, unit tests in the existing file.

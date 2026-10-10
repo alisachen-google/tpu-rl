@@ -1,0 +1,4 @@
+[env] host=t1v-n-eb299eb1-w-1 ip=10.128.0.90 TPU_WORKER_HOSTNAMES=t1v-n-eb299eb1-w-1 python=/home/alisachen_google_com/venv/sglang/bin/python sglang=6187d8bbc9
+[launch] /dev/shm at 408 GB: pruning inductor cache
+tmpfs           473G  305G  168G  65% /dev/shm
+[launch] plan written to /home/alisachen_google_com/pd_disagg/results/runs/G_qwen_1136_main/golden/launch_plan.txt; starting server (log: /home/alisachen_google_com/pd_disagg/results/runs/G_qwen_1136_main/golden/server.log)
