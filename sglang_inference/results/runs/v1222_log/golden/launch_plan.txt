@@ -1,4 +1,4 @@
-[launch] 2026-10-10T11:22:49Z host=t1v-n-eb299eb1-w-1 role=golden run=v1222_log recipe=/home/alisachen_google_com/pd_disagg/recipes/gpt-oss_G_128k_canary_log.json sglang=4914689cb1 compile_cache=1
+[launch] 2026-10-10T12:30:07Z host=t1v-n-eb299eb1-w-1 role=golden run=v1222_log recipe=/home/alisachen_google_com/pd_disagg/recipes/gpt-oss_G_128k_canary_log.json sglang=a8012fedda compile_cache=1
 [launch] env: SGLANG_LAUNCHER_HOSTNAMES= RANK=0 LB_PORT=8080 RAIDEN_TIMEOUT=600
 {
   "command": [

@@ -48,3 +48,10 @@
 2026-10-10T11:22:37Z [1230/1222] === 1222/A monolithic launches on the PR head
    kv_canary=log: launcher rc=124 after 900s; health 000; message: kv-canary log is not supported on TPU: the canary cannot attach to the TPU fused KV pools. Use --kv-canary none.; weights loaded before exit: 0; leftover sglang procs: 0
    kv_canary=raise: launcher rc=124 after 900s; health 000; message: kv-canary raise is not supported on TPU: the canary cannot attach to the TPU fused KV pools. Use --kv-canary none.; weights loaded before exit: 0; leftover sglang procs: 0
+   kv_canary=bogus: launcher rc=124 after 900s; health 000; message: invalid choice: 'bogus' (choose from '; weights loaded before exit: 0; leftover sglang procs: 0
+   kv_canary=none: launcher rc=0 after 331s; health 200; message: ; weights loaded before exit: 16; leftover sglang procs: 8
+   kv_canary=none serves: HTTP 200
+2026-10-10T12:14:32Z [1230/1222] === 1222/B pair with --kv-canary log on the decode only
+   2026-10-10 12:17:16 prefill /health ready after 150 s
+   pair launcher returned after 900s; decode message: kv-canary log is not supported on TPU: the canary cannot attach to the TPU fused KV pools. Use --kv-canary none.; prefill health 200 (prefill ran with kv_canary none)
+2026-10-10T12:29:53Z [1230/1222] === 1222/C control on main: --kv-canary log (before: crash after weights load)

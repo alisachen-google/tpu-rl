@@ -2,3 +2,7 @@
 [launch] /dev/shm at 345 GB: pruning inductor cache
 tmpfs           473G  345G  129G  73% /dev/shm
 [launch] plan written to /home/alisachen_google_com/pd_disagg/results/runs/v1222_log/golden/launch_plan.txt; starting server (log: /home/alisachen_google_com/pd_disagg/results/runs/v1222_log/golden/server.log)
+[env] host=t1v-n-eb299eb1-w-1 ip=10.128.0.90 TPU_WORKER_HOSTNAMES=t1v-n-eb299eb1-w-1 python=/home/alisachen_google_com/venv/sglang/bin/python sglang=a8012fedda
+[launch] /dev/shm at 349 GB: pruning inductor cache
+tmpfs           473G  349G  125G  74% /dev/shm
+[launch] plan written to /home/alisachen_google_com/pd_disagg/results/runs/v1222_log/golden/launch_plan.txt; starting server (log: /home/alisachen_google_com/pd_disagg/results/runs/v1222_log/golden/server.log)
