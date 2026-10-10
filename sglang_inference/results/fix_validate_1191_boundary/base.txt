@@ -1,0 +1,5 @@
+[start] INFO decode used tokens 0.0, running 0.0
+[Q1-burst-idle] PASS 8 holders into an idle decode: statuses [200] (rejected: [])
+[Q2-burst-limit-edge] PASS 12 holders (limit 4): rejected none
+[Q3-equal-into-full] PASS newcomer priority 5 -> HTTP 503 {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":
+[Q4-lower-into-full] PASS newcomer priority 3 -> HTTP 503

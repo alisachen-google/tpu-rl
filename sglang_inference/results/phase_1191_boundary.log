@@ -1,0 +1,6 @@
+   host a on 2f67d8b7016
+2026-10-10T09:29:49Z [1191b] local on 2f67d8b701
+2026-10-10T09:29:50Z [1191b] === base: recipe gpt-oss_C_128k_ps_q
+2026-10-10 09:34:19 prefill /health ready after 255 s
+2026-10-10 09:34:20 decode /health ready after 0 s
+2026-10-10 09:34:21 LB /health_generate ready after 1 s
