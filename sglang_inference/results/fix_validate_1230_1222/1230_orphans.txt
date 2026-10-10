@@ -1,0 +1,7 @@
+[start] INFO timeout 60.0s; decode used 0.0 prealloc 0.0
+[B1-orphan-times-out] FAIL status ERR after 240.1s; body: ReadTimeout: HTTPConnectionPool(host='10.128.0.90', port=30000): Read timed out. (read timeout=240.0)
+[B1-decode-clean] PASS prealloc queue 0.0, health 200
+[B2-16-orphans] FAIL in prealloc queue while waiting: 0.0; e2e spread 240..240s; statuses ['ERR']
+[B2-decode-clean] PASS prealloc 0.0, used 0.0, health 200
+[B3-unreachable-host] PASS status 500 after 60.0s; body: {"object":"error","message":"Decode handshake failed for request rank=0 decode_req.req.rid='5ac376478f2d4307b63d9a4456ba7403' decode_req.req.bootstrap_room=1581283167811901393 with exception Request 1
+[B4a-client-abort-early] PASS client timed out at 10s: ERR ReadTimeout: HTTPConnectionPool(host='10.128.0.90', port=300

@@ -80,3 +80,13 @@
    scheduler exceptions: prefill 0 decode 0; health prefill 200 decode 200; 503s on decode: 0
 2026-10-10T10:40:05Z [1191b] === monolithic reference (G, 4 slots, limit 4): base cases Q3-Q5
 2026-10-10 10:45:33 golden(b) /health ready after 316 s
+   [Q1-burst-idle] PASS 4 holders into an idle decode: statuses [200] (rejected: [])
+   [Q2-burst-limit-edge] FAIL 8 holders (limit 4): rejected ['b2_4', 'b2_5', 'b2_6', 'b2_7']
+   [Q3-equal-into-full] PASS newcomer priority 5 -> HTTP 503 {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":
+   [Q4-lower-into-full] PASS newcomer priority 3 -> HTTP 503
+   [Q5-eviction-cascade] PASS evicted ['fill2', 'fill3'] (expect newest two: fill2, fill3); newcomers 200, 200; evicted msg: {"object":"error","message":"The request is aborted by a higher priority request
+   [Q-end-idle] PASS idle=True decode num_used_tokens at end = 256.0
+   [Q10-soak-cycles] FAIL 6 cycles of (newcomer, that cycle's filler, waiting after): [(200, 503, 0.0), (200, 200, 0.0), (200, 200, 0.0), (200, 200, 0.0), (200, 200, 0.0), (200, 200, 0.0)]
+   [Q10-end-idle] PASS idle=True decode num_used_tokens at end = 64.0
+   mono exceptions: 0; health 200
+2026-10-10T10:51:01Z [1191b] phase 1191 boundary done

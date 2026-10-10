@@ -1,0 +1,6 @@
+   host a on 683a25e34f5
+2026-10-10T10:51:21Z [1230/1222] local on 683a25e34f fix(raiden): bound the decode handshake with the bootstrap timeout
+2026-10-10T10:51:21Z [1230/1222] === 1230/A orphans: Config A 8 slots, BOOTSTRAP_TIMEOUT 60
+2026-10-10 10:54:05 prefill /health ready after 150 s
+2026-10-10 10:55:05 decode /health ready after 60 s
+2026-10-10 10:55:06 LB /health_generate ready after 1 s
