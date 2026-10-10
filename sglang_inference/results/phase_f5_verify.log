@@ -1,1 +1,7 @@
 2026-10-10T05:25:58Z [f5] === fix_flag_off: f6e07d183e [TPU] Refuse prompt-logprob requests the compiled backend cannot serv
+2026-10-10 05:32:12 golden(b) /health ready after 361 s
+   output-only logprobs: HTTP 200 output_token_logprobs 8; health 200
+   prompt logprobs (logprob_start_len=0): HTTP 400; body: {"error":{"message":"input/prompt logprobs (echo) need SGLANG_TPU_ENABLE_PROMPT_LOGPROB=1 on the TPU compiled backend; only output (next-token) logprobs are served by default."}}
+   input_token_logprobs returned: 0
+   health after: 200; follow-up plain request: HTTP 200; scheduler exceptions in log: 0; NotImplementedError: 0
+2026-10-10T05:32:26Z [f5] === fix_flag_on: f6e07d183e [TPU] Refuse prompt-logprob requests the compiled backend cannot serv
