@@ -1,0 +1,4 @@
+[start] INFO decode used tokens 0.0, running 0.0
+[O1-second-waiter-rejected] PASS limit 1: second equal waiter -> HTTP 503
+[O2-single-waiter-evicted] PASS priority 9 -> 200, the single waiter -> 503
+[O-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
