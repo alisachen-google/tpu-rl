@@ -860,3 +860,10 @@ on main 6187d8bbc9. Fix PR: validate at request intake (tokenizer manager, TPU h
 (~/wt-f5).
 **F-5 fix PR #1245 opened (draft, 2026-10-10 ~01:10 UTC):** TPU helper `hardware_backend/tpu/prompt_logprob.py` + intake validation in the
 tokenizer manager; shim delegates. 131 unit tests pass. Live verification `_phase_f5_verify.sh` running (fix flag-off, fix flag-on, main).
+
+**Plugin-boundary pass over all fix PRs (2026-10-10 ~06:00–06:30 UTC).** Per the user's rule (no `is_tpu`/TPU imports outside the TPU
+folder; use the platform interface), #1181, #1193, #1237 and #1245 were rerouted: new `SRTPlatform` hooks `swa_pool_page_multiple()`,
+`supports_kv_canary()` (+ attacher/sub-pool-builder registries filled from `TpuSRTPlatform.init_backend()`), `get_decoder_compile_policy_cls()`,
+`validate_generate_request()`; #1191/#1192 needed nothing. All branches rebased onto main 4f7aae5369, unit tests green, 0 TPU references added
+outside the TPU directory. F-5 live verification (fixv1244): main crash (8 ranks NotImplementedError), fix 400 + healthy, flag-on 200 with 5
+input logprobs. #1191's Change section rewritten for readability.
