@@ -1,0 +1,28 @@
+prefill host on 21859c77df36
+2026-10-11T07:27:10Z [1191p] decode host on 21859c77df
+2026-10-11T07:27:10Z [1191p] === base: recipe gpt-oss_C_128k_ps_q.json
+2026-10-11 07:31:39 prefill /health ready after 255 s
+2026-10-11 07:31:39 decode /health ready after 0 s
+2026-10-11 07:31:41 LB /health_generate ready after 1 s
+   [start] INFO decode used tokens 0.0, running 0.0
+   [Q1-burst-idle] PASS 8 holders into an idle decode: statuses [200] (rejected: [])
+   [Q2-burst-limit-edge] PASS 12 holders (limit 4): rejected none
+   [Q3-equal-into-full] PASS newcomer priority 5 -> HTTP 503 {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":
+   [Q4-lower-into-full] PASS newcomer priority 3 -> HTTP 503
+   [Q5-eviction-cascade] PASS evicted ['fill2', 'fill3'] (expect newest two: fill2, fill3); newcomers 200, 200; evicted msg: {"object":"error","message":"The request is aborted by a higher priority request
+   [Q6-eviction-frees-kv] INFO decode num_used_tokens before eviction 8576.0, after first eviction 11648.0
+   [Q-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   [Q7a-fifth-waiter] PASS 5th waiter -> HTTP 503 (queue 4.0)
+   [Q7b-client-abort-waiting] PASS priority-9 waiter aborted by its client after 6s: ERR
+   [Q7c-place-freed] PASS waiting count dropped below 4 54.1s after the client abort (None = not within 90s)
+   [Q7d-admitted-after-abort] PASS equal newcomer after the abort -> HTTP 200
+   [Q7-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   [Q8-streaming-filler-evicted] PASS newcomer 200; streaming fillers: {'fill0': (200, None), 'fill1': (200, None), 'fill2': (200, None), 'fill3': (503, None)}
+   [Q8-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   [Q9-long-filler-evicted] PASS waiting before 4.0; used tokens 61888.0 -> 0.0 after evicting ['fill3'] (8k prompt)
+   [Q9-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   [Q10-soak-cycles] FAIL 6 cycles of (newcomer, that cycle's filler, waiting after): [(200, 503, 0.0), (200, 200, 0.0), (200, 200, 0.0), (200, 200, 0.0), (200, 200, 0.0), (200, 200, 0.0)]
+   [Q10-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   [exceptions] INFO see phase log
+   patch installed on decode: 0 log(s) mention it; scheduler exceptions: decode 4, prefill 0
+2026-10-11T07:38:27Z [1191p] === low: recipe gpt-oss_C_128k_ps_q_low.json
