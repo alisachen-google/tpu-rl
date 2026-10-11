@@ -1,1 +1,17 @@
 2026-10-11T04:03:21Z [f5v2] === fix_flag_off: a2c09c3b1d [TPU] Refuse prompt-logprob requests the compiled backend cannot serv
+2026-10-11 04:09:04 golden(b) /health ready after 331 s
+   plain: HTTP 200
+   output-only logprobs: HTTP 200 output_token_logprobs: 8 input: 0
+   prompt logprobs (BODY): HTTP 400; body: {"error":{"message":"input/prompt logprobs (echo) need SGLANG_TPU_ENABLE_PROMPT_LOGPROB=1 on the TPU compiled backend; only output (next-token) logprobs are served by default."}}
+   prompt logprobs (BODY2): HTTP 400; body: {"error":{"message":"input/prompt logprobs (echo) need SGLANG_TPU_ENABLE_PROMPT_LOGPROB=1 on the TPU compiled backend; only output (next-token) logprobs are served by default."}}
+   input_token_logprobs returned: 0
+   health after: 200; follow-up plain: HTTP 200; burst 8 plain: 200 200 200 200 200 200 200 200 ; scheduler tracebacks: 4
+2026-10-11T04:09:20Z [f5v2] === fix_flag_on: 79b242fa38 [TPU] Refuse prompt-logprob requests the compiled backend cannot serv
+2026-10-11 04:15:03 golden(b) /health ready after 331 s
+   plain: HTTP 200
+   output-only logprobs: HTTP 200 output_token_logprobs: 8 input: 0
+   prompt logprobs (BODY): HTTP 200; body: {"text":" red, blue, and yellow.\n\n","output_ids":[3592,11,9861,11,326,19691,13,279],"meta_info":{"id":"bc84262331be4abe8ac4e603a4ef7406","finish_reason":{"type":"length","length":8},"prompt_tokens":5,"weight_version":"default","num_retractions":0,"forward_en
+   prompt logprobs (BODY2): HTTP 200; body: {"text":" red, blue, and yellow.\n\n","output_ids":[3592,11,9861,11,326,19691,13,279],"meta_info":{"id":"df23c8c28bd64e638f36198fc16f6d05","finish_reason":{"type":"length","length":8},"prompt_tokens":5,"weight_version":"default","num_retractions":0,"forward_en
+   input_token_logprobs returned: 5
+   health after: 200; follow-up plain: HTTP 200; burst 8 plain: 200 200 200 200 200 200 200 200 ; scheduler tracebacks: 4
+2026-10-11T04:15:19Z [f5v2] phase f5v2 done
