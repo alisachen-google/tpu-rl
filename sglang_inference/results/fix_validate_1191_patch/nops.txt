@@ -1,0 +1,4 @@
+[start] INFO decode used tokens 0.0, running 0.0
+[N1-limit-without-priority] PASS priority scheduling off, limit 4: 5th waiter -> HTTP 503
+[N2-no-eviction] PASS fillers all served (no eviction possible): {'fill0': 200, 'fill1': 200, 'fill2': 200, 'fill3': 200}
+[N-end-idle] PASS idle=True decode num_used_tokens at end = 0.0

@@ -122,3 +122,6 @@ Zero scheduler exceptions in every configuration except the limit-0 crash this m
 
 
 Probe: `scripts/queue_limit_probe.py` (modes base/low/q0/q1/nops/nolimit/retract/soak); recipes `recipes/gpt-oss_C_128k_ps_q*.json`, `gpt-oss_C_128k_q_nops.json`, `gpt-oss_A_128k_smallpool_ps_q.json`, `gpt-oss_G_128k_ps_q.json`; outputs `results/fix_validate_1191_boundary/`; phase logs `results/phase_1191_*.log`.
+
+### Fix re-validation after redesign as a TPU patch (2026-10-11, PR #1191 head 21859c77df)
+sglang_tpu/pd_decode_queue_limit.py (wraps DecodeTransferQueue.pop_transferred and Scheduler._abort_on_queued_limit). base 16 PASS / 1 known probe-design FAIL (Q10), low 3 PASS, q0 4 PASS, nops 3 PASS; prefill 0 exceptions, decode only the 4 launcher tracebacks. Raw: results/fix_validate_1191_patch/, log results/fix_validate_1191_patch.log.
