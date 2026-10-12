@@ -1,0 +1,6 @@
+2026-10-12 18:57:28 starting decodes first (d1=10.128.0.90 d2=10.128.0.20), then prefills (p1=10.128.15.217 p2=10.128.15.239); recipe=gpt-oss_A_128k_2p2d.json run=2p2d_tp8_bringup
+2026-10-12 19:00:44 d1 /health ready after 181 s
+2026-10-12 19:00:44 d2 /health ready after 0 s
+2026-10-12 19:01:44 p1 /health ready after 60 s
+2026-10-12 19:01:44 p2 /health ready after 0 s
+2026-10-12 19:01:44 router /health ready after 0 s

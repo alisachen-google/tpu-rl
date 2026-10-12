@@ -1,0 +1,69 @@
+2026-10-12T19:01:47Z [2p2d-p0] === status
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-12T19:01:54Z [2p2d-p0] === compile audit per engine (startup vs serving-time)
+   p1: ready_at_line=1190 total_lines=1207
+     startup : __recompiles=32  Compiling/compile=22  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=0
+     serving-time recompile lines (first 5):
+   p2: ready_at_line=1369 total_lines=1372
+     startup : __recompiles=32  Compiling/compile=22  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=0
+     serving-time recompile lines (first 5):
+   d1: ready_at_line=1281 total_lines=1396
+     startup : __recompiles=24  Compiling/compile=22  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=0
+     serving-time recompile lines (first 5):
+   d2: ready_at_line=1281 total_lines=1284
+     startup : __recompiles=24  Compiling/compile=22  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=0
+     serving-time recompile lines (first 5):
+2026-10-12T19:09:56Z [2p2d-p0] === smoke through the router
+    ' Paris.\n\nGreat! If you have any more questions or need further assistance,' 16 tokens
+2026-10-12T19:09:57Z [2p2d-p0] === phase 2: routing probe (24 requests, c=4; every P and D must receive work; repeated prompt gives one distinct output)
+   [start] INFO router http://10.128.15.217:8080; prefills ['http://10.128.15.217:30000', 'http://10.128.15.239:30000']; decodes ['http://10.128.0.90:30000', 'http://10.128.0.20:30000']
+   [health] PASS http://10.128.15.217:30000
+   [health] PASS http://10.128.15.239:30000
+   [health] PASS http://10.128.0.90:30000
+   [health] PASS http://10.128.0.20:30000
+   [R1-all-served] PASS 24 requests at c=4: statuses ['200'], e2e 0.22..0.58s
+   [R2-all-prefills-used] PASS prefill deltas (prompt_tokens, gen_tokens, requests): {'http://10.128.15.217:30000': (195.0, 13.0, 13.0), 'http://10.128.15.239:30000': (165.0, 11.0, 11.0)}
+   [R3-all-decodes-used] PASS decode deltas: {'http://10.128.0.90:30000': (210.0, 448.0, 14.0), 'http://10.128.0.20:30000': (150.0, 320.0, 10.0)}
+   [R4-pair-invariant-output] PASS 1 distinct outputs over 8 repeats; statuses ['200']
+   [R5-idle-after] PASS decode running: {'http://10.128.0.90:30000': 0.0, 'http://10.128.0.20:30000': 0.0}
+2026-10-12T19:10:11Z [2p2d-p0] === phase 1: TC-1 differential, 8k prompts, greedy 1024 tokens, c=1, PD(2P/2D) vs TP-8 monolithic golden
+   [isl8192_k0] tokens=1024 finish=length cached=0 ttft=6349.86ms e2e=6353.96ms
+   [isl8192_k1] tokens=1024 finish=length cached=0 ttft=6041.53ms e2e=6042.89ms
+   done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/2p2d_tp8/p0/8192.jsonl
+                   b: 'e secret code words embedded: "The secre'
+   isl8192_k1    False     105     22  0.039   0.0000  FAIL  token prefix 22<256; agreement 0.039<0.95
+                   a@105: 'xt, there are three mentions: checkpoint'
+                   b: 'xt, there are three code words: checkpoi'
+   
+   2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/2p2d_tp8/p0/diff_8192.json
+2026-10-12T19:10:24Z [2p2d-p0] === TC-1 at 32k and 128k, c=1 (expect the known NUM class as in 1P/1D, needles must hold)
+   done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/2p2d_tp8/p0/32768.jsonl
+                   b: 'We need to list secret code wor'
+   
+   2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/2p2d_tp8/p0/diff_32768.json
+   done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/2p2d_tp8/p0/131072.jsonl
+                   b: 'We need to parse the long text.'
+   
+   2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/2p2d_tp8/p0/diff_131072.json
+2026-10-12T19:11:03Z [2p2d-p0] === TC-7 decode-phase client abort through the router (2 aborts, follow-ups must be served; both decodes polled)
+   [+   70.87s] server-info[settled] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+   [+   70.87s] WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+   [+   70.87s] WARN http://10.128.0.20:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+   [+   71.08s] follow-up short: OK status=200 tokens=16 cached=0 
+   [+   71.58s] follow-up identical-prompt: OK status=200 tokens=32 cached=0 
+   [+   71.60s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+   [+   71.61s] server-info[final] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+   [+   71.61s] PASS: 2 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=0), 0 baseline problem(s) -> abort_report.json
+2026-10-12T19:12:15Z [2p2d-p0] === serving-time recompiles after the battery
