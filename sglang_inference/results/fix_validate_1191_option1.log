@@ -1,0 +1,17 @@
+2026-10-12T04:59:11Z [1191o1] === on 595db1a908
+2026-10-12T04:59:24Z [1191o1] (b) PD decode role with --max-queued-requests 0: expect start refused
+   launcher exit 1; message: max-queued-requests is not supported with --disaggregation-mode decode: the prefill and the decode admit requests independently, so a queue cap on one side cannot be enforced c
+   server processes left: 0
+2026-10-12T04:59:48Z [1191o1] (a) monolithic limit 0 + priority scheduling: recipe gpt-oss_G_128k_fp8_e4m3_q0.json
+2026-10-12 05:05:19 golden(b) /health ready after 331 s
+   [start] INFO decode used tokens 0.0, running 0.0
+   [Z1-burst-into-idle] FAIL limit 0: 4 holders into idle -> [503]
+   Traceback (most recent call last):
+     File "/home/alisachen_google_com/pd_disagg/scripts/queue_limit_probe.py", line 251, in <module>
+       main()
+     File "/home/alisachen_google_com/pd_disagg/scripts/queue_limit_probe.py", line 204, in main
+       st = {}; th = holders(U, S, 5, H, st); assert wait_running(D, S)
+                                                     ^^^^^^^^^^^^^^^^^^
+   AssertionError
+   health after: 200; scheduler tracebacks: 0
+2026-10-12T05:07:28Z [1191o1] phase 1191o1 done

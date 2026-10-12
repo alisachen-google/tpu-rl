@@ -1,0 +1,5 @@
+2026-10-12T05:07:43Z [1191o1b] === (c) on 8f578ae4ae: monolithic limit 0 + priority scheduling, expect start refused
+   launcher exit 1; message: max-queued-requests 0 cannot be combined with --enable-priority-scheduling: with no waiting request there is nothing to evict, and the scheduler raises on the first request that finds the running slot
+   server processes left: 0
+2026-10-12T05:08:20Z [1191o1b] === (d) main 42bc00b453: same recipe, probe q0 -> expect the scheduler to die
+2026-10-12 05:12:21 golden(b) /health ready after 241 s

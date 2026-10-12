@@ -1,0 +1,9 @@
+[start] INFO decode used tokens 0.0, running 0.0
+[Z1-burst-into-idle] FAIL limit 0: 4 holders into idle -> [503]
+Traceback (most recent call last):
+  File "/home/alisachen_google_com/pd_disagg/scripts/queue_limit_probe.py", line 251, in <module>
+    main()
+  File "/home/alisachen_google_com/pd_disagg/scripts/queue_limit_probe.py", line 204, in main
+    st = {}; th = holders(U, S, 5, H, st); assert wait_running(D, S)
+                                                  ^^^^^^^^^^^^^^^^^^
+AssertionError
