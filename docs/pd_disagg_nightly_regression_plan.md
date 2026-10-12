@@ -81,3 +81,48 @@ Cost: P0 set is about 3 hours of 1P1D time (2 hosts) per night and fits one exte
 4. Later: N10 after the canary runtime, N11 when the router version is pinned, N12 as a separate advisory workflow with its own schedule so it never blocks the pinned nightly.
 
 Owner: PD/TPU on-call rotation; one file per test, one job per file (dashboard rule); keep `id` stable once registered.
+
+## 6. Model coverage review (added 2026-10-12)
+
+Question asked: does the plan cover both gpt-oss-120b and Qwen3-VL, exercise each model's own features, and reach the corner cases the live campaign found? Answer: gpt-oss is covered broadly but misses its Harmony chat path and its sliding-window corner cases; Qwen3-VL is barely covered, and the model that production will serve (Qwen3-VL-30B-A3B, MoE) has no nightly test at all. The matrix below is against the tests of section 1 plus N1-N12.
+
+### 6.1 Model-specific features and where they are tested
+
+| Feature | Model | Nightly today | Plan N1-N12 | Gap |
+|---|---|---|---|---|
+| Hybrid sliding-window KV pool (window 128), chunk-cap budget, `--disable-hybrid-swa-memory` variant | gpt-oss | implicit in every run, never at the boundaries | N7 (continuation budget at 0), N4 (unaligned lengths) | no window/page/chunk-edge sweep (TC-2: 35 lengths at the 64/128/8192 edges), no 1M single-slot trigger (F-11), no ratio-pool guard case |
+| MXFP4 MoE weights, fp8 e4m3 KV vs bf16 KV | gpt-oss | fp8 only in the perf bench rows | N4 (fp8) | no fp8-vs-bf16 identity against the monolithic golden (F-4 class, #829), no MXINT8 KV (#1066) |
+| Harmony chat: `reasoning_effort`, reasoning/content split, `<\|return\|>`/`<\|call\|>` stops, tool calls, multi-turn with dropped reasoning | gpt-oss | none (all tests use `/generate` or GSM8K) | none | TC-9 found the tool-call parser missing from the recipe; nothing nightly would catch a Harmony regression |
+| EAGLE3 and DFlash speculation | gpt-oss | spec and dflash rows, GSM8K accept-length | N9 throughput floor | no verify-graph recompile check without `SGLANG_TPU_ALLOW_SPEC_RECOMPILE` (campaign 7.5), no odd `bs x draft` batch (7.3), no first-spec-request-after-warm-up (7.2) |
+| DPA / hybrid DPA, PP x PCP, push-reshard | gpt-oss | dpa rows, reshard rows | N3 (peer fault) | fine as is |
+| 1M context recipe, long multi-turn | gpt-oss | none | N6 | N6 is gpt-oss only and text only |
+| ViT compile buckets: resolution outside the precompiled range (F-10, #1146), image straddling the 8192 chunk, `--mm-process-config` pixel caps | Qwen3-VL | 8B tests pin `max_pixels` so no bucket is ever missed | N5 "odd image sizes" (one line) | no image-count sweep (1/4/16/64), no 448^2 vs 1024^2, no straddle, no corrupt image -> 400, no 1920x1080 kill check |
+| MoE language model compiled (F-2, #1136, #1237) | Qwen3-VL-30B-A3B | no 30B test exists; 8B is dense | N9 floor 150 tok/s | the model with the defect is not in the nightly (#1069 asks for it) |
+| MRoPE after the P/D hand-off (decode re-processes images; no rope state crosses the wire) | Qwen3-VL | 8B PD test scores MMMU-Pro report-only, accept length gated | N4 names Qwen3-VL but not images | no 1,024-token image-prompt identity vs monolithic, which is the detector (campaign 5.4) |
+| Multimodal prefix-cache keys: same image + different question hits, different image + same text misses; HiCache with image KV | Qwen3-VL | none | none | TC-10 and config C Qwen covered these live; nothing nightly |
+| VL on the request-shape edges: n>1 with images, logprobs with images, image-only, text-only, empty image list | Qwen3-VL | none | N5 partly (text cases) | add the VL rows to N5 |
+| VL overload, abort and peer-fault behaviour | Qwen3-VL | none | N1-N3 are gpt-oss only | image prompts change prefill length and chunking; at least N2 and N5 need a VL run |
+| Router and mini-LB error propagation (4xx stays 4xx, decode death ends the stream with an error) | both | none | N11 (router only) | mini-LB is what the CI recipes launch; run the contract against both (campaign 6.1/6.2) |
+
+### 6.2 Tests to add or parametrize
+
+| # | Test | What it does | Pass criteria | Catches | Est. |
+|---|---|---|---|---|---|
+| N13 | `pd_qwen3_vl_30b_mm_matrix` | Qwen3-VL-30B-A3B 1P1D, `--enable-torch-compile`: images 1/4/16/64 at 448^2 and 1024^2; one image straddling the 8192 chunk; image-only; text-only; corrupt image; 1920x1080 and 896x504 (outside and inside the ViT buckets); same image + different question, different image + same text; n=2 with an image; logprobs with an image | every request 2xx or 4xx, never a dead engine (F-10 becomes a 4xx or a handled recompile); cache-key hits and misses as specified; decoder policy installed; 0 serving-time recompiles for text; both engines idle after | #1146, #1136, #1069, F-10, F-2, TC-10 | 40 min |
+| N14 | `pd_vl_identity_mrope` | Qwen3-VL-30B-A3B monolithic vs 1P1D: 10 image prompts and 10 text prompts, greedy, 1,024 tokens, plus a 32k text prompt | token-identical outputs and first-token logprob; `prompt_tokens` identical between engines; MMMU-Pro-50 within 0.02 of monolithic | campaign 5.4, #984 class for image KV, #1077 | 45 min |
+| N15 | `pd_gpt_oss_harmony_chat` | `/v1/chat/completions` through the mini-LB and the router: `reasoning_effort` low/medium/high, reasoning vs content split, `<\|return\|>` and `<\|call\|>` stop positions with `ignore_eos=false`, a tool call with the parser configured, 3-turn multi-turn with dropped reasoning, streaming with `usage`, 6k system prompt | each case returns the expected shape; tool call parsed; reasoning never leaks into content; stream ends with `[DONE]` and usage; identical answers via both LBs | TC-9 gap, #1115, #1273, campaign 5.1/5.2/6.1/6.2 | 15 min |
+| N16 | `pd_gpt_oss_swa_boundaries` | 35 exact prompt lengths at the 64/128 page, 128 window and 8192 chunk edges (1 to 16,385 tokens), 160 tokens each; prefix-cache hit ending mid-window; 1M recipe with 1 slot and with 2 slots on 32k/131k/256k prompts; `--disable-hybrid-swa-memory` identity against the default pool | 35/35 complete with exact token counts; needles found; 1-slot 1M completes (F-11 trigger); hybrid-off outputs byte-identical to monolithic | #1142, #1181, F-11, F-4, TC-2 | 60 min |
+| N17 | `pd_spec_corner_cases` | gpt-oss EAGLE3 1P1D without `SGLANG_TPU_ALLOW_SPEC_RECOMPILE`: first spec request after warm-up, decode batch sizes 3/5/7 with `tpu_compile_bs` [1,2,4,8], a chat workload vs a random-text workload for accept length; Qwen3-VL-8B EAGLE3 the same with image prompts | no verify-graph recompile crash; accept length within 20% of the previous nightly; outputs vs the no-spec twin NUM-class, needles 3/3 | campaign 7.2/7.3/7.5, #1066 | 40 min |
+| N18 | `pd_kv_dtype_identity` | both models, 1P1D vs monolithic at bf16 KV, fp8 e4m3 KV and MXINT8 KV: 20 greedy prompts incl. unaligned 127,999 | token identity per dtype vs its own monolithic golden; GSM8K-50 within 0.02 | F-4, #829, #1066 | 60 min |
+| N1v, N2v, N5v | VL variants of admission, abort lifecycle and request shapes | same probes as N1/N2/N5 with image prompts on Qwen3-VL-30B-A3B | same criteria | VL-specific prefill lengths and chunking under the same classes | 25 + 30 + 15 min |
+
+### 6.3 Priority changes
+
+- N13 and N14 are P0: they put the production VL model into the nightly for the first time and they are the only tests that would have caught F-2 and F-10, both of which were silent (slow) or fatal (engine dead) with a clean accuracy score.
+- N15 and N16 are P1: Harmony is the production chat path for gpt-oss, and the SWA edges are where every gpt-oss hang of the campaign lived.
+- N17 and N18 are P1, N1v/N2v/N5v P1 once N13 is green.
+- Cost: about 4.5 hours of 1P1D time on top of section 4, all on 1+1 hosts; N14 and N18 also need a monolithic slot for the goldens, which can be produced once per weights version and cached.
+
+### 6.4 Corner cases carried over from the campaign that no proposed test covers yet
+
+Decode engine death mid-stream through the mini-LB (#1115) beyond N3; load-balancer restart with requests in flight; the abort storm with the radix cache off (F-8 class, now fixed); the exact ViT bucket edge (4,900 vs 4,901 patches); ISL = context + 1 at the 1M shape; both engines on one host sharing RAM (#1269, #1286); the Rust router in `--pd-disaggregation` mode with `--worker-startup-timeout-secs` and no rediscovery. These stay in `sglang_inference/results/TEST_CASES.md` section 5 as the backlog.
