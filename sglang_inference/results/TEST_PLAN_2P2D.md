@@ -16,6 +16,8 @@ Written 2026-10-12 from the 1P/1D campaign (`TEST_CASES.md`, `FINDINGS.md`) and 
 - **TP-4 engines:** 6 (two per worker), enough for 2P/2D plus spares or 3P/3D. gpt-oss-120b weights fit in 4 chips, but the launcher's single-host topology code (`sglang_tpu/patches.py`) has no chip-subset support (`TPU_VISIBLE_CHIPS` / process bounds), and the compile buckets and 1M-context KV sizing would need re-deriving for 4 chips. Budget this as launcher work before any TP-4 run.
 - **True 2P/2D at TP-8** needs a fourth 8-chip worker. The project has about 30 `tpu7x-8` slices owned by others (`gcloud compute tpus tpu-vm list --zone us-central1-c`); borrowing one for the test window is the quickest route.
 
+**Why TP-8 is one engine per worker.** HBM is not the limit: each v7x chip has 96 GiB, and the TP-8 gpt-oss-120b engine uses about 31.7 GB per chip after load with the KV pool allocated (weights roughly 8 GB per chip at TP-8, the 786k-token pool under 2 GB per chip because only the 18 full-attention layers carry the full-length pool). The limit is chip exclusivity: a rank pins its chip through `/dev/vfio`, so two engines cannot share a chip. At TP-4, two engines per worker fit comfortably in HBM (about 16 GB of weights plus KV and compile workspace per chip); the cost is launcher work and losing direct comparability with the TP-8 1P/1D baselines.
+
 Recommendation: get one more tpu7x-8 (or repair wyzhang-tpu7x-8) and keep TP-8 so every 1P/1D result transfers unchanged; use the TP-4 route only if no fourth host appears.
 
 ## 2. What is new over 1P/1D
