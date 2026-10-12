@@ -1,0 +1,24 @@
+prefill host on 6ba76cbc11ac
+2026-10-12T06:26:33Z [door3] decode host on 6ba76cbc11
+2026-10-12 06:29:18 prefill /health ready after 150 s
+2026-10-12 06:29:33 decode /health ready after 15 s
+2026-10-12 06:29:34 LB /health_generate ready after 1 s
+   decode: 'door admission installed' lines = 8
+   [start] INFO mode=door decode used=0.0 prefill prompt_tokens_total=None
+   [D1-idle-burst] PASS 20 into idle (slots 8, limit 4): 200×12 503×8 other=[]
+   [D1-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+   [D1-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+   [D2-refused-503] PASS newcomer -> HTTP 503 in 0.02s; body: {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":503}
+   [D3-no-eviction] PASS higher-priority newcomer (door v1 refuses, no eviction) -> HTTP 503 in 0.02s
+   [D4-no-prefill-work] FAIL 3 refused 8k prompts: statuses [503, 503, 503] e2e [0.03, 0.02, 0.02]; prefill prompt_tokens_total 2048.0 -> 26629.0
+   [D5-stream-refused] PASS streaming newcomer -> HTTP 503 first line: {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":503}
+   [D6-abort-storm] PASS 16 newcomers with 1.5s client timeout: {503: 9, 200: 7}
+   [D6-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+   [D6-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+   [D7-serves-after-storm] PASS plain request after storm -> HTTP 200
+   [D8-soak-cycles] PASS per cycle (refused, served, idle, prefill bootstrap queue): [(3, 12, True, 0.0), (3, 12, True, 0.0), (3, 12, True, 0.0), (3, 12, True, 0.0), (3, 12, True, 0.0)] expected (3, 12, True, 0)
+   [D9-greedy-equal-under-pressure] PASS 3 greedy prompts idle vs admitted-under-pressure equal: [True, True, True]
+   [D9-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+   [D9-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+   decode: refusal log lines = 304; prefill: refused rooms logged=302 bootstrap-failed=2
+2026-10-12T06:32:42Z [door3] phase door3 done

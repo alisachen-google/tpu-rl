@@ -1,0 +1,16 @@
+[start] INFO mode=door decode used=0.0 prefill prompt_tokens_total=None
+[D1-idle-burst] FAIL 20 into idle (slots 8, limit 4): 200×20 503×0 other=[]
+[D1-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+[D1-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+[D2-refused-503] FAIL newcomer -> HTTP 200 in 36.56s; body: {"text":" So we need to compute the probability that","output_ids":[2632,581,1309,316,23864,290,34933,484],"meta_info":{
+[D3-no-eviction] FAIL higher-priority newcomer (door v1 refuses, no eviction) -> HTTP 200 in 0.13s
+[D4-no-prefill-work] FAIL 3 refused 8k prompts: statuses [200, 200, 200] e2e [0.41, 0.39, 0.16]; prefill prompt_tokens_total None -> None
+[D5-stream-refused] FAIL streaming newcomer -> HTTP 200 first line: {"text":"\n\nSure! Here's a revised version of","output_ids":[279,62915,0,44257,261,52287,3926,328],
+[D6-abort-storm] PASS 16 newcomers with 1.5s client timeout: {200: 16}
+[D6-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+[D6-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+[D7-serves-after-storm] PASS plain request after storm -> HTTP 200
+[D8-soak-cycles] FAIL per cycle (refused, served, idle, prefill bootstrap queue): [(0, 12, True, 0.0), (0, 12, True, 0.0), (0, 12, True, 0.0), (0, 12, True, 0.0), (0, 12, True, 0.0)] expected (3, 12, True, 0)
+[D9-greedy-equal-under-pressure] PASS 3 greedy prompts idle vs admitted-under-pressure equal: [True, True, True]
+[D9-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+[D9-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0

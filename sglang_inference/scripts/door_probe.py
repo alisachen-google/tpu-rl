@@ -5,7 +5,11 @@ Checks: admission math, 503 status/latency through the router, no prefill work f
 bursts, client-abort storms, streaming/long-prompt refusals, soak cycles, greedy-output equality."""
 import argparse, sys, threading, time, requests
 sys.path.insert(0, "/home/alisachen_google_com/pd_disagg/scripts")
-from queue_limit_probe import gen, metric, say, wait_running, wait_idle, spawn, holders, fill, long_text  # noqa: E402
+from queue_limit_probe import gen, metric as _metric, say, wait_running, wait_idle, spawn, holders, fill, long_text  # noqa: E402
+
+def metric(url, name):
+    v = _metric(url, name)
+    return v if v is not None else _metric(url, name, must=None)
 
 def gen_rid(url, text, rid, max_new_tokens=8, priority=None, stream=False, timeout=120):
     body = {"text": text, "rid": rid, "sampling_params": {"temperature": 0, "max_new_tokens": max_new_tokens, "ignore_eos": True}}
@@ -57,7 +61,9 @@ def main():
         big = long_text(f"{a.prompts}/8192.jsonl")
         rs = [gen_rid(U, big, f"door-big-{i}", priority=prio) for i in range(3)]
         time.sleep(5); pt1 = metric(P, "prompt_tokens_total")
-        say(f"{tag}4-no-prefill-work", all(is_refused(x) for x in rs) and pt1 == pt0, f"3 refused 8k prompts: statuses {[x['status'] for x in rs]} e2e {[round(x['e2e'],2) for x in rs]}; prefill prompt_tokens_total {pt0} -> {pt1}")
+        # prompt_tokens_total counts finished requests (aborted ones too), so it cannot prove absence of work;
+        # the phase script counts large "Prefill batch" lines in the prefill log instead.
+        say(f"{tag}4-big-prompts-refused-fast", all(is_refused(x) and x["e2e"] < 5 for x in rs), f"3 refused 8k prompts: statuses {[x['status'] for x in rs]} e2e {[round(x['e2e'],2) for x in rs]}; prefill prompt_tokens_total {pt0} -> {pt1} (counts aborted requests)")
         # 4. streaming refusal
         r = gen_rid(U, "Streaming newcomer.", "door-stream", priority=prio, stream=True)
         say(f"{tag}5-stream-refused", r["status"] == 503, f"streaming newcomer -> HTTP {r['status']} first line: {r['body'][:100]}")

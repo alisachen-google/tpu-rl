@@ -11,3 +11,6 @@ prefill host on e545ae345bf2
    door newcomers door-rid-0..2: ["HTTPConnectionPool(host='10.128.15.217',", 200, 200]
    prefill log: bootstrap failures for door rids = 0; prefill batches mentioning door rids = 0; scheduler exceptions: decode 0, prefill 0
 2026-10-12T05:30:21Z [door] === q0: recipe gpt-oss_C_128k_ps_q0.json
+2026-10-12 06:15:58 prefill /health ready after 2721 s
+2026-10-12 06:16:13 decode /health ready after 15 s
+2026-10-12 06:16:14 LB /health_generate ready after 1 s

@@ -1,0 +1,6 @@
+[env] host=t1v-n-eb299eb1-w-1 ip=10.128.0.90 TPU_WORKER_HOSTNAMES=t1v-n-eb299eb1-w-1 python=/home/alisachen_google_com/venv/sglang/bin/python sglang=42bc00b453
+[launch] root disk low (18 GB free): pruning inductor caches
+/dev/root        96G   78G   18G  82% /
+[launch] /dev/shm at 398 GB: pruning inductor cache
+tmpfs           473G  398G   75G  85% /dev/shm
+[launch] plan written to /home/alisachen_google_com/pd_disagg/results/runs/door2_door/decode/launch_plan.txt; starting server (log: /home/alisachen_google_com/pd_disagg/results/runs/door2_door/decode/server.log)

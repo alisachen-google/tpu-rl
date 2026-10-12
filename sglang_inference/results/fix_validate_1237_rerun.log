@@ -1,0 +1,1 @@
+2026-10-12T06:34:55Z [1237r] === fix2: 001409d983 [TPU] Qwen3-VL-MoE: compile the language model with --enable-torch-compile (TPU
