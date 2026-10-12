@@ -1,0 +1,9 @@
+2026-10-12T21:44:29Z [2p2d-p4] === baseline burst of 8 x 1k through the router
+   HTTP 200 x8
+2026-10-12T21:44:30Z [2p2d-p4] === kill p2 while 6 x 8k prefills are in flight
+   HTTP 200 x6
+2026-10-12T21:44:35Z [2p2d-p4]    p2 health now: 200; router health: 200
+2026-10-12T21:44:35Z [2p2d-p4] === with p2 dead: 8 x 1k must still be served by p1 (router may or may not skip the dead P: #1274 class)
+   HTTP 200 x2
+   HTTP 500 x6
+2026-10-12T21:44:43Z [2p2d-p4] === restart p2 and wait for health
