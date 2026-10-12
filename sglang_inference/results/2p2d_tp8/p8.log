@@ -36,3 +36,9 @@
    [rank4]:V1012 23:12:05.045000 3878339 /mnt/disks/nvme2/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/_dynamo/guards.py:4760] [0/1] [__recompiles]     - 0/0: tensor 'args[0]' size mismatch at index 0
    [rank1]:V1012 23:12:05.045000 3878336 /mnt/disks/nvme2/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/_dynamo/guards.py:4760] [0/1] [__recompiles]     - 0/0: tensor 'args[0]' size mismatch at index 0
    [rank7]:V1012 23:12:05.046000 3878342 /mnt/disks/nvme2/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/_dynamo/guards.py:4760] [0/1] [__recompiles]     - 0/0: tensor 'args[0]' size mismatch at index 0
+2026-10-12T23:22:16Z [2p2d-p8]    d2 health now: 000; gauges:
+   10.128.15.217: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.20: 
+2026-10-12T23:22:16Z [2p2d-p8] === (b) d2 with rpa_batched + SEQ_ALONG_LANE KV layout (prefills token-major): #1077 predicts no handshake error
