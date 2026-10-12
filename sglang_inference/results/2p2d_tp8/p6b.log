@@ -1,0 +1,36 @@
+2026-10-12T22:24:08Z [2p2d-p6b] === MT-Bench 80x2 c=1
+2026-10-12T22:24:08Z [2p2d-p6b]    prefill counters before:
+   10.128.15.217 cached_tokens_total=0.0 prompt_tokens_total=
+   10.128.15.239 cached_tokens_total=0.0 prompt_tokens_total=
+   [2p2d_B_c1] c=1 questions=80 ok turn1=80 turn2=80 wall=366.9s output_tokens=68878 out_tok/s=187.7
+   [2p2d_B_c1]   TTFT turn1 mean=341ms p50=329ms | turn2 mean=359ms p50=357ms
+   [2p2d_B_c1]   turn2 cached_tokens mean=83 of prompt mean=573 (cached fraction 0.15); turn1 cached mean=62
+   [2p2d_B_c1]   e2e per turn mean: turn1=2.20s turn2=2.38s; completion mean turn1=415 turn2=446
+   [2p2d_B_c1]   no spec_verify_ct (non-speculative server)
+2026-10-12T22:30:20Z [2p2d-p6b]    prefill counters after:
+   10.128.15.217 cached_tokens_total=0.1032258064516129 prompt_tokens_total=
+   10.128.15.239 cached_tokens_total=0.10372771474878444 prompt_tokens_total=
+2026-10-12T22:30:20Z [2p2d-p6b] === MT-Bench 80x2 c=4
+2026-10-12T22:30:20Z [2p2d-p6b]    prefill counters before:
+   10.128.15.217 cached_tokens_total=0.1032258064516129 prompt_tokens_total=
+   10.128.15.239 cached_tokens_total=0.10372771474878444 prompt_tokens_total=
+   [2p2d_B_c4] c=4 questions=80 ok turn1=80 turn2=80 wall=107.6s output_tokens=68963 out_tok/s=640.7
+   [2p2d_B_c4]   TTFT turn1 mean=370ms p50=367ms | turn2 mean=420ms p50=390ms
+   [2p2d_B_c4]   turn2 cached_tokens mean=104 of prompt mean=572 (cached fraction 0.18); turn1 cached mean=82
+   [2p2d_B_c4]   e2e per turn mean: turn1=2.52s turn2=2.77s; completion mean turn1=414 turn2=448
+   [2p2d_B_c4]   no spec_verify_ct (non-speculative server)
+2026-10-12T22:32:14Z [2p2d-p6b]    prefill counters after:
+   10.128.15.217 cached_tokens_total=0.10372771474878444 prompt_tokens_total=
+   10.128.15.239 cached_tokens_total=0.1032258064516129 prompt_tokens_total=
+2026-10-12T22:32:14Z [2p2d-p6b] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-12T22:32:20Z [2p2d-p6b] phase p6b done
+phase 6b exit 0

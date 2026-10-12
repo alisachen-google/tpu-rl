@@ -2,3 +2,15 @@
 2026-10-12 22:19:17 stopping p2 on 10.128.15.239
 2026-10-12 22:19:21 stopping d1 on 10.128.0.90
 2026-10-12 22:19:25 stopping d2 on 10.128.0.20
+p1      10.128.15.217:30000 health=000
+p2      10.128.15.239:30000 health=000
+d1      10.128.0.90:30000 health=000
+d2      10.128.0.20:30000 health=000
+router  10.128.15.217:8080 health=000
+2026-10-12 22:19:52 starting decodes first (d1=10.128.0.90 d2=10.128.0.20), then prefills (p1=10.128.15.217 p2=10.128.15.239); recipe=gpt-oss_B_128k_2p2d.json run=2p2d_tp8_B
+2026-10-12 22:21:52 d1 /health ready after 105 s
+2026-10-12 22:22:07 d2 /health ready after 15 s
+2026-10-12 22:24:08 p1 /health ready after 121 s
+2026-10-12 22:24:08 p2 /health ready after 0 s
+2026-10-12 22:24:08 router /health ready after 0 s
+B group up
