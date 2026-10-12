@@ -26,3 +26,7 @@ It was written on 2026-10-09 at about 04:30 UTC from `TEST_CASES.md`, `FINDINGS.
 | D (C + EAGLE3 bf16) | TC-1 vs bf16 golden; acceptance probes random text vs GSM8K-style (PD = monolithic); GSM8K throughput; MT-Bench vs no-spec twin | Workload-dependent acceptance (1.0–1.15 vs 2.46); draft graph compiled only at warm-up; TPU lost to a colleague's job at launch | none (+43 % / +25 %) |
 | E (all features, both engines) | GSM8K; MT-Bench multi-turn on decode radix; TC-1 subset | Decode radix + EAGLE3 under multi-turn (#856 not reproduced); fully cached turn 2, zero log-prob delta | none |
 | G (monolithic) | Goldens c=1 and c=8 (1k–128k, 1M, fp8), bf16, `--disable-hybrid-swa-memory`; controls: 1 slot 1M before/after F-11 fix; queue limit and preemption with priorities | Batch invariance; SWA chunk-schedule numerics; preemption threshold, preemptor/victim aborts, repeated preemption | F-3, F-4 isolation; controls for F-11, F-16 |
+
+## Status addendum 2 (2026-10-12)
+
+The production-readiness narrative (why, issues of the last two weeks by failure class, metrics reading guide, per-test findings, fix status) is the live document **PD Disaggregation Hardening Report**: https://claude.ai/code/artifact/4e16e970-2a02-43f3-9344-572f87dd5f3a. Fix-validation batteries TC-19 to TC-24 and the 2026-10-12 PR status are in `TEST_CASES.md` §6-§7.

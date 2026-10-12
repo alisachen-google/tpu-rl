@@ -294,3 +294,89 @@ Everything planned has run. Summary of the items that were pending at some point
 - Not covered on this hardware: multi-host engines (each host is a 4-chip slice), both engines on one host, the Rust router variant, the
   abort storm (needs the F-8 fix or radix on), decode engine death mid-stream, load-balancer restart, queue-limit overflow (429), fault
   injection (covered by a colleague's campaigns), image patch count at exactly the 4,900 bucket edge, ISL = context + 1 at the 1M shape.
+
+## 6. Fix-validation batteries added 2026-10-10 to 2026-10-12
+
+Every battery deploys the PR head to both hosts (git bundle to host a, checkout on host b), runs the scenario that exposed the defect plus boundary cases around it, and runs main as the control where the defect is a crash or hang. Probes print one verdict line per case (`[id] PASS|FAIL|INFO ...`); raw outputs are under `results/fix_validate_*/`, phase logs under `results/*.log`, server logs under `results/runs/<RUN>/`.
+
+### TC-19 PR #1191 queue limit in PD (#1188, F-16)
+
+| Field | Value |
+|---|---|
+| Goal | `--max-queued-requests` on a P/D pair: admission, rejection (503), priority eviction, limit 0, limit without priority, low-priority-first, retraction interplay, soak |
+| Tool | `scripts/queue_limit_probe.py --url <LB> --decode <decode> --mode base\|low\|q0\|q1\|nops\|nolimit\|retract\|soak --slots 8`; recipes `gpt-oss_C_128k_ps_q{,0,1,_low}.json`, `gpt-oss_C_128k_q_nops.json`, `gpt-oss_A_128k_smallpool_ps_q.json`; phases `_phase_1191_boundary.sh`, `_phase_1191_base_rerun.sh`, `_phase_1191_soak.sh`, `_phase_1191_patch.sh`, `_phase_1191_option1{,b}.sh` |
+| Cases | Q1 burst into idle, Q2 limit edge, Q3/Q4 equal and lower newcomer → 503, Q5 eviction cascade (newest fillers first), Q6 eviction frees KV, Q7a-d fifth waiter / client abort frees a place / equal newcomer admitted, Q8 streaming filler evicted, Q9 8k filler evicted, Q10 soak cycles (probe-design flaw: fillers finish before the next cycle; superseded by S1/S2), S1/S2 soak evictions and survivors, L1/L2 low-priority-first, Z1-Z3 limit 0, N1/N2 limit without priority, O1/O2 limit 1, R1-R3 retraction, U1 no limit |
+| Results, decode-side admission (heads bb5bbe6c1b, 6839ff1789, 21859c77df) | base 16 PASS + Q10, low 3 PASS, q0 4 PASS, nops 3 PASS, q1 and soak PASS, retract PASS with an intermittent KV free-fence hold (1 of 4 runs); identical verdicts after the move into a TPU runtime patch |
+| Results, final shape (option 1, heads 8f578ae4ae to d4fe0e7376) | PD decode launched with the flag: launcher exits 1 with the refusal message, no processes left. Main with the monolithic limit-0 + priority recipe: first burst → connection errors, `max() iterable argument is empty` in all 8 ranks, `/health` dead, 0 schedulers. Note: upstream counts the newcomer itself, so limit 0 refuses every request even into an idle server (4 holders → 4 × 503 on the guard head) |
+| Findings | F-16 confirmed; limit-0 crash reproduced on main; mono Q2 (monolithic intake refuses bursts into an idle server with a limit set); ~52 s client-abort propagation through the mini-LB vs 3 s single engine; KV free fence held ~4,166 pages while idle in 1 of 4 pressure runs (not isolated) |
+| Evidence | `results/fix_validate_1191_boundary/`, `results/fix_validate_1191_patch/`, `results/fix_validate_1191_option1/`, `prs/PR_1191_live_validation_*.md`, `bug_reports/F-16_github_issue.md` |
+
+### TC-20 Teammate PRs #1230 (handshake timeout), #1222 (kv-canary refusal), #1217 (parallel sampling)
+
+| Field | Value |
+|---|---|
+| Tools | `scripts/handshake_timeout_probe.py --mode orphans\|pressure` (B1-B6), `_phase_1230_1222.sh`, `_phase_1230_wt.sh`, `_phase_1217.sh`; recipes `gpt-oss_A_128k_bt60{,_wt90}.json`, `gpt-oss_A_128k_smallpool_bt60.json`, `gpt-oss_G_128k_canary_{log,raise,none,bogus}.json`, `gpt-oss_A_128k_canary_decode_only.json` |
+| #1230 | B3 orphan room with an unreachable bootstrap host: 500 after 60.0 s (main: hangs). B1/B2 orphans against the real prefill wait in the KV window (left to the waiting timeout by design). B4 client disconnect then deadline: clean. B5 normal traffic 200. C the #1148 trigger did not reproduce on this head. **B6 regression risk**: decode pool 262k, 8 × 131k at c=8, requests 5-7 failed with 500 at ~60 s while waiting for KV pages; suggested starting the clock after the handshake or excluding WaitingForInput |
+| #1222 | `--kv-canary log/raise` rejected at argument validation on TPU instead of dying after weight load (main: AttributeError on `k_buffer`); `bogus` rejected by argparse; `none` starts normally; decode-only canary on a pair: decode refused, prefill unaffected |
+| #1217 | n=2/3/8, batches of 2×n=2 and 3×n=3, 5 consecutive n=2, chat n=2, n=1: every case returns in ≤ 1.2 s (main: no response in 90 s); prefill scheduled 41 sequences for 39 sub-requests + 2 warm-ups with 0 zero-token prefix requests; decode `num_used_tokens` 0 afterwards; monolithic n=2/3 unchanged. Equivalent to our closed #1192 |
+| Evidence | `results/fix_validate_1230_1222/`, `results/fix_validate_1217/`, `prs/COMMENT_1230_live_validation.md`, `prs/COMMENT_1222_live_validation.md`, `prs/COMMENT_1217_live_validation.md` |
+
+### TC-21 PR #1245 prompt logprobs (#1244, F-5)
+
+| Field | Value |
+|---|---|
+| Goal | A request with `return_logprob` and a `logprob_start_len` inside the prompt must be refused with 400 when `SGLANG_TPU_ENABLE_PROMPT_LOGPROB` is off, served when on, and never reach the raise inside the forward |
+| Tool | `_phase_f5_verify.sh`, `_phase_f5_verify2.sh`, `_phase_f5_neg2.sh`; recipes `gpt-oss_G_128k_fp8_e4m3.json` (flag off), `gpt-oss_G_128k_fp8_e4m3_promptlogprob.json` (flag on) |
+| Cases | plain; output-only logprobs; `logprob_start_len` 0, 2, -2, -7 (negatives are unvalidated upstream and clamp to 0), -1; health, follow-up and a burst of 8 afterwards; flag on: same requests |
+| Results | main: connection dropped, `NotImplementedError` on all 8 ranks, engine dead. Fix (heads bf3b2f4b1e to 19f1a2e64a): flag off → 400 with the flag message for 0, 2, -2, -7; -1 → 200 output-only; 8 output logprobs; health 200, follow-up 200, burst 8 × 200. Flag on → 200 with 5 input logprobs for the 5-token prompt. The 4 tracebacks per server log are the launcher's early `freeze_gc` connection refusal, present in every run |
+| Design note | the gate is a TPU runtime patch on `Scheduler._add_request_to_queue` (same shape as the scheduler's MLX check); the first design (tokenizer-manager hook via a platform method) was replaced after review; -2 was caught by a reviewer and fixed by widening the gate to `start != -1 and start < len(prompt)` |
+| Evidence | `results/fix_validate_1244/`, `results/fix_validate_1244_v2/`, `results/fix_validate_1244_neg2.log`, `prs/PR_1245_live_validation_v2.md`, `bug_reports/F-5_github_issue.filed.md` |
+
+### TC-22 PR #1237 Qwen3-VL-MoE decoder compile (#1136, F-2)
+
+| Field | Value |
+|---|---|
+| Tool | `_phase_1136_verify.sh`, `_phase_1237_rerun.sh`; recipe `gpt-oss`-style Qwen3-VL bf16 128k monolithic |
+| Results | hook-based head: decoder compiled, 1024-token story 6 s (170 tok/s) vs 161.5 s on main, GSM8K 0.99. Plugin-only head (001409d983, annotation from `sglang_tpu/patches.py`): policies installed (`Qwen3VLDecoderTpuCompilePolicy` on `Qwen3MoeLLMModel`), no eager-decoder warning, same 170 tok/s, two 8k prompts complete (TTFT ~350 ms), outputs identical to the hook-based head, 0 exceptions |
+| Evidence | `results/fix_validate_1136/` |
+
+### TC-23 PR #1299 door admission for PD (#1188, option 2)
+
+| Field | Value |
+|---|---|
+| Goal | the decode decides `--max-queued-requests` at `DecodePreallocQueue.add`, before pre-allocation and before any prefill work; the client gets 503 from the decode and the prefill drops the twin |
+| Tools | `_phase_door.sh` (nops, q0 + known-rid wasted-work check), `door_probe.py` with `_phase_door2.sh`/`_phase_door3.sh` (six recipes: limit 4 with priority on/off/low-first, limit 0, limit 1, small KV pool) |
+| First head (e545ae345b) | decode refused (two 503s in its HTTP log) but the client saw a connection error and the prefill logged 0 bootstrap failures: the receiver's ABORT needs `bootstrap_infos`, which only `init()` resolves; the router relays the prefill's status; raiden tombstones an ABORT that beats sender registration (#1204/#1279). q0 case invalid on that head (limit 0 + priority refused at start-up) |
+| Reworked head (6ba76cbc11 → b9da83f34a) | decision in `_init_receiver`, ABORT carries a reason, raiden sender records it before registration, twin finished with the same 503. Diagnostic run: 503 in 20 ms through the router, 8 of 20 burst requests refused at limit 4, abort storm (9 refused, 7 served) and 5 soak cycles clean, 302 "decode refused room" prefill lines, no prefill batch for refused prompts. Six-recipe run in progress: recipes 1-3 (priority on, off, low-first) 15/15, 14/14, 15/15 PASS |
+| Known wart | 2 of 304 per-rank refusals on a non-zero rank took the generic 500 path because the all-reduced poll reported the failure before that rank's ABORT frame; rank 0 answers the client with 503 |
+| Evidence | `results/fix_validate_door/`, `results/fix_validate_door2/`, `results/fix_validate_door3/` |
+
+### TC-24 PR #1181 head re-run
+
+| Field | Value |
+|---|---|
+| Tool | `_phase_1181_head.sh` |
+| Results | current head (959f507510, TPU edits under `sglang_tpu/`): former triggers pass, outputs unchanged where the pool is unchanged; CI 32/32 |
+| Evidence | `results/fix_validate_1181_head/` |
+
+### Design and process notes learned in this period
+
+- `--max-queued-requests` counts the newcomer itself: limit 0 refuses every request even into an idle server; with priority scheduling it crashes instead (fixed by refusing the combination at start-up or by an empty-queue guard).
+- The mini-LB waits for both halves of a PD request and relays the prefill's status, so a decode-side refusal is only visible to the client if the prefill twin is also finished.
+- A decode receiver can notify the prefill ranks only after `init()` resolved `bootstrap_infos`; a pre-dispatch ABORT needs that step first and a prefill that honours an ABORT arriving before its sender exists.
+- The repo's TPU CI runs on demand per commit: post `/tag-and-rerun-ci` after each push, after the new head's workflow run exists; TPU jobs frequently time out on slice admission ("NOT ADMITTED after 3281s") and need `rerun-failed-jobs` once the run completes.
+- Plugin boundary: fixes go through platform methods, registries or runtime patches under `sglang_tpu/`; the debt ratchet (`tools/plugin/check_tpu_branches.py`) fails lint for any new `is_tpu` branch or plugin import in core.
+
+## 7. Status on 2026-10-12
+
+| PR | Scope | State |
+|---|---|---|
+| #1181 | SWA chunk-cap deadlock (F-11) | ready for review, CI green |
+| #1191 | fail the server when `--max-queued-requests` is set and PD is enabled (option 1) | ready for review, head d4fe0e7376, CI running |
+| #1299 | door admission (option 2), stacked on #1191 | draft, six-recipe validation in progress, 3/6 PASS |
+| #1245 | prompt-logprob intake gate (F-5) | ready for review, rebased on main (19f1a2e64a), CI rerunning |
+| #1237 | Qwen3-VL-MoE decoder compile (F-2), plugin-only shape | ready for review, live rerun PASS, CI running |
+| #1265 | TPU debt baseline fix | merged |
+| #1192, #1193 | superseded (parallel sampling → #1217; kv-canary → #1222) | closed |
+
+Open and not addressed by a PR: F-10 (#1146), F-14 (#1177), F-15 (#1189), and the monolithic limit-0 + priority crash (reproduced, left out of #1191 by decision). Full narrative: the "PD Disaggregation Hardening Report" doc (link in TEST_REPORT.md).
