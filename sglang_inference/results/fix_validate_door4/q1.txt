@@ -1,0 +1,8 @@
+[start] INFO mode=q1 decode used=0.0 prefill prompt_tokens_total=None
+[O1-idle-burst] PASS 12 into idle, limit 1: 200×9 503×3 other=[]
+[O1-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+[O1-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+[O2-over-limit-503] PASS limit 1: waiter #2 -> HTTP 503 in 0.02s
+[O3-priority-no-crash] PASS priority 9 newcomer -> HTTP 503 (no eviction; scheduler alive)
+[O3-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+[O3-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0

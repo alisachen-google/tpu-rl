@@ -33,7 +33,7 @@ def end_check(tag, D, P):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--url", required=True); ap.add_argument("--decode", required=True); ap.add_argument("--prefill", required=True)
-    ap.add_argument("--mode", required=True, choices=["door", "q0", "q1", "nops", "low", "retract"]); ap.add_argument("--slots", type=int, default=8)
+    ap.add_argument("--mode", required=True, choices=["door", "q0", "q1", "nops", "low", "retract", "retract2"]); ap.add_argument("--slots", type=int, default=8)
     ap.add_argument("--limit", type=int, default=4); ap.add_argument("--hold-tokens", type=int, default=6000)
     ap.add_argument("--prompts", default="/home/alisachen_google_com/pd_disagg/prompts/gpt-oss")
     a = ap.parse_args(); U, D, P, S, L, H = a.url, a.decode, a.prefill, a.slots, a.limit, a.hold_tokens
@@ -114,6 +114,25 @@ def main():
         for t in f: t.join(900)
         for t in th: t.join(1500)
         end_check(f"{tag}3", D, P)
+
+    elif a.mode == "retract2":
+        # Running requests must outgrow the 262k decode pool: 7 holders x (32k prompt + 16k generation) ~ 336k.
+        text32k = long_text(f"{a.prompts}/32768.jsonl")
+        st = {}; th = [spawn(U, st, f"hold{i}", text32k, priority=prio, max_new_tokens=16000, stream=True, timeout=3000) for i in range(7)]
+        assert wait_running(D, 4, 300), "holders did not start"
+        t0 = time.time(); peak = 0
+        while time.time() - t0 < 900:
+            peak = max(peak, metric(D, "num_retracted_reqs") or 0)
+            if peak: break
+            time.sleep(3)
+        say("R1-retraction-observed", peak > 0, f"decode num_retracted_reqs peaked at {peak} after {time.time()-t0:.0f}s (running {metric(D,'num_running_reqs')}, used {metric(D,'num_used_tokens')})")
+        news = []
+        for k in range(4):
+            news.append(gen_rid(U, f"Under retraction {k}.", f"door-retract-{k}", priority=prio, timeout=1500)); time.sleep(2)
+        say("R2-newcomers-answered", all(x["status"] in (200, 503) for x in news), f"newcomers while retracted: {[x['status'] for x in news]} (503 once retracted + waiting exceed limit {L}); e2e {[round(x['e2e'],1) for x in news]}")
+        for t in th: t.join(3000)
+        say("R3-holders-finish", all(st[f"hold{i}"]["status"] == 200 for i in range(7)), f"holders {[st[f'hold{i}']['status'] for i in range(7)]} (no deadlock after retraction)")
+        end_check("R3", D, P)
 
     elif a.mode == "retract":
         # small decode pool: long holders force retractions; the door counts retracted requests as occupying slots

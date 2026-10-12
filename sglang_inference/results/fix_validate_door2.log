@@ -68,3 +68,6 @@ prefill host on 1ec9c0509714
    prefill log: big prefill batches (>=4000 new tokens, 8k refusals would show here)=0
    prefill log: refused rooms logged=287 bootstrap-failed warnings=1 door rids seen=28; exceptions: prefill 0 decode 0
 2026-10-12T07:13:48Z [door2] === q0: recipe gpt-oss_C_128k_ps_q0.json (limit 0)
+2026-10-12 07:51:08 prefill /health ready after 2224 s
+2026-10-12 07:51:08 decode /health ready after 0 s
+2026-10-12 07:51:09 LB /health_generate ready after 1 s

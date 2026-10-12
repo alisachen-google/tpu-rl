@@ -1,0 +1,43 @@
+prefill host on b9da83f34a87
+2026-10-12T07:48:19Z [door4] decode host on b9da83f34a
+2026-10-12T07:48:19Z [door4] === q0: recipe gpt-oss_C_128k_ps_q0.json (limit 0)
+2026-10-12 07:51:03 prefill /health ready after 151 s
+2026-10-12 07:51:18 decode /health ready after 15 s
+2026-10-12 07:51:19 LB /health_generate ready after 1 s
+   [start] INFO mode=q0 decode used=0.0 prefill prompt_tokens_total=None
+   [Z1-idle-burst] PASS 12 into idle, limit 0: 200×8 503×4 other=[]
+   [Z1-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+   [Z1-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+   [Z2-over-limit-503] PASS limit 0: waiter #1 -> HTTP 503 in 0.04s
+   [Z3-priority-no-crash] PASS priority 9 newcomer -> HTTP 503 (no eviction; scheduler alive)
+   [Z3-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+   [Z3-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+   prefill log: big prefill batches (>=4000 new tokens, 8k refusals would show here)=0
+   prefill log: refused rooms logged=48 bootstrap-failed warnings=0 door rids seen=2; exceptions: prefill 0 decode 0
+2026-10-12T07:52:13Z [door4] === q1: recipe gpt-oss_C_128k_ps_q1.json (limit 1)
+2026-10-12 07:55:00 prefill /health ready after 151 s
+2026-10-12 07:55:45 decode /health ready after 45 s
+2026-10-12 07:55:46 LB /health_generate ready after 1 s
+   [start] INFO mode=q1 decode used=0.0 prefill prompt_tokens_total=None
+   [O1-idle-burst] PASS 12 into idle, limit 1: 200×9 503×3 other=[]
+   [O1-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+   [O1-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+   [O2-over-limit-503] PASS limit 1: waiter #2 -> HTTP 503 in 0.02s
+   [O3-priority-no-crash] PASS priority 9 newcomer -> HTTP 503 (no eviction; scheduler alive)
+   [O3-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+   [O3-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+   prefill log: big prefill batches (>=4000 new tokens, 8k refusals would show here)=0
+   prefill log: refused rooms logged=40 bootstrap-failed warnings=0 door rids seen=2; exceptions: prefill 0 decode 0
+2026-10-12T07:56:42Z [door4] === retract: recipe gpt-oss_A_128k_smallpool_ps_q.json (limit 4)
+2026-10-12 08:00:59 prefill /health ready after 241 s
+2026-10-12 08:00:59 decode /health ready after 0 s
+2026-10-12 08:01:00 LB /health_generate ready after 1 s
+   [start] INFO mode=retract decode used=0.0 prefill prompt_tokens_total=None
+   [R1-retraction-observed] FAIL decode num_retracted_reqs peaked at 0 within 242s
+   [R2-newcomers-under-retraction] PASS newcomers while retracted: [200, 200, 200] (503 when retracted+waiting exceed the limit)
+   [R3-holders-finish] PASS holders statuses [200, 200, 200, 200, 200, 200, 200, 200] (no deadlock)
+   [R3-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+   [R3-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+   prefill log: big prefill batches (>=4000 new tokens, 8k refusals would show here)=0
+   prefill log: refused rooms logged=0 bootstrap-failed warnings=0 door rids seen=0; exceptions: prefill 0 decode 0
+2026-10-12T08:05:22Z [door4] phase door2 done
