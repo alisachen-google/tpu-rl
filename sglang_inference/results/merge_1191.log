@@ -55,3 +55,14 @@
    unit-test / stage-a-test-tpu-unit in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114768795860
 2026-10-12T11:43:12Z [merge#1191] PENDING
    unit-test / stage-a-test-tpu-unit in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114768795860
+2026-10-12T11:48:14Z [merge#1191] PENDING
+   unit-test / stage-a-test-tpu-unit in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114768795860
+2026-10-12T11:53:16Z [merge#1191] PENDING
+   unit-test / stage-a-test-tpu-unit in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114768795860
+2026-10-12T11:58:17Z [merge#1191] PENDING
+   unit-test / stage-a-test-tpu-unit in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114768795860
+2026-10-12T12:03:19Z [merge#1191] PENDING
+   unit-test / stage-a-test-tpu-unit in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114768795860
+2026-10-12T12:08:21Z [merge#1191] GREEN
+{'message': 'Repository rule violations found\n\nA conversation must be resolved before this pull request can be merged.\n\n', 'documentation_url': 'https://docs.github.com/rest/pulls/pulls#merge-a-pull-request', 'status': '405'}
+2026-10-12T12:08:27Z [merge#1191] merge attempted
