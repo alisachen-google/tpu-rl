@@ -1,0 +1,17 @@
+2026-10-12T09:39:34Z [tp4-golden] stopping d1 and the b-side router (p1 on a stays up)
+2026-10-12T09:42:29Z [tp4-golden] TP-4 golden up after 180 s
+2026-10-12T09:42:29Z [tp4-golden] generate 8k (greedy 1024, c=1)
+2026-10-12T09:42:41Z [tp4-golden] === PD(TP-4) vs golden(TP-4):
+                   a@76: 'entioned, in order. In the text, there a'
+                   b: "entioned, in order. Let's scan the text:"
+   
+   2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/2p2d/tp4_golden/diff_pd_vs_golden_tp4.json
+2026-10-12T09:42:41Z [tp4-golden] === golden(TP-4) vs golden(TP-8):
+                   a@115: 'are three mentions: checkpoint 1 is copp'
+                   b: 'are three mentions: "The secret code wor'
+   
+   2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/2p2d/tp4_golden/diff_golden_tp4_vs_tp8.json
+2026-10-12T09:42:41Z [tp4-golden] === golden(TP-4) repeat for determinism:
+   
+   2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/2p2d/tp4_golden/diff_rep.json
+2026-10-12T09:42:57Z [tp4-golden] phase tp4-golden done (b freed; p1 on a still up)

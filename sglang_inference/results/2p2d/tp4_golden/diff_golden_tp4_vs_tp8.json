@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_fp8/8192.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/2p2d/tp4_golden/8192.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": null,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl8192_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 18<256",
+    "agreement 0.034<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 84,
+   "token_prefix": 18,
+   "token_agreement": 0.0341796875,
+   "first_divergence_token": 18,
+   "first_divergence_char": 84,
+   "context_a": "ted sentences, with some secret code wor",
+   "context_b": "ted sentences, with two secret code word",
+   "first_token_logprob_absdiff": 0.11059489846229553,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl8192_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 24<256",
+    "agreement 0.033<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 115,
+   "token_prefix": 24,
+   "token_agreement": 0.033203125,
+   "first_divergence_token": 24,
+   "first_divergence_char": 115,
+   "context_a": "are three mentions: checkpoint 1 is copp",
+   "context_b": "are three mentions: \"The secret code wor",
+   "first_token_logprob_absdiff": 0.0543195903301239,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}

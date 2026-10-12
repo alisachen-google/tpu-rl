@@ -1,4 +1,4 @@
-[launch] 2026-10-12T09:20:39Z host=t1v-n-eb299eb1-w-1 engine=golden run=2p2d_golden_tp4 recipe=/home/alisachen_google_com/pd_disagg/recipes/2p2d/gpt-oss_G_128k_tp4.json sglang=2e14706a62 chips=0,1
+[launch] 2026-10-12T09:39:44Z host=t1v-n-eb299eb1-w-1 engine=golden run=2p2d_golden_tp4 recipe=/home/alisachen_google_com/pd_disagg/recipes/2p2d/gpt-oss_G_128k_tp4.json sglang=2e14706a62 chips=0,1
 {
   "command": [
     "/home/alisachen_google_com/venv/sglang/bin/python",
@@ -12,7 +12,7 @@
     "--host",
     "0.0.0.0",
     "--port",
-    "30002",
+    "30010",
     "--grammar-backend",
     "none",
     "--model-path",
@@ -69,7 +69,7 @@
     "device": "tpu",
     "dtype": "bfloat16",
     "host": "0.0.0.0",
-    "port": 30002,
+    "port": 30010,
     "grammar_backend": "none",
     "model_path": "/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a",
     "served_model_name": "gpt-oss-120b",

@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/2p2d/tp4_golden/8192.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/2p2d/tp4_1p1d/8192.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": null,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl8192_k0",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 134<256",
+    "agreement 0.141<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 540,
+   "token_prefix": 134,
+   "token_agreement": 0.140625,
+   "first_divergence_token": 134,
+   "first_divergence_char": 540,
+   "context_a": "a lighthouse keeper.\n\nWe must output the",
+   "context_b": "a lighthouse keeper. So after listing th",
+   "first_token_logprob_absdiff": 0.03508439660072327,
+   "structural_a": [],
+   "structural_b": []
+  },
+  {
+   "id": "isl8192_k1",
+   "gate_pass": false,
+   "notes": [
+    "token prefix 15<256",
+    "agreement 0.091<0.95"
+   ],
+   "identical": false,
+   "char_prefix": 76,
+   "token_prefix": 15,
+   "token_agreement": 0.0908203125,
+   "first_divergence_token": 15,
+   "first_divergence_char": 76,
+   "context_a": "entioned, in order. In the text, there a",
+   "context_b": "entioned, in order. Let's scan the text:",
+   "first_token_logprob_absdiff": 0.02068185806274414,
+   "structural_a": [],
+   "structural_b": []
+  }
+ ]
+}
