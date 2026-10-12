@@ -1,0 +1,5 @@
+2026-10-12T22:36:01Z [2p2d-p7] === relaunch on config D (EAGLE3): stop B group, start D group
+   2026-10-12 22:36:01 stopping p1 on 10.128.15.217
+   2026-10-12 22:36:06 stopping p2 on 10.128.15.239
+   2026-10-12 22:36:11 stopping d1 on 10.128.0.90
+   2026-10-12 22:36:15 stopping d2 on 10.128.0.20
