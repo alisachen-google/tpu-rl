@@ -8,11 +8,12 @@ Written 2026-10-12 from the 1P/1D campaign (`TEST_CASES.md`, `FINDINGS.md`) and 
 |---|---|---|---|
 | wyzhang-tpu7x-16-a (34.56.86.215) | worker 0 of slice `wyzhang-tpu7x-16` (tpu7x-16, topology 2x2x2), internal 10.128.15.217 | 8 | healthy; the current prefill host a |
 | wyzhang-tpu7x-16-b (34.68.1.148) | worker 1 of the same slice, internal 10.128.0.90 | 8 | healthy; the current decode host b |
-| wyzhang-tpu7x-8 (34.31.248.180) | separate slice `wyzhang-tpu7x-8` (2x2x1), internal 10.128.0.20 | 8 | `UNHEALTHY_TENSORFLOW`; root disk 0 bytes free; no venv; weights NFS not mounted at `/mnt/data` |
+| wyzhang-tpu7x-8 (34.31.248.180) | separate slice `wyzhang-tpu7x-8` (2x2x1), internal 10.128.0.20, hostname t1v-n-8e56fa4b-w-0 | 8 | chips free (0 of 8 vfio nodes held, no engines) but root disk 100% full (96 GB; 68 GB under wyzhang's home, 13 GB docker, 3 GB /tmp), so `tpu-runtime` fails every restart writing its docker config ("no space left on device") and the node reports `UNHEALTHY_TENSORFLOW`; 1.5 TB NVMe at `/mnt/disks/nvme2` with 818 GB free; no venv, weights NFS only under wyzhang's home |
+| sixiang-v7x-8 ("v7" in the user's ssh config, corp name nic0.t1v-n-cba38f45-w-0...gcpnode.com) | separate slice `sixiang-v7x-8`, internal 10.128.15.239, hostname t1v-n-cba38f45-w-0 | 8 | healthy, idle, nobody logged in, 969 GB free root disk, sudo via the SA user; bare (no venv, no torch_tpu, no weights mount); reaches a and b internally |
 
-24 chips on two slices; each worker has 224 CPUs and 944 GB RAM. What that gives:
+32 chips on four workers over three slices (added sixiang-v7x-8 on 2026-10-12); each worker has 224 CPUs and 944 GB RAM. What that gives:
 
-- **TP-8 engines (the 1P/1D recipes):** at most 3, so 2P/1D or 1P/2D, not 2P/2D. The third engine needs the tpu7x-8 host repaired first (disk, venv, NFS mount, TPU health).
+- **TP-8 engines (the 1P/1D recipes):** 3 today (a, b, sixiang-v7x-8), so 2P/1D or 1P/2D now; 4 once wyzhang-tpu7x-8 has about 20 GB of root disk freed (its chips are idle; the unhealthy state is only the runtime failing to write to the full disk), which gives true 2P/2D at TP-8 with every 1P/1D recipe and golden unchanged.
 - **TP-4 engines:** 6 (two per worker), enough for 2P/2D plus spares or 3P/3D. gpt-oss-120b weights fit in 4 chips, but the launcher's single-host topology code (`sglang_tpu/patches.py`) has no chip-subset support (`TPU_VISIBLE_CHIPS` / process bounds), and the compile buckets and 1M-context KV sizing would need re-deriving for 4 chips. Budget this as launcher work before any TP-4 run.
 - **True 2P/2D at TP-8** needs a fourth 8-chip worker. The project has about 30 `tpu7x-8` slices owned by others (`gcloud compute tpus tpu-vm list --zone us-central1-c`); borrowing one for the test window is the quickest route.
 
@@ -49,7 +50,7 @@ Give every panel of the PD dashboard an engine label so per-P and per-D queue de
 
 ## 6. Before the first run
 
-1. Secure the fourth 8-chip worker, or repair wyzhang-tpu7x-8 (root disk full, TPU runtime unhealthy, venv and NFS missing).
+1. Free about 20 GB on wyzhang-tpu7x-8's root disk (ask wangyuan which of the 68 GB under their home can go or move to `/mnt/disks/nvme2`; `docker builder prune` reclaims 3.2 GB), restart `tpu-runtime`, confirm `HEALTHY`. Then set up sixiang-v7x-8 and wyzhang-tpu7x-8 like a and b: mount the weights NFS, build the venv from the pinned wheel stack, seed the compile cache (put all of it on the NVMe on tpu7x-8).
 2. Extend `pd.sh` and `launch_role.sh` to N engines with per-engine ports and run directories.
 3. Decide the router (Rust PD gateway vs mini-LB multi-worker); verify it relays the decode's status (#1273, #1274 are open against it).
 4. Land or carry the 1P/1D fixes the regression floor depends on (#1181, #1191, #1245, #1237, #1217, #1230).
