@@ -1,0 +1,5 @@
+scp: dest open "/tmp/door2.bundle": Permission denied
+scp: failed to upload file /tmp/door2.bundle to /tmp/door2.bundle
+prefill host on 1ec9c0509714
+2026-10-12T06:55:47Z [door2] decode host on 2d8940cbf5
+2026-10-12T06:55:47Z [door2] === door: recipe gpt-oss_C_128k_ps_q.json (limit 4)

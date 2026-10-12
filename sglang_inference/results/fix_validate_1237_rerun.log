@@ -1,1 +1,15 @@
 2026-10-12T06:34:55Z [1237r] === fix2: 001409d983 [TPU] Qwen3-VL-MoE: compile the language model with --enable-torch-compile (TPU
+2026-10-12 06:54:56 golden(b) /health ready after 1188 s
+   policy lines (TP0): VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder on ViTTpuCompileRunner.forward.|VisionTpuCompilePolicy.run: compiled-fn arg shapes=((196, 1, 1152), (2,), (196, 36), (196, 36), (1, 196))|VisionTpuCompilePolicy.precompile: submitted; 0 deferred warmups.|[TPU] [decoder compile policy] _install_forward_shim for Qwen3MoeLLMModel (is_draft=False, is_eagle3_draft=False, shim_target=forward)|[TPU] [decoder compile policy] Installed Qwen3VLDecoderTpuCompilePolicy on Qwen3MoeLLMModel.forward (t-bucketer=TokenBucketer, b-bucketer=BatchSizeBuc|[TPU] [decoder compile policy] VL EXTEND: 15 graph variants (batch_caps=[('EXTEND', 4)], token_buckets=[512, 1024, 2048, 4096, 8192], variants=('deeps|
+   eager-decoder warning present: 0
+   story 1024 tokens: completion 1024 e2e_s 6.0 tok/s 169.9
+   decode gen throughput (last 3 batches): 180.98 179.01 180.60 
+   8k prompts: 0 completed; ttft=355.69ms; e2e=6210.36ms; errors 1
+   recompiles after warmup: 23472; exceptions: 0; health 200
+2026-10-12T06:55:23Z [1237r] === output identity vs main baseline and vs the previous fix head
+                a@0: 'The secret code word'
+                b: '\n:\n\nThe secret code '
+
+2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/fix_validate_1136/8k_diff2.json
+   story text identical to main: False | to previous fix head: True | main e2e 161.5 s; fix e2e 6.0 s; previous fix e2e 6.3 s
+2026-10-12T06:55:24Z [1237r] phase 1237 rerun done
