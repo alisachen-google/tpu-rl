@@ -126,3 +126,50 @@ Question asked: does the plan cover both gpt-oss-120b and Qwen3-VL, exercise eac
 ### 6.4 Corner cases carried over from the campaign that no proposed test covers yet
 
 Decode engine death mid-stream through the mini-LB (#1115) beyond N3; load-balancer restart with requests in flight; the abort storm with the radix cache off (F-8 class, now fixed); the exact ViT bucket edge (4,900 vs 4,901 patches); ISL = context + 1 at the 1M shape; both engines on one host sharing RAM (#1269, #1286); the Rust router in `--pd-disaggregation` mode with `--worker-startup-timeout-secs` and no rediscovery. These stay in `sglang_inference/results/TEST_CASES.md` section 5 as the backlog.
+
+## 7. Feature coverage audit (added 2026-10-12)
+
+Scope: every serving feature the TPU backend exposes (server flags, `sglang_tpu/` modules, env knobs) against the registered end-to-end tests at main 2e14706a62. "Nightly" = suites `external-nightly-*`, `nightly-tpu-*` and `tpu-integration` tests registered with `nightly=True`; "PR gate" = `stage-b-test-tpu-4-v7` (runs on PRs, not nightly); "campaign" = covered only by the October live campaign; "none" = no end-to-end coverage anywhere. Unit tests are not counted: they prove the code path, not the served behaviour.
+
+| Feature area | Nightly | PR gate only | Campaign only | None | Proposed |
+|---|---|---|---|---|---|
+| P/D 1P1D and 2P2D over raiden, bootstrap, transfer | gpt-oss-120b singlehost x5, multihost x6, 480B reshard, VL-8B eagle3 | | | | covered; add failure paths (N1-N3) |
+| P/D TP reshard (push-reshard, heterogeneous attention TP) | gpt-oss and 480B reshard rows | | | | covered |
+| P/D decode radix cache, KV offload on the decode | singlehost decode_radix, kv_offload rows | | | | covered |
+| P/D optimistic prefill, decode allocation policy `prefill_complete`, host receive threshold, extra decode slots | | | | yes | add a policy matrix row to N1 (one run per policy) |
+| P/D retraction backup (`cpu_tensor`), rebootstrap | | | TC-8 retraction, boundary (3) | | N7 |
+| P/D role switch, pdmux, encoder disaggregation (`encoder_only`/`language_only`), colocated PD (`SGLANG_TPU_PD_COLOCATED`) | | | | yes | not production features yet; one smoke each when they are |
+| Prefix cache (radix) on prefill, multi-turn | prefix_cache rows, decode_radix | | O-3 multi-turn depth | | add an 8-turn conversation to N6 (done) |
+| HiCache RAM offload over raiden (`hicache_io_backend raiden`, `page_first_fused`, write-through) | kv_offload rows | | eviction + reload bit-exact (TC-3b), decode HiCache (config E) | | add evict-then-reload to N6; write-back policy and `hicache_storage_backend` (lmcache/flexkv) have no test and no TPU use yet |
+| HiSparse, session radix cache, unified cache linker, unified memory | | | | yes | not enabled in any recipe; smoke only if adopted |
+| EAGLE3 speculation (gpt-oss, 480B, VL-8B) | spec rows, VL-8B eagle3 | | acceptance by workload (TC-4, TC-16), verify-graph recompile stance (7.5) | | N17 |
+| DFlash speculation | multihost_dflash, singlehost_dflash | dflash_smoke | | | covered |
+| ngram, dspark, domino, decoupled spec, adaptive spec | | | | yes | dspark has unit tests only; add a smoke when any ships on TPU |
+| DP attention (dpa), hybrid dpa | dpa rows (gpt-oss, 480B) | | | | covered |
+| Pipeline parallel, PP x PCP | | gpt-oss-20b pp4_pcp2 | | | promote to nightly on a 1-host slice (N19) |
+| Prefill context parallel (PCP), decode context parallel (DCP, `pallas_tpu_rpa_dcp`) | | qwen3-30b-a3b pcp | | DCP: none | N19 adds a DCP row (#1137 class halts live in this path) |
+| Attention backends: `pallas_tpu_rpa_v3` (default), `rpa_batched`, `flash`, `mla`, GDN/KDA | v3 everywhere; MLA/KDA via kimi-k3 compile (nightly oot) | kimi_k3_tiny compile | | `rpa_batched` and `flash` as served backends: none | one GSM8K-20 row per backend in N9 |
+| MoE kernels: MXFP4 (gpt-oss), fp8 MoE (480B), fp4 MoE, w4a16 MoE, SparseCore gather, EP local expert reads | gpt-oss and 480B rows | | | fp4 and w4a16: none | add the quantized-MoE models that production will serve |
+| KV cache dtypes: bf16, fp8 e4m3, fp8 e5m2, MXINT8 | fp8 e4m3 in bench rows only | | fp8 vs bf16 identity (F-4) | MXINT8 and e5m2: none | N18 |
+| Hybrid SWA pool, `swa_full_tokens_ratio`, `--disable-hybrid-swa-memory`, SWA prefix tails | implicit in every gpt-oss run | | TC-2 edges, F-11, F-4 | | N16 |
+| Chunked prefill, dynamic chunking, mixed chunk, prefill delayer | chunked prefill implicit | | unaligned lengths | dynamic chunking, mixed chunk, prefill delayer: none | add flags as variants of N16 |
+| Scheduling: priority scheduling, preemption threshold, low-values-first, `max_queued_requests`, schedule policies | | | TC-18, queue-limit batteries | | N1 (PD) + a monolithic admission row |
+| Request shapes: n>1, logprobs, prompt logprobs, logit bias, stops, penalties, grammar/constrained decoding | | qwen3-0.6b prompt_logprob | TC-6 (19 cases), TC-9 chat | constrained decoding with a real grammar backend: none on TPU | N5 |
+| Chat paths: Harmony (gpt-oss) reasoning and tools, Qwen chat template, streaming with usage | `--reasoning-parser` set but only `/generate` and GSM8K exercised | | TC-9 | tool calls: none | N15 |
+| Multimodal: Qwen3-VL images (count, resolution, straddle, cache keys), `mm-process-config`, ViT compile buckets, `SGLANG_TPU_MM_EMBED_ON_DEVICE` | VL-8B MMMU-Pro (fixed max_pixels) | | TC-10 on VL-30B | VL-30B-A3B: none | N13, N14 |
+| Compile: `--enable-torch-compile`, compile buckets, compile cache (tier-2/tier-3), compile bundle save/load, recompile check, compile tracer | kimi-k3 compile (oot) | qwen3-0.6b compile_tracer, torch_compile_bundle | F-1, F-2, F-10, 0-recompile audits | per-model compiled assertion: none | N9 |
+| Overlap schedule, async copy worker, result copy worker, continuous decode steps | implicit defaults | | | disabled-overlap variant: none | one variant row in N9 |
+| KV free fence, host heap trim, host metadata cache, req_to_token on host | unit tests only | | fence hold observed (1 of 4 runs) | | N7 records fence pages at the end; N8 records host RSS |
+| KV integrity: `--kv-canary`, `--disaggregation-enable-kv-checksum` | | | both unusable on TPU (F-13, F-14) | | N10 after the runtime lands |
+| Health, metrics, Perfetto PD tracing, profiler | metrics scraped by the perf bench only | | dashboard panels (37) | health contract: none | N8 |
+| Load balancers: mini-LB (CI), Rust PD gateway | bench rows behind the mini-LB | | mini-LB error paths (F-15) | Rust router in PD mode: none | N11 |
+| LoRA | | | | yes | not supported on TPU; keep out of scope |
+| Diffusion (Wan2.2 TI2V, multihost collectives) | suite="external-nightly-1host" / suite="tpu-integration" | | | | outside P/D; owned by the diffusion track |
+| Long context: 128k, 256k, 1M recipes | 128k only | | 1M (TC-12) | 256k/1M nightly: none | N6 |
+| Upgrades: torch_tpu, libtpu, JAX wheels | pinned | | | drift: none | N12 |
+
+Summary: of 32 feature areas, 12 are covered nightly on their happy path, 4 only by the PR gate, 7 only by the live campaign, and 9 have no end-to-end coverage at all. Everything in the "campaign only" and "none" columns that production will enable is already assigned to a proposed test above; the areas with no proposed test are features not yet used in any production recipe (pdmux, encoder disaggregation, HiSparse, LoRA, ngram/dspark speculation), which should get a one-row smoke the day a recipe turns them on.
+
+| # | Test | What it does | Pass criteria | Est. |
+|---|---|---|---|---|
+| N19 | `pp_pcp_dcp_matrix` | gpt-oss-20b at PP4 x PCP2 and PP2 x TP2; gpt-oss-120b with DCP on the decode; GSM8K-50 and a 32k needle each | accuracy within 0.02 of TP-only; needles 3/3; no halt (#1137 class) within the watchdog | 45 min |
