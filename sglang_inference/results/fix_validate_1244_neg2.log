@@ -1,0 +1,8 @@
+2026-10-12T00:14:05Z [f5neg] === neg2 on 4a22546829
+2026-10-12 00:18:18 golden(b) /health ready after 240 s
+   logprob_start_len=-2: HTTP 400; {"error":{"message":"input/prompt logprobs (echo) need SGLANG_TPU_ENABLE_PROMPT_LOGPROB=1 on the TPU compiled backend; only output (next-token) logprobs are ser
+   logprob_start_len=-7: HTTP 400; {"error":{"message":"input/prompt logprobs (echo) need SGLANG_TPU_ENABLE_PROMPT_LOGPROB=1 on the TPU compiled backend; only output (next-token) logprobs are ser
+   logprob_start_len=-1: HTTP 200; {"text":" red, blue, and yellow.\n\n","output_ids":[3592,11,9861,11,326,19691,13,279],"meta_info":{"id":"bcafabb2481a42168a97c2cc6a9eede5","finish_reason":{"typ
+   logprob_start_len=0: HTTP 400; {"error":{"message":"input/prompt logprobs (echo) need SGLANG_TPU_ENABLE_PROMPT_LOGPROB=1 on the TPU compiled backend; only output (next-token) logprobs are ser
+   health after: 200; follow-up plain: HTTP 200
+2026-10-12T00:18:31Z [f5neg] phase f5neg done

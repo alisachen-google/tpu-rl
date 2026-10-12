@@ -118,3 +118,5 @@ In `alisachen-google/tpu-rl`, directory `sglang_inference/`: `results/A/params/g
 `results/phase_A_gptoss_redo.log` (section "(5) F-5 repro"), prefill logs under `results/logs/runs/A_gptoss_128k_run*`, `results/bug_reports/F-5.md`.
 ### Fix re-validation (2026-10-11, PR #1245 redesigned: scheduler-intake patch in sglang_tpu/patches.py)
 Head 79b242fa38. Flag off: logprob_start_len 0 and 2 → HTTP 400 with the flag message; output-only logprobs 200; health/follow-up/burst-8 all 200; scheduler logged the refusals, no exception. Flag on: prompt logprobs served (5 input logprobs for a 5-token prompt), all follow-ups 200. Raw results: results/fix_validate_1244_v2/, log results/fix_validate_1244_v2.log.
+
+Negative starts (2026-10-12, head 4a22546829): logprob_start_len -2 and -7 are unvalidated upstream and clamp to 0 (prompt logprobs); the gate was widened to 'start != -1 and start < prompt length'. Live, flag off: -2 → 400, -7 → 400, -1 → 200, 0 → 400, health/follow-up 200. Raw: results/fix_validate_1244_v2/neg_*.json, log results/fix_validate_1244_neg2.log.

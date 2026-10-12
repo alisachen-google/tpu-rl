@@ -1,0 +1,1 @@
+{"error":{"message":"input/prompt logprobs (echo) need SGLANG_TPU_ENABLE_PROMPT_LOGPROB=1 on the TPU compiled backend; only output (next-token) logprobs are served by default."}}
