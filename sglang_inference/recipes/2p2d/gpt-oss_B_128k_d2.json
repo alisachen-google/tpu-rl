@@ -33,7 +33,7 @@
   ],
   "enable_torch_compile": true,
   "torch_compile_max_bs": 8,
-  "mem_fraction_static": 0.45,
+  "mem_fraction_static": 0.75,
   "sampling_backend": "pytorch",
   "skip_server_warmup": true,
   "enable_metrics": true,

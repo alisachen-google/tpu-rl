@@ -76,4 +76,5 @@ Known caveats of this layout: TP-4 results are not byte-comparable with the TP-8
 
 | When (UTC) | Run | What | Result |
 |---|---|---|---|
-| 2026-10-12 08:xx | `2p2d_bringup` | first launch of p1,p2,d1,d2 + router on main 2e14706a62 | in progress |
+| 2026-10-12 08:36 | `2p2d_bringup` | first launch of p1,p2,d1,d2 on main 2e14706a62, `mem_fraction_static 0.45` (the TP-8 value) | all four engines died at KV-pool sizing: at TP-4 the gpt-oss-120b weights take 56.9 GB of the 94.7 GB available per device (`Load weight end ... mem usage=56.86 GB`; the MXFP4 checkpoint is held as bf16 on TPU, so 1/4 of ~230 GB), leaving 37.9 GB; the launcher refused: "Loaded weights leave no GPU memory for the KV cache under --mem-fraction-static=0.45. Raise above 0.601". TP-4 needs `mem_fraction_static` >= 0.61; set to 0.75 (71 GB budget, ~14 GB for KV, enough for 786k tokens) |
+| 2026-10-12 08:42 | `2p2d_bringup2` | relaunch with `mem_fraction_static 0.75` | in progress |
