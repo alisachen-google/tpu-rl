@@ -1,0 +1,85 @@
+2026-10-12T22:57:46Z [2p2d-p7b] === group already live (d2 restarted after the F7 crash); no relaunch
+2026-10-12T22:57:46Z [2p2d-p7b] === spec / kv fields per engine
+   10.128.15.217 {'disaggregation_mode': 'prefill', 'speculative_algorithm': 'EAGLE3', 'speculative_num_draft_tokens': 4, 'kv_cache_dtype': 'bfloat16', 'page_size': 64, 'enable_hierarchical_cache': True}
+   10.128.15.239 {'disaggregation_mode': 'prefill', 'speculative_algorithm': 'EAGLE3', 'speculative_num_draft_tokens': 4, 'kv_cache_dtype': 'bfloat16', 'page_size': 64, 'enable_hierarchical_cache': True}
+   10.128.0.90 {'disaggregation_mode': 'decode', 'speculative_algorithm': 'EAGLE3', 'speculative_num_draft_tokens': 4, 'kv_cache_dtype': 'bfloat16', 'page_size': 64, 'enable_hierarchical_cache': False}
+   10.128.0.20 {'disaggregation_mode': 'decode', 'speculative_algorithm': 'EAGLE3', 'speculative_num_draft_tokens': 4, 'kv_cache_dtype': 'bfloat16', 'page_size': 64, 'enable_hierarchical_cache': False}
+2026-10-12T22:57:46Z [2p2d-p7b] === compile audit per engine (startup vs serving-time)
+   p1: server not ready yet (no ready marker); lines=1382
+   p1: ready_at_line=1382 total_lines=1382
+     startup : __recompiles=37  Compiling/compile=7  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=0
+     serving-time recompile lines (first 5):
+   p2: server not ready yet (no ready marker); lines=1196
+   p2: ready_at_line=1196 total_lines=1196
+     startup : __recompiles=32  Compiling/compile=5  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=0
+     serving-time recompile lines (first 5):
+   d1: ready_at_line=19271 total_lines=25929
+     startup : __recompiles=432  Compiling/compile=72  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=8
+     serving-time recompile lines (first 5):
+   d2: server not ready yet (no ready marker); lines=1362
+   d2: ready_at_line=1362 total_lines=1362
+     startup : __recompiles=36  Compiling/compile=8  cache_miss=0  InductorError=0
+     serving : __recompiles=0  Compiling/compile=0  cache_miss=0  InductorError=0  fail_on_recompile=0
+     serving-time recompile lines (first 5):
+2026-10-12T22:57:49Z [2p2d-p7b] === smoke through the router
+    ' Paris.\n\nGreat! If you have any more questions or need further assistance,' 16 tokens, spec_verify_ct 10
+2026-10-12T22:57:49Z [2p2d-p7b] === routing probe (24 requests, c=4)
+   [start] INFO router http://10.128.15.217:8080; prefills ['http://10.128.15.217:30000', 'http://10.128.15.239:30000']; decodes ['http://10.128.0.90:30000', 'http://10.128.0.20:30000']
+   [health] PASS http://10.128.15.217:30000
+   [health] PASS http://10.128.15.239:30000
+   [health] PASS http://10.128.0.90:30000
+   [health] PASS http://10.128.0.20:30000
+   [R1-all-served] PASS 24 requests at c=4: statuses ['200'], e2e 0.25..0.75s
+   [R2-all-prefills-used] PASS prefill deltas (prompt_tokens, gen_tokens, requests): {'http://10.128.15.217:30000': (120.0, 8.0, 8.0), 'http://10.128.15.239:30000': (240.0, 16.0, 16.0)}
+   [R3-all-decodes-used] PASS decode deltas: {'http://10.128.0.90:30000': (150.0, 320.0, 10.0), 'http://10.128.0.20:30000': (210.0, 448.0, 14.0)}
+   [R4-pair-invariant-output] PASS 1 distinct outputs over 8 repeats; statuses ['200']
+   [R5-idle-after] PASS decode running: {'http://10.128.0.90:30000': 0.0, 'http://10.128.0.20:30000': 0.0}
+2026-10-12T22:58:05Z [2p2d-p7b] === TC-1: 8k greedy 1024 tokens c=1 vs the bf16 c=1 golden, WITHOUT return_logprob (logprobs on an EAGLE3 decode trip fail_on_recompile: 2P2D-F7)
+   [isl8192_k0] tokens=1024 finish=length cached=8128 ttft=6287.22ms e2e=6287.5ms
+   [isl8192_k1] tokens=1024 finish=length cached=0 ttft=6271.23ms e2e=6271.4ms
+   done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/2p2d_tp8/p7b/8192.jsonl
+                   b: 'e secret code words embedded: "The secre'
+   isl8192_k1    False      82      -  0.081        -  FAIL  char prefix 82<1000; agreement 0.081<0.95
+                   a@82: 'ed above, in order. In the massive text,'
+                   b: "ed above, in order. Let's scan the text "
+   
+   2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/2p2d_tp8/p7b/diff_8192_bf16.json
+2026-10-12T22:58:18Z [2p2d-p7b] === MT-Bench 80x2 c=1 and c=4 (acceptance from spec_verify_ct; throughput vs config B: 187.7 / 640.7 tok/s)
+   [2p2d_D2_c1] c=1 questions=80 ok turn1=80 turn2=80 wall=272.1s output_tokens=66926 out_tok/s=245.9
+   [2p2d_D2_c1]   TTFT turn1 mean=519ms p50=416ms | turn2 mean=547ms p50=479ms
+   [2p2d_D2_c1]   turn2 cached_tokens mean=146 of prompt mean=566 (cached fraction 0.26); turn1 cached mean=62
+   [2p2d_D2_c1]   e2e per turn mean: turn1=1.63s turn2=1.77s; completion mean turn1=408 turn2=429
+   [2p2d_D2_c1]   spec accept_length mean=2.465 p50=2.396 min=1.907 max=3.692 (n=160)
+   [2p2d_D2_c4] c=4 questions=80 ok turn1=80 turn2=80 wall=85.9s output_tokens=67300 out_tok/s=783.8
+   [2p2d_D2_c4]   TTFT turn1 mean=596ms p50=486ms | turn2 mean=643ms p50=528ms
+   [2p2d_D2_c4]   turn2 cached_tokens mean=184 of prompt mean=566 (cached fraction 0.33); turn1 cached mean=84
+   [2p2d_D2_c4]   e2e per turn mean: turn1=2.00s turn2=2.23s; completion mean turn1=407 turn2=434
+   [2p2d_D2_c4]   spec accept_length mean=2.450 p50=2.381 min=1.718 max=3.692 (n=160)
+2026-10-12T23:04:27Z [2p2d-p7b] === avg_spec_accept_length per decode
+   10.128.0.90 None
+   10.128.0.20 None
+2026-10-12T23:04:27Z [2p2d-p7b] === TC-7: decode-phase aborts through the router
+   [+   70.88s] follow-up identical-prompt: OK status=200 tokens=32 cached=8128 
+   [+   70.89s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+   [+   70.91s] server-info[final] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+   [+   70.91s] PASS: 2 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+2026-10-12T23:05:38Z [2p2d-p7b] === gauges and counters after
+   10.128.15.217: num_bootstrap_failed_reqs_total 79.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 num_bootstrap_failed_reqs_total 61.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T23:05:38Z [2p2d-p7b] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-12T23:05:44Z [2p2d-p7b] phase p7b done
+phase 7b exit 0

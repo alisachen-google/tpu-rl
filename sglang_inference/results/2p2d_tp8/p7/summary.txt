@@ -1,0 +1,10 @@
+[2p2d_D_c1] c=1 questions=80 ok turn1=44 turn2=35 wall=140.0s output_tokens=33565 out_tok/s=239.7
+[2p2d_D_c1]   TTFT turn1 mean=493ms p50=413ms | turn2 mean=584ms p50=478ms
+[2p2d_D_c1]   turn2 cached_tokens mean=31 of prompt mean=406 (cached fraction 0.08); turn1 cached mean=15
+[2p2d_D_c1]   e2e per turn mean: turn1=1.65s turn2=1.91s; completion mean turn1=403 turn2=452
+[2p2d_D_c1]   spec accept_length mean=2.485 p50=2.370 min=1.809 max=3.692 (n=79)
+[2p2d_D_c4] c=4 questions=80 ok turn1=42 turn2=37 wall=46.7s output_tokens=33272 out_tok/s=711.9
+[2p2d_D_c4]   TTFT turn1 mean=685ms p50=625ms | turn2 mean=667ms p50=578ms
+[2p2d_D_c4]   turn2 cached_tokens mean=61 of prompt mean=388 (cached fraction 0.16); turn1 cached mean=61
+[2p2d_D_c4]   e2e per turn mean: turn1=2.21s turn2=2.36s; completion mean turn1=403 turn2=441
+[2p2d_D_c4]   spec accept_length mean=2.451 p50=2.349 min=1.837 max=3.692 (n=79)

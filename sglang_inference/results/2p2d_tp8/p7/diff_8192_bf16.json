@@ -1,0 +1,53 @@
+{
+ "a": "/home/alisachen_google_com/pd_disagg/results/golden/gpt-oss_bf16_c1/8192.jsonl",
+ "b": "/home/alisachen_google_com/pd_disagg/results/2p2d_tp8/p7/8192.jsonl",
+ "ids": 2,
+ "failed": 2,
+ "identical": 0,
+ "gates": {
+  "exact_prefix_tokens": 256,
+  "min_agreement": 0.95,
+  "expect_tokens": null,
+  "max_4gram_repeats": 50
+ },
+ "rows": [
+  {
+   "id": "isl8192_k0",
+   "gate_pass": false,
+   "notes": [
+    "agreement 0.000<0.95",
+    "structural:error:HTTP 500: Internal Server Error,empty_output"
+   ],
+   "identical": false,
+   "char_prefix": 0,
+   "char_agreement": 0.0,
+   "first_divergence_char": 0,
+   "context_a": "We need to parse the",
+   "context_b": "",
+   "structural_a": [],
+   "structural_b": [
+    "error:HTTP 500: Internal Server Error",
+    "empty_output"
+   ]
+  },
+  {
+   "id": "isl8192_k1",
+   "gate_pass": false,
+   "notes": [
+    "agreement 0.000<0.95",
+    "structural:error:ConnectionError: ('Connection aborted.', ConnectionResetErro,empty_output"
+   ],
+   "identical": false,
+   "char_prefix": 0,
+   "char_agreement": 0.0,
+   "first_divergence_char": 0,
+   "context_a": "We need to list secr",
+   "context_b": "",
+   "structural_a": [],
+   "structural_b": [
+    "error:ConnectionError: ('Connection aborted.', ConnectionResetErro",
+    "empty_output"
+   ]
+  }
+ ]
+}
