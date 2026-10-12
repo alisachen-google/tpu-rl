@@ -1,3 +1,15 @@
 prefill host on b9da83f34a87
 2026-10-12T08:06:19Z [door5] decode host on b9da83f34a
 2026-10-12T08:06:19Z [door5] === retract2: recipe gpt-oss_A_128k_smallpool_ps_q.json (limit 4)
+2026-10-12 08:08:48 prefill /health ready after 135 s
+2026-10-12 08:09:18 decode /health ready after 30 s
+2026-10-12 08:09:19 LB /health_generate ready after 1 s
+   [start] INFO mode=retract2 decode used=0.0 prefill prompt_tokens_total=None
+   [R1-retraction-observed] PASS decode num_retracted_reqs peaked at 1.0 after 98s (running 6.0, used 256000.0)
+   [R2-newcomers-answered] PASS newcomers while retracted: [200, 200, 200, 200] (503 once retracted + waiting exceed limit 4); e2e [42.4, 0.1, 0.1, 0.1]
+   [R3-holders-finish] PASS holders [200, 200, 200, 200, 200, 200, 200] (no deadlock after retraction)
+   [R3-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+   [R3-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+   prefill log: big prefill batches (>=4000 new tokens, 8k refusals would show here)=21
+   prefill log: refused rooms logged=0 bootstrap-failed warnings=0 door rids seen=0; exceptions: prefill 0 decode 0
+2026-10-12T08:12:59Z [door5] phase door2 done

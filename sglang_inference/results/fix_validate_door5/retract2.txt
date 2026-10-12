@@ -1,0 +1,6 @@
+[start] INFO mode=retract2 decode used=0.0 prefill prompt_tokens_total=None
+[R1-retraction-observed] PASS decode num_retracted_reqs peaked at 1.0 after 98s (running 6.0, used 256000.0)
+[R2-newcomers-answered] PASS newcomers while retracted: [200, 200, 200, 200] (503 once retracted + waiting exceed limit 4); e2e [42.4, 0.1, 0.1, 0.1]
+[R3-holders-finish] PASS holders [200, 200, 200, 200, 200, 200, 200] (no deadlock after retraction)
+[R3-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+[R3-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
