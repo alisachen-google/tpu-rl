@@ -1,11 +1,15 @@
 [start] INFO mode=nops decode used=0.0 prefill prompt_tokens_total=None
-[N1-idle-burst] FAIL 20 into idle (slots 8, limit 4): 200×20 503×0 other=[]
+[N1-idle-burst] PASS 20 into idle (slots 8, limit 4): 200×12 503×8 other=[]
 [N1-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
 [N1-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
-[N2-refused-503] FAIL newcomer -> HTTP 200 in 37.52s; body: {"text":" So we need to compute the probability that","output_ids":[2632,581,1309,316,23864,290,34933,484],"meta_info":{
-[N4-no-prefill-work] FAIL 3 refused 8k prompts: statuses [200, 200, 200] e2e [0.45, 0.37, 0.18]; prefill prompt_tokens_total 2048.0 -> 26629.0
-[N5-stream-refused] FAIL streaming newcomer -> HTTP 200 first line: {"text":"\n\nSure! Here's a revised version of","output_ids":[279,62915,0,44257,261,52287,3926,328],
-[N6-abort-storm] PASS 16 newcomers with 1.5s client timeout: {200: 16}
+[N2-refused-503] PASS newcomer -> HTTP 503 in 0.01s; body: {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":503}
+[N4-big-prompts-refused-fast] PASS 3 refused 8k prompts: statuses [503, 503, 503] e2e [0.02, 0.02, 0.02]; prefill prompt_tokens_total 2048.0 -> 26629.0 (counts aborted requests)
+[N5-stream-refused] PASS streaming newcomer -> HTTP 503 first line: {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":503}
+[N6-abort-storm] PASS 16 newcomers with 1.5s client timeout: {503: 4, 200: 12}
 [N6-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
 [N6-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
 [N7-serves-after-storm] PASS plain request after storm -> HTTP 200
+[N8-soak-cycles] PASS per cycle (refused, served, idle, prefill bootstrap queue): [(3, 12, True, 0.0), (3, 12, True, 0.0), (3, 12, True, 0.0), (3, 12, True, 0.0), (3, 12, True, 0.0)] expected (3, 12, True, 0)
+[N9-greedy-equal-under-pressure] PASS 3 greedy prompts idle vs admitted-under-pressure equal: [True, True, True]
+[N9-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+[N9-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0

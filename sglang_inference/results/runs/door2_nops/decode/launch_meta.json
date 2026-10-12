@@ -160,18 +160,18 @@
   },
   "git": {
     "sglang_torchtpu": {
-      "branch": "main",
-      "commit": "42bc00b453b40109b0c6fb34a7b1e41f5e1b0af1",
+      "branch": "HEAD",
+      "commit": "2d8940cbf5a3357e121d590a565eadea9a15fa67",
       "dirty": false,
       "remote": "https://github.com/sgl-project/sglang-torchtpu.git",
       "root": "/home/alisachen_google_com/sglang-torchtpu",
-      "short": "42bc00b453b4"
+      "short": "2d8940cbf5a3"
     }
   },
   "hostname": "t1v-n-eb299eb1-w-1",
   "kind": "launch",
   "schema_version": 1,
-  "timestamp": "2026-10-12T06:19:38+00:00",
+  "timestamp": "2026-10-12T07:02:00+00:00",
   "versions": {
     "jax": "0.10.2",
     "jaxlib": "0.10.2",

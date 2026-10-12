@@ -1,0 +1,12 @@
+[start] INFO mode=low decode used=0.0 prefill prompt_tokens_total=None
+[L1-idle-burst] PASS 20 into idle (slots 8, limit 4): 200×12 503×8 other=[]
+[L1-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+[L1-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+[L2-refused-503] PASS newcomer -> HTTP 503 in 0.01s; body: {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":503}
+[L3-no-eviction] PASS higher-priority newcomer (door v1 refuses, no eviction) -> HTTP 503 in 0.02s
+[L4-big-prompts-refused-fast] PASS 3 refused 8k prompts: statuses [503, 503, 503] e2e [0.03, 0.02, 0.02]; prefill prompt_tokens_total 2048.0 -> 26629.0 (counts aborted requests)
+[L5-stream-refused] PASS streaming newcomer -> HTTP 503 first line: {"object":"error","message":"The request queue is full.","type":"503","param":null,"code":503}
+[L6-abort-storm] PASS 16 newcomers with 1.5s client timeout: {503: 7, 200: 9}
+[L6-end-idle] PASS decode idle=True used_tokens=0.0 queue=0.0
+[L6-prefill-clean] PASS prefill bootstrap_queue=0.0 queue=0.0 running=0.0
+[L7-serves-after-storm] PASS plain request after storm -> HTTP 200
