@@ -16,3 +16,18 @@
 2026-10-12T10:12:42Z [merge#1191] PENDING
    e2e-test / stage-b-test-tpu-4-v7 in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114723598646
    unit-test / stage-a-test-tpu-unit completed failure https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114723598639
+2026-10-12T10:17:43Z [merge#1191] PENDING
+   e2e-test / stage-b-test-tpu-4-v7 in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114723598646
+   unit-test / stage-a-test-tpu-unit completed failure https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114723598639
+2026-10-12T10:22:45Z [merge#1191] PENDING
+   e2e-test / stage-b-test-tpu-4-v7 in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114723598646
+   unit-test / stage-a-test-tpu-unit completed failure https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114723598639
+2026-10-12T10:27:47Z [merge#1191] PENDING
+   e2e-test / stage-b-test-tpu-4-v7 in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114723598646
+   unit-test / stage-a-test-tpu-unit completed failure https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114723598639
+2026-10-12T10:32:49Z [merge#1191] PENDING
+   unit-test / stage-a-test-tpu-unit in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114768795860
+2026-10-12T10:37:50Z [merge#1191] PENDING
+   unit-test / stage-a-test-tpu-unit in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114768795860
+2026-10-12T10:42:52Z [merge#1191] PENDING
+   unit-test / stage-a-test-tpu-unit in_progress None https://github.com/sgl-project/sglang-torchtpu/actions/runs/38213969985/job/114768795860
