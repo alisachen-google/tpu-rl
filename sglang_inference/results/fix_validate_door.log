@@ -1,3 +1,13 @@
 prefill host on e545ae345bf2
 2026-10-12T05:15:00Z [door] decode host on e545ae345b
 2026-10-12T05:15:00Z [door] === nops: recipe gpt-oss_C_128k_q_nops.json
+2026-10-12 05:17:45 prefill /health ready after 150 s
+2026-10-12 05:18:00 decode /health ready after 15 s
+2026-10-12 05:18:01 LB /health_generate ready after 1 s
+   [start] INFO decode used tokens 0.0, running 0.0
+   [N1-limit-without-priority] FAIL priority scheduling off, limit 4: 5th waiter -> HTTP ERR
+   [N2-no-eviction] PASS fillers all served (no eviction possible): {'fill0': 200, 'fill1': 200, 'fill2': 200, 'fill3': 200}
+   [N-end-idle] PASS idle=True decode num_used_tokens at end = 0.0
+   door newcomers door-rid-0..2: ["HTTPConnectionPool(host='10.128.15.217',", 200, 200]
+   prefill log: bootstrap failures for door rids = 0; prefill batches mentioning door rids = 0; scheduler exceptions: decode 0, prefill 0
+2026-10-12T05:30:21Z [door] === q0: recipe gpt-oss_C_128k_ps_q0.json
