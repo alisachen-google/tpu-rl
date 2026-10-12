@@ -1,0 +1,85 @@
+2026-10-12T21:52:39Z [2p2d-p5] === gauges before
+   10.128.15.217: num_bootstrap_failed_reqs_total 1.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_bootstrap_failed_reqs_total 1.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 num_transfer_failed_reqs_total 5.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T21:52:39Z [2p2d-p5] === c8_8k: random isl=8192 osl=256 c=8 n=64
+   Successful requests:                     64        
+   Benchmark duration (s):                  20.15     
+   Total input tokens:                      524288    
+   Total input text tokens:                 524288    
+   Request throughput (req/s):              3.18      
+   Output token throughput (tok/s):         813.06    
+   Mean E2E Latency (ms):                   2415.97   
+   Mean TTFT (ms):                          515.44    
+   P99 TTFT (ms):                           1395.72   
+   Mean ITL (ms):                           7.46      
+   P99 ITL (ms):                            17.27     
+2026-10-12T21:53:33Z [2p2d-p5]    gauges after c8_8k:
+   10.128.15.217: num_bootstrap_failed_reqs_total 1.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_bootstrap_failed_reqs_total 1.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 num_transfer_failed_reqs_total 5.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T21:53:34Z [2p2d-p5] === c16_8k: random isl=8192 osl=256 c=16 n=96
+   Successful requests:                     96        
+   Benchmark duration (s):                  19.18     
+   Total input tokens:                      786432    
+   Total input text tokens:                 786432    
+   Request throughput (req/s):              5.00      
+   Output token throughput (tok/s):         1281.16   
+   Mean E2E Latency (ms):                   2988.68   
+   Mean TTFT (ms):                          782.74    
+   P99 TTFT (ms):                           2316.00   
+   Mean ITL (ms):                           8.66      
+   P99 ITL (ms):                            17.83     
+2026-10-12T21:54:24Z [2p2d-p5]    gauges after c16_8k:
+   10.128.15.217: num_bootstrap_failed_reqs_total 1.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_bootstrap_failed_reqs_total 1.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 num_transfer_failed_reqs_total 5.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T21:54:25Z [2p2d-p5] === c8_32k: random isl=32768 osl=256 c=8 n=32
+   Successful requests:                     32        
+   Benchmark duration (s):                  21.23     
+   Total input tokens:                      1048576   
+   Total input text tokens:                 1048576   
+   Request throughput (req/s):              1.51      
+   Output token throughput (tok/s):         385.86    
+   Mean E2E Latency (ms):                   4819.44   
+   Mean TTFT (ms):                          3162.00   
+   P99 TTFT (ms):                           5344.68   
+   Mean ITL (ms):                           6.50      
+   P99 ITL (ms):                            14.34     
+2026-10-12T21:55:19Z [2p2d-p5]    gauges after c8_32k:
+   10.128.15.217: num_bootstrap_failed_reqs_total 1.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_bootstrap_failed_reqs_total 1.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 num_transfer_failed_reqs_total 5.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T21:55:19Z [2p2d-p5] === c4_128k: random isl=131072 osl=256 c=4 n=12
+   Successful requests:                     12        
+   Benchmark duration (s):                  48.51     
+   Total input tokens:                      1572864   
+   Total input text tokens:                 1572864   
+   Request throughput (req/s):              0.25      
+   Output token throughput (tok/s):         63.32     
+   Mean E2E Latency (ms):                   13412.61  
+   Mean TTFT (ms):                          11863.07  
+   P99 TTFT (ms):                           17640.61  
+   Mean ITL (ms):                           6.08      
+   P99 ITL (ms):                            9.54      
+2026-10-12T21:56:47Z [2p2d-p5]    gauges after c4_128k:
+   10.128.15.217: num_bootstrap_failed_reqs_total 1.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_bootstrap_failed_reqs_total 1.0 num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 num_transfer_failed_reqs_total 5.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T21:56:48Z [2p2d-p5] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-12T21:56:55Z [2p2d-p5] phase p5 done
+phase 5 exit 0

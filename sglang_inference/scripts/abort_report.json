@@ -1,0 +1,3342 @@
+{
+ "url": "http://10.128.15.217:8080",
+ "prompt_id": "isl8192_k0",
+ "phase": "decode",
+ "abort_after": 0.25,
+ "repeat": 40,
+ "concurrent": 4,
+ "settle": 90.0,
+ "server_info": {
+  "baseline": {
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.20:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "after_abort": {
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.20:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "settled": {
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.20:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  },
+  "final": {
+   "http://10.128.0.90:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   },
+   "http://10.128.0.20:30000": {
+    "num_running_reqs": null,
+    "num_queue_reqs": null,
+    "token_usage": null
+   }
+  }
+ },
+ "aborts": [
+  {
+   "idx": 0,
+   "rid": "abort-0-1791841776514",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.59,
+   "aborted_s": 0.84,
+   "chunks": 36,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 1,
+   "rid": "abort-1-1791841776514",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.333,
+   "aborted_s": 0.583,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 2,
+   "rid": "abort-2-1791841776515",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.366,
+   "aborted_s": 0.617,
+   "chunks": 35,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 3,
+   "rid": "abort-3-1791841776516",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.849,
+   "aborted_s": 1.1,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 4,
+   "rid": "abort-4-1791841777616",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.327,
+   "aborted_s": 0.577,
+   "chunks": 45,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 5,
+   "rid": "abort-5-1791841777617",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.332,
+   "aborted_s": 0.582,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 6,
+   "rid": "abort-6-1791841777618",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.603,
+   "aborted_s": 0.854,
+   "chunks": 43,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 7,
+   "rid": "abort-7-1791841777619",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.612,
+   "aborted_s": 0.862,
+   "chunks": 43,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 8,
+   "rid": "abort-8-1791841778481",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.325,
+   "aborted_s": 0.575,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 9,
+   "rid": "abort-9-1791841778482",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.569,
+   "aborted_s": 0.819,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 10,
+   "rid": "abort-10-1791841778483",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.33,
+   "aborted_s": 0.581,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 11,
+   "rid": "abort-11-1791841778484",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.83,
+   "aborted_s": 1.08,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 12,
+   "rid": "abort-12-1791841779565",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.325,
+   "aborted_s": 0.575,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 13,
+   "rid": "abort-13-1791841779566",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.105,
+   "aborted_s": 1.356,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 14,
+   "rid": "abort-14-1791841779567",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.568,
+   "aborted_s": 0.819,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 15,
+   "rid": "abort-15-1791841779567",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.84,
+   "aborted_s": 1.09,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 16,
+   "rid": "abort-16-1791841780922",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.33,
+   "aborted_s": 0.58,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 17,
+   "rid": "abort-17-1791841780923",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.576,
+   "aborted_s": 0.826,
+   "chunks": 45,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 18,
+   "rid": "abort-18-1791841780923",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.834,
+   "aborted_s": 1.085,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 19,
+   "rid": "abort-19-1791841780924",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.324,
+   "aborted_s": 0.575,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 20,
+   "rid": "abort-20-1791841782008",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.322,
+   "aborted_s": 0.573,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 21,
+   "rid": "abort-21-1791841782009",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.567,
+   "aborted_s": 0.817,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 22,
+   "rid": "abort-22-1791841782010",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.336,
+   "aborted_s": 0.587,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 23,
+   "rid": "abort-23-1791841782011",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.827,
+   "aborted_s": 1.077,
+   "chunks": 43,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 24,
+   "rid": "abort-24-1791841783089",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.571,
+   "aborted_s": 0.822,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 25,
+   "rid": "abort-25-1791841783090",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.325,
+   "aborted_s": 0.576,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 26,
+   "rid": "abort-26-1791841783091",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.322,
+   "aborted_s": 0.572,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 27,
+   "rid": "abort-27-1791841783092",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.567,
+   "aborted_s": 0.817,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 28,
+   "rid": "abort-28-1791841783911",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.352,
+   "aborted_s": 0.602,
+   "chunks": 41,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 29,
+   "rid": "abort-29-1791841783912",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.57,
+   "aborted_s": 0.821,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 30,
+   "rid": "abort-30-1791841783913",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.36,
+   "aborted_s": 0.61,
+   "chunks": 41,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 31,
+   "rid": "abort-31-1791841783914",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.832,
+   "aborted_s": 1.082,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 32,
+   "rid": "abort-32-1791841784997",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.347,
+   "aborted_s": 0.598,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 33,
+   "rid": "abort-33-1791841784998",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.581,
+   "aborted_s": 0.831,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 34,
+   "rid": "abort-34-1791841784999",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.356,
+   "aborted_s": 0.606,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 35,
+   "rid": "abort-35-1791841784999",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.845,
+   "aborted_s": 1.096,
+   "chunks": 49,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 36,
+   "rid": "abort-36-1791841786096",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.33,
+   "aborted_s": 0.582,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 37,
+   "rid": "abort-37-1791841786096",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.573,
+   "aborted_s": 0.823,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 38,
+   "rid": "abort-38-1791841786097",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.838,
+   "aborted_s": 1.089,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 39,
+   "rid": "abort-39-1791841786098",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.095,
+   "aborted_s": 1.346,
+   "chunks": 43,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 40,
+   "rid": "abort-40-1791841787444",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.586,
+   "aborted_s": 0.836,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 41,
+   "rid": "abort-41-1791841787445",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.33,
+   "aborted_s": 0.58,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 42,
+   "rid": "abort-42-1791841787446",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.332,
+   "aborted_s": 0.582,
+   "chunks": 45,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 43,
+   "rid": "abort-43-1791841787447",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.845,
+   "aborted_s": 1.095,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 44,
+   "rid": "abort-44-1791841788543",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.324,
+   "aborted_s": 0.574,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 45,
+   "rid": "abort-45-1791841788544",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.33,
+   "aborted_s": 0.58,
+   "chunks": 45,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 46,
+   "rid": "abort-46-1791841788545",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.6,
+   "aborted_s": 0.85,
+   "chunks": 45,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 47,
+   "rid": "abort-47-1791841788545",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.607,
+   "aborted_s": 0.857,
+   "chunks": 45,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 48,
+   "rid": "abort-48-1791841789403",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.327,
+   "aborted_s": 0.577,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 49,
+   "rid": "abort-49-1791841789404",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.563,
+   "aborted_s": 0.813,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 50,
+   "rid": "abort-50-1791841789405",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.826,
+   "aborted_s": 1.077,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 51,
+   "rid": "abort-51-1791841789406",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.355,
+   "aborted_s": 0.605,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 52,
+   "rid": "abort-52-1791841790482",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.341,
+   "aborted_s": 0.592,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 53,
+   "rid": "abort-53-1791841790483",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.359,
+   "aborted_s": 0.61,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 54,
+   "rid": "abort-54-1791841790484",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.607,
+   "aborted_s": 0.857,
+   "chunks": 44,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 55,
+   "rid": "abort-55-1791841790485",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.606,
+   "aborted_s": 0.857,
+   "chunks": 44,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 56,
+   "rid": "abort-56-1791841791342",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.326,
+   "aborted_s": 0.576,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 57,
+   "rid": "abort-57-1791841791343",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.322,
+   "aborted_s": 0.573,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 58,
+   "rid": "abort-58-1791841791343",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.567,
+   "aborted_s": 0.818,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 59,
+   "rid": "abort-59-1791841791344",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.569,
+   "aborted_s": 0.819,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 60,
+   "rid": "abort-60-1791841792163",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.324,
+   "aborted_s": 0.574,
+   "chunks": 33,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 61,
+   "rid": "abort-61-1791841792164",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.573,
+   "aborted_s": 0.824,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 62,
+   "rid": "abort-62-1791841792165",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.323,
+   "aborted_s": 0.573,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 63,
+   "rid": "abort-63-1791841792166",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.829,
+   "aborted_s": 1.079,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 64,
+   "rid": "abort-64-1791841793246",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.322,
+   "aborted_s": 0.573,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 65,
+   "rid": "abort-65-1791841793246",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.329,
+   "aborted_s": 0.579,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 66,
+   "rid": "abort-66-1791841793248",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.573,
+   "aborted_s": 0.824,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 67,
+   "rid": "abort-67-1791841793249",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.587,
+   "aborted_s": 0.837,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 68,
+   "rid": "abort-68-1791841794086",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.342,
+   "aborted_s": 0.593,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 69,
+   "rid": "abort-69-1791841794087",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.353,
+   "aborted_s": 0.604,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 70,
+   "rid": "abort-70-1791841794088",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.58,
+   "aborted_s": 0.83,
+   "chunks": 41,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 71,
+   "rid": "abort-71-1791841794089",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.838,
+   "aborted_s": 1.089,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 72,
+   "rid": "abort-72-1791841795178",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.579,
+   "aborted_s": 0.829,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 73,
+   "rid": "abort-73-1791841795179",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.325,
+   "aborted_s": 0.576,
+   "chunks": 42,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 74,
+   "rid": "abort-74-1791841795180",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.336,
+   "aborted_s": 0.586,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 75,
+   "rid": "abort-75-1791841795180",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.584,
+   "aborted_s": 0.834,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 76,
+   "rid": "abort-76-1791841796015",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.833,
+   "aborted_s": 1.083,
+   "chunks": 49,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 77,
+   "rid": "abort-77-1791841796016",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.57,
+   "aborted_s": 0.821,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 78,
+   "rid": "abort-78-1791841796017",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.324,
+   "aborted_s": 0.574,
+   "chunks": 42,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 79,
+   "rid": "abort-79-1791841796018",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.091,
+   "aborted_s": 1.341,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 80,
+   "rid": "abort-80-1791841797359",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.339,
+   "aborted_s": 0.59,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 81,
+   "rid": "abort-81-1791841797360",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.351,
+   "aborted_s": 0.601,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 82,
+   "rid": "abort-82-1791841797361",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.851,
+   "aborted_s": 1.101,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 83,
+   "rid": "abort-83-1791841797362",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.585,
+   "aborted_s": 0.836,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 84,
+   "rid": "abort-84-1791841798463",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.346,
+   "aborted_s": 0.596,
+   "chunks": 42,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 85,
+   "rid": "abort-85-1791841798464",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.356,
+   "aborted_s": 0.606,
+   "chunks": 42,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 86,
+   "rid": "abort-86-1791841798465",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.567,
+   "aborted_s": 0.817,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 87,
+   "rid": "abort-87-1791841798466",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.832,
+   "aborted_s": 1.082,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 88,
+   "rid": "abort-88-1791841799549",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.567,
+   "aborted_s": 0.817,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 89,
+   "rid": "abort-89-1791841799549",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.336,
+   "aborted_s": 0.586,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 90,
+   "rid": "abort-90-1791841799550",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.828,
+   "aborted_s": 1.078,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 91,
+   "rid": "abort-91-1791841799551",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.354,
+   "aborted_s": 0.604,
+   "chunks": 41,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 92,
+   "rid": "abort-92-1791841800629",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.335,
+   "aborted_s": 0.585,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 93,
+   "rid": "abort-93-1791841800630",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.835,
+   "aborted_s": 1.086,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 94,
+   "rid": "abort-94-1791841800631",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.575,
+   "aborted_s": 0.825,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 95,
+   "rid": "abort-95-1791841800631",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.322,
+   "aborted_s": 0.573,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 96,
+   "rid": "abort-96-1791841801716",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.331,
+   "aborted_s": 0.581,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 97,
+   "rid": "abort-97-1791841801717",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.326,
+   "aborted_s": 0.576,
+   "chunks": 41,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 98,
+   "rid": "abort-98-1791841801718",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.836,
+   "aborted_s": 1.086,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 99,
+   "rid": "abort-99-1791841801719",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.574,
+   "aborted_s": 0.824,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 100,
+   "rid": "abort-100-1791841802804",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.328,
+   "aborted_s": 0.578,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 101,
+   "rid": "abort-101-1791841802805",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.838,
+   "aborted_s": 1.089,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 102,
+   "rid": "abort-102-1791841802805",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.578,
+   "aborted_s": 0.829,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 103,
+   "rid": "abort-103-1791841802806",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.105,
+   "aborted_s": 1.355,
+   "chunks": 49,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 104,
+   "rid": "abort-104-1791841804162",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.359,
+   "aborted_s": 0.61,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 105,
+   "rid": "abort-105-1791841804163",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.348,
+   "aborted_s": 0.598,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 106,
+   "rid": "abort-106-1791841804164",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.618,
+   "aborted_s": 0.868,
+   "chunks": 44,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 107,
+   "rid": "abort-107-1791841804165",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.617,
+   "aborted_s": 0.867,
+   "chunks": 44,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 108,
+   "rid": "abort-108-1791841805033",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.324,
+   "aborted_s": 0.574,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 109,
+   "rid": "abort-109-1791841805034",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.323,
+   "aborted_s": 0.574,
+   "chunks": 49,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 110,
+   "rid": "abort-110-1791841805035",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.833,
+   "aborted_s": 1.083,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 111,
+   "rid": "abort-111-1791841805035",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.564,
+   "aborted_s": 0.814,
+   "chunks": 41,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 112,
+   "rid": "abort-112-1791841806118",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.327,
+   "aborted_s": 0.578,
+   "chunks": 42,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 113,
+   "rid": "abort-113-1791841806119",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.324,
+   "aborted_s": 0.574,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 114,
+   "rid": "abort-114-1791841806120",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.574,
+   "aborted_s": 0.824,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 115,
+   "rid": "abort-115-1791841806121",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.591,
+   "aborted_s": 0.842,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 116,
+   "rid": "abort-116-1791841806963",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.834,
+   "aborted_s": 1.084,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 117,
+   "rid": "abort-117-1791841806964",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.323,
+   "aborted_s": 0.573,
+   "chunks": 41,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 118,
+   "rid": "abort-118-1791841806965",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.323,
+   "aborted_s": 0.573,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 119,
+   "rid": "abort-119-1791841806965",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.569,
+   "aborted_s": 0.819,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 120,
+   "rid": "abort-120-1791841808048",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.568,
+   "aborted_s": 0.818,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 121,
+   "rid": "abort-121-1791841808048",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.323,
+   "aborted_s": 0.573,
+   "chunks": 41,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 122,
+   "rid": "abort-122-1791841808049",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.099,
+   "aborted_s": 1.349,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 123,
+   "rid": "abort-123-1791841808050",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.83,
+   "aborted_s": 1.081,
+   "chunks": 41,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 124,
+   "rid": "abort-124-1791841809399",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.837,
+   "aborted_s": 1.087,
+   "chunks": 49,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 125,
+   "rid": "abort-125-1791841809400",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.354,
+   "aborted_s": 0.605,
+   "chunks": 43,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 126,
+   "rid": "abort-126-1791841809401",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.57,
+   "aborted_s": 0.821,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 127,
+   "rid": "abort-127-1791841809401",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.362,
+   "aborted_s": 0.612,
+   "chunks": 44,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 128,
+   "rid": "abort-128-1791841810487",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.33,
+   "aborted_s": 0.581,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 129,
+   "rid": "abort-129-1791841810488",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.565,
+   "aborted_s": 0.816,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 130,
+   "rid": "abort-130-1791841810489",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.826,
+   "aborted_s": 1.077,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 131,
+   "rid": "abort-131-1791841810490",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.35,
+   "aborted_s": 0.6,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 132,
+   "rid": "abort-132-1791841811566",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.572,
+   "aborted_s": 0.823,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 133,
+   "rid": "abort-133-1791841811567",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.836,
+   "aborted_s": 1.087,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 134,
+   "rid": "abort-134-1791841811568",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.324,
+   "aborted_s": 0.574,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 135,
+   "rid": "abort-135-1791841811569",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.341,
+   "aborted_s": 0.591,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 136,
+   "rid": "abort-136-1791841812654",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.329,
+   "aborted_s": 0.579,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 137,
+   "rid": "abort-137-1791841812655",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.581,
+   "aborted_s": 0.831,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 138,
+   "rid": "abort-138-1791841812656",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.833,
+   "aborted_s": 1.083,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 139,
+   "rid": "abort-139-1791841812656",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.321,
+   "aborted_s": 0.571,
+   "chunks": 45,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 140,
+   "rid": "abort-140-1791841813739",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.575,
+   "aborted_s": 0.825,
+   "chunks": 45,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 141,
+   "rid": "abort-141-1791841813740",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.325,
+   "aborted_s": 0.576,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 142,
+   "rid": "abort-142-1791841813741",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.832,
+   "aborted_s": 1.082,
+   "chunks": 48,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 143,
+   "rid": "abort-143-1791841813742",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.338,
+   "aborted_s": 0.588,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 144,
+   "rid": "abort-144-1791841814824",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.324,
+   "aborted_s": 0.575,
+   "chunks": 36,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 145,
+   "rid": "abort-145-1791841814825",
+   "status": 200,
+   "error": null,
+   "first_token_s": 1.115,
+   "aborted_s": 1.366,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 146,
+   "rid": "abort-146-1791841814825",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.85,
+   "aborted_s": 1.101,
+   "chunks": 34,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 147,
+   "rid": "abort-147-1791841814826",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.587,
+   "aborted_s": 0.838,
+   "chunks": 40,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 148,
+   "rid": "abort-148-1791841816190",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.344,
+   "aborted_s": 0.594,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 149,
+   "rid": "abort-149-1791841816191",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.359,
+   "aborted_s": 0.609,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 150,
+   "rid": "abort-150-1791841816192",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.567,
+   "aborted_s": 0.818,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 151,
+   "rid": "abort-151-1791841816193",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.829,
+   "aborted_s": 1.08,
+   "chunks": 49,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 152,
+   "rid": "abort-152-1791841817274",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.319,
+   "aborted_s": 0.57,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 153,
+   "rid": "abort-153-1791841817275",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.826,
+   "aborted_s": 1.076,
+   "chunks": 46,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 154,
+   "rid": "abort-154-1791841817276",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.565,
+   "aborted_s": 0.816,
+   "chunks": 36,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 155,
+   "rid": "abort-155-1791841817276",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.347,
+   "aborted_s": 0.597,
+   "chunks": 38,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 156,
+   "rid": "abort-156-1791841818351",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.837,
+   "aborted_s": 1.087,
+   "chunks": 43,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 157,
+   "rid": "abort-157-1791841818352",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.581,
+   "aborted_s": 0.831,
+   "chunks": 37,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 158,
+   "rid": "abort-158-1791841818353",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.33,
+   "aborted_s": 0.58,
+   "chunks": 47,
+   "phase_actual": "decode",
+   "finished": false
+  },
+  {
+   "idx": 159,
+   "rid": "abort-159-1791841818354",
+   "status": 200,
+   "error": null,
+   "first_token_s": 0.345,
+   "aborted_s": 0.596,
+   "chunks": 39,
+   "phase_actual": "decode",
+   "finished": false
+  }
+ ],
+ "follow_ups": [
+  {
+   "label": "short",
+   "ok": true,
+   "status": 200,
+   "error": null,
+   "cached_tokens": 0,
+   "completion_tokens": 16,
+   "elapsed": 0.16
+  },
+  {
+   "label": "identical-prompt",
+   "ok": true,
+   "status": 200,
+   "error": null,
+   "cached_tokens": 0,
+   "completion_tokens": 32,
+   "elapsed": 0.511
+  }
+ ],
+ "baseline_problems": [],
+ "start_errors": 0,
+ "pass": true,
+ "timeline": [
+  {
+   "t": 0.001,
+   "msg": "prompt id=isl8192_k0 isl=8192 chars=43963 phase=decode abort_after=0.25s repeat=40 concurrent=4"
+  },
+  {
+   "t": 0.013,
+   "msg": "server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 0.025,
+   "msg": "server-info[baseline] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 0.026,
+   "msg": "round 1/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 0.048,
+   "msg": "req0: sent (abort-0-1791841776514), headers after 0.02s"
+  },
+  {
+   "t": 0.048,
+   "msg": "req1: sent (abort-1-1791841776514), headers after 0.02s"
+  },
+  {
+   "t": 0.063,
+   "msg": "req2: sent (abort-2-1791841776515), headers after 0.04s"
+  },
+  {
+   "t": 0.073,
+   "msg": "req3: sent (abort-3-1791841776516), headers after 0.04s"
+  },
+  {
+   "t": 0.61,
+   "msg": "req1: aborted at 0.583s in decode (first_token=0.333s, chunks=46)"
+  },
+  {
+   "t": 0.644,
+   "msg": "req2: aborted at 0.617s in decode (first_token=0.366s, chunks=35)"
+  },
+  {
+   "t": 0.866,
+   "msg": "req0: aborted at 0.84s in decode (first_token=0.59s, chunks=36)"
+  },
+  {
+   "t": 1.128,
+   "msg": "req3: aborted at 1.1s in decode (first_token=0.849s, chunks=47)"
+  },
+  {
+   "t": 1.128,
+   "msg": "round 2/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 1.137,
+   "msg": "req4: sent (abort-4-1791841777616), headers after 0.01s"
+  },
+  {
+   "t": 1.139,
+   "msg": "req5: sent (abort-5-1791841777617), headers after 0.01s"
+  },
+  {
+   "t": 1.156,
+   "msg": "req6: sent (abort-6-1791841777618), headers after 0.03s"
+  },
+  {
+   "t": 1.168,
+   "msg": "req7: sent (abort-7-1791841777619), headers after 0.04s"
+  },
+  {
+   "t": 1.706,
+   "msg": "req4: aborted at 0.577s in decode (first_token=0.327s, chunks=45)"
+  },
+  {
+   "t": 1.711,
+   "msg": "req5: aborted at 0.582s in decode (first_token=0.332s, chunks=38)"
+  },
+  {
+   "t": 1.984,
+   "msg": "req6: aborted at 0.854s in decode (first_token=0.603s, chunks=43)"
+  },
+  {
+   "t": 1.993,
+   "msg": "req7: aborted at 0.862s in decode (first_token=0.612s, chunks=43)"
+  },
+  {
+   "t": 1.993,
+   "msg": "round 3/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 2.001,
+   "msg": "req8: sent (abort-8-1791841778481), headers after 0.01s"
+  },
+  {
+   "t": 2.012,
+   "msg": "req9: sent (abort-9-1791841778482), headers after 0.02s"
+  },
+  {
+   "t": 2.012,
+   "msg": "req10: sent (abort-10-1791841778483), headers after 0.02s"
+  },
+  {
+   "t": 2.022,
+   "msg": "req11: sent (abort-11-1791841778484), headers after 0.03s"
+  },
+  {
+   "t": 2.568,
+   "msg": "req8: aborted at 0.575s in decode (first_token=0.325s, chunks=46)"
+  },
+  {
+   "t": 2.576,
+   "msg": "req10: aborted at 0.581s in decode (first_token=0.33s, chunks=37)"
+  },
+  {
+   "t": 2.813,
+   "msg": "req9: aborted at 0.819s in decode (first_token=0.569s, chunks=38)"
+  },
+  {
+   "t": 3.076,
+   "msg": "req11: aborted at 1.08s in decode (first_token=0.83s, chunks=47)"
+  },
+  {
+   "t": 3.076,
+   "msg": "round 4/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 3.084,
+   "msg": "req12: sent (abort-12-1791841779565), headers after 0.01s"
+  },
+  {
+   "t": 3.095,
+   "msg": "req14: sent (abort-14-1791841779567), headers after 0.02s"
+  },
+  {
+   "t": 3.11,
+   "msg": "req13: sent (abort-13-1791841779566), headers after 0.03s"
+  },
+  {
+   "t": 3.117,
+   "msg": "req15: sent (abort-15-1791841779567), headers after 0.04s"
+  },
+  {
+   "t": 3.652,
+   "msg": "req12: aborted at 0.575s in decode (first_token=0.325s, chunks=37)"
+  },
+  {
+   "t": 3.897,
+   "msg": "req14: aborted at 0.819s in decode (first_token=0.568s, chunks=38)"
+  },
+  {
+   "t": 4.169,
+   "msg": "req15: aborted at 1.09s in decode (first_token=0.84s, chunks=38)"
+  },
+  {
+   "t": 4.433,
+   "msg": "req13: aborted at 1.356s in decode (first_token=1.105s, chunks=47)"
+  },
+  {
+   "t": 4.434,
+   "msg": "round 5/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 4.443,
+   "msg": "req19: sent (abort-19-1791841780924), headers after 0.01s"
+  },
+  {
+   "t": 4.443,
+   "msg": "req16: sent (abort-16-1791841780922), headers after 0.01s"
+  },
+  {
+   "t": 4.458,
+   "msg": "req17: sent (abort-17-1791841780923), headers after 0.02s"
+  },
+  {
+   "t": 4.464,
+   "msg": "req18: sent (abort-18-1791841780923), headers after 0.03s"
+  },
+  {
+   "t": 5.011,
+   "msg": "req19: aborted at 0.575s in decode (first_token=0.324s, chunks=39)"
+  },
+  {
+   "t": 5.014,
+   "msg": "req16: aborted at 0.58s in decode (first_token=0.33s, chunks=37)"
+  },
+  {
+   "t": 5.261,
+   "msg": "req17: aborted at 0.826s in decode (first_token=0.576s, chunks=45)"
+  },
+  {
+   "t": 5.52,
+   "msg": "req18: aborted at 1.085s in decode (first_token=0.834s, chunks=48)"
+  },
+  {
+   "t": 5.52,
+   "msg": "round 6/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 5.528,
+   "msg": "req20: sent (abort-20-1791841782008), headers after 0.01s"
+  },
+  {
+   "t": 5.54,
+   "msg": "req21: sent (abort-21-1791841782009), headers after 0.02s"
+  },
+  {
+   "t": 5.544,
+   "msg": "req22: sent (abort-22-1791841782010), headers after 0.02s"
+  },
+  {
+   "t": 5.548,
+   "msg": "req23: sent (abort-23-1791841782011), headers after 0.03s"
+  },
+  {
+   "t": 6.093,
+   "msg": "req20: aborted at 0.573s in decode (first_token=0.322s, chunks=39)"
+  },
+  {
+   "t": 6.109,
+   "msg": "req22: aborted at 0.587s in decode (first_token=0.336s, chunks=39)"
+  },
+  {
+   "t": 6.339,
+   "msg": "req21: aborted at 0.817s in decode (first_token=0.567s, chunks=47)"
+  },
+  {
+   "t": 6.6,
+   "msg": "req23: aborted at 1.077s in decode (first_token=0.827s, chunks=43)"
+  },
+  {
+   "t": 6.601,
+   "msg": "round 7/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 6.611,
+   "msg": "req26: sent (abort-26-1791841783091), headers after 0.01s"
+  },
+  {
+   "t": 6.611,
+   "msg": "req25: sent (abort-25-1791841783090), headers after 0.01s"
+  },
+  {
+   "t": 6.622,
+   "msg": "req27: sent (abort-27-1791841783092), headers after 0.02s"
+  },
+  {
+   "t": 6.623,
+   "msg": "req24: sent (abort-24-1791841783089), headers after 0.02s"
+  },
+  {
+   "t": 7.175,
+   "msg": "req26: aborted at 0.572s in decode (first_token=0.322s, chunks=38)"
+  },
+  {
+   "t": 7.178,
+   "msg": "req25: aborted at 0.576s in decode (first_token=0.325s, chunks=37)"
+  },
+  {
+   "t": 7.421,
+   "msg": "req27: aborted at 0.817s in decode (first_token=0.567s, chunks=47)"
+  },
+  {
+   "t": 7.422,
+   "msg": "req24: aborted at 0.822s in decode (first_token=0.571s, chunks=46)"
+  },
+  {
+   "t": 7.423,
+   "msg": "round 8/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 7.431,
+   "msg": "req29: sent (abort-29-1791841783912), headers after 0.01s"
+  },
+  {
+   "t": 7.442,
+   "msg": "req28: sent (abort-28-1791841783911), headers after 0.02s"
+  },
+  {
+   "t": 7.446,
+   "msg": "req30: sent (abort-30-1791841783913), headers after 0.02s"
+  },
+  {
+   "t": 7.451,
+   "msg": "req31: sent (abort-31-1791841783914), headers after 0.03s"
+  },
+  {
+   "t": 8.025,
+   "msg": "req28: aborted at 0.602s in decode (first_token=0.352s, chunks=41)"
+  },
+  {
+   "t": 8.035,
+   "msg": "req30: aborted at 0.61s in decode (first_token=0.36s, chunks=41)"
+  },
+  {
+   "t": 8.245,
+   "msg": "req29: aborted at 0.821s in decode (first_token=0.57s, chunks=40)"
+  },
+  {
+   "t": 8.508,
+   "msg": "req31: aborted at 1.082s in decode (first_token=0.832s, chunks=48)"
+  },
+  {
+   "t": 8.509,
+   "msg": "round 9/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 8.516,
+   "msg": "req32: sent (abort-32-1791841784997), headers after 0.01s"
+  },
+  {
+   "t": 8.528,
+   "msg": "req34: sent (abort-34-1791841784999), headers after 0.02s"
+  },
+  {
+   "t": 8.541,
+   "msg": "req33: sent (abort-33-1791841784998), headers after 0.03s"
+  },
+  {
+   "t": 8.554,
+   "msg": "req35: sent (abort-35-1791841784999), headers after 0.04s"
+  },
+  {
+   "t": 9.107,
+   "msg": "req32: aborted at 0.598s in decode (first_token=0.347s, chunks=37)"
+  },
+  {
+   "t": 9.117,
+   "msg": "req34: aborted at 0.606s in decode (first_token=0.356s, chunks=37)"
+  },
+  {
+   "t": 9.341,
+   "msg": "req33: aborted at 0.831s in decode (first_token=0.581s, chunks=37)"
+  },
+  {
+   "t": 9.607,
+   "msg": "req35: aborted at 1.096s in decode (first_token=0.845s, chunks=49)"
+  },
+  {
+   "t": 9.608,
+   "msg": "round 10/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 9.616,
+   "msg": "req36: sent (abort-36-1791841786096), headers after 0.01s"
+  },
+  {
+   "t": 9.628,
+   "msg": "req37: sent (abort-37-1791841786096), headers after 0.02s"
+  },
+  {
+   "t": 9.635,
+   "msg": "req38: sent (abort-38-1791841786097), headers after 0.03s"
+  },
+  {
+   "t": 9.644,
+   "msg": "req39: sent (abort-39-1791841786098), headers after 0.03s"
+  },
+  {
+   "t": 10.19,
+   "msg": "req36: aborted at 0.582s in decode (first_token=0.33s, chunks=40)"
+  },
+  {
+   "t": 10.432,
+   "msg": "req37: aborted at 0.823s in decode (first_token=0.573s, chunks=40)"
+  },
+  {
+   "t": 10.698,
+   "msg": "req38: aborted at 1.089s in decode (first_token=0.838s, chunks=48)"
+  },
+  {
+   "t": 10.956,
+   "msg": "req39: aborted at 1.346s in decode (first_token=1.095s, chunks=43)"
+  },
+  {
+   "t": 10.956,
+   "msg": "round 11/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 10.964,
+   "msg": "req41: sent (abort-41-1791841787445), headers after 0.01s"
+  },
+  {
+   "t": 10.98,
+   "msg": "req40: sent (abort-40-1791841787444), headers after 0.02s"
+  },
+  {
+   "t": 10.985,
+   "msg": "req42: sent (abort-42-1791841787446), headers after 0.03s"
+  },
+  {
+   "t": 10.992,
+   "msg": "req43: sent (abort-43-1791841787447), headers after 0.03s"
+  },
+  {
+   "t": 11.537,
+   "msg": "req41: aborted at 0.58s in decode (first_token=0.33s, chunks=40)"
+  },
+  {
+   "t": 11.54,
+   "msg": "req42: aborted at 0.582s in decode (first_token=0.332s, chunks=45)"
+  },
+  {
+   "t": 11.792,
+   "msg": "req40: aborted at 0.836s in decode (first_token=0.586s, chunks=40)"
+  },
+  {
+   "t": 12.054,
+   "msg": "req43: aborted at 1.095s in decode (first_token=0.845s, chunks=47)"
+  },
+  {
+   "t": 12.054,
+   "msg": "round 12/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 12.062,
+   "msg": "req44: sent (abort-44-1791841788543), headers after 0.01s"
+  },
+  {
+   "t": 12.063,
+   "msg": "req45: sent (abort-45-1791841788544), headers after 0.01s"
+  },
+  {
+   "t": 12.077,
+   "msg": "req46: sent (abort-46-1791841788545), headers after 0.02s"
+  },
+  {
+   "t": 12.089,
+   "msg": "req47: sent (abort-47-1791841788545), headers after 0.03s"
+  },
+  {
+   "t": 12.629,
+   "msg": "req44: aborted at 0.574s in decode (first_token=0.324s, chunks=40)"
+  },
+  {
+   "t": 12.636,
+   "msg": "req45: aborted at 0.58s in decode (first_token=0.33s, chunks=45)"
+  },
+  {
+   "t": 12.907,
+   "msg": "req46: aborted at 0.85s in decode (first_token=0.6s, chunks=45)"
+  },
+  {
+   "t": 12.915,
+   "msg": "req47: aborted at 0.857s in decode (first_token=0.607s, chunks=45)"
+  },
+  {
+   "t": 12.915,
+   "msg": "round 13/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 12.922,
+   "msg": "req48: sent (abort-48-1791841789403), headers after 0.01s"
+  },
+  {
+   "t": 12.931,
+   "msg": "req49: sent (abort-49-1791841789404), headers after 0.01s"
+  },
+  {
+   "t": 12.94,
+   "msg": "req50: sent (abort-50-1791841789405), headers after 0.02s"
+  },
+  {
+   "t": 12.948,
+   "msg": "req51: sent (abort-51-1791841789406), headers after 0.03s"
+  },
+  {
+   "t": 13.493,
+   "msg": "req48: aborted at 0.577s in decode (first_token=0.327s, chunks=38)"
+  },
+  {
+   "t": 13.523,
+   "msg": "req51: aborted at 0.605s in decode (first_token=0.355s, chunks=39)"
+  },
+  {
+   "t": 13.73,
+   "msg": "req49: aborted at 0.813s in decode (first_token=0.563s, chunks=46)"
+  },
+  {
+   "t": 13.994,
+   "msg": "req50: aborted at 1.077s in decode (first_token=0.826s, chunks=46)"
+  },
+  {
+   "t": 13.994,
+   "msg": "round 14/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 14.001,
+   "msg": "req52: sent (abort-52-1791841790482), headers after 0.01s"
+  },
+  {
+   "t": 14.015,
+   "msg": "req53: sent (abort-53-1791841790483), headers after 0.02s"
+  },
+  {
+   "t": 14.026,
+   "msg": "req54: sent (abort-54-1791841790484), headers after 0.03s"
+  },
+  {
+   "t": 14.036,
+   "msg": "req55: sent (abort-55-1791841790485), headers after 0.04s"
+  },
+  {
+   "t": 14.586,
+   "msg": "req52: aborted at 0.592s in decode (first_token=0.341s, chunks=37)"
+  },
+  {
+   "t": 14.605,
+   "msg": "req53: aborted at 0.61s in decode (first_token=0.359s, chunks=37)"
+  },
+  {
+   "t": 14.853,
+   "msg": "req54: aborted at 0.857s in decode (first_token=0.607s, chunks=44)"
+  },
+  {
+   "t": 14.854,
+   "msg": "req55: aborted at 0.857s in decode (first_token=0.606s, chunks=44)"
+  },
+  {
+   "t": 14.854,
+   "msg": "round 15/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 14.862,
+   "msg": "req57: sent (abort-57-1791841791343), headers after 0.01s"
+  },
+  {
+   "t": 14.863,
+   "msg": "req56: sent (abort-56-1791841791342), headers after 0.01s"
+  },
+  {
+   "t": 14.874,
+   "msg": "req58: sent (abort-58-1791841791343), headers after 0.02s"
+  },
+  {
+   "t": 14.876,
+   "msg": "req59: sent (abort-59-1791841791344), headers after 0.02s"
+  },
+  {
+   "t": 15.427,
+   "msg": "req57: aborted at 0.573s in decode (first_token=0.322s, chunks=39)"
+  },
+  {
+   "t": 15.43,
+   "msg": "req56: aborted at 0.576s in decode (first_token=0.326s, chunks=38)"
+  },
+  {
+   "t": 15.673,
+   "msg": "req58: aborted at 0.818s in decode (first_token=0.567s, chunks=46)"
+  },
+  {
+   "t": 15.675,
+   "msg": "req59: aborted at 0.819s in decode (first_token=0.569s, chunks=46)"
+  },
+  {
+   "t": 15.675,
+   "msg": "round 16/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 15.682,
+   "msg": "req60: sent (abort-60-1791841792163), headers after 0.01s"
+  },
+  {
+   "t": 15.694,
+   "msg": "req62: sent (abort-62-1791841792165), headers after 0.02s"
+  },
+  {
+   "t": 15.694,
+   "msg": "req61: sent (abort-61-1791841792164), headers after 0.02s"
+  },
+  {
+   "t": 15.702,
+   "msg": "req63: sent (abort-63-1791841792166), headers after 0.02s"
+  },
+  {
+   "t": 16.249,
+   "msg": "req60: aborted at 0.574s in decode (first_token=0.324s, chunks=33)"
+  },
+  {
+   "t": 16.251,
+   "msg": "req62: aborted at 0.573s in decode (first_token=0.323s, chunks=40)"
+  },
+  {
+   "t": 16.5,
+   "msg": "req61: aborted at 0.824s in decode (first_token=0.573s, chunks=37)"
+  },
+  {
+   "t": 16.757,
+   "msg": "req63: aborted at 1.079s in decode (first_token=0.829s, chunks=46)"
+  },
+  {
+   "t": 16.757,
+   "msg": "round 17/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 16.767,
+   "msg": "req64: sent (abort-64-1791841793246), headers after 0.01s"
+  },
+  {
+   "t": 16.768,
+   "msg": "req65: sent (abort-65-1791841793246), headers after 0.01s"
+  },
+  {
+   "t": 16.781,
+   "msg": "req66: sent (abort-66-1791841793248), headers after 0.02s"
+  },
+  {
+   "t": 16.782,
+   "msg": "req67: sent (abort-67-1791841793249), headers after 0.02s"
+  },
+  {
+   "t": 17.331,
+   "msg": "req64: aborted at 0.573s in decode (first_token=0.322s, chunks=39)"
+  },
+  {
+   "t": 17.338,
+   "msg": "req65: aborted at 0.579s in decode (first_token=0.329s, chunks=39)"
+  },
+  {
+   "t": 17.583,
+   "msg": "req66: aborted at 0.824s in decode (first_token=0.573s, chunks=47)"
+  },
+  {
+   "t": 17.598,
+   "msg": "req67: aborted at 0.837s in decode (first_token=0.587s, chunks=46)"
+  },
+  {
+   "t": 17.598,
+   "msg": "round 18/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 17.607,
+   "msg": "req68: sent (abort-68-1791841794086), headers after 0.01s"
+  },
+  {
+   "t": 17.618,
+   "msg": "req69: sent (abort-69-1791841794087), headers after 0.02s"
+  },
+  {
+   "t": 17.627,
+   "msg": "req70: sent (abort-70-1791841794088), headers after 0.03s"
+  },
+  {
+   "t": 17.637,
+   "msg": "req71: sent (abort-71-1791841794089), headers after 0.04s"
+  },
+  {
+   "t": 18.191,
+   "msg": "req68: aborted at 0.593s in decode (first_token=0.342s, chunks=38)"
+  },
+  {
+   "t": 18.203,
+   "msg": "req69: aborted at 0.604s in decode (first_token=0.353s, chunks=39)"
+  },
+  {
+   "t": 18.43,
+   "msg": "req70: aborted at 0.83s in decode (first_token=0.58s, chunks=41)"
+  },
+  {
+   "t": 18.69,
+   "msg": "req71: aborted at 1.089s in decode (first_token=0.838s, chunks=47)"
+  },
+  {
+   "t": 18.69,
+   "msg": "round 19/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 18.699,
+   "msg": "req72: sent (abort-72-1791841795178), headers after 0.01s"
+  },
+  {
+   "t": 18.707,
+   "msg": "req73: sent (abort-73-1791841795179), headers after 0.02s"
+  },
+  {
+   "t": 18.714,
+   "msg": "req74: sent (abort-74-1791841795180), headers after 0.02s"
+  },
+  {
+   "t": 18.714,
+   "msg": "req75: sent (abort-75-1791841795180), headers after 0.02s"
+  },
+  {
+   "t": 19.266,
+   "msg": "req73: aborted at 0.576s in decode (first_token=0.325s, chunks=42)"
+  },
+  {
+   "t": 19.278,
+   "msg": "req74: aborted at 0.586s in decode (first_token=0.336s, chunks=37)"
+  },
+  {
+   "t": 19.519,
+   "msg": "req72: aborted at 0.829s in decode (first_token=0.579s, chunks=46)"
+  },
+  {
+   "t": 19.527,
+   "msg": "req75: aborted at 0.834s in decode (first_token=0.584s, chunks=48)"
+  },
+  {
+   "t": 19.527,
+   "msg": "round 20/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 19.537,
+   "msg": "req78: sent (abort-78-1791841796017), headers after 0.01s"
+  },
+  {
+   "t": 19.546,
+   "msg": "req77: sent (abort-77-1791841796016), headers after 0.02s"
+  },
+  {
+   "t": 19.556,
+   "msg": "req76: sent (abort-76-1791841796015), headers after 0.03s"
+  },
+  {
+   "t": 19.566,
+   "msg": "req79: sent (abort-79-1791841796018), headers after 0.04s"
+  },
+  {
+   "t": 20.103,
+   "msg": "req78: aborted at 0.574s in decode (first_token=0.324s, chunks=42)"
+  },
+  {
+   "t": 20.349,
+   "msg": "req77: aborted at 0.821s in decode (first_token=0.57s, chunks=39)"
+  },
+  {
+   "t": 20.611,
+   "msg": "req76: aborted at 1.083s in decode (first_token=0.833s, chunks=49)"
+  },
+  {
+   "t": 20.871,
+   "msg": "req79: aborted at 1.341s in decode (first_token=1.091s, chunks=46)"
+  },
+  {
+   "t": 20.871,
+   "msg": "round 21/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 20.879,
+   "msg": "req80: sent (abort-80-1791841797359), headers after 0.01s"
+  },
+  {
+   "t": 20.888,
+   "msg": "req81: sent (abort-81-1791841797360), headers after 0.02s"
+  },
+  {
+   "t": 20.901,
+   "msg": "req83: sent (abort-83-1791841797362), headers after 0.03s"
+  },
+  {
+   "t": 20.911,
+   "msg": "req82: sent (abort-82-1791841797361), headers after 0.04s"
+  },
+  {
+   "t": 21.462,
+   "msg": "req80: aborted at 0.59s in decode (first_token=0.339s, chunks=39)"
+  },
+  {
+   "t": 21.474,
+   "msg": "req81: aborted at 0.601s in decode (first_token=0.351s, chunks=39)"
+  },
+  {
+   "t": 21.71,
+   "msg": "req83: aborted at 0.836s in decode (first_token=0.585s, chunks=40)"
+  },
+  {
+   "t": 21.975,
+   "msg": "req82: aborted at 1.101s in decode (first_token=0.851s, chunks=48)"
+  },
+  {
+   "t": 21.975,
+   "msg": "round 22/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 21.984,
+   "msg": "req84: sent (abort-84-1791841798463), headers after 0.01s"
+  },
+  {
+   "t": 21.993,
+   "msg": "req86: sent (abort-86-1791841798465), headers after 0.02s"
+  },
+  {
+   "t": 21.996,
+   "msg": "req85: sent (abort-85-1791841798464), headers after 0.02s"
+  },
+  {
+   "t": 22.006,
+   "msg": "req87: sent (abort-87-1791841798466), headers after 0.03s"
+  },
+  {
+   "t": 22.572,
+   "msg": "req84: aborted at 0.596s in decode (first_token=0.346s, chunks=42)"
+  },
+  {
+   "t": 22.582,
+   "msg": "req85: aborted at 0.606s in decode (first_token=0.356s, chunks=42)"
+  },
+  {
+   "t": 22.794,
+   "msg": "req86: aborted at 0.817s in decode (first_token=0.567s, chunks=47)"
+  },
+  {
+   "t": 23.06,
+   "msg": "req87: aborted at 1.082s in decode (first_token=0.832s, chunks=48)"
+  },
+  {
+   "t": 23.06,
+   "msg": "round 23/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 23.069,
+   "msg": "req89: sent (abort-89-1791841799549), headers after 0.01s"
+  },
+  {
+   "t": 23.08,
+   "msg": "req88: sent (abort-88-1791841799549), headers after 0.02s"
+  },
+  {
+   "t": 23.089,
+   "msg": "req90: sent (abort-90-1791841799550), headers after 0.03s"
+  },
+  {
+   "t": 23.09,
+   "msg": "req91: sent (abort-91-1791841799551), headers after 0.03s"
+  },
+  {
+   "t": 23.648,
+   "msg": "req89: aborted at 0.586s in decode (first_token=0.336s, chunks=40)"
+  },
+  {
+   "t": 23.667,
+   "msg": "req91: aborted at 0.604s in decode (first_token=0.354s, chunks=41)"
+  },
+  {
+   "t": 23.878,
+   "msg": "req88: aborted at 0.817s in decode (first_token=0.567s, chunks=46)"
+  },
+  {
+   "t": 24.14,
+   "msg": "req90: aborted at 1.078s in decode (first_token=0.828s, chunks=48)"
+  },
+  {
+   "t": 24.141,
+   "msg": "round 24/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 24.149,
+   "msg": "req92: sent (abort-92-1791841800629), headers after 0.01s"
+  },
+  {
+   "t": 24.161,
+   "msg": "req95: sent (abort-95-1791841800631), headers after 0.02s"
+  },
+  {
+   "t": 24.17,
+   "msg": "req94: sent (abort-94-1791841800631), headers after 0.03s"
+  },
+  {
+   "t": 24.171,
+   "msg": "req93: sent (abort-93-1791841800630), headers after 0.03s"
+  },
+  {
+   "t": 24.716,
+   "msg": "req95: aborted at 0.573s in decode (first_token=0.322s, chunks=47)"
+  },
+  {
+   "t": 24.726,
+   "msg": "req92: aborted at 0.585s in decode (first_token=0.335s, chunks=39)"
+  },
+  {
+   "t": 24.968,
+   "msg": "req94: aborted at 0.825s in decode (first_token=0.575s, chunks=39)"
+  },
+  {
+   "t": 25.227,
+   "msg": "req93: aborted at 1.086s in decode (first_token=0.835s, chunks=48)"
+  },
+  {
+   "t": 25.228,
+   "msg": "round 25/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 25.237,
+   "msg": "req96: sent (abort-96-1791841801716), headers after 0.01s"
+  },
+  {
+   "t": 25.246,
+   "msg": "req97: sent (abort-97-1791841801717), headers after 0.02s"
+  },
+  {
+   "t": 25.25,
+   "msg": "req99: sent (abort-99-1791841801719), headers after 0.02s"
+  },
+  {
+   "t": 25.256,
+   "msg": "req98: sent (abort-98-1791841801718), headers after 0.03s"
+  },
+  {
+   "t": 25.805,
+   "msg": "req97: aborted at 0.576s in decode (first_token=0.326s, chunks=41)"
+  },
+  {
+   "t": 25.809,
+   "msg": "req96: aborted at 0.581s in decode (first_token=0.331s, chunks=37)"
+  },
+  {
+   "t": 26.055,
+   "msg": "req99: aborted at 0.824s in decode (first_token=0.574s, chunks=48)"
+  },
+  {
+   "t": 26.316,
+   "msg": "req98: aborted at 1.086s in decode (first_token=0.836s, chunks=47)"
+  },
+  {
+   "t": 26.316,
+   "msg": "round 26/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 26.324,
+   "msg": "req100: sent (abort-100-1791841802804), headers after 0.01s"
+  },
+  {
+   "t": 26.337,
+   "msg": "req102: sent (abort-102-1791841802805), headers after 0.02s"
+  },
+  {
+   "t": 26.347,
+   "msg": "req101: sent (abort-101-1791841802805), headers after 0.03s"
+  },
+  {
+   "t": 26.357,
+   "msg": "req103: sent (abort-103-1791841802806), headers after 0.04s"
+  },
+  {
+   "t": 26.894,
+   "msg": "req100: aborted at 0.578s in decode (first_token=0.328s, chunks=38)"
+  },
+  {
+   "t": 27.146,
+   "msg": "req102: aborted at 0.829s in decode (first_token=0.578s, chunks=40)"
+  },
+  {
+   "t": 27.406,
+   "msg": "req101: aborted at 1.089s in decode (first_token=0.838s, chunks=40)"
+  },
+  {
+   "t": 27.674,
+   "msg": "req103: aborted at 1.355s in decode (first_token=1.105s, chunks=49)"
+  },
+  {
+   "t": 27.674,
+   "msg": "round 27/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 27.683,
+   "msg": "req105: sent (abort-105-1791841804163), headers after 0.01s"
+  },
+  {
+   "t": 27.694,
+   "msg": "req104: sent (abort-104-1791841804162), headers after 0.02s"
+  },
+  {
+   "t": 27.704,
+   "msg": "req107: sent (abort-107-1791841804165), headers after 0.03s"
+  },
+  {
+   "t": 27.716,
+   "msg": "req106: sent (abort-106-1791841804164), headers after 0.04s"
+  },
+  {
+   "t": 28.274,
+   "msg": "req105: aborted at 0.598s in decode (first_token=0.348s, chunks=38)"
+  },
+  {
+   "t": 28.284,
+   "msg": "req104: aborted at 0.61s in decode (first_token=0.359s, chunks=38)"
+  },
+  {
+   "t": 28.544,
+   "msg": "req107: aborted at 0.867s in decode (first_token=0.617s, chunks=44)"
+  },
+  {
+   "t": 28.545,
+   "msg": "req106: aborted at 0.868s in decode (first_token=0.618s, chunks=44)"
+  },
+  {
+   "t": 28.545,
+   "msg": "round 28/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 28.552,
+   "msg": "req109: sent (abort-109-1791841805034), headers after 0.01s"
+  },
+  {
+   "t": 28.552,
+   "msg": "req108: sent (abort-108-1791841805033), headers after 0.01s"
+  },
+  {
+   "t": 28.565,
+   "msg": "req111: sent (abort-111-1791841805035), headers after 0.02s"
+  },
+  {
+   "t": 28.576,
+   "msg": "req110: sent (abort-110-1791841805035), headers after 0.03s"
+  },
+  {
+   "t": 29.119,
+   "msg": "req108: aborted at 0.574s in decode (first_token=0.324s, chunks=40)"
+  },
+  {
+   "t": 29.12,
+   "msg": "req109: aborted at 0.574s in decode (first_token=0.323s, chunks=49)"
+  },
+  {
+   "t": 29.362,
+   "msg": "req111: aborted at 0.814s in decode (first_token=0.564s, chunks=41)"
+  },
+  {
+   "t": 29.63,
+   "msg": "req110: aborted at 1.083s in decode (first_token=0.833s, chunks=48)"
+  },
+  {
+   "t": 29.63,
+   "msg": "round 29/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 29.639,
+   "msg": "req112: sent (abort-112-1791841806118), headers after 0.01s"
+  },
+  {
+   "t": 29.64,
+   "msg": "req113: sent (abort-113-1791841806119), headers after 0.01s"
+  },
+  {
+   "t": 29.651,
+   "msg": "req114: sent (abort-114-1791841806120), headers after 0.02s"
+  },
+  {
+   "t": 29.654,
+   "msg": "req115: sent (abort-115-1791841806121), headers after 0.02s"
+  },
+  {
+   "t": 30.206,
+   "msg": "req113: aborted at 0.574s in decode (first_token=0.324s, chunks=40)"
+  },
+  {
+   "t": 30.208,
+   "msg": "req112: aborted at 0.578s in decode (first_token=0.327s, chunks=42)"
+  },
+  {
+   "t": 30.456,
+   "msg": "req114: aborted at 0.824s in decode (first_token=0.574s, chunks=47)"
+  },
+  {
+   "t": 30.475,
+   "msg": "req115: aborted at 0.842s in decode (first_token=0.591s, chunks=48)"
+  },
+  {
+   "t": 30.475,
+   "msg": "round 30/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 30.483,
+   "msg": "req117: sent (abort-117-1791841806964), headers after 0.01s"
+  },
+  {
+   "t": 30.483,
+   "msg": "req118: sent (abort-118-1791841806965), headers after 0.01s"
+  },
+  {
+   "t": 30.496,
+   "msg": "req119: sent (abort-119-1791841806965), headers after 0.02s"
+  },
+  {
+   "t": 30.503,
+   "msg": "req116: sent (abort-116-1791841806963), headers after 0.03s"
+  },
+  {
+   "t": 31.049,
+   "msg": "req117: aborted at 0.573s in decode (first_token=0.323s, chunks=41)"
+  },
+  {
+   "t": 31.05,
+   "msg": "req118: aborted at 0.573s in decode (first_token=0.323s, chunks=39)"
+  },
+  {
+   "t": 31.297,
+   "msg": "req119: aborted at 0.819s in decode (first_token=0.569s, chunks=46)"
+  },
+  {
+   "t": 31.559,
+   "msg": "req116: aborted at 1.084s in decode (first_token=0.834s, chunks=48)"
+  },
+  {
+   "t": 31.559,
+   "msg": "round 31/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 31.568,
+   "msg": "req120: sent (abort-120-1791841808048), headers after 0.01s"
+  },
+  {
+   "t": 31.577,
+   "msg": "req121: sent (abort-121-1791841808048), headers after 0.02s"
+  },
+  {
+   "t": 31.587,
+   "msg": "req123: sent (abort-123-1791841808050), headers after 0.02s"
+  },
+  {
+   "t": 31.597,
+   "msg": "req122: sent (abort-122-1791841808049), headers after 0.03s"
+  },
+  {
+   "t": 32.134,
+   "msg": "req121: aborted at 0.573s in decode (first_token=0.323s, chunks=41)"
+  },
+  {
+   "t": 32.378,
+   "msg": "req120: aborted at 0.818s in decode (first_token=0.568s, chunks=48)"
+  },
+  {
+   "t": 32.643,
+   "msg": "req123: aborted at 1.081s in decode (first_token=0.83s, chunks=41)"
+  },
+  {
+   "t": 32.911,
+   "msg": "req122: aborted at 1.349s in decode (first_token=1.099s, chunks=47)"
+  },
+  {
+   "t": 32.911,
+   "msg": "round 32/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 32.931,
+   "msg": "req126: sent (abort-126-1791841809401), headers after 0.02s"
+  },
+  {
+   "t": 32.932,
+   "msg": "req125: sent (abort-125-1791841809400), headers after 0.02s"
+  },
+  {
+   "t": 32.933,
+   "msg": "req127: sent (abort-127-1791841809401), headers after 0.02s"
+  },
+  {
+   "t": 32.941,
+   "msg": "req124: sent (abort-124-1791841809399), headers after 0.03s"
+  },
+  {
+   "t": 33.517,
+   "msg": "req125: aborted at 0.605s in decode (first_token=0.354s, chunks=43)"
+  },
+  {
+   "t": 33.526,
+   "msg": "req127: aborted at 0.612s in decode (first_token=0.362s, chunks=44)"
+  },
+  {
+   "t": 33.733,
+   "msg": "req126: aborted at 0.821s in decode (first_token=0.57s, chunks=40)"
+  },
+  {
+   "t": 33.998,
+   "msg": "req124: aborted at 1.087s in decode (first_token=0.837s, chunks=49)"
+  },
+  {
+   "t": 33.999,
+   "msg": "round 33/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 34.006,
+   "msg": "req128: sent (abort-128-1791841810487), headers after 0.01s"
+  },
+  {
+   "t": 34.016,
+   "msg": "req129: sent (abort-129-1791841810488), headers after 0.02s"
+  },
+  {
+   "t": 34.025,
+   "msg": "req130: sent (abort-130-1791841810489), headers after 0.02s"
+  },
+  {
+   "t": 34.026,
+   "msg": "req131: sent (abort-131-1791841810490), headers after 0.02s"
+  },
+  {
+   "t": 34.58,
+   "msg": "req128: aborted at 0.581s in decode (first_token=0.33s, chunks=37)"
+  },
+  {
+   "t": 34.602,
+   "msg": "req131: aborted at 0.6s in decode (first_token=0.35s, chunks=38)"
+  },
+  {
+   "t": 34.815,
+   "msg": "req129: aborted at 0.816s in decode (first_token=0.565s, chunks=46)"
+  },
+  {
+   "t": 35.077,
+   "msg": "req130: aborted at 1.077s in decode (first_token=0.826s, chunks=46)"
+  },
+  {
+   "t": 35.078,
+   "msg": "round 34/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 35.086,
+   "msg": "req132: sent (abort-132-1791841811566), headers after 0.01s"
+  },
+  {
+   "t": 35.098,
+   "msg": "req134: sent (abort-134-1791841811568), headers after 0.02s"
+  },
+  {
+   "t": 35.108,
+   "msg": "req135: sent (abort-135-1791841811569), headers after 0.03s"
+  },
+  {
+   "t": 35.119,
+   "msg": "req133: sent (abort-133-1791841811567), headers after 0.04s"
+  },
+  {
+   "t": 35.654,
+   "msg": "req134: aborted at 0.574s in decode (first_token=0.324s, chunks=48)"
+  },
+  {
+   "t": 35.672,
+   "msg": "req135: aborted at 0.591s in decode (first_token=0.341s, chunks=40)"
+  },
+  {
+   "t": 35.901,
+   "msg": "req132: aborted at 0.823s in decode (first_token=0.572s, chunks=40)"
+  },
+  {
+   "t": 36.166,
+   "msg": "req133: aborted at 1.087s in decode (first_token=0.836s, chunks=47)"
+  },
+  {
+   "t": 36.166,
+   "msg": "round 35/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 36.175,
+   "msg": "req139: sent (abort-139-1791841812656), headers after 0.01s"
+  },
+  {
+   "t": 36.176,
+   "msg": "req136: sent (abort-136-1791841812654), headers after 0.01s"
+  },
+  {
+   "t": 36.191,
+   "msg": "req137: sent (abort-137-1791841812655), headers after 0.02s"
+  },
+  {
+   "t": 36.202,
+   "msg": "req138: sent (abort-138-1791841812656), headers after 0.03s"
+  },
+  {
+   "t": 36.74,
+   "msg": "req139: aborted at 0.571s in decode (first_token=0.321s, chunks=45)"
+  },
+  {
+   "t": 36.745,
+   "msg": "req136: aborted at 0.579s in decode (first_token=0.329s, chunks=40)"
+  },
+  {
+   "t": 36.998,
+   "msg": "req137: aborted at 0.831s in decode (first_token=0.581s, chunks=40)"
+  },
+  {
+   "t": 37.251,
+   "msg": "req138: aborted at 1.083s in decode (first_token=0.833s, chunks=46)"
+  },
+  {
+   "t": 37.251,
+   "msg": "round 36/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 37.261,
+   "msg": "req140: sent (abort-140-1791841813739), headers after 0.01s"
+  },
+  {
+   "t": 37.272,
+   "msg": "req141: sent (abort-141-1791841813740), headers after 0.02s"
+  },
+  {
+   "t": 37.276,
+   "msg": "req143: sent (abort-143-1791841813742), headers after 0.02s"
+  },
+  {
+   "t": 37.281,
+   "msg": "req142: sent (abort-142-1791841813741), headers after 0.03s"
+  },
+  {
+   "t": 37.828,
+   "msg": "req141: aborted at 0.576s in decode (first_token=0.325s, chunks=39)"
+  },
+  {
+   "t": 37.842,
+   "msg": "req143: aborted at 0.588s in decode (first_token=0.338s, chunks=39)"
+  },
+  {
+   "t": 38.077,
+   "msg": "req140: aborted at 0.825s in decode (first_token=0.575s, chunks=45)"
+  },
+  {
+   "t": 38.336,
+   "msg": "req142: aborted at 1.082s in decode (first_token=0.832s, chunks=48)"
+  },
+  {
+   "t": 38.336,
+   "msg": "round 37/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 38.345,
+   "msg": "req144: sent (abort-144-1791841814824), headers after 0.01s"
+  },
+  {
+   "t": 38.365,
+   "msg": "req146: sent (abort-146-1791841814825), headers after 0.03s"
+  },
+  {
+   "t": 38.372,
+   "msg": "req145: sent (abort-145-1791841814825), headers after 0.04s"
+  },
+  {
+   "t": 38.375,
+   "msg": "req147: sent (abort-147-1791841814826), headers after 0.04s"
+  },
+  {
+   "t": 38.911,
+   "msg": "req144: aborted at 0.575s in decode (first_token=0.324s, chunks=36)"
+  },
+  {
+   "t": 39.176,
+   "msg": "req147: aborted at 0.838s in decode (first_token=0.587s, chunks=40)"
+  },
+  {
+   "t": 39.438,
+   "msg": "req146: aborted at 1.101s in decode (first_token=0.85s, chunks=34)"
+  },
+  {
+   "t": 39.702,
+   "msg": "req145: aborted at 1.366s in decode (first_token=1.115s, chunks=38)"
+  },
+  {
+   "t": 39.702,
+   "msg": "round 38/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 39.711,
+   "msg": "req148: sent (abort-148-1791841816190), headers after 0.01s"
+  },
+  {
+   "t": 39.726,
+   "msg": "req149: sent (abort-149-1791841816191), headers after 0.02s"
+  },
+  {
+   "t": 39.729,
+   "msg": "req150: sent (abort-150-1791841816192), headers after 0.02s"
+  },
+  {
+   "t": 39.737,
+   "msg": "req151: sent (abort-151-1791841816193), headers after 0.03s"
+  },
+  {
+   "t": 40.297,
+   "msg": "req148: aborted at 0.594s in decode (first_token=0.344s, chunks=38)"
+  },
+  {
+   "t": 40.313,
+   "msg": "req149: aborted at 0.609s in decode (first_token=0.359s, chunks=39)"
+  },
+  {
+   "t": 40.522,
+   "msg": "req150: aborted at 0.818s in decode (first_token=0.567s, chunks=46)"
+  },
+  {
+   "t": 40.785,
+   "msg": "req151: aborted at 1.08s in decode (first_token=0.829s, chunks=49)"
+  },
+  {
+   "t": 40.785,
+   "msg": "round 39/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 40.792,
+   "msg": "req152: sent (abort-152-1791841817274), headers after 0.01s"
+  },
+  {
+   "t": 40.802,
+   "msg": "req154: sent (abort-154-1791841817276), headers after 0.01s"
+  },
+  {
+   "t": 40.812,
+   "msg": "req153: sent (abort-153-1791841817275), headers after 0.02s"
+  },
+  {
+   "t": 40.822,
+   "msg": "req155: sent (abort-155-1791841817276), headers after 0.03s"
+  },
+  {
+   "t": 41.356,
+   "msg": "req152: aborted at 0.57s in decode (first_token=0.319s, chunks=38)"
+  },
+  {
+   "t": 41.386,
+   "msg": "req155: aborted at 0.597s in decode (first_token=0.347s, chunks=38)"
+  },
+  {
+   "t": 41.603,
+   "msg": "req154: aborted at 0.816s in decode (first_token=0.565s, chunks=36)"
+  },
+  {
+   "t": 41.863,
+   "msg": "req153: aborted at 1.076s in decode (first_token=0.826s, chunks=46)"
+  },
+  {
+   "t": 41.863,
+   "msg": "round 40/40: launching 4 aborting request(s)"
+  },
+  {
+   "t": 41.88,
+   "msg": "req158: sent (abort-158-1791841818353), headers after 0.02s"
+  },
+  {
+   "t": 41.886,
+   "msg": "req156: sent (abort-156-1791841818351), headers after 0.02s"
+  },
+  {
+   "t": 41.888,
+   "msg": "req157: sent (abort-157-1791841818352), headers after 0.02s"
+  },
+  {
+   "t": 41.897,
+   "msg": "req159: sent (abort-159-1791841818354), headers after 0.03s"
+  },
+  {
+   "t": 42.445,
+   "msg": "req158: aborted at 0.58s in decode (first_token=0.33s, chunks=47)"
+  },
+  {
+   "t": 42.462,
+   "msg": "req159: aborted at 0.596s in decode (first_token=0.345s, chunks=39)"
+  },
+  {
+   "t": 42.696,
+   "msg": "req157: aborted at 0.831s in decode (first_token=0.581s, chunks=37)"
+  },
+  {
+   "t": 42.951,
+   "msg": "req156: aborted at 1.087s in decode (first_token=0.837s, chunks=43)"
+  },
+  {
+   "t": 42.965,
+   "msg": "server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 42.98,
+   "msg": "server-info[after-abort] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 42.98,
+   "msg": "waiting --settle 90.0s"
+  },
+  {
+   "t": 132.993,
+   "msg": "server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 133.005,
+   "msg": "server-info[settled] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 133.005,
+   "msg": "WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
+  },
+  {
+   "t": 133.005,
+   "msg": "WARN http://10.128.0.20:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
+  },
+  {
+   "t": 133.165,
+   "msg": "follow-up short: OK status=200 tokens=16 cached=0 "
+  },
+  {
+   "t": 133.676,
+   "msg": "follow-up identical-prompt: OK status=200 tokens=32 cached=0 "
+  },
+  {
+   "t": 133.688,
+   "msg": "server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  },
+  {
+   "t": 133.699,
+   "msg": "server-info[final] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
+  }
+ ]
+}

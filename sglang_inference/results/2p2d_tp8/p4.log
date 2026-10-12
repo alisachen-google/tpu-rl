@@ -7,3 +7,42 @@
    HTTP 200 x2
    HTTP 500 x6
 2026-10-12T21:44:43Z [2p2d-p4] === restart p2 and wait for health
+2026-10-12T21:46:59Z [2p2d-p4]    p2 back after 135 s (health 200)
+2026-10-12T21:46:59Z [2p2d-p4] === after p2 rejoin: 8 x 1k
+   HTTP 200 x8
+2026-10-12T21:47:00Z [2p2d-p4] === kill d2 while 6 x 8k requests are decoding
+   HTTP 200 x6
+2026-10-12T21:47:27Z [2p2d-p4]    d2 health now: 200
+2026-10-12T21:47:27Z [2p2d-p4] === with d2 dead: 8 x 1k (requests routed to d2 fail; d1 ones must succeed)
+   HTTP 200 x6
+   HTTP 500 x2
+2026-10-12T21:47:34Z [2p2d-p4] === restart d2
+2026-10-12T21:49:35Z [2p2d-p4]    d2 back after 120 s
+2026-10-12T21:49:35Z [2p2d-p4] === after d2 rejoin: 8 x 1k
+   HTTP 200 x8
+2026-10-12T21:49:36Z [2p2d-p4] === abort storm: 40 aborts in 10 s across both pairs, then follow-ups
+   [+  133.01s] server-info[settled] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+   [+  133.01s] WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+   [+  133.01s] WARN http://10.128.0.20:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+   [+  133.17s] follow-up short: OK status=200 tokens=16 cached=0 
+   [+  133.68s] follow-up identical-prompt: OK status=200 tokens=32 cached=0 
+   [+  133.69s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+   [+  133.70s] server-info[final] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+   [+  133.70s] PASS: 160 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=0), 0 baseline problem(s) -> abort_report.json
+2026-10-12T21:51:50Z [2p2d-p4] === prefill bootstrap queues and decode inflight after storm
+   http://10.128.15.217:30000: sglang:num_running_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 
+   http://10.128.15.239:30000: sglang:num_running_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 
+   http://10.128.0.90:30000: sglang:num_running_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 
+   http://10.128.0.20:30000: sglang:num_running_reqs 0.0 sglang:num_queue_reqs 0.0 sglang:num_decode_prealloc_queue_reqs 0.0 sglang:num_decode_transfer_queue_reqs 0.0 
+2026-10-12T21:51:50Z [2p2d-p4] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-12T21:51:57Z [2p2d-p4] phase p4 done
+phase 4 exit 0

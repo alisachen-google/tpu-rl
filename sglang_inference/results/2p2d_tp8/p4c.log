@@ -1,0 +1,54 @@
+2026-10-12T22:03:36Z [2p2d-p4c] === gauges before
+   10.128.15.217: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T22:03:37Z [2p2d-p4c] === reference: 4 x 128k/64 and 4 x 8k/1024 through the router, nothing killed
+   HTTP 200 x4
+   HTTP 200 x4
+2026-10-12T22:04:14Z [2p2d-p4c] === kill p2 3 s into 6 x 128k prefills (about half land on p2)
+2026-10-12T22:04:19Z [2p2d-p4c]    p2 killed at +3 s
+   HTTP 200 x1
+   HTTP 500 x5
+2026-10-12T22:04:27Z [2p2d-p4c]    gauges with p2 dead:
+   10.128.15.217: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: 
+   10.128.0.90: num_running_reqs 1.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 2.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T22:04:27Z [2p2d-p4c] === restart p2
+2026-10-12T22:06:43Z [2p2d-p4c]    p2restart3 back after 135 s (health 200)
+   HTTP 200 x6
+2026-10-12T22:06:43Z [2p2d-p4c] === kill d2 6 s into 6 x 8k/4096 decodes (about 25 s each; about half decode on d2)
+2026-10-12T22:06:51Z [2p2d-p4c]    d2 killed at +6 s
+   HTTP 200 x5
+   HTTP 500 x1
+2026-10-12T22:07:15Z [2p2d-p4c]    gauges with d2 dead (prefills must not hold KV for the dead decode):
+   10.128.15.217: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.20: 
+2026-10-12T22:07:15Z [2p2d-p4c] === with d2 dead: 8 x 1k
+   HTTP 200 x6
+   HTTP 500 x2
+2026-10-12T22:07:16Z [2p2d-p4c] === restart d2
+2026-10-12T22:09:17Z [2p2d-p4c]    d2restart3 back after 121 s (health 200)
+   HTTP 200 x8
+2026-10-12T22:09:18Z [2p2d-p4c] === greedy check after recoveries: 8k/256 via router vs the phase-0 output
+   two greedy runs identical: True
+2026-10-12T22:09:21Z [2p2d-p4c] === gauges after
+   10.128.15.217: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T22:09:22Z [2p2d-p4c] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-12T22:09:28Z [2p2d-p4c] phase p4c done
+phase 4c exit 0

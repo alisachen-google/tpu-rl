@@ -1,0 +1,4 @@
+2026-10-12T22:10:23Z [2p2d-p6] === MT-Bench 80x2 c=1
+2026-10-12T22:10:23Z [2p2d-p6]    prefill counters before:
+   10.128.15.217 cached_tokens_total= prompt_tokens_total=
+   10.128.15.239 cached_tokens_total= prompt_tokens_total=

@@ -1,0 +1,62 @@
+2026-10-12T21:57:22Z [2p2d-p4b] === gauges before
+   10.128.15.217: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T21:57:22Z [2p2d-p4b] === reference: 4 x 128k/64 and 4 x 8k/1024 through the router, nothing killed
+_phase_2p2d_tp8_p4b.sh: line 13: /usr/bin/curl: Argument list too long
+_phase_2p2d_tp8_p4b.sh: line 13: /usr/bin/curl: Argument list too long
+_phase_2p2d_tp8_p4b.sh: line 13: /usr/bin/curl: Argument list too long
+_phase_2p2d_tp8_p4b.sh: line 13: /usr/bin/curl: Argument list too long
+   HTTP 0.1 x4
+   HTTP 200 x4
+2026-10-12T21:57:29Z [2p2d-p4b] === kill p2 3 s into 6 x 128k prefills (about half land on p2)
+_phase_2p2d_tp8_p4b.sh: line 13: /usr/bin/curl: Argument list too long
+_phase_2p2d_tp8_p4b.sh: line 13: /usr/bin/curl: Argument list too long
+_phase_2p2d_tp8_p4b.sh: line 13: /usr/bin/curl: Argument list too long
+_phase_2p2d_tp8_p4b.sh: line 13: /usr/bin/curl: Argument list too long
+_phase_2p2d_tp8_p4b.sh: line 13: /usr/bin/curl: Argument list too long
+_phase_2p2d_tp8_p4b.sh: line 13: /usr/bin/curl: Argument list too long
+   HTTP 0.1 x6
+2026-10-12T21:57:33Z [2p2d-p4b]    p2 killed at +3 s
+2026-10-12T21:57:33Z [2p2d-p4b]    gauges with p2 dead:
+   10.128.15.217: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T21:57:33Z [2p2d-p4b] === restart p2
+2026-10-12T21:59:56Z [2p2d-p4b]    p2restart2 back after 140 s (health 200)
+   HTTP 200 x6
+2026-10-12T21:59:57Z [2p2d-p4b] === kill d2 8 s into 6 x 8k/1024 decodes (about half decode on d2)
+   HTTP 200 x6
+2026-10-12T22:00:06Z [2p2d-p4b]    d2 killed at +8 s
+2026-10-12T22:00:06Z [2p2d-p4b]    gauges with d2 dead (prefills must not hold KV for the dead decode):
+   10.128.15.217: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T22:00:09Z [2p2d-p4b] === with d2 dead: 8 x 1k
+   HTTP 200 x3
+   HTTP 500 x5
+2026-10-12T22:00:14Z [2p2d-p4b] === restart d2
+2026-10-12T22:02:15Z [2p2d-p4b]    d2restart2 back after 120 s (health 200)
+   HTTP 200 x8
+2026-10-12T22:02:16Z [2p2d-p4b] === greedy check after recoveries: 8k/256 via router vs the phase-0 output
+   two greedy runs identical: True
+2026-10-12T22:02:19Z [2p2d-p4b] === gauges after
+   10.128.15.217: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.15.239: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+   10.128.0.20: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
+2026-10-12T22:02:20Z [2p2d-p4b] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-12T22:02:26Z [2p2d-p4b] phase p4b done
+phase 4b exit 0
