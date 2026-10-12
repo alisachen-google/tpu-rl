@@ -1,0 +1,4 @@
+2 prompts -> http://10.128.0.90:30010 (concurrency=1, stream=False)
+[isl8192_k0] tokens=1024 finish=length cached=0 ttft=5896.17ms e2e=5900.52ms
+[isl8192_k1] tokens=1024 finish=length cached=0 ttft=5810.09ms e2e=5811.15ms
+done: 2 prompts, 0 errors -> /home/alisachen_google_com/pd_disagg/results/2p2d/tp4_noswamem/golden_8192.jsonl

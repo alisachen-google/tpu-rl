@@ -1,0 +1,18 @@
+2026-10-12T09:43:58Z [tp4-noswamem] stopping p1 on a and everything on b
+2026-10-12T09:44:12Z [tp4-noswamem] launch p1(noswamem) on a, d1(noswamem) on b
+2026-10-12T09:48:13Z [tp4-noswamem] p1 up after 255 s
+2026-10-12T09:48:13Z [tp4-noswamem] d1 up after 15 s
+2026-10-12T09:48:16Z [tp4-noswamem] router 200
+2026-10-12T09:48:16Z [tp4-noswamem] PD(TP-4, noswamem) 8k generate
+2026-10-12T09:48:29Z [tp4-noswamem] stopping d1 + router; launching golden(TP-4, noswamem) on b
+2026-10-12T09:53:53Z [tp4-noswamem] golden up after 330 s
+2026-10-12T09:53:53Z [tp4-noswamem] golden(TP-4, noswamem) 8k generate
+2026-10-12T09:54:05Z [tp4-noswamem] === PD(TP-4,noswamem) vs golden(TP-4,noswamem):
+   isl8192_k1    True     4308   1024  1.000   0.0000  PASS  
+   
+   2 ids, 2 identical, 0 failed gates -> /home/alisachen_google_com/pd_disagg/results/2p2d/tp4_noswamem/diff.json
+2026-10-12T09:54:05Z [tp4-noswamem] === golden(TP-4,noswamem) vs golden(TP-4):
+                   b: "entioned, in order. Let's scan the text:"
+   
+   2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/2p2d/tp4_noswamem/diff_golden_swa.json
+2026-10-12T09:54:14Z [tp4-noswamem] phase tp4-noswamem done (both hosts freed)
