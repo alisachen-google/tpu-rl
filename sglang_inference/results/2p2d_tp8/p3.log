@@ -1,0 +1,3 @@
+2026-10-12T19:28:26Z [2p2d-p3] === n=2,3,8 single prompt (/generate)
+   n2: HTTP 000 outputs=? 300.0s
+2026-10-12T19:33:30Z [2p2d-p3] n=2 result recorded; the rest of phase 3 would hang the same way (#1147, fix #1217 not in this build) -> stopping phase 3, chain continues with phase 4

@@ -1370,3 +1370,866 @@ requests.exceptions.ConnectionError: HTTPConnectionPool(host='127.0.0.1', port=3
 [2026-10-12 19:01:41] INFO:     10.128.15.217:37962 - "GET /health HTTP/1.1" 200 OK
 [2026-10-12 19:01:44] INFO:     10.128.0.90:57726 - "GET /health HTTP/1.1" 200 OK
 [2026-10-12 19:01:47] INFO:     10.128.0.90:49360 - "GET /health HTTP/1.1" 200 OK
+[2026-10-12 19:09:57] INFO:     10.128.0.90:45678 - "GET /health HTTP/1.1" 200 OK
+[2026-10-12 19:09:57] INFO:     10.128.0.90:45694 - "GET /metrics HTTP/1.1" 200 OK
+[2026-10-12 19:09:57] INFO:     10.128.0.90:45710 - "GET /metrics HTTP/1.1" 200 OK
+[2026-10-12 19:09:57] INFO:     10.128.0.90:45716 - "GET /metrics HTTP/1.1" 200 OK
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/managers/scheduler.py:4773: UserWarning: Event is experimental and subject to change: Event() is experimental and may change or be removed without notice.
+  batch_result.copy_done = self.device_module.Event()
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/managers/scheduler.py:4773: UserWarning: Event is experimental and subject to change: Event() is experimental and may change or be removed without notice.
+  batch_result.copy_done = self.device_module.Event()
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/managers/scheduler.py:4773: UserWarning: Event is experimental and subject to change: Event() is experimental and may change or be removed without notice.
+  batch_result.copy_done = self.device_module.Event()
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/managers/scheduler.py:4773: UserWarning: Event is experimental and subject to change: Event() is experimental and may change or be removed without notice.
+  batch_result.copy_done = self.device_module.Event()
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/managers/scheduler.py:4773: UserWarning: Event is experimental and subject to change: Event() is experimental and may change or be removed without notice.
+  batch_result.copy_done = self.device_module.Event()
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/managers/scheduler.py:4773: UserWarning: Event is experimental and subject to change: Event() is experimental and may change or be removed without notice.
+  batch_result.copy_done = self.device_module.Event()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:24: UserWarning: record is experimental and subject to change: record() is experimental and may change or be removed without notice.
+  self.event.record()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:24: UserWarning: record is experimental and subject to change: record() is experimental and may change or be removed without notice.
+  self.event.record()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:24: UserWarning: record is experimental and subject to change: record() is experimental and may change or be removed without notice.
+  self.event.record()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:24: UserWarning: record is experimental and subject to change: record() is experimental and may change or be removed without notice.
+  self.event.record()
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/managers/scheduler.py:4773: UserWarning: Event is experimental and subject to change: Event() is experimental and may change or be removed without notice.
+  batch_result.copy_done = self.device_module.Event()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:24: UserWarning: record is experimental and subject to change: record() is experimental and may change or be removed without notice.
+  self.event.record()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:24: UserWarning: record is experimental and subject to change: record() is experimental and may change or be removed without notice.
+  self.event.record()
+/home/alisachen_google_com/sglang-torchtpu/python/sglang/srt/managers/scheduler.py:4773: UserWarning: Event is experimental and subject to change: Event() is experimental and may change or be removed without notice.
+  batch_result.copy_done = self.device_module.Event()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:24: UserWarning: record is experimental and subject to change: record() is experimental and may change or be removed without notice.
+  self.event.record()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:24: UserWarning: record is experimental and subject to change: record() is experimental and may change or be removed without notice.
+  self.event.record()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:29: UserWarning: synchronize is experimental and subject to change: synchronize() is experimental and may change or be removed without notice.
+  self.event.synchronize()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:29: UserWarning: synchronize is experimental and subject to change: synchronize() is experimental and may change or be removed without notice.
+  self.event.synchronize()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:29: UserWarning: synchronize is experimental and subject to change: synchronize() is experimental and may change or be removed without notice.
+  self.event.synchronize()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:29: UserWarning: synchronize is experimental and subject to change: synchronize() is experimental and may change or be removed without notice.
+  self.event.synchronize()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:29: UserWarning: synchronize is experimental and subject to change: synchronize() is experimental and may change or be removed without notice.
+  self.event.synchronize()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:29: UserWarning: synchronize is experimental and subject to change: synchronize() is experimental and may change or be removed without notice.
+  self.event.synchronize()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:29: UserWarning: synchronize is experimental and subject to change: synchronize() is experimental and may change or be removed without notice.
+  self.event.synchronize()
+/home/alisachen_google_com/sglang-torchtpu/sglang_tpu/result_copy_worker.py:29: UserWarning: synchronize is experimental and subject to change: synchronize() is experimental and may change or be removed without notice.
+  self.event.synchronize()
+[2026-10-12 19:09:57 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=4484662612503388388 req_id=swa:4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=4484662612503388388 req_id=4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=4484662612503388388 req_id=swa:4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=4484662612503388388 req_id=4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=4484662612503388388 req_id=swa:4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=4484662612503388388 req_id=4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=4484662612503388388 req_id=swa:4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=4484662612503388388 req_id=4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=4484662612503388388 req_id=swa:4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=4484662612503388388 req_id=4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 15, #cached-token: 0, full token usage: 0.00, swa token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 0.03
+[2026-10-12 19:09:57 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=4484662612503388388 req_id=swa:4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=4484662612503388388 req_id=4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=4484662612503388388 req_id=swa:4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=4484662612503388388 req_id=4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=4484662612503388388 req_id=swa:4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=4484662612503388388 req_id=4484662612503388388 uuid=4484662612503388388 pages=1
+[2026-10-12 19:09:57 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=4160687971599399009 req_id=swa:4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=4160687971599399009 req_id=4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=4160687971599399009 req_id=swa:4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=4160687971599399009 req_id=swa:4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=4160687971599399009 req_id=4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=4160687971599399009 req_id=4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=4160687971599399009 req_id=swa:4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=4160687971599399009 req_id=4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=4160687971599399009 req_id=swa:4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=4160687971599399009 req_id=4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=4484662612503388388
+[2026-10-12 19:09:57 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=4160687971599399009 req_id=swa:4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:4484662612503388388
+[2026-10-12 19:09:57 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=4160687971599399009 req_id=swa:4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=4160687971599399009 req_id=4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=4160687971599399009 req_id=4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 15, #cached-token: 0, full token usage: 0.00, swa token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 2, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 604.91
+[2026-10-12 19:09:57 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=4484662612503388388
+[2026-10-12 19:09:57 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=4160687971599399009 req_id=swa:4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:4484662612503388388
+[2026-10-12 19:09:57 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=4484662612503388388
+[2026-10-12 19:09:57 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=4160687971599399009 req_id=4160687971599399009 uuid=4160687971599399009 pages=1
+[2026-10-12 19:09:57 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:4484662612503388388
+[2026-10-12 19:09:57 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=4484662612503388388
+[2026-10-12 19:09:57 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:4484662612503388388
+[2026-10-12 19:09:57 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=4484662612503388388
+[2026-10-12 19:09:57 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=4484662612503388388
+[2026-10-12 19:09:57 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:4484662612503388388
+[2026-10-12 19:09:57 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:4484662612503388388
+[2026-10-12 19:09:57 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=4484662612503388388
+[2026-10-12 19:09:57 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:4484662612503388388
+[2026-10-12 19:09:57 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=4484662612503388388
+[2026-10-12 19:09:57 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:4484662612503388388
+[2026-10-12 19:09:57 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=4160687971599399009
+[2026-10-12 19:09:57 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=4160687971599399009
+[2026-10-12 19:09:57 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=4160687971599399009
+[2026-10-12 19:09:57 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=4160687971599399009
+[2026-10-12 19:09:57 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:4160687971599399009
+[2026-10-12 19:09:57 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:4160687971599399009
+[2026-10-12 19:09:57 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:4160687971599399009
+[2026-10-12 19:09:57 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:4160687971599399009
+[2026-10-12 19:09:57 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=4160687971599399009
+[2026-10-12 19:09:57 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=4160687971599399009
+[2026-10-12 19:09:57 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=4160687971599399009
+[2026-10-12 19:09:57 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:4160687971599399009
+[2026-10-12 19:09:57 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:4160687971599399009
+[2026-10-12 19:09:57 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:4160687971599399009
+[2026-10-12 19:09:57 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=4160687971599399009
+[2026-10-12 19:09:57 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:4160687971599399009
+[2026-10-12 19:09:57 TP4 EP4] [TPU] [tpu] Warmup complete; froze torch.compile via set_stance('fail_on_recompile').
+[2026-10-12 19:09:57 TP2 EP2] [TPU] [tpu] Warmup complete; froze torch.compile via set_stance('fail_on_recompile').
+[2026-10-12 19:09:57 TP0 EP0] [TPU] [tpu] Warmup complete; froze torch.compile via set_stance('fail_on_recompile').
+[2026-10-12 19:09:57 TP1 EP1] [TPU] [tpu] Warmup complete; froze torch.compile via set_stance('fail_on_recompile').
+[2026-10-12 19:09:57 TP6 EP6] [TPU] [tpu] Warmup complete; froze torch.compile via set_stance('fail_on_recompile').
+[2026-10-12 19:09:57 TP3 EP3] [TPU] [tpu] Warmup complete; froze torch.compile via set_stance('fail_on_recompile').
+[2026-10-12 19:09:57 TP5 EP5] [TPU] [tpu] Warmup complete; froze torch.compile via set_stance('fail_on_recompile').
+[2026-10-12 19:09:57 TP7 EP7] [TPU] [tpu] Warmup complete; froze torch.compile via set_stance('fail_on_recompile').
+[2026-10-12 19:09:57] INFO:     10.128.15.217:49312 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:09:57] INFO:     10.128.15.217:49324 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=665152991496993468 req_id=swa:665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=665152991496993468 req_id=665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=665152991496993468 req_id=swa:665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=665152991496993468 req_id=swa:665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=665152991496993468 req_id=665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=665152991496993468 req_id=665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=665152991496993468 req_id=swa:665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=665152991496993468 req_id=swa:665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=665152991496993468 req_id=665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=665152991496993468 req_id=swa:665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=665152991496993468 req_id=665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=665152991496993468 req_id=665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=665152991496993468 req_id=swa:665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=665152991496993468 req_id=665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 15, #cached-token: 0, full token usage: 0.00, swa token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 56.62
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=665152991496993468 req_id=swa:665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=665152991496993468 req_id=665152991496993468 uuid=665152991496993468 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=6907650974101145288 req_id=swa:6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=6907650974101145288 req_id=swa:6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=6907650974101145288 req_id=swa:6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=6907650974101145288 req_id=6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=6907650974101145288 req_id=6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=6907650974101145288 req_id=swa:6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=6907650974101145288 req_id=6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=6907650974101145288 req_id=6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=6907650974101145288 req_id=swa:6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=6907650974101145288 req_id=6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=6907650974101145288 req_id=swa:6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=6907650974101145288 req_id=swa:6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=6907650974101145288 req_id=6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=6907650974101145288 req_id=6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=665152991496993468
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=665152991496993468
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=665152991496993468
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:665152991496993468
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:665152991496993468
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=6907650974101145288 req_id=swa:6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:665152991496993468
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=6907650974101145288 req_id=6907650974101145288 uuid=6907650974101145288 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=665152991496993468
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:665152991496993468
+[2026-10-12 19:09:58 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 15, #cached-token: 0, full token usage: 0.00, swa token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 2, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 739.53
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=665152991496993468
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=665152991496993468
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:665152991496993468
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:665152991496993468
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=665152991496993468
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:665152991496993468
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=665152991496993468
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:665152991496993468
+[2026-10-12 19:09:58] INFO:     10.128.15.217:49342 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=6907650974101145288
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:6907650974101145288
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=6907650974101145288
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=6907650974101145288
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=6907650974101145288
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:6907650974101145288
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=6907650974101145288
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=6907650974101145288
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:6907650974101145288
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=6907650974101145288
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:6907650974101145288
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:6907650974101145288
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:6907650974101145288
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=6907650974101145288
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:6907650974101145288
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:6907650974101145288
+[2026-10-12 19:09:58] INFO:     10.128.15.217:49340 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=1301130232510000174 req_id=swa:1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=1301130232510000174 req_id=1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=2604286227548946765 req_id=swa:2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=2604286227548946765 req_id=2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=1301130232510000174 req_id=swa:1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=1301130232510000174 req_id=1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=2604286227548946765 req_id=swa:2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=2604286227548946765 req_id=2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP0 EP0] Prefill batch, #new-seq: 2, #new-token: 30, #cached-token: 0, full token usage: 0.00, swa token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 2, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 62.21
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=1301130232510000174 req_id=swa:1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=1301130232510000174 req_id=1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=2604286227548946765 req_id=swa:2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=2604286227548946765 req_id=2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=1301130232510000174 req_id=swa:1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=1301130232510000174 req_id=1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=2604286227548946765 req_id=swa:2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=2604286227548946765 req_id=2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=1301130232510000174 req_id=swa:1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=1301130232510000174 req_id=1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=2604286227548946765 req_id=swa:2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=2604286227548946765 req_id=2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=1301130232510000174 req_id=swa:1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=1301130232510000174 req_id=1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=2604286227548946765 req_id=swa:2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=2604286227548946765 req_id=2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=1301130232510000174 req_id=swa:1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=1301130232510000174 req_id=1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=2604286227548946765 req_id=swa:2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=2604286227548946765 req_id=2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=1301130232510000174 req_id=swa:1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=1301130232510000174 req_id=1301130232510000174 uuid=1301130232510000174 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=2604286227548946765 req_id=swa:2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=2604286227548946765 req_id=2604286227548946765 uuid=2604286227548946765 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=1301130232510000174
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=2604286227548946765
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=1301130232510000174
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=2604286227548946765
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:1301130232510000174
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=2604286227548946765
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:2604286227548946765
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=1301130232510000174
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:1301130232510000174
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:2604286227548946765
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:2604286227548946765
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:1301130232510000174
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=1301130232510000174
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=2604286227548946765
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:1301130232510000174
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:2604286227548946765
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=1301130232510000174
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=2604286227548946765
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:1301130232510000174
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:2604286227548946765
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=1301130232510000174
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=2604286227548946765
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:1301130232510000174
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:2604286227548946765
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=1301130232510000174
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:2604286227548946765
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:1301130232510000174
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=2604286227548946765
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=1301130232510000174
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=2604286227548946765
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:1301130232510000174
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:2604286227548946765
+[2026-10-12 19:09:58] INFO:     10.128.15.217:49358 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:09:58] INFO:     10.128.15.217:49374 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=7806491267267714278 req_id=swa:7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=7806491267267714278 req_id=7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=7806491267267714278 req_id=swa:7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=7806491267267714278 req_id=swa:7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=7806491267267714278 req_id=7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=7806491267267714278 req_id=7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 15, #cached-token: 0, full token usage: 0.00, swa token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 62.85
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=7806491267267714278 req_id=swa:7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=7806491267267714278 req_id=7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=7806491267267714278 req_id=swa:7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=7806491267267714278 req_id=7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=7806491267267714278 req_id=swa:7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=7806491267267714278 req_id=7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=7806491267267714278 req_id=swa:7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=7806491267267714278 req_id=7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=7806491267267714278 req_id=swa:7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=7806491267267714278 req_id=7806491267267714278 uuid=7806491267267714278 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=2745702253846542046 req_id=swa:2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=2745702253846542046 req_id=2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=2745702253846542046 req_id=swa:2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=2745702253846542046 req_id=swa:2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=2745702253846542046 req_id=2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=2745702253846542046 req_id=2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 15, #cached-token: 0, full token usage: 0.00, swa token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 2, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 755.40
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=2745702253846542046 req_id=swa:2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=2745702253846542046 req_id=2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=7806491267267714278
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=2745702253846542046 req_id=swa:2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=2745702253846542046 req_id=swa:2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:7806491267267714278
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=7806491267267714278
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=2745702253846542046 req_id=2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=2745702253846542046 req_id=2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:7806491267267714278
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=7806491267267714278
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:7806491267267714278
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=2745702253846542046 req_id=swa:2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=7806491267267714278
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=7806491267267714278
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=2745702253846542046 req_id=2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:7806491267267714278
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:7806491267267714278
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=2745702253846542046 req_id=swa:2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=7806491267267714278
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=2745702253846542046 req_id=2745702253846542046 uuid=2745702253846542046 pages=1
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:7806491267267714278
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=7806491267267714278
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:7806491267267714278
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=7806491267267714278
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:7806491267267714278
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:2745702253846542046
+[2026-10-12 19:09:58] INFO:     10.128.15.217:49378 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=2745702253846542046
+[2026-10-12 19:09:58 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:2745702253846542046
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=2745702253846542046
+[2026-10-12 19:09:58 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:2745702253846542046
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=2745702253846542046
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=2745702253846542046
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=2745702253846542046
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=2745702253846542046
+[2026-10-12 19:09:58 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:2745702253846542046
+[2026-10-12 19:09:58 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=2745702253846542046
+[2026-10-12 19:09:58 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:2745702253846542046
+[2026-10-12 19:09:58 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:2745702253846542046
+[2026-10-12 19:09:58 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:2745702253846542046
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=2745702253846542046
+[2026-10-12 19:09:58 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:2745702253846542046
+[2026-10-12 19:09:58] INFO:     10.128.15.217:49394 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=5310920403495531681 req_id=swa:5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=5310920403495531681 req_id=5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=5310920403495531681 req_id=swa:5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=5310920403495531681 req_id=5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=5310920403495531681 req_id=swa:5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=5310920403495531681 req_id=5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=5310920403495531681 req_id=swa:5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=5310920403495531681 req_id=5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 15, #cached-token: 0, full token usage: 0.00, swa token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 52.34
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=5310920403495531681 req_id=swa:5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=5310920403495531681 req_id=5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=5310920403495531681 req_id=swa:5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=5310920403495531681 req_id=swa:5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=5310920403495531681 req_id=swa:5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=5310920403495531681 req_id=5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=5310920403495531681 req_id=5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=5310920403495531681 req_id=5310920403495531681 uuid=5310920403495531681 pages=1
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=5310920403495531681
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=5310920403495531681
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=5310920403495531681
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=5310920403495531681
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:5310920403495531681
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=5310920403495531681
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:5310920403495531681
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:5310920403495531681
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=5310920403495531681
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=5310920403495531681
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:5310920403495531681
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:5310920403495531681
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:5310920403495531681
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=5310920403495531681
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:5310920403495531681
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:5310920403495531681
+[2026-10-12 19:09:59] INFO:     10.128.15.217:38070 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=2779157604113170411 req_id=swa:2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=2779157604113170411 req_id=2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=2779157604113170411 req_id=swa:2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=2779157604113170411 req_id=2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=2779157604113170411 req_id=swa:2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=2779157604113170411 req_id=2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 15, #cached-token: 0, full token usage: 0.00, swa token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 41.99
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=2779157604113170411 req_id=swa:2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=2779157604113170411 req_id=swa:2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=2779157604113170411 req_id=2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=2779157604113170411 req_id=swa:2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=2779157604113170411 req_id=swa:2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=2779157604113170411 req_id=2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=2779157604113170411 req_id=2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=2779157604113170411 req_id=2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=2779157604113170411 req_id=swa:2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=2779157604113170411 req_id=2779157604113170411 uuid=2779157604113170411 pages=1
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=5842508618542707599 req_id=swa:5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=5842508618542707599 req_id=swa:5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=5842508618542707599 req_id=swa:5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=5842508618542707599 req_id=5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=5842508618542707599 req_id=5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=5842508618542707599 req_id=5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=5842508618542707599 req_id=swa:5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=5842508618542707599 req_id=5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 15, #cached-token: 0, full token usage: 0.00, swa token usage: 0.01, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 2, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 759.80
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=2779157604113170411
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=2779157604113170411
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:2779157604113170411
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:2779157604113170411
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=5842508618542707599 req_id=swa:5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=5842508618542707599 req_id=swa:5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=5842508618542707599 req_id=5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=5842508618542707599 req_id=5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=2779157604113170411
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=5842508618542707599 req_id=swa:5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=5842508618542707599 req_id=swa:5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=5842508618542707599 req_id=5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:2779157604113170411
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=5842508618542707599 req_id=5842508618542707599 uuid=5842508618542707599 pages=1
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=2779157604113170411
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:2779157604113170411
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=2779157604113170411
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=2779157604113170411
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=2779157604113170411
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:2779157604113170411
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:2779157604113170411
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:2779157604113170411
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=2779157604113170411
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:2779157604113170411
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=5842508618542707599
+[2026-10-12 19:09:59] INFO:     10.128.15.217:38080 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:09:59 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:5842508618542707599
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:5842508618542707599
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=5842508618542707599
+[2026-10-12 19:09:59 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:5842508618542707599
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=5842508618542707599
+[2026-10-12 19:09:59 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=5842508618542707599
+[2026-10-12 19:09:59 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:5842508618542707599
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=5842508618542707599
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=5842508618542707599
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=5842508618542707599
+[2026-10-12 19:09:59 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:5842508618542707599
+[2026-10-12 19:09:59 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:5842508618542707599
+[2026-10-12 19:09:59 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:5842508618542707599
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=5842508618542707599
+[2026-10-12 19:09:59 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:5842508618542707599
+[2026-10-12 19:09:59] INFO:     10.128.15.217:38092 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:10:02] INFO:     10.128.0.90:45726 - "GET /metrics HTTP/1.1" 200 OK
+[2026-10-12 19:10:02] INFO:     10.128.0.90:45738 - "GET /metrics HTTP/1.1" 200 OK
+[2026-10-12 19:10:03] INFO:     10.128.0.90:45746 - "GET /metrics HTTP/1.1" 200 OK
+[2026-10-12 19:10:03 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=1154702064654545460 req_id=swa:1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=1154702064654545460 req_id=swa:1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=1154702064654545460 req_id=1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=1154702064654545460 req_id=1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=1154702064654545460 req_id=swa:1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=1154702064654545460 req_id=swa:1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=1154702064654545460 req_id=1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=1154702064654545460 req_id=1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=1154702064654545460 req_id=swa:1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=1154702064654545460 req_id=swa:1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=1154702064654545460 req_id=1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=1154702064654545460 req_id=1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=1154702064654545460 req_id=swa:1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=1154702064654545460 req_id=1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 10, #cached-token: 0, full token usage: 0.00, swa token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 2.44
+[2026-10-12 19:10:03 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=1154702064654545460 req_id=swa:1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=1154702064654545460 req_id=1154702064654545460 uuid=1154702064654545460 pages=1
+[2026-10-12 19:10:03 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=1154702064654545460
+[2026-10-12 19:10:03 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:1154702064654545460
+[2026-10-12 19:10:03 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=1154702064654545460
+[2026-10-12 19:10:03 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=1154702064654545460
+[2026-10-12 19:10:03 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=1154702064654545460
+[2026-10-12 19:10:03 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=1154702064654545460
+[2026-10-12 19:10:03 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:1154702064654545460
+[2026-10-12 19:10:03 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=1154702064654545460
+[2026-10-12 19:10:03 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:1154702064654545460
+[2026-10-12 19:10:03 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=1154702064654545460
+[2026-10-12 19:10:03 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:1154702064654545460
+[2026-10-12 19:10:03 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:1154702064654545460
+[2026-10-12 19:10:03 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:1154702064654545460
+[2026-10-12 19:10:03 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:1154702064654545460
+[2026-10-12 19:10:03 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=1154702064654545460
+[2026-10-12 19:10:03 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:1154702064654545460
+[2026-10-12 19:10:03] INFO:     10.128.15.217:38102 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=2630510043932186487 req_id=swa:2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=2630510043932186487 req_id=2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=2630510043932186487 req_id=swa:2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=2630510043932186487 req_id=swa:2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=2630510043932186487 req_id=2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=2630510043932186487 req_id=2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=2630510043932186487 req_id=swa:2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=2630510043932186487 req_id=2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 10, #cached-token: 0, full token usage: 0.00, swa token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 14.63
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=2630510043932186487 req_id=swa:2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=2630510043932186487 req_id=2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=2630510043932186487 req_id=swa:2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=2630510043932186487 req_id=2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=2630510043932186487 req_id=swa:2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=2630510043932186487 req_id=2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=2630510043932186487 req_id=swa:2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=2630510043932186487 req_id=2630510043932186487 uuid=2630510043932186487 pages=1
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=2630510043932186487
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:2630510043932186487
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=2630510043932186487
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:2630510043932186487
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=2630510043932186487
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=2630510043932186487
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=2630510043932186487
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:2630510043932186487
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:2630510043932186487
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=2630510043932186487
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:2630510043932186487
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:2630510043932186487
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=2630510043932186487
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=2630510043932186487
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:2630510043932186487
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:2630510043932186487
+[2026-10-12 19:10:04] INFO:     10.128.15.217:38106 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=8523659659548896710 req_id=swa:8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=8523659659548896710 req_id=8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=8523659659548896710 req_id=swa:8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=8523659659548896710 req_id=8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=8523659659548896710 req_id=swa:8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=8523659659548896710 req_id=8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=8523659659548896710 req_id=swa:8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=8523659659548896710 req_id=swa:8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=8523659659548896710 req_id=8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=8523659659548896710 req_id=8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=8523659659548896710 req_id=swa:8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=8523659659548896710 req_id=8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=8523659659548896710 req_id=swa:8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=8523659659548896710 req_id=8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 10, #cached-token: 0, full token usage: 0.00, swa token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 32.56
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=8523659659548896710 req_id=swa:8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=8523659659548896710 req_id=8523659659548896710 uuid=8523659659548896710 pages=1
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=8523659659548896710
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:8523659659548896710
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=8523659659548896710
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:8523659659548896710
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=8523659659548896710
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:8523659659548896710
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=8523659659548896710
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=8523659659548896710
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=8523659659548896710
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:8523659659548896710
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=8523659659548896710
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:8523659659548896710
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:8523659659548896710
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=8523659659548896710
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:8523659659548896710
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:8523659659548896710
+[2026-10-12 19:10:04] INFO:     10.128.15.217:38110 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=333219484227262295 req_id=swa:333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=333219484227262295 req_id=333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=333219484227262295 req_id=swa:333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=333219484227262295 req_id=333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 10, #cached-token: 0, full token usage: 0.00, swa token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 33.72
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=333219484227262295 req_id=swa:333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=333219484227262295 req_id=333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=333219484227262295 req_id=swa:333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=333219484227262295 req_id=333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=333219484227262295 req_id=swa:333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=333219484227262295 req_id=333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=333219484227262295 req_id=swa:333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=333219484227262295 req_id=333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=333219484227262295 req_id=swa:333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=333219484227262295 req_id=333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=333219484227262295 req_id=swa:333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=333219484227262295 req_id=333219484227262295 uuid=333219484227262295 pages=1
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=333219484227262295
+[2026-10-12 19:10:04 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:333219484227262295
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=333219484227262295
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=333219484227262295
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=333219484227262295
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=333219484227262295
+[2026-10-12 19:10:04 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:333219484227262295
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=333219484227262295
+[2026-10-12 19:10:04 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:333219484227262295
+[2026-10-12 19:10:04 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:333219484227262295
+[2026-10-12 19:10:04 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:333219484227262295
+[2026-10-12 19:10:04 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:333219484227262295
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=333219484227262295
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=333219484227262295
+[2026-10-12 19:10:04 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:333219484227262295
+[2026-10-12 19:10:04 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:333219484227262295
+[2026-10-12 19:10:04] INFO:     10.128.15.217:38112 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:10:05 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=4880474292400208237 req_id=swa:4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=4880474292400208237 req_id=4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=4880474292400208237 req_id=swa:4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=4880474292400208237 req_id=4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=4880474292400208237 req_id=swa:4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=4880474292400208237 req_id=4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=4880474292400208237 req_id=swa:4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=4880474292400208237 req_id=4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=4880474292400208237 req_id=swa:4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=4880474292400208237 req_id=4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=4880474292400208237 req_id=swa:4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=4880474292400208237 req_id=4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=4880474292400208237 req_id=swa:4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=4880474292400208237 req_id=4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 10, #cached-token: 0, full token usage: 0.00, swa token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 33.01
+[2026-10-12 19:10:05 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=4880474292400208237 req_id=swa:4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=4880474292400208237 req_id=4880474292400208237 uuid=4880474292400208237 pages=1
+[2026-10-12 19:10:05 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=4880474292400208237
+[2026-10-12 19:10:05 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:4880474292400208237
+[2026-10-12 19:10:05 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=4880474292400208237
+[2026-10-12 19:10:05 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=4880474292400208237
+[2026-10-12 19:10:05 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=4880474292400208237
+[2026-10-12 19:10:05 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=4880474292400208237
+[2026-10-12 19:10:05 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:4880474292400208237
+[2026-10-12 19:10:05 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:4880474292400208237
+[2026-10-12 19:10:05 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=4880474292400208237
+[2026-10-12 19:10:05 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:4880474292400208237
+[2026-10-12 19:10:05 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:4880474292400208237
+[2026-10-12 19:10:05 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:4880474292400208237
+[2026-10-12 19:10:05 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=4880474292400208237
+[2026-10-12 19:10:05 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=4880474292400208237
+[2026-10-12 19:10:05 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:4880474292400208237
+[2026-10-12 19:10:05 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:4880474292400208237
+[2026-10-12 19:10:05] INFO:     10.128.15.217:38126 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:10:05 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=4138503171110773238 req_id=swa:4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=4138503171110773238 req_id=4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=4138503171110773238 req_id=swa:4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=4138503171110773238 req_id=4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=4138503171110773238 req_id=swa:4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=4138503171110773238 req_id=swa:4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=4138503171110773238 req_id=4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=4138503171110773238 req_id=4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=4138503171110773238 req_id=swa:4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=4138503171110773238 req_id=4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=4138503171110773238 req_id=swa:4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=4138503171110773238 req_id=4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=4138503171110773238 req_id=swa:4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=4138503171110773238 req_id=4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 10, #cached-token: 0, full token usage: 0.00, swa token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 15.65
+[2026-10-12 19:10:05 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=4138503171110773238 req_id=swa:4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=4138503171110773238 req_id=4138503171110773238 uuid=4138503171110773238 pages=1
+[2026-10-12 19:10:05 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=4138503171110773238
+[2026-10-12 19:10:05 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:4138503171110773238
+[2026-10-12 19:10:05 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=4138503171110773238
+[2026-10-12 19:10:05 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=4138503171110773238
+[2026-10-12 19:10:05 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=4138503171110773238
+[2026-10-12 19:10:05 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:4138503171110773238
+[2026-10-12 19:10:05 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=4138503171110773238
+[2026-10-12 19:10:05 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:4138503171110773238
+[2026-10-12 19:10:05 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:4138503171110773238
+[2026-10-12 19:10:05 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=4138503171110773238
+[2026-10-12 19:10:05 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=4138503171110773238
+[2026-10-12 19:10:05 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:4138503171110773238
+[2026-10-12 19:10:05 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:4138503171110773238
+[2026-10-12 19:10:05 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:4138503171110773238
+[2026-10-12 19:10:05 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=4138503171110773238
+[2026-10-12 19:10:05 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:4138503171110773238
+[2026-10-12 19:10:05] INFO:     10.128.15.217:38132 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:10:31 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#0 uuid=3284460184682582440 pages=128
+[2026-10-12 19:10:31 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#0 uuid=3658185338400367167 pages=128
+[2026-10-12 19:10:31 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#0 uuid=2505914691251745666 pages=128
+[2026-10-12 19:10:31 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#0 uuid=1840926512104127467 pages=128
+[2026-10-12 19:10:31 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#0 uuid=1737022919270712089 pages=128
+[2026-10-12 19:10:31 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#0 uuid=5008737697273297643 pages=128
+[2026-10-12 19:10:31 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#0 uuid=8251364379894761150 pages=128
+[2026-10-12 19:10:31 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, full token usage: 0.02, swa token usage: 0.84, #running-req: 0, #queue-req: 0, #pending-token: 24576, #bootstrap-req: 0, #inflight-req: 0, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 321.22
+[2026-10-12 19:10:31 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#0 uuid=1959367336241223057 pages=128
+[2026-10-12 19:10:31 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#1 uuid=1812925998556939261 pages=128
+[2026-10-12 19:10:31 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#1 uuid=6705308610100708466 pages=128
+[2026-10-12 19:10:31 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#1 uuid=7299840042136588077 pages=128
+[2026-10-12 19:10:31 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#1 uuid=5750928593957141508 pages=128
+[2026-10-12 19:10:31 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#1 uuid=3863725148314568494 pages=128
+[2026-10-12 19:10:31 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#1 uuid=290902533793726686 pages=128
+[2026-10-12 19:10:31 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, full token usage: 0.02, swa token usage: 0.58, #running-req: 0, #queue-req: 0, #pending-token: 16384, #bootstrap-req: 0, #inflight-req: 0, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 30781.30
+[2026-10-12 19:10:31 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#1 uuid=8907001600593104511 pages=128
+[2026-10-12 19:10:31 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#1 uuid=1657094134085198788 pages=128
+[2026-10-12 19:10:31 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 2880, #cached-token: 0, full token usage: 0.03, swa token usage: 0.84, #running-req: 0, #queue-req: 0, #pending-token: 13504, #bootstrap-req: 0, #inflight-req: 0, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 23109.07
+[2026-10-12 19:10:32 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#2 uuid=5515347255549660770 pages=171
+[2026-10-12 19:10:32 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#2 uuid=8668827270521530946 pages=171
+[2026-10-12 19:10:32 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#2 uuid=3054295266301762361 pages=171
+[2026-10-12 19:10:32 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#2 uuid=4255217623086941098 pages=171
+[2026-10-12 19:10:32 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#2 uuid=5257377084218876114 pages=171
+[2026-10-12 19:10:32 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 8064, #cached-token: 0, full token usage: 0.04, swa token usage: 0.58, #running-req: 0, #queue-req: 0, #pending-token: 5440, #bootstrap-req: 0, #inflight-req: 0, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 27332.24
+[2026-10-12 19:10:32 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#2 uuid=5103680629047466059 pages=171
+[2026-10-12 19:10:32 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#2 uuid=8027514066711228133 pages=171
+[2026-10-12 19:10:32 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=1940835340359596413 req_id=1940835340359596413#2 uuid=1467603049617512974 pages=171
+[2026-10-12 19:10:32 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 2880, #cached-token: 0, full token usage: 0.04, swa token usage: 0.56, #running-req: 0, #queue-req: 0, #pending-token: 2560, #bootstrap-req: 0, #inflight-req: 0, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 21445.05
+[2026-10-12 19:10:32 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=1940835340359596413 req_id=swa:1940835340359596413 uuid=1940835340359596413 pages=2
+[2026-10-12 19:10:32 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=1940835340359596413 req_id=1940835340359596413 uuid=1940835340359596413 pages=512
+[2026-10-12 19:10:32 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=1940835340359596413 req_id=swa:1940835340359596413 uuid=1940835340359596413 pages=2
+[2026-10-12 19:10:32 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=1940835340359596413 req_id=1940835340359596413 uuid=1940835340359596413 pages=512
+[2026-10-12 19:10:32 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=1940835340359596413#1
+[2026-10-12 19:10:32 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=1940835340359596413#2
+[2026-10-12 19:10:32 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=1940835340359596413#0
+[2026-10-12 19:10:32 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=1940835340359596413 req_id=swa:1940835340359596413 uuid=1940835340359596413 pages=2
+[2026-10-12 19:10:32 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=1940835340359596413 req_id=swa:1940835340359596413 uuid=1940835340359596413 pages=2
+[2026-10-12 19:10:32 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=1940835340359596413 req_id=1940835340359596413 uuid=1940835340359596413 pages=512
+[2026-10-12 19:10:32 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=1940835340359596413 req_id=swa:1940835340359596413 uuid=1940835340359596413 pages=2
+[2026-10-12 19:10:32 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=1940835340359596413#1
+[2026-10-12 19:10:32 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=1940835340359596413#2
+[2026-10-12 19:10:32 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=1940835340359596413#0
+[2026-10-12 19:10:32 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=1940835340359596413 req_id=1940835340359596413 uuid=1940835340359596413 pages=512
+[2026-10-12 19:10:32 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=1940835340359596413 req_id=1940835340359596413 uuid=1940835340359596413 pages=512
+[2026-10-12 19:10:32 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=1940835340359596413 req_id=swa:1940835340359596413 uuid=1940835340359596413 pages=2
+[2026-10-12 19:10:32 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=1940835340359596413 req_id=swa:1940835340359596413 uuid=1940835340359596413 pages=2
+[2026-10-12 19:10:32 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=1940835340359596413 req_id=1940835340359596413 uuid=1940835340359596413 pages=512
+[2026-10-12 19:10:32 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=1940835340359596413 req_id=1940835340359596413 uuid=1940835340359596413 pages=512
+[2026-10-12 19:10:32 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=1940835340359596413 req_id=swa:1940835340359596413 uuid=1940835340359596413 pages=2
+[2026-10-12 19:10:32 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 2560, #cached-token: 0, full token usage: 0.04, swa token usage: 0.56, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 18988.36
+[2026-10-12 19:10:32 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=1940835340359596413 req_id=1940835340359596413 uuid=1940835340359596413 pages=512
+[2026-10-12 19:10:32 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=1940835340359596413#1
+[2026-10-12 19:10:32 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=1940835340359596413#2
+[2026-10-12 19:10:32 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=1940835340359596413#0
+[2026-10-12 19:10:32 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=1940835340359596413#0
+[2026-10-12 19:10:32 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=1940835340359596413#2
+[2026-10-12 19:10:32 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=1940835340359596413#1
+[2026-10-12 19:10:32 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=1940835340359596413#1
+[2026-10-12 19:10:32 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=1940835340359596413#1
+[2026-10-12 19:10:32 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=1940835340359596413#2
+[2026-10-12 19:10:32 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=1940835340359596413#2
+[2026-10-12 19:10:32 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=1940835340359596413#0
+[2026-10-12 19:10:32 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=1940835340359596413#0
+[2026-10-12 19:10:32 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=1940835340359596413#1
+[2026-10-12 19:10:32 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=1940835340359596413#2
+[2026-10-12 19:10:32 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=1940835340359596413#0
+[2026-10-12 19:10:32 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=1940835340359596413#1
+[2026-10-12 19:10:32 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=1940835340359596413#2
+[2026-10-12 19:10:32 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=1940835340359596413#0
+[2026-10-12 19:10:32 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:1940835340359596413
+[2026-10-12 19:10:32 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:1940835340359596413
+[2026-10-12 19:10:32 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:1940835340359596413
+[2026-10-12 19:10:32 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:1940835340359596413
+[2026-10-12 19:10:32 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:1940835340359596413
+[2026-10-12 19:10:32 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:1940835340359596413
+[2026-10-12 19:10:32 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:1940835340359596413
+[2026-10-12 19:10:32 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:1940835340359596413
+[2026-10-12 19:10:32 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=1940835340359596413
+[2026-10-12 19:10:32 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=1940835340359596413
+[2026-10-12 19:10:32 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=1940835340359596413
+[2026-10-12 19:10:32 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=1940835340359596413
+[2026-10-12 19:10:32 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=1940835340359596413
+[2026-10-12 19:10:32 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=1940835340359596413
+[2026-10-12 19:10:32 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=1940835340359596413
+[2026-10-12 19:10:32 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=1940835340359596413
+[2026-10-12 19:10:32] INFO:     10.128.15.217:51378 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:11:03] INFO:     10.128.15.217:40870 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:11:04 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=8064898081837537165 req_id=swa:8064898081837537165 uuid=8064898081837537165 pages=2
+[2026-10-12 19:11:04 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=8064898081837537165 req_id=swa:8064898081837537165 uuid=8064898081837537165 pages=2
+[2026-10-12 19:11:04 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=8064898081837537165 req_id=8064898081837537165 uuid=8064898081837537165 pages=128
+[2026-10-12 19:11:04 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=8064898081837537165 req_id=8064898081837537165 uuid=8064898081837537165 pages=128
+[2026-10-12 19:11:04 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=8064898081837537165 req_id=swa:8064898081837537165 uuid=8064898081837537165 pages=2
+[2026-10-12 19:11:04 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=8064898081837537165 req_id=8064898081837537165 uuid=8064898081837537165 pages=128
+[2026-10-12 19:11:04 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=8064898081837537165 req_id=swa:8064898081837537165 uuid=8064898081837537165 pages=2
+[2026-10-12 19:11:04 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=8064898081837537165 req_id=swa:8064898081837537165 uuid=8064898081837537165 pages=2
+[2026-10-12 19:11:04 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=8064898081837537165 req_id=8064898081837537165 uuid=8064898081837537165 pages=128
+[2026-10-12 19:11:04 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=8064898081837537165 req_id=8064898081837537165 uuid=8064898081837537165 pages=128
+[2026-10-12 19:11:04 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, full token usage: 0.01, swa token usage: 0.42, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 258.45
+[2026-10-12 19:11:04 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=8064898081837537165 req_id=swa:8064898081837537165 uuid=8064898081837537165 pages=2
+[2026-10-12 19:11:04 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=8064898081837537165 req_id=8064898081837537165 uuid=8064898081837537165 pages=128
+[2026-10-12 19:11:04 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=8064898081837537165 req_id=swa:8064898081837537165 uuid=8064898081837537165 pages=2
+[2026-10-12 19:11:04 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=8064898081837537165 req_id=8064898081837537165 uuid=8064898081837537165 pages=128
+[2026-10-12 19:11:04 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=8064898081837537165 req_id=swa:8064898081837537165 uuid=8064898081837537165 pages=2
+[2026-10-12 19:11:04 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=8064898081837537165 req_id=8064898081837537165 uuid=8064898081837537165 pages=128
+[2026-10-12 19:11:04 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:8064898081837537165
+[2026-10-12 19:11:04 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:8064898081837537165
+[2026-10-12 19:11:04 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:8064898081837537165
+[2026-10-12 19:11:04 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:8064898081837537165
+[2026-10-12 19:11:04 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:8064898081837537165
+[2026-10-12 19:11:04 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:8064898081837537165
+[2026-10-12 19:11:04 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:8064898081837537165
+[2026-10-12 19:11:04 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:8064898081837537165
+[2026-10-12 19:11:04 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=8064898081837537165
+[2026-10-12 19:11:04 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=8064898081837537165
+[2026-10-12 19:11:04 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=8064898081837537165
+[2026-10-12 19:11:04 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=8064898081837537165
+[2026-10-12 19:11:04 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=8064898081837537165
+[2026-10-12 19:11:04 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=8064898081837537165
+[2026-10-12 19:11:04 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=8064898081837537165
+[2026-10-12 19:11:04 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=8064898081837537165
+[2026-10-12 19:11:09] INFO:     10.128.15.217:58922 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:11:09 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=3386979224028219086 req_id=swa:3386979224028219086 uuid=3386979224028219086 pages=2
+[2026-10-12 19:11:09 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=3386979224028219086 req_id=swa:3386979224028219086 uuid=3386979224028219086 pages=2
+[2026-10-12 19:11:09 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=3386979224028219086 req_id=swa:3386979224028219086 uuid=3386979224028219086 pages=2
+[2026-10-12 19:11:09 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=3386979224028219086 req_id=swa:3386979224028219086 uuid=3386979224028219086 pages=2
+[2026-10-12 19:11:09 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=3386979224028219086 req_id=3386979224028219086 uuid=3386979224028219086 pages=128
+[2026-10-12 19:11:09 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=3386979224028219086 req_id=swa:3386979224028219086 uuid=3386979224028219086 pages=2
+[2026-10-12 19:11:09 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=3386979224028219086 req_id=3386979224028219086 uuid=3386979224028219086 pages=128
+[2026-10-12 19:11:09 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=3386979224028219086 req_id=3386979224028219086 uuid=3386979224028219086 pages=128
+[2026-10-12 19:11:09 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=3386979224028219086 req_id=3386979224028219086 uuid=3386979224028219086 pages=128
+[2026-10-12 19:11:09 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=3386979224028219086 req_id=3386979224028219086 uuid=3386979224028219086 pages=128
+[2026-10-12 19:11:09 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=3386979224028219086 req_id=swa:3386979224028219086 uuid=3386979224028219086 pages=2
+[2026-10-12 19:11:09 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=3386979224028219086 req_id=swa:3386979224028219086 uuid=3386979224028219086 pages=2
+[2026-10-12 19:11:09 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=3386979224028219086 req_id=swa:3386979224028219086 uuid=3386979224028219086 pages=2
+[2026-10-12 19:11:09 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, full token usage: 0.01, swa token usage: 0.42, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 1524.55
+[2026-10-12 19:11:09 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=3386979224028219086 req_id=3386979224028219086 uuid=3386979224028219086 pages=128
+[2026-10-12 19:11:09 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=3386979224028219086 req_id=3386979224028219086 uuid=3386979224028219086 pages=128
+[2026-10-12 19:11:09 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=3386979224028219086 req_id=3386979224028219086 uuid=3386979224028219086 pages=128
+[2026-10-12 19:11:09 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:3386979224028219086
+[2026-10-12 19:11:09 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:3386979224028219086
+[2026-10-12 19:11:09 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:3386979224028219086
+[2026-10-12 19:11:09 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:3386979224028219086
+[2026-10-12 19:11:09 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:3386979224028219086
+[2026-10-12 19:11:09 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:3386979224028219086
+[2026-10-12 19:11:09 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:3386979224028219086
+[2026-10-12 19:11:09 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:3386979224028219086
+[2026-10-12 19:11:09 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=3386979224028219086
+[2026-10-12 19:11:09 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=3386979224028219086
+[2026-10-12 19:11:09 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=3386979224028219086
+[2026-10-12 19:11:09 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=3386979224028219086
+[2026-10-12 19:11:09 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=3386979224028219086
+[2026-10-12 19:11:09 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=3386979224028219086
+[2026-10-12 19:11:09 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=3386979224028219086
+[2026-10-12 19:11:09 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=3386979224028219086
+[2026-10-12 19:12:14 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=4113701311826789321 req_id=swa:4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=4113701311826789321 req_id=4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=4113701311826789321 req_id=swa:4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=4113701311826789321 req_id=4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=4113701311826789321 req_id=swa:4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=4113701311826789321 req_id=swa:4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=4113701311826789321 req_id=4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=4113701311826789321 req_id=4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=4113701311826789321 req_id=swa:4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=4113701311826789321 req_id=swa:4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=4113701311826789321 req_id=4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=4113701311826789321 req_id=swa:4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=4113701311826789321 req_id=4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=4113701311826789321 req_id=swa:4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=4113701311826789321 req_id=4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=4113701311826789321 req_id=4113701311826789321 uuid=4113701311826789321 pages=1
+[2026-10-12 19:12:14 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 5, #cached-token: 0, full token usage: 0.00, swa token usage: 0.00, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 0.08
+[2026-10-12 19:12:14 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:4113701311826789321
+[2026-10-12 19:12:14 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:4113701311826789321
+[2026-10-12 19:12:14 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:4113701311826789321
+[2026-10-12 19:12:14 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=4113701311826789321
+[2026-10-12 19:12:14 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:4113701311826789321
+[2026-10-12 19:12:14 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=4113701311826789321
+[2026-10-12 19:12:14 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:4113701311826789321
+[2026-10-12 19:12:14 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=4113701311826789321
+[2026-10-12 19:12:14 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=4113701311826789321
+[2026-10-12 19:12:14 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=4113701311826789321
+[2026-10-12 19:12:14 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=4113701311826789321
+[2026-10-12 19:12:14 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=4113701311826789321
+[2026-10-12 19:12:14 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:4113701311826789321
+[2026-10-12 19:12:14 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:4113701311826789321
+[2026-10-12 19:12:14 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=4113701311826789321
+[2026-10-12 19:12:14 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:4113701311826789321
+[2026-10-12 19:12:14] INFO:     10.128.15.217:42160 - "POST /generate HTTP/1.1" 200 OK
+[2026-10-12 19:12:14 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=3073559038634779692 req_id=swa:3073559038634779692 uuid=3073559038634779692 pages=2
+[2026-10-12 19:12:14 TP7 EP7] RaidenKVManager rank7 prefill registered read | room=3073559038634779692 req_id=3073559038634779692 uuid=3073559038634779692 pages=128
+[2026-10-12 19:12:14 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=3073559038634779692 req_id=swa:3073559038634779692 uuid=3073559038634779692 pages=2
+[2026-10-12 19:12:14 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=3073559038634779692 req_id=swa:3073559038634779692 uuid=3073559038634779692 pages=2
+[2026-10-12 19:12:14 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=3073559038634779692 req_id=swa:3073559038634779692 uuid=3073559038634779692 pages=2
+[2026-10-12 19:12:14 TP3 EP3] RaidenKVManager rank3 prefill registered read | room=3073559038634779692 req_id=3073559038634779692 uuid=3073559038634779692 pages=128
+[2026-10-12 19:12:14 TP5 EP5] RaidenKVManager rank5 prefill registered read | room=3073559038634779692 req_id=3073559038634779692 uuid=3073559038634779692 pages=128
+[2026-10-12 19:12:14 TP1 EP1] RaidenKVManager rank1 prefill registered read | room=3073559038634779692 req_id=3073559038634779692 uuid=3073559038634779692 pages=128
+[2026-10-12 19:12:14 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=3073559038634779692 req_id=swa:3073559038634779692 uuid=3073559038634779692 pages=2
+[2026-10-12 19:12:14 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=3073559038634779692 req_id=swa:3073559038634779692 uuid=3073559038634779692 pages=2
+[2026-10-12 19:12:14 TP2 EP2] RaidenKVManager rank2 prefill registered read | room=3073559038634779692 req_id=3073559038634779692 uuid=3073559038634779692 pages=128
+[2026-10-12 19:12:14 TP6 EP6] RaidenKVManager rank6 prefill registered read | room=3073559038634779692 req_id=3073559038634779692 uuid=3073559038634779692 pages=128
+[2026-10-12 19:12:14 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=3073559038634779692 req_id=swa:3073559038634779692 uuid=3073559038634779692 pages=2
+[2026-10-12 19:12:14 TP4 EP4] RaidenKVManager rank4 prefill registered read | room=3073559038634779692 req_id=3073559038634779692 uuid=3073559038634779692 pages=128
+[2026-10-12 19:12:14 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=3073559038634779692 req_id=swa:3073559038634779692 uuid=3073559038634779692 pages=2
+[2026-10-12 19:12:14 TP0 EP0] RaidenKVManager rank0 prefill registered read | room=3073559038634779692 req_id=3073559038634779692 uuid=3073559038634779692 pages=128
+[2026-10-12 19:12:14 TP0 EP0] Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, full token usage: 0.01, swa token usage: 0.42, #running-req: 0, #queue-req: 0, #pending-token: 0, #bootstrap-req: 0, #inflight-req: 1, #optimistic-req: 0, cuda graph: False, input throughput (token/s): 20442.04
+[2026-10-12 19:12:14 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=swa:3073559038634779692
+[2026-10-12 19:12:14 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=swa:3073559038634779692
+[2026-10-12 19:12:14 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=swa:3073559038634779692
+[2026-10-12 19:12:14 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=swa:3073559038634779692
+[2026-10-12 19:12:14 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=swa:3073559038634779692
+[2026-10-12 19:12:14 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=swa:3073559038634779692
+[2026-10-12 19:12:14 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=swa:3073559038634779692
+[2026-10-12 19:12:14 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=swa:3073559038634779692
+[2026-10-12 19:12:15 TP0 EP0] RaidenKVManager rank0 prefill read served | req_id=3073559038634779692
+[2026-10-12 19:12:15 TP4 EP4] RaidenKVManager rank4 prefill read served | req_id=3073559038634779692
+[2026-10-12 19:12:15 TP2 EP2] RaidenKVManager rank2 prefill read served | req_id=3073559038634779692
+[2026-10-12 19:12:15 TP1 EP1] RaidenKVManager rank1 prefill read served | req_id=3073559038634779692
+[2026-10-12 19:12:15 TP3 EP3] RaidenKVManager rank3 prefill read served | req_id=3073559038634779692
+[2026-10-12 19:12:15 TP7 EP7] RaidenKVManager rank7 prefill read served | req_id=3073559038634779692
+[2026-10-12 19:12:15 TP6 EP6] RaidenKVManager rank6 prefill read served | req_id=3073559038634779692
+[2026-10-12 19:12:15 TP5 EP5] RaidenKVManager rank5 prefill read served | req_id=3073559038634779692
+[2026-10-12 19:12:15] INFO:     10.128.15.217:42172 - "POST /generate HTTP/1.1" 200 OK
