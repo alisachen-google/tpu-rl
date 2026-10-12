@@ -1,0 +1,53 @@
+# Test plan: 2-prefill + 2-decode disaggregation on TPU v7x
+
+Written 2026-10-12 from the 1P/1D campaign (`TEST_CASES.md`, `FINDINGS.md`) and a capacity check of the three hosts named below. No code changed.
+
+## 1. Host capacity (checked with gcloud and ssh over the internal IPs; the external IPs are unreachable from the test VM)
+
+| Host name in the ssh config | What it is | Chips | State on 2026-10-12 |
+|---|---|---|---|
+| wyzhang-tpu7x-16-a (34.56.86.215) | worker 0 of slice `wyzhang-tpu7x-16` (tpu7x-16, topology 2x2x2), internal 10.128.15.217 | 8 | healthy; the current prefill host a |
+| wyzhang-tpu7x-16-b (34.68.1.148) | worker 1 of the same slice, internal 10.128.0.90 | 8 | healthy; the current decode host b |
+| wyzhang-tpu7x-8 (34.31.248.180) | separate slice `wyzhang-tpu7x-8` (2x2x1), internal 10.128.0.20 | 8 | `UNHEALTHY_TENSORFLOW`; root disk 0 bytes free; no venv; weights NFS not mounted at `/mnt/data` |
+
+24 chips on two slices; each worker has 224 CPUs and 944 GB RAM. What that gives:
+
+- **TP-8 engines (the 1P/1D recipes):** at most 3, so 2P/1D or 1P/2D, not 2P/2D. The third engine needs the tpu7x-8 host repaired first (disk, venv, NFS mount, TPU health).
+- **TP-4 engines:** 6 (two per worker), enough for 2P/2D plus spares or 3P/3D. gpt-oss-120b weights fit in 4 chips, but the launcher's single-host topology code (`sglang_tpu/patches.py`) has no chip-subset support (`TPU_VISIBLE_CHIPS` / process bounds), and the compile buckets and 1M-context KV sizing would need re-deriving for 4 chips. Budget this as launcher work before any TP-4 run.
+- **True 2P/2D at TP-8** needs a fourth 8-chip worker. The project has about 30 `tpu7x-8` slices owned by others (`gcloud compute tpus tpu-vm list --zone us-central1-c`); borrowing one for the test window is the quickest route.
+
+Recommendation: get one more tpu7x-8 (or repair wyzhang-tpu7x-8) and keep TP-8 so every 1P/1D result transfers unchanged; use the TP-4 route only if no fourth host appears.
+
+## 2. What is new over 1P/1D
+
+Choice and fan-out: a router picks a P and a D per request, any P may transfer to any D, and one engine's death must not take the others down. Every 1P/1D finding is the regression floor; the new risks are routing correctness, cross-pair consistency, partial failure, and shared-host resource contention.
+
+## 3. Phases
+
+| Phase | Cases | Tools (existing unless noted) | Pass criteria |
+|---|---|---|---|
+| 0 Bring-up | 4 engines over 3 or 4 hosts; distinct server, raiden and bootstrap ports per engine; per-engine compile audit; Rust PD gateway or mini-LB in multi-worker mode | `pd.sh` extended to N engines, `compile_audit.sh` | all engines and the router healthy; 0 serving-time recompiles; router lists 4 workers |
+| 1 Regression floor | TC-1 differential 1k/8k/32k/128k at c=1, TC-2 boundary sweep, TC-6 params, TC-9 chat, GSM8K-100, and one probe per 1P/1D finding (F-5 #1244, F-6 #1147, F-8 #1145, F-10 #1146, F-11 #1142, F-12 #1148, F-15 #1189, F-16 #1188 flag refused) | `golden_diff.py`, `params_matrix.py`, `chat_suite.py`, existing phase probes | same identical/numeric classification as 1P/1D; GSM8K at or above 0.98; every carried-over probe behaves as its fix PR validated |
+| 2 Routing correctness | 200 requests with the chosen (P, D) recorded per request; all four pairings exercised; outputs independent of pairing | new `route_probe.py` (router logs or per-engine `prompt_tokens_total` deltas) | all 4 pairings seen; 0 output differences across pairings |
+| 3 Rooms and n>1 | n=2/3/8, batches, consecutive calls, chat n=2 spread over both Ps | `_phase_1217.sh` battery against the router | every request returns; rooms unique per sample per P in the prefill logs |
+| 4 Partial failure | kill P1 mid-prefill, kill D1 mid-decode, kill and restart the router, abort storm 40 in 10 s across pairs, client disconnect during handshake | `abort_test.py`, per-engine kill, state snapshots | survivors keep serving; dead rooms released within the bootstrap timeout (#1230 class, #1271); router stops routing to the dead engine (#1274 says it may not: file if so); no hang over 300 s |
+| 5 Load and admission | bench_serving 131k/256 at c=8 and 16; small KV pool on D1 only; retraction on D; router-side shedding (`--max-queued-requests` is refused under PD by #1191) | `bench_serving`, `queue_limit_probe.py` at the router URL | 0 failures; no F-11 / #1140 / #1267 deadlock; shed requests get 503s, never hangs; all engines idle after |
+| 6 Prefix cache and HiCache | MT-Bench 80x2 at c=1/4 with cache-aware routing on and off; host offload on both Ps; evict then reload | `mtbench_runner.py`, hicache metrics | turn-2 cached tokens higher with cache-aware routing; reload bit-exact (O-3: PD caches only the prompt) |
+| 7 Speculative decoding | EAGLE3 on all four engines, TC-4 acceptance, outputs vs the bf16 golden | config D recipes | acceptance and NUM classification as in 1P/1D |
+| 8 Mixed-config pair, deliberate | D2 with a different page size or KV layout | recipe variant | the handshake must fail loudly; #1077 predicts it will not, which is the test |
+| 9 Soak | 2 h mixed traffic (random, MT-Bench, aborts) with the dashboard per engine | soak phase script | queue gauges drain; 0 bootstrap/transfer failures outside injected faults; no host RAM growth (#1286) |
+
+## 4. Carry-in issues to watch at 2P/2D
+
+#1273 (gateway drops `priority`), #1274 and #1276 (health 200 while broken), #1115 (decode death ends the stream silently), #1077 and #1076 (layout and SWA head-count mismatches only bite between unequal engines), #1113/#1114 (120 s holds after a peer fails), #1269 and #1286 (host RAM when two engines share a host).
+
+## 5. Metrics
+
+Give every panel of the PD dashboard an engine label so per-P and per-D queue depths, bootstrap and transfer failure rates and `kv_transfer_oldest_inflight_age_seconds` sit side by side, and add router-side request counts per worker to spot imbalance. The reading guide in the hardening report applies per engine.
+
+## 6. Before the first run
+
+1. Secure the fourth 8-chip worker, or repair wyzhang-tpu7x-8 (root disk full, TPU runtime unhealthy, venv and NFS missing).
+2. Extend `pd.sh` and `launch_role.sh` to N engines with per-engine ports and run directories.
+3. Decide the router (Rust PD gateway vs mini-LB multi-worker); verify it relays the decode's status (#1273, #1274 are open against it).
+4. Land or carry the 1P/1D fixes the regression floor depends on (#1181, #1191, #1245, #1237, #1217, #1230).

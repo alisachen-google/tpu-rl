@@ -30,3 +30,5 @@ It was written on 2026-10-09 at about 04:30 UTC from `TEST_CASES.md`, `FINDINGS.
 ## Status addendum 2 (2026-10-12)
 
 The production-readiness narrative (why, issues of the last two weeks by failure class, metrics reading guide, per-test findings, fix status) is the live document **PD Disaggregation Hardening Report**: https://claude.ai/code/artifact/4e16e970-2a02-43f3-9344-572f87dd5f3a. Fix-validation batteries TC-19 to TC-24 and the 2026-10-12 PR status are in `TEST_CASES.md` §6-§7.
+
+The 2P/2D plan (host capacity, phases, carry-in issues) is `TEST_PLAN_2P2D.md`.
