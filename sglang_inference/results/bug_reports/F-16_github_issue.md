@@ -125,3 +125,6 @@ Probe: `scripts/queue_limit_probe.py` (modes base/low/q0/q1/nops/nolimit/retract
 
 ### Fix re-validation after redesign as a TPU patch (2026-10-11, PR #1191 head 21859c77df)
 sglang_tpu/pd_decode_queue_limit.py (wraps DecodeTransferQueue.pop_transferred and Scheduler._abort_on_queued_limit). base 16 PASS / 1 known probe-design FAIL (Q10), low 3 PASS, q0 4 PASS, nops 3 PASS; prefill 0 exceptions, decode only the 4 launcher tracebacks. Raw: results/fix_validate_1191_patch/, log results/fix_validate_1191_patch.log.
+
+### Final shape of PR #1191: option 1 (validation-only), 2026-10-12, head 8f578ae4ae
+Per review, the decode-side admission was dropped. TpuSRTPlatform.apply_server_args_defaults now refuses --max-queued-requests under a PD mode, and refuses limit 0 + --enable-priority-scheduling. Live: PD decode launch with the flag exits with the message (no processes); monolithic limit 0 + priority launch exits with the message; main with the same monolithic recipe: first burst -> connection errors, 'max() iterable argument is empty' in all 8 ranks, /health dead, 0 schedulers (results/fix_validate_1191_option1/, logs fix_validate_1191_option1{,b}.log). Note: upstream counts the newcomer itself, so limit 0 refuses every request even into an idle server. The decode-side admission moved to the door (option 2) in PR #1299.
