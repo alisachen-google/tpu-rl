@@ -1,0 +1,38 @@
+2026-10-12T23:09:49Z [2p2d-p8] === make sure the config-B group is live
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+2026-10-12T23:09:51Z [2p2d-p8] === baseline: 6 requests, both decodes healthy
+   200 1.9s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.8s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.9s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   summary: 200 x6(unknown,identical) 
+2026-10-12T23:10:09Z [2p2d-p8] === (a) d2 with page_size 128 (prefills 64): expect the bootstrap sanity check to refuse loudly
+2026-10-12T23:13:48Z [2p2d-p8]    d2 (gpt-oss_B_128k_2p2d_d2page128.json) health 200 after 211 s; server_info: {'page_size': 128, 'attention_backend': 'pallas_tpu_rpa_v3', 'kv_cache_dtype': 'fp8_e4m3'}
+   500 5.3s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.8s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.7s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   summary: 200 x4(unknown,identical) 500 x8(unknown,GARBAGE) 
+2026-10-12T23:14:15Z [2p2d-p8]    d2 log: page-size / handshake / exception lines:
+   [2026-10-12 23:10:30] server_args={'model_path': '/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a', 'tokenizer_path': '/mnt/data/tt/hf-cache/hub/models--openai--g
+   [rank0]:V1012 23:12:05.043000 3878335 /mnt/disks/nvme2/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/_dynamo/guards.py:4760] [0/1] [__recompiles]     - 0/0: tensor 'args[0]' size mismatch at index 0
+   [rank2]:V1012 23:12:05.044000 3878337 /mnt/disks/nvme2/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/_dynamo/guards.py:4760] [0/1] [__recompiles]     - 0/0: tensor 'args[0]' size mismatch at index 0
+   [rank3]:V1012 23:12:05.044000 3878338 /mnt/disks/nvme2/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/_dynamo/guards.py:4760] [0/1] [__recompiles]     - 0/0: tensor 'args[0]' size mismatch at index 0
+   [rank5]:V1012 23:12:05.045000 3878340 /mnt/disks/nvme2/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/_dynamo/guards.py:4760] [0/1] [__recompiles]     - 0/0: tensor 'args[0]' size mismatch at index 0
+   [rank4]:V1012 23:12:05.045000 3878339 /mnt/disks/nvme2/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/_dynamo/guards.py:4760] [0/1] [__recompiles]     - 0/0: tensor 'args[0]' size mismatch at index 0
+   [rank1]:V1012 23:12:05.045000 3878336 /mnt/disks/nvme2/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/_dynamo/guards.py:4760] [0/1] [__recompiles]     - 0/0: tensor 'args[0]' size mismatch at index 0
+   [rank7]:V1012 23:12:05.046000 3878342 /mnt/disks/nvme2/alisachen_google_com/venv/sglang/lib/python3.12/site-packages/torch/_dynamo/guards.py:4760] [0/1] [__recompiles]     - 0/0: tensor 'args[0]' size mismatch at index 0
