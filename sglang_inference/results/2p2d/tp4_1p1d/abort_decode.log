@@ -1,0 +1,21 @@
+[+    0.00s] prompt id=isl8192_k0 isl=8192 chars=43963 phase=decode abort_after=5.0s repeat=2 concurrent=1
+[+    0.01s] server-info[baseline] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    0.04s] server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+    0.04s] round 1/2: launching 1 aborting request(s)
+[+    0.06s] req0: sent (abort-0-1791796735437), headers after 0.02s
+[+    5.44s] req0: aborted at 5.406s in decode (first_token=0.405s, chunks=970)
+[+    5.44s] round 2/2: launching 1 aborting request(s)
+[+    5.45s] req1: sent (abort-1-1791796740843), headers after 0.00s
+[+   10.60s] req1: aborted at 5.153s in decode (first_token=0.153s, chunks=938)
+[+   10.61s] server-info[after-abort] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   10.62s] server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   10.62s] waiting --settle 60.0s
+[+   70.63s] server-info[settled] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   70.64s] server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   70.64s] WARN http://10.128.15.217:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+[+   70.64s] WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped
+[+   70.83s] follow-up short: OK status=200 tokens=16 cached=0 
+[+   71.09s] follow-up identical-prompt: OK status=200 tokens=32 cached=8128 
+[+   71.10s] server-info[final] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   71.11s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+[+   71.11s] PASS: 2 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json

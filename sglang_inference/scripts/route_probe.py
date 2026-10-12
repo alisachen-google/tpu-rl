@@ -7,7 +7,7 @@ def metric(url, name, mode=None):
     except Exception: return None
     tot = 0.0; found = False
     for line in txt.splitlines():
-        if line.startswith("sglang:" + name) and 'tp_rank="0"' in line and (mode is None or f'mode="{mode}"' in line) and ("engine_type" in line or True):
+        if line.startswith("sglang:" + name + "{") and ('tp_rank=' not in line or 'tp_rank="0"' in line) and (mode is None or f'mode="{mode}"' in line):
             try: tot += float(line.rsplit(" ", 1)[1]); found = True
             except ValueError: pass
     return tot if found else None

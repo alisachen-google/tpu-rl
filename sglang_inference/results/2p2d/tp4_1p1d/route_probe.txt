@@ -1,0 +1,8 @@
+[start] INFO router http://10.128.0.90:8081; prefills ['http://10.128.15.217:30000']; decodes ['http://10.128.0.90:30000']
+[health] PASS http://10.128.15.217:30000
+[health] PASS http://10.128.0.90:30000
+[R1-all-served] PASS 12 requests at c=4: statuses ['200'], e2e 0.3..0.98s
+[R2-all-prefills-used] FAIL prefill deltas (prompt_tokens, gen_tokens, requests): {'http://10.128.15.217:30000': (0, 0, 0)}
+[R3-all-decodes-used] FAIL decode deltas: {'http://10.128.0.90:30000': (0, 0, 0)}
+[R4-pair-invariant-output] PASS 1 distinct outputs over 8 repeats; statuses ['200']
+[R5-idle-after] PASS decode running: {'http://10.128.0.90:30000': 0.0}

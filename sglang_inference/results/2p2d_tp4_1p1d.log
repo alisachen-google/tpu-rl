@@ -1,0 +1,29 @@
+2026-10-12T09:18:28Z [tp4-1p1d] router up after 6 s
+2026-10-12T09:18:28Z [tp4-1p1d] router health 200; engines: p1 200 d1 200
+2026-10-12T09:18:29Z [tp4-1p1d] smoke: {"text":" red, blue, and yellow.\n\nThe statement \"The three primary colors are","output_ids":[3592,11,9861,11,326,19691,13,279,976,9710,392,976,3407,9107,10803,553],"meta_info":{"id":"222e187ba599418f8fc9210979bd469a","finish_reason":{"type":"length","length":16},"prompt_tokens":5,"weight_version"
+2026-10-12T09:18:29Z [tp4-1p1d] === routing probe (1P/1D degenerate: checks health, serving, pair-invariant output, idle)
+   [start] INFO router http://10.128.0.90:8081; prefills ['http://10.128.15.217:30000']; decodes ['http://10.128.0.90:30000']
+   [health] PASS http://10.128.15.217:30000
+   [health] PASS http://10.128.0.90:30000
+   [R1-all-served] PASS 12 requests at c=4: statuses ['200'], e2e 0.3..0.98s
+   [R2-all-prefills-used] FAIL prefill deltas (prompt_tokens, gen_tokens, requests): {'http://10.128.15.217:30000': (0, 0, 0)}
+   [R3-all-decodes-used] FAIL decode deltas: {'http://10.128.0.90:30000': (0, 0, 0)}
+   [R4-pair-invariant-output] PASS 1 distinct outputs over 8 repeats; statuses ['200']
+   [R5-idle-after] PASS decode running: {'http://10.128.0.90:30000': 0.0}
+2026-10-12T09:18:42Z [tp4-1p1d] === TC-1 differential: 8k prompts, greedy 1024, c=1, vs TP-8 golden (expect NUM class at TP-4)
+   isl8192_k0    False      84     18  0.036   0.1457  FAIL  token prefix 18<256; agreement 0.036<0.95
+                   a@84: 'ted sentences, with some secret code wor'
+                   b: 'ted sentences, with two secret code word'
+   isl8192_k1    False      76     15  0.021   0.0336  FAIL  token prefix 15<256; agreement 0.021<0.95
+                   a@76: 'entioned, in order. In the text, there a'
+                   b: "entioned, in order. Let's scan the text:"
+   
+   2 ids, 0 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/2p2d/tp4_1p1d/diff_8192.json
+2026-10-12T09:18:55Z [tp4-1p1d] === TC-7 decode-phase abort x2
+   [+   70.83s] follow-up short: OK status=200 tokens=16 cached=0 
+   [+   71.09s] follow-up identical-prompt: OK status=200 tokens=32 cached=8128 
+   [+   71.10s] server-info[final] http://10.128.15.217:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+   [+   71.11s] server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}
+   [+   71.11s] PASS: 2 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+2026-10-12T09:20:06Z [tp4-1p1d] === compile audit d1:   serving-time recompile lines (first 5):
+2026-10-12T09:20:06Z [tp4-1p1d] phase tp4-1p1d done (engines left running)

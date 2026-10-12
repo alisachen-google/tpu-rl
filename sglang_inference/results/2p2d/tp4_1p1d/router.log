@@ -1,0 +1,43 @@
+WARNING:root:sglang_router_rs is not available, get_available_tool_call_parsers will return empty list
+WARNING:router:Rust Router is not installed, only python MiniLB (debugging only) is available
+WARNING:sglang_router.mini_lb:[33mMiniLB is only for debugging purposes, it only supports random policy![0m
+WARNING:sglang_router.mini_lb:[MiniLB] Overriding policy to random
+INFO:     Started server process [2941030]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8081 (Press CTRL+C to quit)
+INFO:     10.128.0.90:56086 - "GET /health HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56100 - "GET /health HTTP/1.1" 200 OK
+/home/alisachen_google_com/sglang-torchtpu/sgl-model-gateway/bindings/python/src/sglang_router/mini_lb.py:521: FastAPIDeprecationWarning: ORJSONResponse is deprecated, FastAPI now serializes data directly to JSON bytes via Pydantic when a return type or response model is set, which is faster and doesn't need a custom response class. Read more in the FastAPI docs: https://fastapi.tiangolo.com/advanced/custom-response/#orjson-or-response-model and https://fastapi.tiangolo.com/tutorial/response-model/
+  return await lb.generate(
+INFO:     10.128.0.90:56102 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56114 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56124 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56140 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56156 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56158 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56166 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56172 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56174 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56188 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56190 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56202 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56216 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56232 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56242 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56248 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:56258 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:45568 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:45570 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:45582 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:45586 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:45590 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:45590 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:53326 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:39936 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:53538 - "POST /generate HTTP/1.1" 200 OK
+INFO:     10.128.0.90:55452 - "POST /generate HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [2941030]
