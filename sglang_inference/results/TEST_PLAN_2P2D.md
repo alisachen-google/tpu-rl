@@ -53,3 +53,27 @@ Give every panel of the PD dashboard an engine label so per-P and per-D queue de
 2. Extend `pd.sh` and `launch_role.sh` to N engines with per-engine ports and run directories.
 3. Decide the router (Rust PD gateway vs mini-LB multi-worker); verify it relays the decode's status (#1273, #1274 are open against it).
 4. Land or carry the 1P/1D fixes the regression floor depends on (#1181, #1191, #1245, #1237, #1217, #1230).
+
+## 7. Implementation on the existing tpu7x-16 pair (2026-10-12)
+
+Decision: run 2P/2D on the two hosts we already have by using TP-4 engines, two per host, instead of waiting for a fourth worker. Each host has 4 chips with 2 TensorCores each (8 `/dev/vfio` devices, 96 GiB HBM per device); a TP-4 engine takes 2 chips. torch_tpu supports the sub-slice (`get_tpu_topology(4)` = `1,2,1,2`) and the repo launcher passes `TPU_VISIBLE_CHIPS` through for `tp_size > 1`, so no code change is needed in sglang-torchtpu; the launcher's P/D *group* mode still assumes one engine per host, so the engines are launched individually and the router is started by hand.
+
+| Engine | Host | Chips (`TPU_VISIBLE_CHIPS`) | Server port | Bootstrap port | Raiden KV base port | MASTER_PORT |
+|---|---|---|---|---|---|---|
+| p1 | a 10.128.15.217 | 0,1 | 30000 | 8998 | 31000 | 29500 |
+| p2 | a 10.128.15.217 | 2,3 | 30001 | 8999 | 31100 | 29501 |
+| d1 | b 10.128.0.90 | 0,1 | 30000 | – | 31000 | 29500 |
+| d2 | b 10.128.0.90 | 2,3 | 30001 | – | 31100 | 29501 |
+| router | a | – | 8080 | – | – | – |
+
+Raiden reserves `base + 4 * local_rank` control/data ports per rank, so the two engines on a host use bases 100 apart. Compile caches are keyed per engine (`TORCH_TPU_TIER2_NAME=pd2_<engine>_tp4_chips<..>`, separate inductor and tier-3 roots) so TP-4 graphs never collide with the TP-8 caches.
+
+Recipes: `recipes/2p2d/gpt-oss_B_128k_{p1,p2,d1,d2}.json`, derived from the 1P/1D Config-B recipe (`gpt-oss_C_128k_ps_q.json` minus HiCache, priority scheduling and the queue limit, which #1191 refuses under PD) with `tp_size 4`, `ep_size 4`, `max_total_tokens 786432`, `mem_fraction_static 0.45`, same compile buckets. Scripts: `scripts/launch_engine.sh` (one engine, chip subset), `scripts/pd2.sh start|stop|status` (four engines + `sglang_router --pd-disaggregation --mini-lb` with two `--prefill url bootstrap_port` and two `--decode url`), `scripts/route_probe.py` (phase 2 routing checks), `scripts/_phase_2p2d_p0.sh` (phases 0-2 plus a decode-phase abort). Router policy: default (random) for prefill and decode selection.
+
+Known caveats of this layout: TP-4 results are not byte-comparable with the TP-8 goldens (different reduction order; expect the F-3 class of numerical difference, so the TC-1 oracle here is needles plus GSM8K, not token identity), and two engines share one host's CPUs, RAM and host-RAM pools (#1286, #1269 are in scope).
+
+## 8. Run log
+
+| When (UTC) | Run | What | Result |
+|---|---|---|---|
+| 2026-10-12 08:xx | `2p2d_bringup` | first launch of p1,p2,d1,d2 + router on main 2e14706a62 | in progress |
