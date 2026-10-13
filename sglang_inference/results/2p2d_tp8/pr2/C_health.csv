@@ -1,0 +1,34 @@
+10:54:52,200,1.001757,
+10:54:58,200,1.002270,
+10:55:04,200,1.013507,
+10:55:10,200,1.002656,
+10:55:16,200,1.001296,
+10:55:22,200,1.001272,
+10:55:28,200,1.001269,
+10:55:34,200,1.001482,
+10:55:40,200,1.001965,
+10:55:46,200,1.001088,
+10:55:52,200,1.000560,
+10:55:58,200,1.000834,
+10:56:04,200,1.001717,
+10:56:10,200,1.000666,
+10:56:16,200,1.001180,
+10:56:23,200,1.000987,
+10:56:29,200,1.001297,
+10:56:35,200,1.001010,
+10:56:41,200,1.001628,
+10:56:47,200,1.001430,
+10:56:53,{"state":"unhealthy","reason":"transfer_failures: 3 consecutive over 60s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 3 consecutive over 60s across 2 peer(s) ['10.128.1
+10:56:58,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:03,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:08,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:13,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:18,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:23,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:28,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:33,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:39,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:44,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:49,{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 4 consecutive over 64s across 2 peer(s) ['10.128.1
+10:57:54,{"state":"unhealthy","reason":"transfer_failures: 5 consecutive over 120s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 5 consecutive over 120s across 2 peer(s) ['10.128
+10:57:59,{"state":"unhealthy","reason":"transfer_failures: 6 consecutive over 124s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 6 consecutive over 124s across 2 peer(s) ['10.128

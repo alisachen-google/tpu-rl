@@ -1,0 +1,5 @@
+2026-10-13T11:03:38Z [pr3] === PR #1341 live validation; branch 3f6bacc0a4 on d1, heartbeat max age 20 s
+2026-10-13T11:03:38Z [pr3] === A. relaunch d1 on the branch; idle 3 min
+2026-10-13T11:03:43Z [pr3]    d1 down after 0 s
+2026-10-13T11:05:59Z [pr3]    d1 (gpt-oss_B_128k_2p2d_d1beat.json) health 200 after 136 s
+2026-10-13T11:06:03Z [pr3]    board /dev/shm/sglang_heartbeat_bf67f120b687_38973241.shm: 9 slots; detokenizer[0]=0.7s, scheduler[0]=0.0s, scheduler[1]=0.0s, scheduler[2]=0.0s, scheduler[3]=0.0s, scheduler[4]=0.0s, scheduler[5]=0.0s, scheduler[6]=0.0s, scheduler[7]=0.0s

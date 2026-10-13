@@ -1,0 +1,46 @@
+2026-10-13T10:49:54Z [pr2] === PR #1340 live validation; branch 87633c4d08 on d1 (N=3, T=60 s, P=60 s, bootstrap/waiting timeout 60 s)
+2026-10-13T10:49:54Z [pr2] === A. d1 on the branch, baseline
+2026-10-13T10:49:59Z [pr2]    d1 down after 0 s
+2026-10-13T10:52:14Z [pr2]    d1 health 200 after 135 s
+2026-10-13T10:52:17Z [pr2]    traffic: 200 x8 
+2026-10-13T10:52:18Z [pr2]    d1 /health_generate:  200 1.001523
+2026-10-13T10:52:18Z [pr2]    d1 health_json: {"state":"ready","reason":"ready","consecutive_failures":0,"failing_peers":[],"known_peers":2,"failures_span_s":0.0,"last_success_age_s":1.9,"probation_wait_s":60.0,"since_s":15.3}
+2026-10-13T10:52:18Z [pr2] === B. one prefill dead: kill p2; requests paired with p2 fail on d1 at the 60 s bootstrap timeout, p1 ones succeed
+2026-10-13T10:52:24Z [pr2]    p2 down after 0 s
+2026-10-13T10:52:27Z [pr2]    traffic (12 req, c=4): 200 x5 500 x7 
+2026-10-13T10:52:28Z [pr2]    d1 /health_generate:  200 1.001080
+2026-10-13T10:52:28Z [pr2]    d1 health_json: {"state":"ready","reason":"degraded: 2 consecutive failures all from peer 10.128.15.239:8998","consecutive_failures":2,"failing_peers":["10.128.15.239:8998"],"known_peers":2,"failures_span_s":0.0,"last_success_age_s":3.0,"probation_wait_s":60.0,"since_s":24.6}
+2026-10-13T10:52:29Z [pr2]    d2 (main) /health_generate for comparison:  200 1.002069
+2026-10-13T10:52:29Z [pr2]    restoring p2 in the background
+2026-10-13T10:52:30Z [pr2] === C. #1276 hook on d1: every transfer into d1 fails at the 60 s waiting timeout
+2026-10-13T10:52:34Z [pr2]    d1 down after 0 s
+2026-10-13T10:54:50Z [pr2]    d1 health 200 after 136 s
+2026-10-13T10:54:52Z [pr2]    p2 health 200 after 138 s
+2026-10-13T10:54:52Z [pr2]    hook installs on d1: 8
+2026-10-13T10:57:56Z [pr2]    traffic (10 req, c=2; d1-paired ones fail after 60 s): 200 x4 500 x6 
+2026-10-13T10:58:04Z [pr2]    d1 /health_generate during the traffic: 200 x20 {"state":"unhealthy" x14  (n=34)
+2026-10-13T10:58:04Z [pr2]    first 503 at:  ; first failures in traffic at ~60 s
+2026-10-13T10:58:04Z [pr2]    d1 /health_generate now: {"state":"unhealthy","reason":"transfer_failures: 6 consecutive over 124s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 6 consecutive over 124s across 2 peer(s) ['10.128
+2026-10-13T10:58:04Z [pr2]    d1 health_json: {"state":"unhealthy","reason":"transfer_failures: 6 consecutive over 124s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 60s after the last failure","consecutive_failures":6,"failing_peers":["10.128.15.217:8998","10.128.15.239:8998"],"known_peers":2,"failures_span_s":123.7,"last_success_age_s":null,"probation_wait_s":60.0,"since_s":72.0}
+2026-10-13T10:58:04Z [pr2] === D. probation: no traffic for T=60 s -> ready again on probation; one more failing request -> unhealthy, wait doubled
+2026-10-13T10:59:15Z [pr2]    after 70 s quiet: d1 /health_generate:  200 1.002006
+2026-10-13T10:59:15Z [pr2]    d1 health_json: {"state":"probation","reason":"probation: admitting traffic, first transfer must complete within 60s","consecutive_failures":6,"failing_peers":["10.128.15.217:8998","10.128.15.239:8998"],"known_peers":2,"failures_span_s":123.7,"last_success_age_s":null,"probation_wait_s":60.0,"since_s":19.5}
+2026-10-13T11:01:15Z [pr2]    traffic (4 req, c=2): 200 x1 500 x3 
+2026-10-13T11:01:19Z [pr2]    d1 /health_generate: {"state":"unhealthy","reason":"transfer_failures: 9 consecutive over 324s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 120s after the last failure","pd_health":[{"state":"unhealthy","reason":"transfer_failures: 9 consecutive over 324s across 2 peer(s) ['10.12
+2026-10-13T11:01:19Z [pr2]    d1 health_json: {"state":"unhealthy","reason":"transfer_failures: 9 consecutive over 324s across 2 peer(s) ['10.128.15.217:8998', '10.128.15.239:8998'], 0 successes; probation 120s after the last failure","consecutive_failures":9,"failing_peers":["10.128.15.217:8998","10.128.15.239:8998"],"known_peers":2,"failures_span_s":323.5,"last_success_age_s":null,"probation_wait_s":120.0,"since_s":63.2}
+2026-10-13T11:01:19Z [pr2] === E. restore d1 to main with the standard recipe
+2026-10-13T11:01:24Z [pr2]    d1 down after 0 s
+2026-10-13T11:03:24Z [pr2]    d1 health 200 after 120 s
+2026-10-13T11:03:26Z [pr2]    traffic: 200 x6 
+2026-10-13T11:03:27Z [pr2]    d1 /health_generate:  200 1.001469
+2026-10-13T11:03:27Z [pr2] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-13T11:03:33Z [pr2] phase pr2 done
