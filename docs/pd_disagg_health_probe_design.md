@@ -64,30 +64,30 @@ Endpoint: `GET /health`. Source: heartbeats and a fatal-error flag. No request i
 Endpoint: `GET /health_generate`, alias `GET /readiness`. Same path as today, new contents,
 no generation. Source: real outcomes, an idle-only canary, compatibility and start-up gates.
 
-This is #1276's fix 1 with three additions.
+The rule, in full. It is #1276's fix 1 (N, T, P and the probation step, validated there
+against the repro, a 25-failure burst and cancel-heavy traffic) with peer attribution,
+backoff and a stricter success added.
 
-The issue's rule, adopted as written:
-
-- 503 once N transfers in a row have failed over at least T seconds with zero successes.
-  A success clears it.
-- A decode taken out of service gets no requests, so after T seconds with no new failure it
-  passes on probation, failing again if a new request has no output within P seconds.
-- Validated values N=20, T=300 s, P=60 s: handled the repro without tripping on a 25-failure
-  burst or cancel-heavy traffic.
-
-Additions:
-
-1. Peer attribution. Failures count toward 503 only when they span two or more peers or are
-   locally attributable (a pull failing on this host; one rank with no responses while its
-   sibling ranks succeed). Failures confined to one peer put the decode in a Degraded state:
-   still 200, with the peer named in the reason body. Without this, one dead prefill makes
-   every decode in the group open together and the pool is empty. Phase 4c showed that
-   pairing pattern.
-2. Backoff on probation. Each failed probation doubles the next wait, capped at 30 minutes,
-   so a decode that keeps failing re-admission stops oscillating every T seconds.
-3. Stricter success. A success is the first token of a request that completed a real KV
-   transfer. A fake-bootstrap probe or a fully cached request cannot clear a transfer-failure
-   state.
+- Open: the decode returns 503 once N transfers in a row have failed over at least T seconds
+  with zero successes in that window. Both conditions must hold, so a burst shorter than T
+  never opens it however large it is.
+- Count only what is the decode's own fault: a failure counts toward N when the failures span
+  two or more peers, or when it is locally attributable (a pull failing on this host; one rank
+  with no responses while its sibling ranks succeed). Failures confined to one peer put the
+  decode in Degraded instead: still 200, with the peer named in the reason body. Without this
+  rule one dead prefill makes every decode in the group open together and the pool is empty,
+  which is the pairing pattern phase 4c showed.
+- Close: one success clears the state. A success is the first token of a request that
+  completed a real KV transfer. A fake-bootstrap probe or a fully cached request cannot clear
+  a transfer-failure state.
+- Recover: a decode taken out of service gets no requests, so after T seconds with no new
+  failure it passes on probation, returning 200 so traffic resumes. A probation request must
+  produce output within P seconds; if it does not, the decode fails again.
+- Back off: each failed probation doubles the next wait, capped at 30 minutes, so a decode
+  that keeps failing re-admission stops oscillating every T seconds.
+- Values: N=20, T=300 s, P=60 s, the ones the issue's prototype validated. At low concurrency
+  N dominates (20 sequential 60 s failures take 20 minutes), so N is the knob to lower once
+  the burst and cancel tests pass on our harness.
 
 Idle case (from Dynamo): activity is the evidence, so no probe runs while traffic flows.
 After 15 s of silence the engine runs a loopback transfer over its real NIC path (a dead
