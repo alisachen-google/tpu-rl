@@ -45,9 +45,12 @@ The current probe fails because one generate request tries to answer all three.
 
 Endpoint: `GET /health`. Source: heartbeats and a fatal-error flag. No request is created.
 
-- Every process on the request path writes a monotonic heartbeat into shared memory on each
-  loop iteration, idle iterations included: each scheduler rank, the detokenizer, the
-  tokenizer workers. The HTTP process reads the timestamps; it never asks the scheduler.
+- Every process on the request path writes a heartbeat into its own slot in a shared-memory
+  region on each loop iteration, idle iterations included: each scheduler rank, the
+  detokenizer, the tokenizer workers. The heartbeat is the monotonic clock reading at the top
+  of that iteration. When a probe arrives, the HTTP process reads every slot and computes its
+  age against the clock now. It never sends anything into the scheduler, so a hung process is
+  detected by a stale slot rather than by a request that is never answered.
 - 503 when any heartbeat is older than the threshold (3 x the longest legitimate step). The
   scheduler publishes an "in compile" or "in long chunk" flag that pauses the clock, with its
   own cap so a wedged recompile is still caught.
