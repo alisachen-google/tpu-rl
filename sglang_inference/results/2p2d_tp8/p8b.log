@@ -1,0 +1,78 @@
+2026-10-12T23:50:43Z [2p2d-p8b] === relaunch the whole group at page_size 256 (rpa_batched needs >= 256; prefills stay rpa_v3)
+   2026-10-12 23:50:43 stopping p1 on 10.128.15.217
+   2026-10-12 23:50:47 stopping p2 on 10.128.15.239
+   2026-10-12 23:50:52 stopping d1 on 10.128.0.90
+   2026-10-12 23:50:56 stopping d2 on 10.128.0.20
+   2026-10-12 23:51:20 starting decodes first (d1=10.128.0.90 d2=10.128.0.20), then prefills (p1=10.128.15.217 p2=10.128.15.239); recipe=gpt-oss_B_128k_2p2d_p256.json run=2p2d_tp8_B256
+   2026-10-12 23:54:37 d1 /health ready after 181 s
+   2026-10-12 23:54:37 d2 /health ready after 0 s
+   2026-10-12 23:55:22 p1 /health ready after 45 s
+   2026-10-12 23:55:37 p2 /health ready after 15 s
+   2026-10-12 23:55:37 router /health ready after 0 s
+   10.128.15.217 {'disaggregation_mode': 'prefill', 'page_size': 256, 'attention_backend': 'pallas_tpu_rpa_v3', 'kv_cache_dtype': 'fp8_e4m3'}
+   10.128.0.90 {'disaggregation_mode': 'decode', 'page_size': 256, 'attention_backend': 'pallas_tpu_rpa_v3', 'kv_cache_dtype': 'fp8_e4m3'}
+2026-10-12T23:55:37Z [2p2d-p8b] === baseline at page 256: 6 requests
+   200 2.2s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 2.2s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.6s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   summary: 200 x3(d1,identical) 200 x3(d2,identical) 
+2026-10-12T23:55:55Z [2p2d-p8b] === (b) d2 with rpa_batched + SEQ_ALONG_LANE KV layout at page 256 (prefills rpa_v3 token-major): #1077 predicts no handshake error and garbage with HTTP 200
+2026-10-13T00:01:07Z [2p2d-p8b]    d2 (gpt-oss_B_128k_2p2d_p256_d2lane.json) health 200 after 307 s; server_info: {'page_size': 256, 'attention_backend': 'pallas_tpu_rpa_batched', 'kv_cache_dtype': 'fp8_e4m3'}
+   500 0.2s d2 tokens=None common_prefix_chars=0 GARBAGE :: ''
+   500 0.2s d2 tokens=None common_prefix_chars=0 GARBAGE :: ''
+   500 0.1s d2 tokens=None common_prefix_chars=0 GARBAGE :: ''
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   500 0.1s d2 tokens=None common_prefix_chars=0 GARBAGE :: ''
+   500 0.1s d2 tokens=None common_prefix_chars=0 GARBAGE :: ''
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   500 0.1s d2 tokens=None common_prefix_chars=0 GARBAGE :: ''
+   500 0.1s d2 tokens=None common_prefix_chars=0 GARBAGE :: ''
+   200 1.4s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   500 0.1s d2 tokens=None common_prefix_chars=0 GARBAGE :: ''
+   500 0.1s d2 tokens=None common_prefix_chars=0 GARBAGE :: ''
+   summary: 200 x3(d1,identical) 500 x9(d2,GARBAGE) 
+2026-10-13T00:01:28Z [2p2d-p8b]    d2 log: layout / exception lines:
+   [2026-10-12 23:56:12] server_args={'model_path': '/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a', 'tokenizer_path': '/mnt/data/tt/hf-cache/hub/models--openai--g
+   [2026-10-12 23:57:16 TP5 EP5] Allocating SEQ_ALONG_LANE TPU KV buffers: layers=18, shape per layer=(3073, 2, 16, 4, 256), dtype=torch.float8_e4m3fn
+   [2026-10-12 23:57:16 TP7 EP7] Allocating SEQ_ALONG_LANE TPU KV buffers: layers=18, shape per layer=(3073, 2, 16, 4, 256), dtype=torch.float8_e4m3fn
+   [2026-10-12 23:57:16 TP6 EP6] Allocating SEQ_ALONG_LANE TPU KV buffers: layers=18, shape per layer=(3073, 2, 16, 4, 256), dtype=torch.float8_e4m3fn
+   [2026-10-12 23:57:16 TP1 EP1] Allocating SEQ_ALONG_LANE TPU KV buffers: layers=18, shape per layer=(3073, 2, 16, 4, 256), dtype=torch.float8_e4m3fn
+   [2026-10-12 23:57:16 TP4 EP4] Allocating SEQ_ALONG_LANE TPU KV buffers: layers=18, shape per layer=(3073, 2, 16, 4, 256), dtype=torch.float8_e4m3fn
+   [2026-10-12 23:57:16 TP0 EP0] Allocating SEQ_ALONG_LANE TPU KV buffers: layers=18, shape per layer=(3073, 2, 16, 4, 256), dtype=torch.float8_e4m3fn
+   [2026-10-12 23:57:16 TP3 EP3] Allocating SEQ_ALONG_LANE TPU KV buffers: layers=18, shape per layer=(3073, 2, 16, 4, 256), dtype=torch.float8_e4m3fn
+2026-10-13T00:09:29Z [2p2d-p8b]    d2 health now: 200; decode counters: d1 6.0 d2 9.0
+2026-10-13T00:09:29Z [2p2d-p8b] === restore the standard config-B group (page 64) for the soak
+   2026-10-13 00:09:29 stopping p1 on 10.128.15.217
+   2026-10-13 00:09:34 stopping p2 on 10.128.15.239
+   2026-10-13 00:09:39 stopping d1 on 10.128.0.90
+   2026-10-13 00:09:43 stopping d2 on 10.128.0.20
+   2026-10-13 00:10:08 starting decodes first (d1=10.128.0.90 d2=10.128.0.20), then prefills (p1=10.128.15.217 p2=10.128.15.239); recipe=gpt-oss_B_128k_2p2d.json run=2p2d_tp8_B3
+   2026-10-13 00:12:08 d1 /health ready after 105 s
+   2026-10-13 00:12:24 d2 /health ready after 16 s
+   2026-10-13 00:12:39 p1 /health ready after 15 s
+   2026-10-13 00:12:39 p2 /health ready after 0 s
+   2026-10-13 00:12:39 router /health ready after 0 s
+   200 1.8s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.8s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.6s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.7s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.7s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   summary: 200 x4(d1,identical) 200 x4(d2,identical) 
+2026-10-13T00:13:02Z [2p2d-p8b] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-13T00:13:08Z [2p2d-p8b] phase p8b done
+phase 8b exit 0

@@ -42,3 +42,46 @@
    10.128.0.90: num_running_reqs 0.0 num_queue_reqs 0.0 num_prefill_inflight_queue_reqs 0.0 num_decode_prealloc_queue_reqs 0.0 num_decode_transfer_queue_reqs 0.0 
    10.128.0.20: 
 2026-10-12T23:22:16Z [2p2d-p8] === (b) d2 with rpa_batched + SEQ_ALONG_LANE KV layout (prefills token-major): #1077 predicts no handshake error
+2026-10-12T23:47:22Z [2p2d-p8]    d2 (gpt-oss_B_128k_2p2d_d2lane.json) health 000 after 1504 s; server_info: 
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   500 0.1s unknown tokens=None common_prefix_chars=0 GARBAGE :: 'Internal Server Error'
+   summary: 200 x4(unknown,identical) 500 x8(unknown,GARBAGE) 
+2026-10-12T23:47:43Z [2p2d-p8]    d2 log: layout / exception lines:
+   Traceback (most recent call last):
+   Traceback (most recent call last):
+       raise RuntimeError(
+   RuntimeError: An engine or router exited with 1
+2026-10-12T23:47:44Z [2p2d-p8]    d2 health now: 000
+2026-10-12T23:47:44Z [2p2d-p8] === restore d2 with the normal recipe
+2026-10-12T23:49:46Z [2p2d-p8]    d2 (gpt-oss_B_128k_2p2d.json) health 200 after 120 s; server_info: {'page_size': 64, 'attention_backend': 'pallas_tpu_rpa_v3', 'kv_cache_dtype': 'fp8_e4m3'}
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.4s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s unknown tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   summary: 200 x8(unknown,identical) 
+2026-10-12T23:50:09Z [2p2d-p8] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-12T23:50:15Z [2p2d-p8] phase p8 done
+phase 8 exit 0

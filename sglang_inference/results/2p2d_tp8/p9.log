@@ -1,0 +1,15 @@
+2026-10-13T00:13:47Z [2p2d-p9] === soak start: 120 min; sample 0
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:13:47Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:13:47Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:13:47Z,d1,0,0,0,0,0,0,85.5,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:13:47Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:13:50Z [2p2d-p9] --- round 1
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 2.69 
+   [soak_r1] c=4 questions=20 ok turn1=20 turn2=20 wall=16.8s output_tokens=9734 out_tok/s=580.0
