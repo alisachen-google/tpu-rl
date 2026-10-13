@@ -2,3 +2,24 @@
 2026-10-13T11:14:10Z [pr5]    d1 down after 0 s
 2026-10-13T11:16:26Z [pr5]    d1 (gpt-oss_B_128k_2p2d_d1metrics_hook1276.json) health 200 after 136 s
 2026-10-13T11:16:26Z [pr5]    metrics at start: sglang:pd_health_state{} 1.0 sglang:pd_health_state{} 0.0 sglang:pd_health_state{} 0.0 sglang:pd_health_consecutive_failures{} 0.0 sglang:pd_health_probation_wait_seconds{} 60.0
+2026-10-13T11:20:27Z [pr5]    traffic (10 req, c=2; d1-paired ones fail after 60 s): 200 x3 500 x7
+2026-10-13T11:20:32Z [pr5]    metrics after failures: sglang:pd_health_state{} 0.0 sglang:pd_health_state{} 1.0 sglang:pd_health_state{} 0.0 sglang:pd_health_consecutive_failures{} 7.0 sglang:pd_health_probation_wait_seconds{} 60.0
+2026-10-13T11:20:32Z [pr5]    /health_generate: 503 0.002114
+2026-10-13T11:21:42Z [pr5]    metrics after 70 s quiet: sglang:pd_health_state{} 0.0 sglang:pd_health_state{} 0.0 sglang:pd_health_state{} 1.0 sglang:pd_health_consecutive_failures{} 7.0 sglang:pd_health_probation_wait_seconds{} 60.0
+2026-10-13T11:21:43Z [pr5]    /health_generate: 200 1.001274
+2026-10-13T11:21:43Z [pr5] === restore d1 to main
+2026-10-13T11:21:48Z [pr5]    d1 down after 0 s
+2026-10-13T11:23:49Z [pr5]    d1 (gpt-oss_B_128k_2p2d.json) health 200 after 121 s
+2026-10-13T11:23:50Z [pr5]    d1 /health_generate: 200 1.001523
+2026-10-13T11:23:51Z [pr5]    traffic: 200 x4
+2026-10-13T11:23:51Z [pr5] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-13T11:23:57Z [pr5] phase pr5 done
