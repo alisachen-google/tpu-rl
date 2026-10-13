@@ -29,3 +29,331 @@ awk: cmd. line:1:     ^ syntax error
    bench: Request throughput (req/s): 3.21 
    [soak_r2] c=4 questions=20 ok turn1=20 turn2=20 wall=15.9s output_tokens=9861 out_tok/s=619.3
    [+   23.08s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:16:39Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:16:39Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:16:39Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:16:39Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:16:44Z [2p2d-p9] --- round 3
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.12 
+   [soak_r3] c=4 questions=20 ok turn1=20 turn2=20 wall=15.6s output_tokens=9705 out_tok/s=623.2
+   [+   23.05s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:18:04Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:18:04Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:18:04Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:18:04Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:18:09Z [2p2d-p9] --- round 4
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.63 
+   [soak_r4] c=4 questions=20 ok turn1=20 turn2=20 wall=15.9s output_tokens=9434 out_tok/s=592.9
+   [+   23.05s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:19:29Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:19:29Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:19:29Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:19:29Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:19:33Z [2p2d-p9] --- round 5
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.29 
+   [soak_r5] c=4 questions=20 ok turn1=20 turn2=20 wall=15.3s output_tokens=9669 out_tok/s=631.9
+   [+   23.07s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:20:53Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:20:53Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:20:53Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:20:53Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:20:57Z [2p2d-p9] --- round 6
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.55 
+   [soak_r6] c=4 questions=20 ok turn1=20 turn2=20 wall=15.9s output_tokens=9520 out_tok/s=598.7
+   [+   22.96s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:22:17Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:22:17Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:22:17Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:22:17Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:22:22Z [2p2d-p9] --- round 7
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 4.06 
+   [soak_r7] c=4 questions=20 ok turn1=20 turn2=20 wall=16.0s output_tokens=9511 out_tok/s=594.1
+   [+   23.06s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:23:40Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:23:40Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:23:40Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:23:40Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:23:44Z [2p2d-p9] --- round 8
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.66 
+   [soak_r8] c=4 questions=20 ok turn1=20 turn2=20 wall=15.7s output_tokens=9483 out_tok/s=603.8
+   [+   23.01s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:25:03Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:25:03Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:25:03Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:25:03Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:25:08Z [2p2d-p9] --- round 9
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.55 
+   [soak_r9] c=4 questions=20 ok turn1=20 turn2=20 wall=15.4s output_tokens=9394 out_tok/s=608.0
+   [+   23.03s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:26:28Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:26:28Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:26:28Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:26:28Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:26:32Z [2p2d-p9] --- round 10
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.47 
+   [soak_r10] c=4 questions=20 ok turn1=20 turn2=20 wall=15.4s output_tokens=9397 out_tok/s=611.0
+   [+   23.07s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:27:51Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:27:51Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:27:51Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:27:51Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:27:55Z [2p2d-p9] --- round 11
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.55 
+   [soak_r11] c=4 questions=20 ok turn1=20 turn2=20 wall=16.0s output_tokens=9441 out_tok/s=588.9
+   [+   23.30s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:29:16Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:29:16Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:29:16Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:29:16Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:29:20Z [2p2d-p9] --- round 12
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.85 
+   [soak_r12] c=4 questions=20 ok turn1=20 turn2=20 wall=15.8s output_tokens=9506 out_tok/s=602.9
+   [+   22.97s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:30:39Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:30:39Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:30:39Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:30:39Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:30:44Z [2p2d-p9] --- round 13
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.90 
+   [soak_r13] c=4 questions=20 ok turn1=20 turn2=20 wall=15.7s output_tokens=9577 out_tok/s=610.4
+   [+   23.10s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:32:04Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:32:04Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:32:04Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:32:04Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:32:08Z [2p2d-p9] --- round 14
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.72 
+   [soak_r14] c=4 questions=20 ok turn1=20 turn2=20 wall=15.2s output_tokens=9374 out_tok/s=616.5
+   [+   23.06s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:33:27Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:33:27Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:33:27Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:33:27Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:33:32Z [2p2d-p9] --- round 15
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.85 
+   [soak_r15] c=4 questions=20 ok turn1=20 turn2=20 wall=15.6s output_tokens=9779 out_tok/s=625.9
+   [+   23.01s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:34:50Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:34:50Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:34:50Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:34:50Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:34:55Z [2p2d-p9] --- round 16
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.95 
+   [soak_r16] c=4 questions=20 ok turn1=20 turn2=20 wall=15.6s output_tokens=9741 out_tok/s=623.5
+   [+   23.05s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:36:14Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:36:14Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:36:14Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:36:14Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:36:18Z [2p2d-p9] --- round 17
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.72 
+   [soak_r17] c=4 questions=20 ok turn1=20 turn2=20 wall=15.7s output_tokens=9905 out_tok/s=629.7
+   [+   22.98s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:37:38Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:37:38Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:37:38Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:37:38Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:37:43Z [2p2d-p9] --- round 18
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.64 
+   [soak_r18] c=4 questions=20 ok turn1=20 turn2=20 wall=15.5s output_tokens=9438 out_tok/s=608.2
+   [+   23.03s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:39:02Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:39:02Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:39:02Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:39:02Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:39:06Z [2p2d-p9] --- round 19
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.74 
+   [soak_r19] c=4 questions=20 ok turn1=20 turn2=20 wall=15.1s output_tokens=9463 out_tok/s=628.7
+   [+   23.05s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:40:26Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:40:26Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:40:26Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:40:26Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:40:30Z [2p2d-p9] --- round 20
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.76 
+   [soak_r20] c=4 questions=20 ok turn1=20 turn2=20 wall=15.9s output_tokens=9728 out_tok/s=612.1
+   [+   23.00s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:41:49Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:41:49Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:41:49Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:41:49Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:41:54Z [2p2d-p9] --- round 21
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.86 
+   [soak_r21] c=4 questions=20 ok turn1=20 turn2=20 wall=15.7s output_tokens=9481 out_tok/s=604.7
+   [+   23.02s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:43:13Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:43:13Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:43:13Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:43:13Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:43:18Z [2p2d-p9] --- round 22
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.57 
+   [soak_r22] c=4 questions=20 ok turn1=20 turn2=20 wall=15.6s output_tokens=9808 out_tok/s=630.0
+   [+   23.02s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:44:38Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:44:38Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:44:38Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:44:38Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:44:43Z [2p2d-p9] --- round 23
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.79 
+   [soak_r23] c=4 questions=20 ok turn1=20 turn2=20 wall=15.7s output_tokens=9564 out_tok/s=608.7
+   [+   23.04s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:46:02Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:46:02Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:46:02Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:46:02Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:46:05Z [2p2d-p9] --- round 24
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.92 
