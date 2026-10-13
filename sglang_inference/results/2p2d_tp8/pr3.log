@@ -3,3 +3,30 @@
 2026-10-13T11:03:43Z [pr3]    d1 down after 0 s
 2026-10-13T11:05:59Z [pr3]    d1 (gpt-oss_B_128k_2p2d_d1beat.json) health 200 after 136 s
 2026-10-13T11:06:03Z [pr3]    board /dev/shm/sglang_heartbeat_bf67f120b687_38973241.shm: 9 slots; detokenizer[0]=0.7s, scheduler[0]=0.0s, scheduler[1]=0.0s, scheduler[2]=0.0s, scheduler[3]=0.0s, scheduler[4]=0.0s, scheduler[5]=0.0s, scheduler[6]=0.0s, scheduler[7]=0.0s
+2026-10-13T11:09:05Z [pr3]    idle /health over 3 min: 200 x36  (n=36)
+2026-10-13T11:09:09Z [pr3]    board /dev/shm/sglang_heartbeat_bf67f120b687_38973241.shm: 9 slots; detokenizer[0]=0.7s, scheduler[0]=0.0s, scheduler[1]=0.0s, scheduler[2]=0.0s, scheduler[3]=0.0s, scheduler[4]=0.0s, scheduler[5]=0.0s, scheduler[6]=0.0s, scheduler[7]=0.0s
+2026-10-13T11:09:10Z [pr3] === B. under load: bench_serving 8k/256 c=8 n=48 through the router, /health every 2 s
+2026-10-13T11:09:38Z [pr3]    bench: Successful requests: 48 ;Request throughput (req/s): 3.21 
+2026-10-13T11:09:43Z [pr3]    /health under load: 200 x14  (n=14); board /dev/shm/sglang_heartbeat_bf67f120b687_38973241.shm: 9 slots; detokenizer[0]=0.9s, scheduler[0]=0.0s, scheduler[1]=0.0s, scheduler[2]=0.0s, scheduler[3]=0.0s, scheduler[4]=0.0s, scheduler[5]=0.0s, scheduler[6]=0.0s, scheduler[7]=0.0s
+2026-10-13T11:09:43Z [pr3] === C. SIGSTOP scheduler rank TP3 on d1; /health must turn 503 within 20 s, naming the stalled ranks
+2026-10-13T11:09:43Z [pr3]    TP3 pid 3634849
+2026-10-13T11:10:54Z [pr3]    first 503 after none s; codes: 11:10:03 x1 11:10:06 x1 11:10:08 x1 11:10:10 x1 11:10:12 x1 11:10:14 x1 11:10:16 x1 11:10:18 x1 11:10:20 x1 11:10:22 x1 11:10:24 x1 11:10:26 x1 11:10:28 x1 11:10:30 x1 11:10:32 x1 11:10:34 x1 11:10:36 x1 11:10:38 x1 11:10:40 x1 11:10:42 x1 11:10:44 x1 11:10:46 x1 11:10:48 x1 11:10:50 x1 11:10:52 x1 200 x10 
+2026-10-13T11:10:54Z [pr3]    last body: {"reason":"stale_heartbeat","max_age_s":20.0,"stale":[{"role":"scheduler","rank":0,"age_s":69.092,"paused":false},{"role":"scheduler","rank":1,"age_s":69.092,"paused":false},{"role":"scheduler","rank":2,"age_s":69.086,"paused":false},{"role":"scheduler","rank":3,"age_s":69.092,"paused":false},{"role":"scheduler","rank":
+2026-10-13T11:10:59Z [pr3]    board /dev/shm/sglang_heartbeat_bf67f120b687_38973241.shm: 9 slots; detokenizer[0]=0.7s, scheduler[0]=75.1s, scheduler[1]=75.1s, scheduler[2]=75.1s, scheduler[3]=75.1s, scheduler[4]=75.1s, scheduler[5]=75.1s, scheduler[6]=75.1s, scheduler[7]=75.1s
+2026-10-13T11:11:44Z [pr3]    SIGCONT: first 200 after 0 s; codes: 200 x20 ; board /dev/shm/sglang_heartbeat_bf67f120b687_38973241.shm: 9 slots; detokenizer[0]=0.1s, scheduler[0]=0.0s, scheduler[1]=0.0s, scheduler[2]=0.0s, scheduler[3]=0.0s, scheduler[4]=0.0s, scheduler[5]=0.0s, scheduler[6]=0.0s, scheduler[7]=0.0s
+2026-10-13T11:11:46Z [pr3]    traffic after recovery: 200 200 200 200 
+2026-10-13T11:11:46Z [pr3] === D. restore d1 to main with the standard recipe
+2026-10-13T11:11:51Z [pr3]    d1 down after 0 s
+2026-10-13T11:13:51Z [pr3]    d1 (gpt-oss_B_128k_2p2d.json) health 200 after 120 s
+2026-10-13T11:13:51Z [pr3]    d1 /health:  200 0.000572
+2026-10-13T11:13:51Z [pr3] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-13T11:13:58Z [pr3] phase pr3 done

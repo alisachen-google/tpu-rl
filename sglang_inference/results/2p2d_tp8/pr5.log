@@ -1,0 +1,4 @@
+2026-10-13T11:14:05Z [pr5] === PR #1342 live validation; branch a926c3beb0 on d1 with the #1276 hook, N=3, T=60 s
+2026-10-13T11:14:10Z [pr5]    d1 down after 0 s
+2026-10-13T11:16:26Z [pr5]    d1 (gpt-oss_B_128k_2p2d_d1metrics_hook1276.json) health 200 after 136 s
+2026-10-13T11:16:26Z [pr5]    metrics at start: sglang:pd_health_state{} 1.0 sglang:pd_health_state{} 0.0 sglang:pd_health_state{} 0.0 sglang:pd_health_consecutive_failures{} 0.0 sglang:pd_health_probation_wait_seconds{} 60.0
