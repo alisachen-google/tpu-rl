@@ -1,0 +1,39 @@
+2026-10-13T10:38:29Z [pr1] === PR #1339 live validation; branch 08d86f8d7d on d1, main 35cf024212 on d2
+2026-10-13T10:38:29Z [pr1] === A. relaunch d1 on the branch (no hook)
+2026-10-13T10:38:32Z [pr1]    d1 down after 0 s
+2026-10-13T10:40:19Z [pr1]    d2 health 200 after 107 s
+2026-10-13T10:40:32Z [pr1]    d1 health 200 after 120 s
+2026-10-13T10:40:33Z [pr1]    d1 sglang import path: 
+2026-10-13T10:40:33Z [pr1]    idle probes
+      10:40:33,d1-branch,200,0.024885
+      10:40:33,d1-branch,200,0.010881
+      10:40:33,d1-branch,200,0.010017
+      10:40:33,d2-main,200,1.002101
+      10:40:34,d2-main,200,1.003184
+      10:40:35,d2-main,200,1.001214
+2026-10-13T10:40:36Z [pr1]    under load: bench_serving 8k/256 c=8 n=48 through the router, probes every 2 s
+2026-10-13T10:41:04Z [pr1]    bench: Successful requests: 48 ;Request throughput (req/s): 3.00 
+2026-10-13T10:41:04Z [pr1]    busy probes: d1-branch 200 x9 (max 0.3s) ; d2-main 200 x9 (max 1.0s) 
+2026-10-13T10:41:04Z [pr1]    d1 running/queue after: sglang:num_running_reqs 0.0 sglang:num_queue_reqs 0.0
+2026-10-13T10:41:04Z [pr1] === B. starve the probe on both decodes (hook), d1 on the branch, d2 on main; real traffic every 3 s
+2026-10-13T10:41:09Z [pr1]    d1 down after 0 s
+2026-10-13T10:41:11Z [pr1]    d2 down after 0 s
+2026-10-13T10:43:12Z [pr1]    d1 health 200 after 120 s
+2026-10-13T10:43:12Z [pr1]    d2 health 200 after 120 s
+2026-10-13T10:43:13Z [pr1]    hook lines: d1 18 installs, d2 18 installs
+2026-10-13T10:43:19Z [pr1]    probes (each up to the 20 s health timeout):
+      10:43:19,d2-main,200,1.002692
+      10:43:20,d1-branch,503,20.001451
+      10:43:40,d2-main,200,16.016245
+      10:43:56,d1-branch,503,20.001535
+      10:44:16,d2-main,503,20.004146
+      10:44:36,d1-branch,503,20.001477
+2026-10-13T10:47:14Z [pr1]    traffic during the test: 200 x54  (54 requests)
+2026-10-13T10:47:14Z [pr1]    starved probes: d2-main 200 x2 (max 16.0s) 503 x1 (max 20.0s) ; d1-branch 503 x3 (max 20.0s) 
+2026-10-13T10:47:15Z [pr1]    d1 handler log: 3 x 'no answer of its own'; dropped probes: d1 19, d2 0
+2026-10-13T10:47:16Z [pr1]    d2 (main) handler log: 0 x 'Health check failed'
+2026-10-13T10:47:16Z [pr1] === C. restore both decodes to main with the standard recipe
+2026-10-13T10:47:21Z [pr1]    d1 down after 0 s
+2026-10-13T10:47:22Z [pr1]    d2 down after 0 s
+2026-10-13T10:49:23Z [pr1]    d1 health 200 after 120 s
+2026-10-13T10:49:23Z [pr1]    d2 health 200 after 120 s
