@@ -189,8 +189,8 @@ Sources: `sglang_inference/results/TEST_PLAN_2P2D.md` (findings F4, F7, F8, F9, 
 |---|---|---|---|---|
 | sglang-torchtpu #1339 | M1 | `/health_generate` answered only by the probe's own request (fix 2) | 8 unit | done: starved probe while traffic flows, main 200 on 2/3 probes, branch 503 on 3/3; idle probe latency 1 s -> 10 ms |
 | sglang-torchtpu #1340 | M1 | decode readiness from real transfer outcomes (fix 1 + attribution, backoff, strict success); state in the load snapshot and `/v1/loads`; 503 with JSON reason | 23 unit | done: dead prefill -> degraded, still 200; #1276 hook -> 503 after N=3 over 60 s; probation 200 after 70 s quiet; failure on probation -> wait doubled to 120 s |
-| sglang-torchtpu #1341 | M2 | `/health` liveness from per-process loop heartbeats in /dev/shm (scheduler ranks + detokenizer), pause API | 16 unit | running: idle, load, SIGSTOP one rank |
-| sglang-torchtpu #1342 | M3 | readiness state as Prometheus gauges (stacked on #1340) | 2 unit (+24 subtests) | chained after #1341's run |
+| sglang-torchtpu #1341 | M2 | `/health` liveness from per-process loop heartbeats in /dev/shm (scheduler ranks + detokenizer), pause API | 16 unit | done: 36/36 idle and 14/14 under-load probes 200; SIGSTOP on one rank -> 503 at 20.4 s naming all eight stalled ranks, 25/25 until SIGCONT, then 200 on the first probe |
+| sglang-torchtpu #1342 | M3 | readiness state as Prometheus gauges (stacked on #1340) | 2 unit (+24 subtests) | done: pd_health_state ready -> unhealthy -> probation with one label at 1, failures 0 -> 7, gauge agrees with /health_generate |
 | sglang-torchtpu #1343 | M0 | Kubernetes templates: startup/liveness/readiness with one endpoint each; native API doc | YAML parse | n/a (no cluster) |
 
 Dropped: a separate "self-exit on fatal error" PR. sglang already does it: a scheduler exception sends SIGQUIT to the launcher (`run_scheduler_process`), and `SubprocessWatchdog` kills the tree when a child process dies.
