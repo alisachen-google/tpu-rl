@@ -13,3 +13,19 @@ awk: cmd. line:1:     ^ syntax error
    bench: Successful requests: 32 
    bench: Request throughput (req/s): 2.69 
    [soak_r1] c=4 questions=20 ok turn1=20 turn2=20 wall=16.8s output_tokens=9734 out_tok/s=580.0
+   [+   23.10s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:15:14Z,p1,0,0,0,0,0,0,,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:15:14Z,p2,0,0,0,0,0,0,,200
+   2026-10-13T00:15:14Z,d1,0,0,0,0,0,0,85.8,200
+awk: cmd. line:1: {s+=} END {printf "%.1f", s/1048576}
+awk: cmd. line:1:     ^ syntax error
+   2026-10-13T00:15:14Z,d2,0,0,0,0,0,0,,200
+2026-10-13T00:15:18Z [2p2d-p9] --- round 2
+   bench: Successful requests: 32 
+   bench: Request throughput (req/s): 3.21 
+   [soak_r2] c=4 questions=20 ok turn1=20 turn2=20 wall=15.9s output_tokens=9861 out_tok/s=619.3
+   [+   23.08s] PASS: 8 aborts (0 failed to start), follow-ups short=True identical=True (cached_tokens=8128), 0 baseline problem(s) -> abort_report.json
