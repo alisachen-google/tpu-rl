@@ -1,0 +1,8 @@
+500 60.1s d2 tokens=None common_prefix_chars=0 ERR/GARBAGE :: ''
+500 60.1s d2 tokens=None common_prefix_chars=0 ERR/GARBAGE :: ''
+500 60.1s d2 tokens=None common_prefix_chars=0 ERR/GARBAGE :: ''
+500 61.5s d2 tokens=None common_prefix_chars=0 ERR/GARBAGE :: ''
+200 1.7s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+200 1.9s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+500 60.1s d2 tokens=None common_prefix_chars=0 ERR/GARBAGE :: ''

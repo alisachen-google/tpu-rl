@@ -1,0 +1,51 @@
+2026-10-13T06:30:51Z [i1276] === issue #1276 repro on the config-B group; d2 -> hooked decode (is_recv_done always False, waiting timeout 60 s)
+2026-10-13T06:30:53Z [i1276]    before: d2 /health_generate 200 1.002027; d1 200 1.001558; transfer_failed d2= d1=
+2026-10-13T06:31:02Z [i1276]    d2 down after 6 s (health 000)
+2026-10-13T06:33:18Z [i1276]    d2 (gpt-oss_B_128k_2p2d_d2hook1276.json) health 200 after 136 s
+2026-10-13T06:33:18Z [i1276]    hook lines in d2 log:
+   HOOK-1276 pid=4078958: finder armed
+   HOOK-1276 pid=4079115: finder armed
+   HOOK-1276 pid=4079244: finder armed
+   HOOK-1276 pid=4079245: finder armed
+2026-10-13T06:33:19Z [i1276]    d2 env check: 
+2026-10-13T06:33:19Z [i1276] === 8 greedy 8k/256 requests through the router (those paired with d2 should fail at the 60 s waiting timeout)
+   500 60.1s d2 tokens=None common_prefix_chars=0 ERR/GARBAGE :: ''
+   500 60.1s d2 tokens=None common_prefix_chars=0 ERR/GARBAGE :: ''
+   500 60.1s d2 tokens=None common_prefix_chars=0 ERR/GARBAGE :: ''
+   500 61.5s d2 tokens=None common_prefix_chars=0 ERR/GARBAGE :: ''
+   200 1.7s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.9s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   500 60.1s d2 tokens=None common_prefix_chars=0 ERR/GARBAGE :: ''
+   summary: 200 x3(d1,identical) 500 x5(d2,ERR/GARBAGE) 
+2026-10-13T06:38:38Z [i1276]    transfer_failed d2=5.0 d1=; d2 requests total 5.0; d2 /health_generate now 200 1.001198; /health 200
+2026-10-13T06:38:38Z [i1276]    d2 log: hook / failure lines:
+   [2026-10-13 06:34:20 TP4 EP4] Some requests fail to receive KV Cache transfer done signal after bootstrapping. If a greater mean TTFT is acceptable, you can 'export SGLANG_DISAGGREGATION_WAITING_TIMEOUT=600' (10 minutes) to relax 
+   [2026-10-13 06:34:20 TP7 EP7] Decode transfer failed for request rank=7 decode_req.req.rid='a673da4f8450455cad4cb5a86f03ec8a' decode_req.req.bootstrap_room=4338745674243372246 with exception Raiden transfer failed on another atten
+   [2026-10-13 06:34:20 TP0 EP0] Decode transfer failed for request rank=0 decode_req.req.rid='a673da4f8450455cad4cb5a86f03ec8a' decode_req.req.bootstrap_room=4338745674243372246 with exception Raiden transfer failed on another atten
+   [2026-10-13 06:34:20 TP6 EP6] Decode transfer failed for request rank=6 decode_req.req.rid='a673da4f8450455cad4cb5a86f03ec8a' decode_req.req.bootstrap_room=4338745674243372246 with exception Raiden transfer failed on another atten
+   [2026-10-13 06:34:20 TP5 EP5] Decode transfer failed for request rank=5 decode_req.req.rid='a673da4f8450455cad4cb5a86f03ec8a' decode_req.req.bootstrap_room=4338745674243372246 with exception Raiden transfer failed on another atten
+   [2026-10-13 06:34:20 TP4 EP4] Decode transfer failed for request rank=4 decode_req.req.rid='a673da4f8450455cad4cb5a86f03ec8a' decode_req.req.bootstrap_room=4338745674243372246 with exception Request 4338745674243372246 timed out a
+2026-10-13T06:38:39Z [i1276]    d2 /health_generate during the probes: 200 x53  (n=53, max latency 1.002921 s)
+2026-10-13T06:38:39Z [i1276] === restore d2 with the standard recipe
+2026-10-13T06:38:48Z [i1276]    d2 down after 7 s (health 000)
+2026-10-13T06:40:49Z [i1276]    d2 (gpt-oss_B_128k_2p2d.json) health 200 after 120 s
+   200 2.3s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 2.7s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.4s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.6s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   summary: 200 x5(d1,identical) 200 x1(d2,identical) 
+2026-10-13T06:41:08Z [i1276] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-13T06:41:21Z [i1276] phase i1276 done
+exit 0

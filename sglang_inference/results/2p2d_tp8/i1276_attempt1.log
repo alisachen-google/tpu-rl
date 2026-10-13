@@ -1,0 +1,40 @@
+2026-10-13T06:27:31Z [i1276] === issue #1276 repro on the config-B group; d2 -> hooked decode (is_recv_done always False, waiting timeout 60 s)
+2026-10-13T06:27:33Z [i1276]    before: d2 /health_generate 200 1.002506; d1 200 1.001750; transfer_failed d2= d1=
+2026-10-13T06:27:37Z [i1276]    d2 (gpt-oss_B_128k_2p2d_d2hook1276.json) health 200 after 0 s
+2026-10-13T06:27:37Z [i1276]    hook lines in d2 log:
+   HOOK-1276 pid=4058624: finder armed
+2026-10-13T06:27:38Z [i1276]    d2 env check: 
+2026-10-13T06:27:38Z [i1276] === 8 greedy 8k/256 requests through the router (those paired with d2 should fail at the 60 s waiting timeout)
+   500 0.1s unknown tokens=None common_prefix_chars=0 ERR/GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 ERR/GARBAGE :: 'Internal Server Error'
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   500 0.1s unknown tokens=None common_prefix_chars=0 ERR/GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 ERR/GARBAGE :: 'Internal Server Error'
+   500 0.1s unknown tokens=None common_prefix_chars=0 ERR/GARBAGE :: 'Internal Server Error'
+   200 4.1s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   summary: 200 x3(d1,identical) 500 x5(unknown,ERR/GARBAGE) 
+2026-10-13T06:28:01Z [i1276]    transfer_failed d2= d1=; d2 requests total ; d2 /health_generate now 000 0.000473; /health 000
+2026-10-13T06:28:01Z [i1276]    d2 log: hook / failure lines:
+2026-10-13T06:28:03Z [i1276]    d2 /health_generate during the probes: 000 x4  (n=4, max latency 3.911928 s)
+2026-10-13T06:28:03Z [i1276] === restore d2 with the standard recipe
+2026-10-13T06:30:07Z [i1276]    d2 (gpt-oss_B_128k_2p2d.json) health 200 after 121 s
+   200 7.9s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 2.3s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 4.4s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.6s d2 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 3.7s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   200 1.5s d1 tokens=256 common_prefix_chars=1060 identical :: 'We need to parse the prompt. The user gave a huge block of repeated se'
+   summary: 200 x2(d1,identical) 200 x4(d2,identical) 
+2026-10-13T06:30:36Z [i1276] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-13T06:30:42Z [i1276] phase i1276 done
+exit 0
