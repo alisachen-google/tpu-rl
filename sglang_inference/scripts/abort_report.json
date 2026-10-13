@@ -59,89 +59,89 @@
  "aborts": [
   {
    "idx": 0,
-   "rid": "abort-0-1791852324215",
+   "rid": "abort-0-1791854158422",
    "status": 200,
    "error": null,
-   "first_token_s": 0.128,
-   "aborted_s": 0.629,
-   "chunks": 91,
+   "first_token_s": 0.132,
+   "aborted_s": 0.633,
+   "chunks": 98,
    "phase_actual": "decode",
    "finished": false
   },
   {
    "idx": 1,
-   "rid": "abort-1-1791852324216",
+   "rid": "abort-1-1791854158423",
    "status": 200,
    "error": null,
-   "first_token_s": 0.138,
-   "aborted_s": 0.638,
-   "chunks": 91,
+   "first_token_s": 0.132,
+   "aborted_s": 0.633,
+   "chunks": 98,
    "phase_actual": "decode",
    "finished": false
   },
   {
    "idx": 2,
-   "rid": "abort-2-1791852324854",
+   "rid": "abort-2-1791854159056",
    "status": 200,
    "error": null,
-   "first_token_s": 0.125,
-   "aborted_s": 0.625,
-   "chunks": 90,
+   "first_token_s": 0.129,
+   "aborted_s": 0.629,
+   "chunks": 99,
    "phase_actual": "decode",
    "finished": false
   },
   {
    "idx": 3,
-   "rid": "abort-3-1791852324855",
+   "rid": "abort-3-1791854159057",
    "status": 200,
    "error": null,
-   "first_token_s": 0.134,
-   "aborted_s": 0.634,
-   "chunks": 91,
+   "first_token_s": 0.128,
+   "aborted_s": 0.629,
+   "chunks": 99,
    "phase_actual": "decode",
    "finished": false
   },
   {
    "idx": 4,
-   "rid": "abort-4-1791852325490",
+   "rid": "abort-4-1791854159686",
    "status": 200,
    "error": null,
-   "first_token_s": 0.13,
-   "aborted_s": 0.63,
-   "chunks": 91,
+   "first_token_s": 0.125,
+   "aborted_s": 0.625,
+   "chunks": 95,
    "phase_actual": "decode",
    "finished": false
   },
   {
    "idx": 5,
-   "rid": "abort-5-1791852325491",
+   "rid": "abort-5-1791854159688",
    "status": 200,
    "error": null,
-   "first_token_s": 0.103,
-   "aborted_s": 0.603,
-   "chunks": 89,
+   "first_token_s": 0.108,
+   "aborted_s": 0.609,
+   "chunks": 94,
    "phase_actual": "decode",
    "finished": false
   },
   {
    "idx": 6,
-   "rid": "abort-6-1791852326121",
+   "rid": "abort-6-1791854160312",
    "status": 200,
    "error": null,
-   "first_token_s": 0.113,
-   "aborted_s": 0.613,
-   "chunks": 91,
+   "first_token_s": 0.148,
+   "aborted_s": 0.648,
+   "chunks": 96,
    "phase_actual": "decode",
    "finished": false
   },
   {
    "idx": 7,
-   "rid": "abort-7-1791852326122",
+   "rid": "abort-7-1791854160313",
    "status": 200,
    "error": null,
-   "first_token_s": 0.123,
-   "aborted_s": 0.623,
-   "chunks": 92,
+   "first_token_s": 0.1,
+   "aborted_s": 0.6,
+   "chunks": 96,
    "phase_actual": "decode",
    "finished": false
   }
@@ -154,7 +154,7 @@
    "error": null,
    "cached_tokens": 0,
    "completion_tokens": 16,
-   "elapsed": 0.139
+   "elapsed": 0.136
   },
   {
    "label": "identical-prompt",
@@ -163,7 +163,7 @@
    "error": null,
    "cached_tokens": 8128,
    "completion_tokens": 32,
-   "elapsed": 0.274
+   "elapsed": 0.269
   }
  ],
  "baseline_problems": [],
@@ -175,135 +175,135 @@
    "msg": "prompt id=isl8192_k0 isl=8192 chars=43963 phase=decode abort_after=0.5s repeat=4 concurrent=2"
   },
   {
-   "t": 0.013,
+   "t": 0.012,
    "msg": "server-info[baseline] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 0.026,
+   "t": 0.023,
    "msg": "server-info[baseline] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 0.026,
+   "t": 0.023,
    "msg": "round 1/4: launching 2 aborting request(s)"
   },
   {
-   "t": 0.032,
-   "msg": "req0: sent (abort-0-1791852324215), headers after 0.01s"
+   "t": 0.029,
+   "msg": "req0: sent (abort-0-1791854158422), headers after 0.01s"
   },
   {
-   "t": 0.045,
-   "msg": "req1: sent (abort-1-1791852324216), headers after 0.02s"
+   "t": 0.042,
+   "msg": "req1: sent (abort-1-1791854158423), headers after 0.02s"
   },
   {
-   "t": 0.655,
-   "msg": "req0: aborted at 0.629s in decode (first_token=0.128s, chunks=91)"
+   "t": 0.656,
+   "msg": "req0: aborted at 0.633s in decode (first_token=0.132s, chunks=98)"
   },
   {
-   "t": 0.665,
-   "msg": "req1: aborted at 0.638s in decode (first_token=0.138s, chunks=91)"
+   "t": 0.657,
+   "msg": "req1: aborted at 0.633s in decode (first_token=0.132s, chunks=98)"
   },
   {
-   "t": 0.665,
+   "t": 0.657,
    "msg": "round 2/4: launching 2 aborting request(s)"
   },
   {
-   "t": 0.671,
-   "msg": "req2: sent (abort-2-1791852324854), headers after 0.01s"
+   "t": 0.663,
+   "msg": "req3: sent (abort-3-1791854159057), headers after 0.00s"
   },
   {
-   "t": 0.684,
-   "msg": "req3: sent (abort-3-1791852324855), headers after 0.02s"
+   "t": 0.673,
+   "msg": "req2: sent (abort-2-1791854159056), headers after 0.02s"
   },
   {
-   "t": 1.29,
-   "msg": "req2: aborted at 0.625s in decode (first_token=0.125s, chunks=90)"
+   "t": 1.287,
+   "msg": "req2: aborted at 0.629s in decode (first_token=0.129s, chunks=99)"
   },
   {
-   "t": 1.301,
-   "msg": "req3: aborted at 0.634s in decode (first_token=0.134s, chunks=91)"
+   "t": 1.287,
+   "msg": "req3: aborted at 0.629s in decode (first_token=0.128s, chunks=99)"
   },
   {
-   "t": 1.301,
+   "t": 1.287,
    "msg": "round 3/4: launching 2 aborting request(s)"
   },
   {
-   "t": 1.307,
-   "msg": "req5: sent (abort-5-1791852325491), headers after 0.00s"
+   "t": 1.293,
+   "msg": "req5: sent (abort-5-1791854159688), headers after 0.00s"
   },
   {
-   "t": 1.318,
-   "msg": "req4: sent (abort-4-1791852325490), headers after 0.02s"
+   "t": 1.306,
+   "msg": "req4: sent (abort-4-1791854159686), headers after 0.02s"
   },
   {
-   "t": 1.905,
-   "msg": "req5: aborted at 0.603s in decode (first_token=0.103s, chunks=89)"
+   "t": 1.897,
+   "msg": "req5: aborted at 0.609s in decode (first_token=0.108s, chunks=94)"
   },
   {
-   "t": 1.932,
-   "msg": "req4: aborted at 0.63s in decode (first_token=0.13s, chunks=91)"
+   "t": 1.913,
+   "msg": "req4: aborted at 0.625s in decode (first_token=0.125s, chunks=95)"
   },
   {
-   "t": 1.932,
+   "t": 1.913,
    "msg": "round 4/4: launching 2 aborting request(s)"
   },
   {
-   "t": 1.938,
-   "msg": "req6: sent (abort-6-1791852326121), headers after 0.01s"
+   "t": 1.929,
+   "msg": "req7: sent (abort-7-1791854160313), headers after 0.01s"
   },
   {
-   "t": 1.949,
-   "msg": "req7: sent (abort-7-1791852326122), headers after 0.02s"
+   "t": 1.956,
+   "msg": "req6: sent (abort-6-1791854160312), headers after 0.04s"
   },
   {
-   "t": 2.545,
-   "msg": "req6: aborted at 0.613s in decode (first_token=0.113s, chunks=91)"
+   "t": 2.515,
+   "msg": "req7: aborted at 0.6s in decode (first_token=0.1s, chunks=96)"
   },
   {
-   "t": 2.556,
-   "msg": "req7: aborted at 0.623s in decode (first_token=0.123s, chunks=92)"
+   "t": 2.561,
+   "msg": "req6: aborted at 0.648s in decode (first_token=0.148s, chunks=96)"
   },
   {
-   "t": 2.568,
+   "t": 2.578,
    "msg": "server-info[after-abort] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 2.58,
+   "t": 2.589,
    "msg": "server-info[after-abort] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 2.58,
+   "t": 2.589,
    "msg": "waiting --settle 20.0s"
   },
   {
-   "t": 22.593,
+   "t": 22.602,
    "msg": "server-info[settled] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 22.606,
+   "t": 22.615,
    "msg": "server-info[settled] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 22.606,
+   "t": 22.615,
    "msg": "WARN http://10.128.0.90:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
   },
   {
-   "t": 22.606,
+   "t": 22.615,
    "msg": "WARN http://10.128.0.20:30000: server-info lacks num_running_reqs/token_usage; baseline check skipped"
   },
   {
-   "t": 22.745,
+   "t": 22.752,
    "msg": "follow-up short: OK status=200 tokens=16 cached=0 "
   },
   {
-   "t": 23.019,
+   "t": 23.021,
    "msg": "follow-up identical-prompt: OK status=200 tokens=32 cached=8128 "
   },
   {
-   "t": 23.031,
+   "t": 23.032,
    "msg": "server-info[final] http://10.128.0.90:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   },
   {
-   "t": 23.042,
+   "t": 23.043,
    "msg": "server-info[final] http://10.128.0.20:30000: {'num_running_reqs': None, 'num_queue_reqs': None, 'token_usage': None}"
   }
  ]
