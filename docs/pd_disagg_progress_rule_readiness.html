@@ -1,0 +1,749 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Progress-Rule Readiness</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column for prose; diagrams and the timeline break out to 1100px. */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --fg: #1b2430; --muted: #5b6878; --line: #d6dbe3;
+  --accent: #0b6e7a; --accent-soft: #d9eef0;
+  --ok: #1f8a4c; --ok-soft: #dff3e6; --warn: #b7791f; --warn-soft: #fbefd6; --bad: #c2392b; --bad-soft: #fbe1dd;
+  --off: #8a94a3; --off-soft: #e9ecf1; --startup: #6a5acd; --startup-soft: #e8e4f7;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121820; --surface: #1a212b; --fg: #e4e9f0; --muted: #9aa6b5; --line: #2e3844;
+  --accent: #4fc3cf; --accent-soft: #15353a;
+  --ok: #4cc777; --ok-soft: #173224; --warn: #e0a93c; --warn-soft: #3a2d12; --bad: #ef6b5c; --bad-soft: #3d1f1b;
+  --off: #7c8796; --off-soft: #252d38; --startup: #a79af0; --startup-soft: #2a2545; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #121820; --surface: #1a212b; --fg: #e4e9f0; --muted: #9aa6b5; --line: #2e3844;
+  --accent: #4fc3cf; --accent-soft: #15353a;
+  --ok: #4cc777; --ok-soft: #173224; --warn: #e0a93c; --warn-soft: #3a2d12; --bad: #ef6b5c; --bad-soft: #3d1f1b;
+  --off: #7c8796; --off-soft: #252d38; --startup: #a79af0; --startup-soft: #2a2545; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.55; margin: 0; }
+.wrap { max-width: 1100px; margin: 0 auto; padding-block: 32px 64px; padding-inline: 16px; }
+.prose { max-width: 72ch; }
+h1 { font-size: 30px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 6px; text-wrap: balance; }
+h2 { font-size: 21px; font-weight: 600; margin: 48px 0 10px; text-wrap: balance; padding-top: 16px; border-top: 1px solid var(--line); }
+h3 { font-size: 16px; font-weight: 600; margin: 22px 0 6px; }
+p { margin: 8px 0; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 17px; color: var(--muted); max-width: 72ch; }
+code, .mono { font-family: var(--mono); font-size: 0.92em; }
+code { background: var(--off-soft); padding: 1px 5px; border-radius: 3px; }
+pre { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.5; }
+pre code { background: none; padding: 0; }
+a { color: var(--accent); }
+.rule { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0; }
+.rule .big { font-family: var(--mono); font-size: 17px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.tablewrap { overflow-x: auto; margin: 12px 0; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 13px; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; font-family: var(--mono); font-size: 12px; padding: 1px 8px; border-radius: 10px; white-space: nowrap; }
+.p-ok { background: var(--ok-soft); color: var(--ok); } .p-warn { background: var(--warn-soft); color: var(--warn); }
+.p-bad { background: var(--bad-soft); color: var(--bad); } .p-off { background: var(--off-soft); color: var(--muted); }
+.p-new { background: var(--accent-soft); color: var(--accent); }
+figure { margin: 18px 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; max-width: 80ch; }
+.diagwrap { overflow-x: auto; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+.controls { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: end; }
+.ctl { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+.ctl label { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.ctl input[type=range] { width: 150px; }
+.ctl .val { font-family: var(--mono); font-size: 14px; }
+select, button { font: inherit; font-size: 14px; padding: 5px 8px; border-radius: 5px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.scen { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.scen button { cursor: pointer; }
+.scen button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.sw { display: inline-block; width: 11px; height: 11px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+.note { font-size: 13px; color: var(--muted); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.two > * { min-width: 0; }
+.steps li { margin: 6px 0; }
+ol.steps { padding-left: 22px; }
+ol.steps li::marker { font-family: var(--mono); color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+<div class="eyebrow">sglang-torchtpu · P/D disaggregation · issue #1276 · PR #1390 (scheduler-side) · PR #1392 (HTTP-side, patches.py)</div>
+<h1>Progress-Rule Readiness</h1>
+<p class="lede">The simplest readiness rule that unblocks #1276: an engine is unhealthy when it has had demand for a whole window and produced nothing in it. One rule for prefill and decode, no peers, no state machine. Two implementations are open side by side, both as single commits on main: both are now TPU-plugin only, installed through the plugin's patches.py: #1390 judges in each scheduler rank and publishes to a slot file in /dev/shm, with a staleness rule for a hung loop; #1392 judges in the HTTP process from its own request bookkeeping and hands an idle engine to the core probe. This page shows the rule, both data flows, the hang case, and what the live runs found.</p>
+
+<div class="rule">
+  <div class="big">UNHEALTHY ⇔ demand continuously for T  and  nothing produced for T</div>
+  <p style="margin:6px 0 0"><b>Demand</b> is a real request held anywhere on the engine's P/D path, or one the engine itself concluded without output within the window (handshake failure, transfer failure, transport timeout). <b>Produced</b> is a generated token on a decode, or KV released after a completed transfer on a prefill. Probe requests and client cancels count for neither. Until the first thing an engine produces after start, the window is <span class="mono">T_cold</span>. Recovery needs no state: when the held requests leave and the last failure ages out, demand is gone and the engine is ready; the next request gets a fresh window.</p>
+</div>
+
+<h2>1. The rule on a timeline</h2>
+<div class="prose">
+<p>Simulated with the shipped tracker logic from <code>health_generate.py</code>. One decode in a 2P/2D group; real requests arrive every 4 s and alternate between the two prefills; a transfer either completes 3 s after admission or fails at the 60 s transport timeout. Probes every 10 s. The window <span class="mono">T</span> is 60 s here so the chart stays readable; the shipped default is 600 s (1200 s until the first output after start).</p>
+</div>
+<div class="scen" id="scen" role="group" aria-label="Scenario"></div>
+<div class="panel">
+  <div class="controls">
+    <div class="ctl"><label for="s-t">T  window_s</label><input id="s-t" type="range" min="20" max="180" step="10" value="60"><span class="val" id="sv-t">60</span></div>
+    <div class="ctl"><label for="s-cold">T_cold</label><input id="s-cold" type="range" min="20" max="360" step="10" value="120"><span class="val" id="sv-cold">120</span></div>
+    <div class="ctl"><label for="s-timeout">transport timeout</label><input id="s-timeout" type="range" min="20" max="300" step="10" value="60"><span class="val" id="sv-timeout">60</span></div>
+    <div class="ctl"><label for="s-fail">engine failures count as demand</label><select id="s-fail"><option value="yes">yes (shipped)</option><option value="no">no (first live run)</option></select></div>
+    <div class="ctl"><label for="s-side">where the clock lives</label><select id="s-side"><option value="sched">scheduler, via snapshot (#1390)</option><option value="http">HTTP process (proposed)</option></select></div>
+  </div>
+  <figure style="margin-top:14px">
+    <div class="diagwrap"><svg id="tl" viewBox="0 0 1100 400" role="img" aria-label="Timeline of held requests, failures, progress, demand window, verdict and probe answers for one decode"></svg></div>
+    <figcaption id="tl-cap"></figcaption>
+  </figure>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--ok)"></span>produced / ready 200</span>
+    <span><span class="sw" style="background:var(--bad)"></span>engine failure / unhealthy 503</span>
+    <span><span class="sw" style="background:var(--accent)"></span>demand window running</span>
+    <span><span class="sw" style="background:var(--startup)"></span>cold window (nothing produced yet)</span>
+    <span><span class="sw" style="background:var(--off)"></span>held requests (height = count)</span>
+  </div>
+</div>
+
+<h2>2. Scheduler-side snapshot: how the facts reach the probe</h2>
+<div class="prose">
+<p>This is what PR #1390 implements. The scheduler owns the facts, judges them on every loop iteration, and copies the verdict into the shared-memory load snapshot. The HTTP process reads that copy when a probe arrives and never calls into the scheduler.</p>
+</div>
+<figure>
+<div class="diagwrap">
+<svg viewBox="0 0 1200 560" role="img" aria-label="Scheduler-side flow: real requests enter the scheduler queues; the two record hooks and the per-iteration observe feed the tracker; the tracker's verdict goes through the load inquirer into the shared-memory snapshot; the HTTP process reads it on a probe and answers 503 or falls through to the one-token probe" style="min-width:900px">
+  <defs>
+    <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+    <marker id="a1b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--bad)"/></marker>
+    <marker id="a1g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ok)"/></marker>
+  </defs>
+  <g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="11" fill="currentColor" stroke="currentColor">
+    <!-- external -->
+    <rect x="20" y="40" width="130" height="44" rx="4" fill="none"/><text x="85" y="58" text-anchor="middle" stroke="none">router</text><text x="85" y="74" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">real requests</text>
+    <rect x="20" y="440" width="130" height="44" rx="4" fill="none"/><text x="85" y="458" text-anchor="middle" stroke="none">kubelet · router</text><text x="85" y="474" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">GET /health_generate</text>
+    <rect x="1050" y="150" width="130" height="44" rx="4" fill="none"/><text x="1115" y="168" text-anchor="middle" stroke="none">peer engines</text><text x="1115" y="184" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">handshake · KV</text>
+
+    <!-- engine boundary -->
+    <rect x="180" y="14" width="840" height="530" rx="8" fill="none" stroke-dasharray="6 4" opacity="0.6"/>
+    <text x="195" y="32" stroke="none" font-size="10" opacity="0.7" letter-spacing="1">ONE ENGINE, PREFILL OR DECODE</text>
+
+    <!-- HTTP process -->
+    <rect x="200" y="380" width="300" height="150" rx="5" fill="none"/>
+    <text x="212" y="400" stroke="none" font-weight="600">HTTP process · http_server.py</text>
+    <text x="212" y="418" stroke="none" font-size="10">1 shutting down → 503 · 2 Starting → 503</text>
+    <rect x="212" y="428" width="276" height="44" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <text x="350" y="445" text-anchor="middle" stroke="none" font-size="10" font-weight="600">3 pd_health_unready_snapshots(): read every rank slot</text>
+    <text x="350" y="460" text-anchor="middle" stroke="none" font-size="10">any rank unhealthy → 503 {role, state, reason, pd_health[]}</text>
+    <text x="212" y="492" stroke="none" font-size="10">4 else one-token probe with FAKE host → 200 / 503</text>
+    <text x="212" y="508" stroke="none" font-size="10" opacity="0.7">(step 4 stays today; drops in the HTTP-side variant)</text>
+
+    <!-- shm -->
+    <rect x="560" y="400" width="200" height="60" rx="5" fill="var(--surface)"/>
+    <text x="660" y="420" text-anchor="middle" stroke="none" font-weight="600">/dev/shm load snapshot</text>
+    <text x="660" y="436" text-anchor="middle" stroke="none" font-size="10">one slot per rank · msgpack</text>
+    <text x="660" y="450" text-anchor="middle" stroke="none" font-size="10">disaggregation.health_state / health_json</text>
+
+    <!-- scheduler -->
+    <rect x="200" y="60" width="800" height="300" rx="5" fill="none"/>
+    <text x="212" y="80" stroke="none" font-weight="600">Scheduler rank (× TP) · scheduler.py · decode.py · prefill.py</text>
+
+    <rect x="212" y="96" width="330" height="110" rx="3" fill="var(--surface)"/>
+    <text x="222" y="113" stroke="none" font-size="10" font-weight="600">P/D queues (exist today)</text>
+    <text x="222" y="129" stroke="none" font-size="10">decode: prealloc · transfer · retracted · waiting · running</text>
+    <text x="222" y="143" stroke="none" font-size="10">prefill: bootstrap · waiting · running · inflight</text>
+    <text x="222" y="163" stroke="none" font-size="10" fill="var(--ok)">Success: decode batch produced tokens · prefill inflight Success</text>
+    <text x="222" y="177" stroke="none" font-size="10" fill="var(--bad)">Failed: handshake Failed · transfer Failed · timeout → abort 500</text>
+    <text x="222" y="195" stroke="none" font-size="10" opacity="0.7">client cancel: leaves the queue, records nothing</text>
+
+    <rect x="590" y="96" width="390" height="110" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <text x="785" y="113" text-anchor="middle" stroke="none" font-size="10" font-weight="600">PDProgressHealth · health.py</text>
+    <text x="600" y="131" stroke="none" font-size="10">observe(held)       every loop iteration: pd_requests_present(), probes skipped</text>
+    <text x="600" y="145" stroke="none" font-size="10">record_progress()   token on decode · KV released after transfer on prefill</text>
+    <text x="600" y="159" stroke="none" font-size="10">record_failure()    engine concluded a request without output</text>
+    <text x="600" y="177" stroke="none" font-size="10">state: demand_since · last_progress · last_failure → ready / unhealthy</text>
+    <text x="600" y="193" stroke="none" font-size="10">version++ only when the verdict flips</text>
+
+    <rect x="212" y="236" width="768" height="54" rx="3" fill="var(--surface)"/>
+    <text x="222" y="254" stroke="none" font-size="10" font-weight="600">maybe_publish_pd_health()   end of process_decode_queue / both prefill loops</text>
+    <text x="222" y="270" stroke="none" font-size="10">tracker.observe(held); if version changed → publish_load_snapshot(force=True)</text>
+    <text x="222" y="284" stroke="none" font-size="10" opacity="0.7">a stalled engine runs no batch, so nothing else would publish its transition; batches also publish on the normal cadence</text>
+
+    <rect x="212" y="304" width="768" height="40" rx="3" fill="var(--surface)"/>
+    <text x="222" y="322" stroke="none" font-size="10" font-weight="600">load_inquirer.get_loads()</text>
+    <text x="222" y="336" stroke="none" font-size="10">DisaggregationMetrics(health_state=snapshot.state, health_json=snapshot.to_json()) → LoadSnapshotWriter.write()</text>
+
+    <!-- arrows -->
+    <line x1="150" y1="62" x2="200" y2="62" marker-end="url(#a1)"/>
+    <path d="M200 62 H377 V96" fill="none" marker-end="url(#a1)"/><text x="300" y="56" text-anchor="middle" stroke="none" font-size="10">ZMQ via the HTTP process</text>
+    <line x1="542" y1="163" x2="590" y2="145" stroke="var(--ok)" marker-end="url(#a1g)"/>
+    <line x1="542" y1="177" x2="590" y2="160" stroke="var(--bad)" marker-end="url(#a1b)"/>
+    <line x1="1000" y1="172" x2="1050" y2="172" marker-end="url(#a1)" marker-start="url(#a1)"/>
+    <line x1="785" y1="206" x2="785" y2="236" marker-end="url(#a1)"/>
+    <line x1="596" y1="290" x2="596" y2="304" marker-end="url(#a1)"/>
+    <line x1="660" y1="344" x2="660" y2="400" marker-end="url(#a1)"/><text x="700" y="376" stroke="none" font-size="10">write slot[rank]</text>
+    <line x1="560" y1="450" x2="500" y2="450" marker-end="url(#a1)"/><text x="530" y="442" text-anchor="middle" stroke="none" font-size="10">mmap read</text>
+    <line x1="150" y1="462" x2="200" y2="462" marker-end="url(#a1)"/>
+    <line x1="200" y1="500" x2="150" y2="500" marker-end="url(#a1)"/><text x="100" y="516" text-anchor="middle" stroke="none" font-size="10">200 · 503 + body</text>
+  </g>
+</svg>
+</div>
+<figcaption>Everything the probe knows about readiness was written by the scheduler. That is the strength of the design, since the probe never waits on the scheduler, and its one weakness: when the scheduler stops, the copy in shared memory stops with it.</figcaption>
+</figure>
+
+<h2>3. The blind spot, and the two ways to close it</h2>
+<div class="prose">
+<p>If the scheduler loop hangs while requests are pending, the loop that counts them, judges them and writes the snapshot is the loop that hung. The snapshot keeps the last verdict, ready, and the probe reports it faithfully. Today the fall-through one-token probe catches this by timing out. If the probe is removed, something else must.</p>
+</div>
+<figure>
+<div class="diagwrap">
+<svg viewBox="0 0 1200 330" role="img" aria-label="Left: scheduler-side clock, the snapshot freezes when the scheduler hangs; middle: the same with a staleness rule; right: HTTP-side clock kept by the tokenizer manager from its own in-flight requests and outputs, unaffected by the hang" style="min-width:900px">
+  <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+  <g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="11" fill="currentColor" stroke="currentColor">
+    <!-- panel 1 -->
+    <text x="20" y="24" stroke="none" font-weight="600">A · scheduler-side clock (as committed)</text>
+    <rect x="20" y="40" width="360" height="270" rx="6" fill="none" stroke-dasharray="5 4" opacity="0.6"/>
+    <rect x="40" y="60" width="140" height="40" rx="4" fill="var(--surface)"/><text x="110" y="78" text-anchor="middle" stroke="none">HTTP process</text><text x="110" y="92" text-anchor="middle" stroke="none" font-size="10">reads snapshot</text>
+    <rect x="220" y="60" width="140" height="40" rx="4" fill="var(--bad-soft)" stroke="var(--bad)"/><text x="290" y="78" text-anchor="middle" stroke="none" fill="var(--bad)">scheduler HUNG</text><text x="290" y="92" text-anchor="middle" stroke="none" font-size="10">loop not iterating</text>
+    <rect x="130" y="140" width="140" height="40" rx="4" fill="var(--surface)"/><text x="200" y="158" text-anchor="middle" stroke="none">snapshot</text><text x="200" y="172" text-anchor="middle" stroke="none" font-size="10" fill="var(--ok)">ready (frozen)</text>
+    <line x1="290" y1="100" x2="230" y2="140" stroke-dasharray="3 3" opacity="0.5"/><text x="290" y="128" stroke="none" font-size="10" opacity="0.7">no more writes</text>
+    <line x1="110" y1="100" x2="170" y2="140" marker-end="url(#a2)"/>
+    <text x="40" y="210" stroke="none" font-size="10">requests pile up in the scheduler's socket and queues</text>
+    <text x="40" y="226" stroke="none" font-size="10">nobody counts them, nobody judges, nobody writes</text>
+    <text x="40" y="250" stroke="none" font-size="10" fill="var(--bad)">probe answers 200 from the frozen copy</text>
+    <text x="40" y="266" stroke="none" font-size="10">today the fall-through one-token probe times out → 503</text>
+    <text x="40" y="282" stroke="none" font-size="10">drop the probe and this case is silent</text>
+
+    <!-- panel 2 -->
+    <text x="420" y="24" stroke="none" font-weight="600">B · scheduler-side + staleness rule</text>
+    <rect x="420" y="40" width="360" height="270" rx="6" fill="none" stroke-dasharray="5 4" opacity="0.6"/>
+    <rect x="440" y="60" width="140" height="40" rx="4" fill="var(--surface)"/><text x="510" y="78" text-anchor="middle" stroke="none">HTTP process</text><text x="510" y="92" text-anchor="middle" stroke="none" font-size="10">reads snapshot + its age</text>
+    <rect x="620" y="60" width="140" height="40" rx="4" fill="var(--bad-soft)" stroke="var(--bad)"/><text x="690" y="78" text-anchor="middle" stroke="none" fill="var(--bad)">scheduler HUNG</text>
+    <rect x="530" y="140" width="140" height="40" rx="4" fill="var(--surface)"/><text x="600" y="158" text-anchor="middle" stroke="none">snapshot</text><text x="600" y="172" text-anchor="middle" stroke="none" font-size="10">held=3, written 190 s ago</text>
+    <line x1="510" y1="100" x2="570" y2="140" marker-end="url(#a2)"/>
+    <text x="440" y="210" stroke="none" font-size="10">scheduler republishes every few seconds while held &gt; 0</text>
+    <text x="440" y="226" stroke="none" font-size="10">reader: held &gt; 0 and age ≥ T → unhealthy</text>
+    <text x="440" y="242" stroke="none" font-size="10">reader: held = 0 may be arbitrarily old (idle is ready)</text>
+    <text x="440" y="266" stroke="none" font-size="10" fill="var(--ok)">probe answers 503 "scheduler stopped judging with 3 held"</text>
+    <text x="440" y="282" stroke="none" font-size="10">two extra rules, same scheduler-side facts</text>
+
+    <!-- panel 3 -->
+    <text x="820" y="24" stroke="none" font-weight="600">C · HTTP-side clock (proposed)</text>
+    <rect x="820" y="40" width="360" height="270" rx="6" fill="none" stroke-dasharray="5 4" opacity="0.6"/>
+    <rect x="840" y="60" width="160" height="54" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="920" y="78" text-anchor="middle" stroke="none">TokenizerManager</text><text x="920" y="92" text-anchor="middle" stroke="none" font-size="10">in_flight · busy_since</text><text x="920" y="105" text-anchor="middle" stroke="none" font-size="10">last_success_ts</text>
+    <rect x="1030" y="60" width="130" height="40" rx="4" fill="var(--bad-soft)" stroke="var(--bad)"/><text x="1095" y="78" text-anchor="middle" stroke="none" fill="var(--bad)">scheduler HUNG</text>
+    <line x1="1000" y1="80" x2="1030" y2="80" marker-end="url(#a2)"/><text x="1015" y="72" text-anchor="middle" stroke="none" font-size="9">send</text>
+    <line x1="1030" y1="94" x2="1000" y2="94" stroke-dasharray="3 3" opacity="0.5"/><text x="1015" y="110" text-anchor="middle" stroke="none" font-size="9" opacity="0.7">no output</text>
+    <text x="840" y="150" stroke="none" font-size="10">+1 when a real request is sent, −1 on final output or cancel</text>
+    <text x="840" y="166" stroke="none" font-size="10">last_success_ts on any output whose finish reason is not abort</text>
+    <text x="840" y="182" stroke="none" font-size="10">probe: in_flight &gt; 0, busy ≥ T, no success for T → 503</text>
+    <text x="840" y="210" stroke="none" font-size="10">no scheduler change, no shared memory, no probe while loaded</text>
+    <text x="840" y="226" stroke="none" font-size="10">the hang shows up as requests out and nothing back</text>
+    <text x="840" y="250" stroke="none" font-size="10" fill="var(--ok)">probe answers 503 from the live counters</text>
+    <text x="840" y="266" stroke="none" font-size="10">one verdict per engine; multi-worker HTTP sees its own share</text>
+    <text x="840" y="282" stroke="none" font-size="10">prefill "produced" = its final output after transfer, one hop later</text>
+  </g>
+</svg>
+</div>
+<figcaption>A was the first draft of #1390. B is #1390 today: the scheduler refreshes its slot every 5 s while it holds requests, and the HTTP process treats a slot that reports held requests but is older than the window as "scheduler stopped judging". C is #1392 today: the same three numbers kept by the process that answers the probe, fed by a patches.py wrapper, live by construction, with no probe request while it holds requests; idle, it hands the probe to core. B and C detect the same stalls under load; C also sees a hung detokenizer, catches a scheduler that died while idle through the core probe, and touches no shared file.</figcaption>
+</figure>
+
+<div class="tablewrap"><table>
+<thead><tr><th></th><th>A · scheduler-side, first draft</th><th>B · A + staleness = PR #1390 today (plugin slot files)</th><th>C · HTTP-side = PR #1392 today</th></tr></thead>
+<tbody>
+<tr><td>held, produced, failed</td><td>counted in the scheduler loop from the queues and the record hooks</td><td>same</td><td>counted in the tokenizer manager from requests sent and outputs received</td></tr>
+<tr><td>hung scheduler with pending requests</td><td class="p-bad">silent without the one-token probe</td><td>503 once the snapshot is older than T with held &gt; 0</td><td>503 at T: requests went out, nothing came back</td></tr>
+<tr><td>hung detokenizer</td><td>silent: the scheduler's view says tokens were produced</td><td>silent</td><td>503 at T: nothing reaches the HTTP process</td></tr>
+<tr><td>one-token probe</td><td>still needed as the hang detector</td><td>can be dropped on P/D engines</td><td>sent only while the engine holds nothing; the tracker answers while requests are held</td></tr>
+<tr><td>granularity</td><td>per TP rank; 503 if any rank</td><td>same</td><td>per engine, or per HTTP worker when several</td></tr>
+<tr><td>new plumbing</td><td>snapshot fields, inquirer, forced publish, queue walk</td><td>a patches.py patch on four scheduler-side methods; per-rank slot files in /dev/shm replace the load-snapshot fields; a 5 s republish while work is held and two staleness facts in the slot</td><td>one patches.py patch wrapping four tokenizer manager methods, and a swapped route; no shared file</td></tr>
+<tr><td>what it cannot see</td><td colspan="3">a fault that fails requests within milliseconds and never holds one for T; the router's circuit breaker owns that case. An engine that hangs while idle: A and B see it only when the next request stalls, or through the core probe they keep; C hands idle probes to the core probe and reads 503 at its 20 s timeout</td></tr>
+</tbody></table></div>
+
+<h2>3b. PR #1392 at a glance</h2>
+<div class="prose"><p>One engine's HTTP process. Orange: the four core methods the plugin wraps through <code>sglang_tpu/patches.py</code> and the swapped route. Blue: the plugin's own state. Dashed: core, unchanged. The scheduler ranks and the detokenizer are not touched; the HTTP process judges from what it forwards and what comes back.</p></div>
+<div class="figure" style="max-width:980px;margin:0 auto 24px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 680" width="100%" style="font-family: ui-sans-serif, system-ui, sans-serif; font-size: 13px; color: inherit" role="img" aria-label="PR 1392 design: health_generate judged in the HTTP process">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+    <style>
+      .box{fill:rgba(127,127,127,.08);stroke:currentColor;stroke-width:1.2;rx:8}
+      .patched{fill:rgba(220,120,40,.14);stroke:#d9782a;stroke-width:1.4;rx:6}
+      .plugin{fill:rgba(60,140,220,.12);stroke:#3b8ad8;stroke-width:1.4;rx:6}
+      .core{fill:rgba(127,127,127,.06);stroke:currentColor;stroke-width:1;stroke-dasharray:4 3;rx:6}
+      .t{fill:currentColor}
+      .mono{font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px}
+      .small{font-size:11.5px;opacity:.85}
+      .arrow{stroke:currentColor;stroke-width:1.4;fill:none;marker-end:url(#ar)}
+      .arrow.o{stroke:#d9782a}
+      .arrow.b{stroke:#3b8ad8}
+      .lbl{font-size:11.5px;fill:currentColor}
+    </style>
+  </defs>
+
+  <!-- consumer -->
+  <rect class="box" x="20" y="40" width="150" height="100"/>
+  <text class="t" x="95" y="64" text-anchor="middle" font-weight="600">router / kubelet</text>
+  <text class="lbl" x="95" y="86" text-anchor="middle">pairs P with D,</text>
+  <text class="lbl" x="95" y="102" text-anchor="middle">polls readiness,</text>
+  <text class="lbl" x="95" y="118" text-anchor="middle">one probe per engine</text>
+
+  <!-- probe answer -->
+  <rect class="box" x="20" y="200" width="150" height="120"/>
+  <text class="t" x="95" y="222" text-anchor="middle" font-weight="600">probe answer</text>
+  <text class="mono t" x="30" y="246">200</text><text class="small t" x="62" y="246">bare; tracker while</text>
+  <text class="small t" x="62" y="261">requests are held,</text>
+  <text class="small t" x="62" y="276">core probe when idle</text>
+  <text class="mono t" x="30" y="300">503</text><text class="small t" x="62" y="300">{role, state, reason,</text>
+  <text class="small t" x="62" y="314">pd_health: record}</text>
+
+  <!-- HTTP process -->
+  <rect class="box" x="210" y="20" width="560" height="500"/>
+  <text class="t" x="490" y="44" text-anchor="middle" font-weight="600">engine HTTP process  (one per prefill, one per decode)</text>
+
+  <!-- FastAPI -->
+  <rect class="core" x="230" y="74" width="520" height="66"/>
+  <text class="t" x="240" y="92" font-weight="600">FastAPI app</text>
+  <rect class="core" x="240" y="100" width="170" height="34"/>
+  <text class="mono t" x="250" y="115">POST /generate</text>
+  <text class="small t" x="250" y="129">core, unchanged</text>
+  <rect class="patched" x="430" y="100" width="310" height="34"/>
+  <text class="mono t" x="440" y="115">GET /health_generate</text>
+  <text class="small t" x="440" y="129">route swapped for health_generate_with_tracker (plugin)</text>
+
+  <!-- TokenizerManager -->
+  <rect class="core" x="230" y="160" width="520" height="150"/>
+  <text class="t" x="240" y="180" font-weight="600">TokenizerManager</text>
+  <text class="small t" x="380" y="180">four methods wrapped by sglang_tpu/patches.py (functools.wraps, idempotent)</text>
+  <rect class="patched" x="240" y="192" width="230" height="24"/><text class="mono t" x="248" y="209">init_disaggregation</text>
+  <text class="lbl" x="480" y="209">AFTER: attach_tracker, then the route swap</text>
+  <rect class="patched" x="240" y="222" width="230" height="24"/><text class="mono t" x="248" y="239">_mark_state_dispatched(rid)</text>
+  <text class="lbl" x="480" y="239">BEFORE: track_dispatched</text>
+  <rect class="patched" x="240" y="252" width="230" height="24"/><text class="mono t" x="248" y="269">_handle_batch_output(chunks)</text>
+  <text class="lbl" x="480" y="269">BEFORE: track_outputs</text>
+  <rect class="patched" x="240" y="282" width="230" height="24"/><text class="mono t" x="248" y="299">abort_request(rid)</text>
+  <text class="lbl" x="480" y="299">BEFORE: track_cancelled</text>
+
+  <!-- bookkeeping -->
+  <rect class="plugin" x="230" y="330" width="245" height="172"/>
+  <text class="t" x="240" y="350" font-weight="600">bookkeeping</text>
+  <text class="small t" x="240" y="364" style="font-size:10.5px">health_generate_http.py</text>
+  <text class="small t" x="240" y="384">in_flight: the set of real rids</text>
+  <text class="small t" x="240" y="400">probe rids (HEALTH_CHECK_*) excluded</text>
+  <text class="small t" x="240" y="416">re-synced with rid_to_state on each event</text>
+  <text class="small t" x="240" y="438">final chunk: the rid leaves the set</text>
+  <text class="small t" x="240" y="454">abort chunk: record_failure()</text>
+  <text class="small t" x="240" y="470">other chunk: record_progress()</text>
+  <text class="small t" x="240" y="492">state in a weak map keyed by the manager</text>
+
+  <!-- tracker -->
+  <rect class="plugin" x="500" y="330" width="250" height="172"/>
+  <text class="t" x="510" y="350" font-weight="600">PDProgressHealth</text>
+  <text class="small t" x="510" y="364" style="font-size:10.5px">health_generate.py</text>
+  <text class="mono small t" x="510" y="386">requests_since    &lt;- observe(n)</text>
+  <text class="mono small t" x="510" y="402">last_progress_ts  &lt;- record_progress</text>
+  <text class="mono small t" x="510" y="418">last_failure_ts   &lt;- record_failure</text>
+  <text class="small t" x="510" y="442">UNHEALTHY: outstanding for T and</text>
+  <text class="small t" x="510" y="458">nothing produced for T</text>
+  <text class="small t" x="510" y="474">T = 600 s; 1200 s until the first output</text>
+  <text class="small t" x="510" y="492">every read re-judges on the clock</text>
+
+  <!-- arrows inside the HTTP process -->
+  <path class="arrow o" d="M355,306 L355,330"/>
+  <path class="arrow b" d="M475,410 L500,410"/>
+  <path class="arrow b" d="M740,117 L758,117 L758,440 L750,440"/>
+  <text class="lbl" x="752" y="323" text-anchor="end">health_state(), health_json()</text>
+
+  <!-- consumer arrows -->
+  <path class="arrow" d="M170,66 L445,66 L445,100"/>
+  <text class="lbl" x="178" y="60">probe</text>
+  <path class="arrow" d="M170,117 L240,117"/>
+  <text class="lbl" x="178" y="111">requests</text>
+  <path class="arrow" d="M430,124 L422,124 L422,150 L200,150 L200,250 L170,250"/>
+
+  <!-- scheduler side -->
+  <rect class="box" x="840" y="150" width="230" height="130"/>
+  <text class="t" x="955" y="174" text-anchor="middle" font-weight="600">scheduler ranks</text>
+  <text class="lbl" x="955" y="194" text-anchor="middle">TP ranks, untouched</text>
+  <text class="lbl" x="955" y="222" text-anchor="middle">P/D queues, KV transfer,</text>
+  <text class="lbl" x="955" y="238" text-anchor="middle">forward, engine aborts (5xx)</text>
+  <rect class="box" x="840" y="300" width="230" height="56"/>
+  <text class="t" x="955" y="324" text-anchor="middle" font-weight="600">detokenizer</text>
+  <text class="lbl" x="955" y="342" text-anchor="middle">untouched</text>
+
+  <path class="arrow" d="M770,240 L840,240"/>
+  <text class="lbl" x="805" y="232" text-anchor="middle">requests</text>
+  <path class="arrow" d="M840,328 L770,270"/>
+  <text class="lbl" x="800" y="346" text-anchor="middle">chunks</text>
+
+  <!-- footer -->
+  <rect class="box" x="20" y="540" width="1050" height="120"/>
+  <text class="t" x="34" y="562" font-weight="600">What the HTTP process sees, and what it means</text>
+  <text class="small t" x="34" y="582">decode: a chunk without an abort reason means tokens were generated. prefill: its only output is the final chunk, sent after the KV release that follows a completed transfer.</text>
+  <text class="small t" x="34" y="598">abort chunk with a 5xx status: the engine gave up (handshake or transfer failure, transport timeout); keeps requests outstanding for one window.</text>
+  <text class="small t" x="34" y="614">client cancel or disconnect: the rid leaves the set, nothing recorded. idle engine: handed to the core probe; the first request after idleness gets a whole window.</text>
+  <text class="small t" x="34" y="630">hung scheduler or detokenizer with requests held: 503 at T, no probe request. hung while idle: the core probe fails at its 20 s timeout.</text>
+  <text class="small t" x="34" y="646">installed by apply_tpu_http_patches from apply_server_args_defaults in the HTTP process of a prefill or decode; zero shared files.</text>
+</svg>
+
+
+
+</div>
+<h2>3c. How #1392 answers each case</h2>
+<div class="prose"><p>The handler runs three checks in order: the two core gates, then the tracker, then, only when nothing is in flight and the tracker is ready, the core probe. Every row below is one case an operator will meet, what the HTTP process holds at that moment, and which of the three answers.</p></div>
+<div class="tablewrap"><table>
+<thead><tr><th>Case</th><th>What the HTTP process holds</th><th>Answer</th><th>Who answers</th><th>Seen live</th></tr></thead>
+<tbody>
+<tr><td>Starting: weights loading, warmup running</td><td><code>server_status == Starting</code></td><td><span class="pill p-bad">503</span> bare</td><td>core gate, unchanged</td><td>every start</td></tr>
+<tr><td>Shutting down</td><td><code>gracefully_exit</code></td><td><span class="pill p-bad">503</span> bare</td><td>core gate, unchanged</td><td>every stop</td></tr>
+<tr><td>Fresh start, no request yet</td><td>nothing in flight, no failure</td><td><span class="pill p-ok">200</span> in about 1 s, or <span class="pill p-bad">503</span> after 20 s if the scheduler is dead</td><td>core probe, by fallthrough</td><td>200 in 1.00 s</td></tr>
+<tr><td>Idle after traffic</td><td>nothing in flight, progress long ago</td><td><span class="pill p-ok">200</span> in about 1 s</td><td>core probe, by fallthrough</td><td>200 in 1.00 s after 90 s quiet</td></tr>
+<tr><td>Hung while idle</td><td>nothing in flight; the probe gets no reply</td><td><span class="pill p-bad">503</span> bare after 20 s; core marks the server UnHealthy</td><td>core probe, by fallthrough</td><td>503 after 20.0 s, three times</td></tr>
+<tr><td>Requests in flight and producing</td><td>held &gt; 0, fresh progress</td><td><span class="pill p-ok">200</span> bare in about 1 ms; no probe is sent</td><td>tracker</td><td>12 probes, 0.9 to 6.5 ms</td></tr>
+<tr><td>Requests in flight, nothing back for T: hung scheduler or detokenizer, prefill whose sender never replies</td><td>held &gt; 0, no progress for T</td><td><span class="pill p-bad">503</span> with the record: <code>N requests held, outstanding for Ns, nothing produced …</code></td><td>tracker</td><td>decode hang 503 exactly 60 s after the block; prefill fault 503 at 140 s</td></tr>
+<tr><td>Decode whose transfers never complete</td><td>requests abort at the transport timeout; failures inside the window keep the engine outstanding</td><td><span class="pill p-bad">503</span> with the record: <code>0 requests held, … last failed Ns ago</code></td><td>tracker</td><td>503 at 182 s</td></tr>
+<tr><td>Recovery with no traffic</td><td>last failure older than the window</td><td><span class="pill p-ok">200</span> via the probe once the failure ages out</td><td>tracker ages out, then core probe</td><td>200 at 130 s quiet on the earlier head</td></tr>
+<tr><td>Client cancel or disconnect</td><td>rid leaves the set; nothing recorded</td><td>no effect on the verdict</td><td>bookkeeping</td><td>unit test</td></tr>
+<tr><td>One long chunked prefill</td><td>held &gt; 0, no output until the final chunk</td><td><span class="pill p-ok">200</span> until T; <span class="pill p-bad">503</span> only if a single prompt takes longer than T</td><td>tracker; T must exceed the longest prefill plus transfer</td><td>not exercised</td></tr>
+<tr><td>Feature off, or a non-P/D engine</td><td>no tracker attached</td><td>as on main</td><td>core handler and probe</td><td>unit test</td></tr>
+<tr><td><code>/health</code> on any engine</td><td>route not swapped</td><td>as on main</td><td>core handler and probe</td><td>every run</td></tr>
+</tbody></table></div>
+<div class="prose"><p class="note">Live numbers are from the 2P/2D runs with T = 60 s and T_cold = 120 s. The probe path costs one 1-token forward per poll and a 1 s poll granularity; the tracker path costs a dictionary read.</p></div>
+
+<h2>3d. The idle fallthrough at a glance</h2>
+<div class="prose"><p>One <code>GET /health_generate</code> on a TPU P/D engine, read left to right. Three checks run in order; each can end the request downward. The core probe, dashed, runs only when the third check finds nothing in flight. Timings are from the live runs.</p></div>
+<figure>
+<div class="diagwrap">
+<svg viewBox="0 0 1100 430" role="img" aria-label="Decision flow of the swapped /health_generate handler: core gates, then the tracker verdict, then an in-flight check; requests held answer 200 in about a millisecond with no probe, nothing in flight hands the request to the core one-token probe, which answers 200 in about a second or 503 after 20 seconds" style="min-width:900px">
+  <defs>
+    <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+    <marker id="a4b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--bad)"/></marker>
+    <marker id="a4g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ok)"/></marker>
+  </defs>
+  <g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="11" fill="currentColor" stroke="currentColor">
+    <!-- HTTP process boundary -->
+    <rect x="170" y="14" width="640" height="400" rx="8" fill="none" stroke-dasharray="6 4" opacity="0.6"/>
+    <text x="185" y="32" stroke="none" font-size="10" opacity="0.7" letter-spacing="1">HTTP PROCESS · health_generate_with_tracker</text>
+
+    <!-- request -->
+    <rect x="20" y="70" width="130" height="60" rx="4" fill="none"/>
+    <text x="85" y="94" text-anchor="middle" stroke="none" font-weight="600">GET /health_generate</text>
+    <text x="85" y="112" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">router · kubelet</text>
+    <line x1="150" y1="100" x2="190" y2="100" marker-end="url(#a4)"/>
+
+    <!-- 1 gates (core) -->
+    <rect x="190" y="60" width="170" height="80" rx="4" fill="var(--surface)" stroke-dasharray="4 3"/>
+    <text x="275" y="82" text-anchor="middle" stroke="none" font-weight="600">1 · core gates</text>
+    <text x="275" y="100" text-anchor="middle" stroke="none" font-size="10">gracefully_exit?</text>
+    <text x="275" y="114" text-anchor="middle" stroke="none" font-size="10">server_status == Starting?</text>
+    <text x="275" y="130" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">same as core, unchanged</text>
+    <line x1="360" y1="100" x2="400" y2="100" marker-end="url(#a4)"/><text x="380" y="92" text-anchor="middle" stroke="none" font-size="10">up</text>
+    <line x1="275" y1="140" x2="275" y2="290" stroke="var(--bad)" marker-end="url(#a4b)"/><text x="281" y="215" stroke="none" font-size="10" fill="var(--bad)">either</text>
+
+    <!-- 2 tracker (plugin) -->
+    <rect x="400" y="60" width="170" height="80" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <text x="485" y="82" text-anchor="middle" stroke="none" font-weight="600">2 · tracker</text>
+    <text x="485" y="100" text-anchor="middle" stroke="none" font-size="10">_observe: in_flight ∩ rid_to_state</text>
+    <text x="485" y="114" text-anchor="middle" stroke="none" font-size="10">outstanding for T and</text>
+    <text x="485" y="128" text-anchor="middle" stroke="none" font-size="10">nothing produced for T?</text>
+    <line x1="570" y1="100" x2="610" y2="100" marker-end="url(#a4)"/><text x="590" y="92" text-anchor="middle" stroke="none" font-size="10">ready</text>
+    <line x1="485" y1="140" x2="485" y2="290" stroke="var(--bad)" marker-end="url(#a4b)"/><text x="491" y="215" stroke="none" font-size="10" fill="var(--bad)">unhealthy</text>
+
+    <!-- 3 in flight? (plugin) -->
+    <rect x="610" y="60" width="170" height="80" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <text x="695" y="82" text-anchor="middle" stroke="none" font-weight="600">3 · anything in flight?</text>
+    <text x="695" y="100" text-anchor="middle" stroke="none" font-size="10">in_flight non-empty:</text>
+    <text x="695" y="114" text-anchor="middle" stroke="none" font-size="10">real requests the manager forwarded</text>
+    <text x="695" y="128" text-anchor="middle" stroke="none" font-size="10">and has not seen finish</text>
+    <line x1="695" y1="140" x2="695" y2="290" stroke="var(--ok)" marker-end="url(#a4g)"/><text x="701" y="215" stroke="none" font-size="10" fill="var(--ok)">held → no probe</text>
+    <line x1="780" y1="100" x2="840" y2="100" marker-end="url(#a4)"/><text x="810" y="92" text-anchor="middle" stroke="none" font-size="10">empty</text>
+
+    <!-- core probe (outside the plugin's own code, inside the HTTP process) -->
+    <rect x="840" y="60" width="240" height="80" rx="4" fill="var(--surface)" stroke-dasharray="4 3"/>
+    <text x="960" y="82" text-anchor="middle" stroke="none" font-weight="600">core health_generate (saved handler)</text>
+    <text x="960" y="100" text-anchor="middle" stroke="none" font-size="10">builds a 1-token probe, rid HEALTH_CHECK_…</text>
+    <text x="960" y="114" text-anchor="middle" stroke="none" font-size="10">bootstrap_host 2.2.2.2 (fake sender/receiver)</text>
+    <text x="960" y="128" text-anchor="middle" stroke="none" font-size="10">polls last_receive_tstamp once a second, ≤ 20 s</text>
+
+    <!-- scheduler -->
+    <rect x="860" y="180" width="200" height="56" rx="4" fill="none"/>
+    <text x="960" y="202" text-anchor="middle" stroke="none" font-weight="600">scheduler ranks</text>
+    <text x="960" y="220" text-anchor="middle" stroke="none" font-size="10">admit · one forward · one token</text>
+    <line x1="930" y1="140" x2="930" y2="180" marker-end="url(#a4)"/><text x="924" y="164" text-anchor="end" stroke="none" font-size="10">probe request</text>
+    <line x1="990" y1="180" x2="990" y2="140" marker-end="url(#a4)"/><text x="996" y="164" stroke="none" font-size="10">any message, or none</text>
+    <text x="960" y="256" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">the plugin's bookkeeping ignores the probe rid</text>
+
+    <!-- outcomes -->
+    <text x="20" y="300" stroke="none" font-size="10" opacity="0.7" letter-spacing="1">ANSWER</text>
+    <rect x="190" y="290" width="170" height="64" rx="4" fill="var(--bad-soft)" stroke="var(--bad)"/>
+    <text x="275" y="312" text-anchor="middle" stroke="none" font-weight="600" fill="var(--bad)">503 · bare</text>
+    <text x="275" y="330" text-anchor="middle" stroke="none" font-size="10">starting or stopping</text>
+    <text x="275" y="344" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">every start and stop</text>
+
+    <rect x="400" y="290" width="170" height="64" rx="4" fill="var(--bad-soft)" stroke="var(--bad)"/>
+    <text x="485" y="312" text-anchor="middle" stroke="none" font-weight="600" fill="var(--bad)">503 · with the record</text>
+    <text x="485" y="330" text-anchor="middle" stroke="none" font-size="10">stalled: N held, outstanding Ns</text>
+    <text x="485" y="344" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">hang 60 s after block · prefill fault 140 s</text>
+
+    <rect x="610" y="290" width="170" height="64" rx="4" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <text x="695" y="312" text-anchor="middle" stroke="none" font-weight="600" fill="var(--ok)">200 · bare, no probe</text>
+    <text x="695" y="330" text-anchor="middle" stroke="none" font-size="10">requests held and producing</text>
+    <text x="695" y="344" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">0.9 to 6.5 ms, 12 of 12</text>
+
+    <line x1="900" y1="140" x2="900" y2="290" stroke="var(--ok)" stroke-dasharray="4 3" marker-end="url(#a4g)"/>
+    <line x1="1040" y1="140" x2="1040" y2="290" stroke="var(--bad)" stroke-dasharray="4 3" marker-end="url(#a4b)"/>
+    <rect x="840" y="290" width="115" height="64" rx="4" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <text x="897" y="312" text-anchor="middle" stroke="none" font-weight="600" fill="var(--ok)">200 · probe</text>
+    <text x="897" y="330" text-anchor="middle" stroke="none" font-size="10">a message came back</text>
+    <text x="897" y="344" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">1.00 s, idle engine</text>
+    <rect x="965" y="290" width="115" height="64" rx="4" fill="var(--bad-soft)" stroke="var(--bad)"/>
+    <text x="1022" y="312" text-anchor="middle" stroke="none" font-weight="600" fill="var(--bad)">503 · bare</text>
+    <text x="1022" y="330" text-anchor="middle" stroke="none" font-size="10">nothing back in 20 s</text>
+    <text x="1022" y="344" text-anchor="middle" stroke="none" font-size="10" opacity="0.7">20.0 s, hung while idle</text>
+
+    <!-- before/after note -->
+    <text x="190" y="385" stroke="none" font-size="10">before this change, check 3 did not exist: a ready tracker answered 200 at once, so a scheduler that died while idle read 200 until the first real request had stalled for a window.</text>
+    <text x="190" y="401" stroke="none" font-size="10">now the probe runs exactly where the tracker has no evidence, and nowhere else: a loaded engine still sends no probe.</text>
+  </g>
+</svg>
+</div>
+<figcaption>The tracker decides whenever it has evidence (checks 2 and 3 downward). Only an engine with nothing in flight reaches the core probe, which is the one case where sending a request is the only way to learn anything. Dashed boxes are core code, unchanged; solid teal boxes are the plugin.</figcaption>
+</figure>
+
+<h2>4. Files: both PRs are plugin files only (patches.py)</h2>
+<h3>PR #1390: scheduler-side, per-rank slot files</h3>
+<div class="tablewrap"><table>
+<thead><tr><th>File</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td class="mono">sglang_tpu/disaggregation/health_generate.py</td><td>the tracker; <code>PDHealthSlot</code> and the slot files <code>/dev/shm/sglang_tpu_pd_health_&lt;port&gt;/dp&lt;d&gt;_tp&lt;t&gt;.json</code> (atomic write; a slot whose writer pid is dead is ignored)</td></tr>
+<tr><td class="mono">sglang_tpu/disaggregation/health_generate_scheduler.py</td><td><code>attach_tracker</code>, <code>requests_present</code> (waiting queue, running batch, P/D queues; probes skipped), <code>observe_and_publish</code> (every loop iteration; publish on a verdict change and every 5 s while work is held), <code>track_streamed</code> (decode chunks and prefill final outputs are progress; 5xx aborts are failures; cancels and rejections nothing)</td></tr>
+<tr><td class="mono">sglang_tpu/disaggregation/health_generate_http.py</td><td><code>attach_slots</code>, <code>unready_slots</code> (unhealthy, or held requests in a slot older than the window), the replacement GET <code>/health_generate</code>, falling through to the core probe when every rank is ready</td></tr>
+<tr><td class="mono">sglang_tpu/patches.py</td><td>wraps <code>Scheduler.init_output_streamer</code>, <code>process_decode_queue</code>, <code>process_disagg_prefill_inflight_queue</code>, <code>SchedulerOutputStreamer.stream_output</code> (scheduler process, with the other TPU patches) and <code>TokenizerManager.init_disaggregation</code> (HTTP process, from <code>apply_server_args_defaults</code>)</td></tr>
+<tr><td class="mono">sglang_tpu/envs.py</td><td>the three knobs</td></tr>
+<tr><td class="mono">test/registered/unit/plugins/test_tpu_pd_health_generate.py</td><td>51 CPU tests</td></tr>
+</tbody></table></div>
+<h3>PR #1392: the same rule, HTTP-side, plugin files only (patches.py)</h3>
+<div class="tablewrap"><table>
+<thead><tr><th>File</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td class="mono">sglang_tpu/disaggregation/health_generate.py</td><td>the shared tracker; reads re-judge on the clock (<code>_refresh</code>) so an abort ages out with no new event</td></tr>
+<tr><td class="mono">sglang_tpu/envs.py</td><td>the same three knobs</td></tr>
+<tr><td class="mono">sglang_tpu/disaggregation/health_generate_http.py</td><td><code>attach_tracker</code> (one tracker per manager in a weak map, then the route swap); <code>track_dispatched</code>, <code>track_outputs</code>, <code>track_cancelled</code>; <code>health_generate_with_tracker</code>, the replacement GET <code>/health_generate</code>, delegating to the core handler when the manager has no tracker or holds no request</td></tr>
+<tr><td class="mono">sglang_tpu/patches.py</td><td><code>_patch_tokenizer_manager_pd_health_generate</code>: wraps <code>TokenizerManager.init_disaggregation</code> (attach after), <code>_mark_state_dispatched</code>, <code>_handle_batch_output</code>, <code>abort_request</code> (bookkeeping before); idempotent like the other patches. <code>apply_tpu_http_patches</code> is called from <code>apply_server_args_defaults</code> in the HTTP process of a P/D engine</td></tr>
+<tr><td class="mono">test/registered/unit/plugins/test_tpu_pd_health_generate.py</td><td>49 CPU tests; one asserts the four core method names still exist, one that the route's <code>request</code> parameter is annotated (unannotated, FastAPI answered 422; found live)</td></tr>
+</tbody></table></div>
+<div class="prose"><p class="note">The readiness modules in both PRs are now named <code>health_generate</code>: <code>sglang_tpu/disaggregation/health_generate.py</code> in both, <code>python/sglang/srt/disaggregation/health_generate.py</code> for #1390's seam, with <code>get_pd_health_tracker</code>, <code>build_pd_health_tracker</code> and <code>PDHealthTracker</code>.</p></div>
+<h2>5. Tunables</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Setting</th><th class="num">Default</th><th>Meaning</th><th>Tune it when</th></tr></thead>
+<tbody>
+<tr><td class="mono">SGLANG_TPU_PD_HEALTH_READINESS_ENABLED</td><td class="num">true</td><td>Kill switch; off restores today's probe-only behaviour.</td><td>Rolling back without a code redeploy.</td></tr>
+<tr><td class="mono">SGLANG_TPU_PD_HEALTH_WINDOW_S (T)</td><td class="num">600</td><td>Demand without anything produced for this long is unhealthy.</td><td>Must exceed the slowest honest time to first output plus transfer. Lower for faster isolation; the kubelet adds 30 s (3 × 10 s) before removal.</td></tr>
+<tr><td class="mono">SGLANG_TPU_PD_HEALTH_COLD_WINDOW_S</td><td class="num">1200</td><td>The window until the engine produces its first output after start.</td><td>Longer than a cold compile of the largest shapes. Transport timeouts shorter than this still drive the verdict through failures-as-demand.</td></tr>
+<tr><td class="mono">PD_HEALTH_REPUBLISH_S (#1390, constant)</td><td class="num">5</td><td>How often the scheduler refreshes its slot while it holds requests, so a frozen slot is unambiguous.</td><td>Not an env var; well under any window.</td></tr>
+<tr><td class="mono">SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT · WAITING_TIMEOUT</td><td class="num">600</td><td>When a stuck request is failed by the transport and leaves the queue.</td><td>Any value works with the rule because failures count as demand; shorter timeouts free resources sooner.</td></tr>
+</tbody></table></div>
+
+<h2>6. Tests and live results</h2>
+<div class="two">
+<div class="panel">
+<h3 style="margin-top:0">Unit tests: 39 on #1390, 49 on #1392, CPU, injected clock</h3>
+<ul class="steps">
+<li>idle engine ready whatever the progress age; first request after idle gets the whole window; progress inside the window keeps ready</li>
+<li>count dropping to zero restarts the clock; continuous demand with churn trips; <b>failures at a timeout shorter than the window keep demand alive</b> (the live finding); client cancels are not demand; failures age out so recovery still needs no state</li>
+<li>cold window until the first progress; recovery needs no state and the version counts state changes only; the snapshot reports the facts; invalid config rejected, env read</li>
+<li>scheduler wiring: every P/D queue counted on both roles with probes skipped; progress and failure hooks ignore probes and a missing tracker; the idle transition forces exactly one publish per verdict change; <code>maybe_init</code> asks the platform on P/D roles only and accepts None; <code>SRTPlatform</code> defaults to None; <code>TpuSRTPlatform</code> builds the tracker with the role and honours the kill switch; the wire strings match the snapshot</li>
+<li>msgpack round trip; handler returns 503 with the facts before any probe is built; ready, untracked, empty and no-reader pass; one unready rank is enough; prefill covered, non-P/D not</li>
+</ul>
+</div>
+<div class="panel">
+<h3 style="margin-top:0">Live, 4-host 2P/2D TP-8, T = 60 s, T_cold = 120 s, 60 s transport timeouts</h3>
+<ul class="steps">
+<li><b>#1390 decode and prefill, all phases passed</b> after the failures-as-demand fix: baseline and 90 s idle ready; dead peer leaves the engine ready; the issue's hook on the decode gives 503 at 121 s with "0 requests held, demand for 120s, nothing produced since start, last failed 0s ago"; the sender fault on the prefill gives 503 with 4 to 8 requests held and nothing produced; both restore to main.</li>
+<li><b>#1392, same scenarios, in progress:</b> baseline answered 200 in about 1 ms with no probe request; 90 s idle stayed ready; the decode stall flipped to 503 at 180 s. The recovery phase exposed a second bug: after the last abort aged out the decode stayed 503, because the verdict was only re-judged on events and no requests flowed. Fixed by re-judging on every read; regression test added to both PRs. The scheduler-hang phase is running, then the prefill phases.</li>
+<li><b>#1390 hang phase:</b> the loop was blocked while idle and requests were sent afterwards, so the scheduler never counted them and the slot stayed fresh with no work; every probe during the hang still returned 503, from the core probe's 20 s timeout. The staleness rule itself needs requests in hand before the hang; that variant is still to run.</li>
+<li><b>#1392 on the patches.py head, passed on both roles:</b> decode baseline 200 in about 1 ms with no probe request; 90 s idle ready; the decode whose transfers never complete 503 at 180 s; recovery 200 once the last abort aged out (the re-judge fix, validated); prefill baseline 200 in about 2 ms; the prefill whose sender never replies 503 at 140 s with 3 requests held; both restored. Its hang phase was invalid in the harness (requests sent before the loop blocked) and is being rerun with the loop blocking once requests are in the scheduler's queues.</li>
+<li><b>#1390 plugin-only layout, passed on both roles:</b> decode baseline through the core probe; 90 s idle ready; the decode whose transfers never complete 503 at 124 s with all eight ranks' records; recovery in both directions; the prefill whose sender never replies 503 at 140 s; and the hang case: with the loop blocked holding one request, every rank's slot froze and the HTTP process answered <code>scheduler stopped judging: slot 130s old with 1 requests held (limit 60s)</code> on its own.</li>
+<li><b>#1392 idle fallthrough, decode, passed:</b> with eight long generations held, twelve probes answered 200 in 0.9 to 6.5 ms from the tracker; idle right after start, right after traffic and after 90 s quiet, 200 in 1.00 s from the core probe; with the scheduler loop hung while idle, three probes in a row read 503 after 20.0 s each with the core <code>Health check failed</code> line logged. The earlier head answered an idle engine 200 without any test.</li>
+<li class="note">Two earlier attempts died for harness reasons, not design ones: a full <code>/dev/shm</code> on the decode host, and the MiniLB holding its port when the prefill was relaunched. Both fixed in the harness.</li>
+</ul>
+</div>
+</div>
+
+<h2>6b. Per-peer rule on the decode (PR #1393, stacked on #1392)</h2>
+<div class="prose">
+<p>The router stamps the prefill's bootstrap host and port on every decode request, so the decode's HTTP process can attribute each outcome to a peer. A peer is <b>failing</b> after <code>SGLANG_TPU_PD_HEALTH_PEER_FAILURE_STREAK</code> (3) consecutive aborts with no success in between, the last inside the window, or when its requests have been in flight for a window with nothing back. The decode is <b>unhealthy</b> once failing peers reach <code>SGLANG_TPU_PD_HEALTH_PEER_FAILURE_RATIO</code> (50%) of the peers active within the window, with at least <code>SGLANG_TPU_PD_HEALTH_PEER_MIN</code> (1) active. The engine-wide rule stays and the two are ORed; the 503 body carries both records. Prefills keep the engine-wide rule only: their requests do not name the decode they pair with.</p>
+<p><b>Live, 2P/2D with one prefill's sender broken:</b> the decode on the branch answered 503 with <code>peers failing: 1 of 2 active ... 10.128.15.217:8998</code> while its engine-wide rule stayed ready and the decode on main stayed 200. The verdict cleared between bursts because the broken prefill reports 503 itself, the router pulls it from the pool, and the decode then has nothing outstanding to it: the same stateless recovery as the engine rule, working end to end. A first pass found that requests which never abort left a peer unjudged; fixed, with a test.</p>
+</div>
+<h2>6c. Trade-offs: HTTP side against scheduler side</h2>
+<div class="prose"><p>Both designs catch the issue 1276 failure and a scheduler that hangs while holding requests. They differ in what else each can see, how much it takes to operate, and where each is the only option.</p></div>
+<div class="tablewrap"><table>
+<thead><tr><th>Dimension</th><th>HTTP side, #1392</th><th>Scheduler side, #1390</th></tr></thead>
+<tbody>
+<tr><td>Hung scheduler, requests held</td><td class="p-ok">natural: requests out, nothing back, 503 at T</td><td>needs the heartbeat and the staleness rule on the slot</td></tr>
+<tr><td>Hung or dead detokenizer</td><td class="p-ok">sees it: nothing reaches the HTTP process</td><td class="p-bad">blind: the scheduler recorded tokens as produced</td></tr>
+<tr><td>Scheduler dead while idle</td><td>core probe fallthrough, 503 at 20 s</td><td>same fallthrough</td></tr>
+<tr><td>Moving parts</td><td class="p-ok">four wrapped manager methods, one swapped route</td><td>four wrapped scheduler methods, slot files, a 5 s republish, a dead-pid check, one swapped route</td></tr>
+<tr><td>Verdict granularity</td><td>one per engine, rank 0's view</td><td class="p-ok">one per TP rank; any rank trips</td></tr>
+<tr><td>Reason quality</td><td>"N held, outstanding Ns, nothing produced"</td><td class="p-ok">can add the rank, the queue, KV usage, the transfer poll state</td></tr>
+<tr><td>Prefill progress</td><td>only the final output, one hop after the transfer; T must exceed the longest prefill</td><td class="p-ok">every chunk completion and transfer state change</td></tr>
+<tr><td>Front end</td><td class="p-bad">tied to the Python TokenizerManager</td><td class="p-ok">any front end, including the Rust server</td></tr>
+<tr><td>Several HTTP workers</td><td>each worker sees its own share</td><td class="p-ok">one view of everything</td></tr>
+<tr><td>Live validation</td><td>all phases, both roles, hang and idle cases</td><td>all phases, both roles, hang with work held</td></tr>
+</tbody></table></div>
+<div class="two">
+<div class="panel">
+<h3 style="margin-top:0">Only the scheduler side can</h3>
+<ul class="steps">
+<li><b>Run without a Python HTTP process.</b> With <code>SGLANG_RUST_SERVER</code> the Rust server hosts the API, tokenizer and detokenizer inside the scheduler process; the <code>TokenizerManager</code> never runs, so there is nothing for #1392 to wrap and its <code>/health</code> is static 200 from the moment the port binds.</li>
+<li><b>Judge a long prefill without a false 503.</b> The scheduler sees each chunk complete and each transfer poll advance; the HTTP process sees nothing until the final output, so a single prompt longer than T looks like a stall.</li>
+<li><b>Name the cause and the rank.</b> "KV pool full, preallocation failing" against "transfers never complete" against "rank 5 stuck" are facts only the scheduler holds.</li>
+<li><b>Flag degradation before requests fail.</b> Transfer latency, handshake retries and bandwidth live in the KV poll states; the HTTP side only sees end-to-end outcomes.</li>
+<li><b>Act locally.</b> Stop accepting bootstraps, abort stuck requests early, or report through the load snapshot the router already reads.</li>
+</ul>
+</div>
+<div class="panel">
+<h3 style="margin-top:0">Only the HTTP side can</h3>
+<ul class="steps">
+<li><b>See a dead detokenizer or a broken scheduler-to-HTTP link.</b> The scheduler's verdict stays ready and its slot stays fresh, because from where it stands tokens were produced. Only the process waiting for the output notices it never arrives.</li>
+<li><b>Give a verdict that cannot be stale.</b> No slot file, no republish timer, no dead-pid handling, no staleness rule: the facts are read in the same process that answers.</li>
+</ul>
+<h3>How to read it</h3>
+<p class="note">The HTTP side wins on simplicity and on the one failure between scheduler and client that the scheduler cannot see. The scheduler side wins on richness of evidence and on deployments without the Python HTTP layer. If the Rust server becomes the production front end, or chunk-level prefill progress and per-rank reasons become requirements, #1390's plumbing is built and validated for them. The two combine cleanly: the HTTP-side verdict as the readiness answer, the scheduler-side slot as the source of reasons and compute-level progress.</p>
+</div>
+</div>
+
+<h2>7. Recommendation</h2>
+<div class="prose">
+<p>Ship the rule; move the clock. The rule is right: it reproduced every expected verdict on both roles and its one gap was a bookkeeping gap, now closed. The scheduler-side snapshot is a correct implementation of it, but it is the scheduler describing itself, so it needs either the one-token probe or the staleness rule to cover a scheduler that stops. The HTTP-side variant evaluates the same three numbers in the process that answers the probe, is live by construction, covers a hung detokenizer as well, needs no shared memory, sends no probe while loaded, and is less code. The live scenarios are the same for both, so the switch costs a rewrite of the plumbing, not of the validation.</p>
+</div>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const T0 = -60, T1 = 540, REQ_EVERY = 4, PROBE_EVERY = 10, TRANSFER_OK_S = 3;
+  const scenarios = [
+    { id: 'healthy', name: 'Healthy', fail: () => false, hang: null, trafficUntil: 540, idleFrom: null,
+      cap: 'Every transfer completes 3 s after admission. Held is never more than a few requests, produced is always fresh, the verdict is ready throughout.' },
+    { id: 'stall', name: 'Transfers never complete (#1276)', fail: () => true, hang: null, trafficUntil: 540, idleFrom: null,
+      cap: 'Every transfer into the decode hangs and fails at the transport timeout. With failures counting as demand the window closes at T after the first request and the verdict is 503; without them (the first live run) the queue drains at each timeout, demand resets and the decode stays ready. Switch the toggle to see both.' },
+    { id: 'peer', name: 'One prefill dead', fail: (t, peer) => peer === 'p2', hang: null, trafficUntil: 540, idleFrom: null,
+      cap: 'Requests paired with p2 fail at the timeout; those paired with p1 keep producing. Demand is continuous but produced is always fresh, so the decode stays ready.' },
+    { id: 'idle', name: 'Idle, then first request', fail: () => false, hang: null, trafficUntil: 540, idleFrom: 0, resumeAt: 300,
+      cap: 'No requests for five minutes: ready, with produced far in the past. The first request at t = 300 s starts the window from its arrival and completes long before T.' },
+    { id: 'cold', name: 'Cold start, nothing ever produced', fail: () => true, hang: null, trafficUntil: 540, idleFrom: null, cold: true,
+      cap: 'A decode that never produced anything after start is judged with T_cold. Failures keep the demand alive across transport timeouts, so it still trips, at T_cold instead of T.' },
+    { id: 'hang', name: 'Scheduler hangs at t = 200 s', fail: () => false, hang: 200, trafficUntil: 540, idleFrom: null,
+      cap: 'Requests keep arriving but the loop stopped. Scheduler-side: nobody counts, judges or writes, so the snapshot stays ready and the probe reports it (the fall-through one-token probe would time out instead). HTTP-side: requests go out and nothing comes back, 503 at T. Switch "where the clock lives".' },
+  ];
+  let scen = scenarios[1];
+
+  function simulate(sc, p) {
+    const trk = { demandSince: null, lastProgress: sc.cold ? null : -1e9, lastFailure: null, held: 0, state: 'ready', version: 0 };
+    if (!sc.cold) trk.lastProgress = T0 - 1;  // warm: produced long ago
+    const window = () => trk.lastProgress === null ? p.cold : p.T;
+    const judge = (now) => {
+      const w = window();
+      const stalled = trk.demandSince !== null && now - trk.demandSince >= w && (trk.lastProgress === null || now - trk.lastProgress >= w);
+      const s = stalled ? 'unhealthy' : 'ready';
+      if (s !== trk.state) { trk.state = s; trk.version++; }
+    };
+    const observe = (held, now) => {
+      const recentFail = p.failDemand && trk.lastFailure !== null && now - trk.lastFailure < window();
+      if (held <= 0 && !recentFail) trk.demandSince = null; else if (trk.demandSince === null) trk.demandSince = now;
+      trk.held = held; judge(now);
+    };
+    const inflight = [];  // {t0, peer, ok, land}
+    const events = { fail: [], ok: [] }, heldSeries = [], demandBands = [], verdictBands = [], probes = [], writes = [];
+    let published = { state: 'ready', version: -1, held: 0, t: T0 };
+    let seq = 0;
+    for (let t = T0; t <= T1; t += 1) {
+      // arrivals
+      const traffic = t >= 0 && t < sc.trafficUntil && !(sc.idleFrom !== null && t >= sc.idleFrom && t < (sc.resumeAt || 1e9));
+      if (traffic && t % REQ_EVERY === 0) {
+        const peer = seq % 2 === 0 ? 'p1' : 'p2'; seq++;
+        const ok = !sc.fail(t, peer);
+        inflight.push({ t0: t, peer, ok, land: t + (ok ? TRANSFER_OK_S : p.timeout) });
+      }
+      const schedulerAlive = sc.hang === null || t < sc.hang;
+      // outcomes land (the transport fails requests even if the scheduler hung? no: a hung scheduler processes nothing)
+      for (let i = inflight.length - 1; i >= 0; i--) {
+        const r = inflight[i];
+        if (r.land <= t && (schedulerAlive || p.side === 'http' && false)) {
+          inflight.splice(i, 1);
+          if (r.ok) { events.ok.push(t); if (schedulerAlive) { trk.lastProgress = t; } }
+          else { events.fail.push(t); if (schedulerAlive) { trk.lastFailure = t; if (trk.demandSince === null) trk.demandSince = t; } }
+        }
+      }
+      const held = inflight.length;
+      heldSeries.push({ t, held });
+      // judging
+      if (p.side === 'sched') {
+        if (schedulerAlive) { observe(held, t); if (trk.version !== published.version) { published = { state: trk.state, version: trk.version, held, t }; writes.push(t); } }
+      } else {
+        observe(held, t);  // the HTTP process keeps its own counters
+        published = { state: trk.state, version: trk.version, held, t };
+      }
+      const band = (arr, key) => { if (!arr.length || arr[arr.length - 1].key !== key) arr.push({ t0: t, t1: t + 1, key }); else arr[arr.length - 1].t1 = t + 1; };
+      band(demandBands, trk.demandSince === null ? 'none' : (trk.lastProgress === null ? 'cold' : 'demand'));
+      band(verdictBands, published.state);
+      if (t % PROBE_EVERY === 0) probes.push({ t, code: t < -20 ? 'start' : published.state === 'unhealthy' ? 503 : 200, startup: t < 0 });
+    }
+    return { events, heldSeries, demandBands, verdictBands, probes, writes, final: trk };
+  }
+
+  const W = 1100, LEFT = 170, RIGHT = 20, X0 = LEFT, X1 = W - RIGHT;
+  const x = (t) => X0 + (t - T0) / (T1 - T0) * (X1 - X0);
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function render() {
+    const p = { T: +$('s-t').value, cold: +$('s-cold').value, timeout: +$('s-timeout').value, failDemand: $('s-fail').value === 'yes', side: $('s-side').value };
+    if (p.cold < p.T) { p.cold = p.T; $('s-cold').value = p.T; }
+    $('sv-t').textContent = p.T; $('sv-cold').textContent = p.cold; $('sv-timeout').textContent = p.timeout;
+    const sim = simulate(scen, p);
+    const out = []; let y = 36;
+    out.push(`<g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="12" fill="currentColor">`);
+    out.push(`<rect x="${x(T0)}" y="18" width="${x(0) - x(T0)}" height="${400 - 48}" fill="var(--startup-soft)" opacity="0.5"/>`);
+    for (let t = T0; t <= T1; t += 60) { out.push(`<line x1="${x(t)}" y1="20" x2="${x(t)}" y2="${400 - 34}" stroke="currentColor" stroke-opacity="0.12"/>`); out.push(`<text x="${x(t)}" y="${400 - 18}" text-anchor="middle" font-size="11" fill="var(--muted)">${t} s</text>`); }
+    const lane = (label, sub, h) => { const ly = y; y += h + 14; out.push(`<text x="${LEFT - 10}" y="${ly + h / 2 + 4}" text-anchor="end">${esc(label)}</text>`); if (sub) out.push(`<text x="${LEFT - 10}" y="${ly + h / 2 + 18}" text-anchor="end" font-size="10" fill="var(--muted)">${esc(sub)}</text>`); return ly; };
+    // held
+    const lyH = lane('held requests', 'real, on the P/D path', 50);
+    const maxHeld = Math.max(1, ...sim.heldSeries.map(s => s.held));
+    let path = '';
+    sim.heldSeries.forEach((s, i) => { const yy = lyH + 50 - (s.held / maxHeld) * 48; path += (i ? 'L' : 'M') + x(s.t) + ' ' + yy + ' '; });
+    out.push(`<path d="${path} L${x(T1)} ${lyH + 50} L${x(T0)} ${lyH + 50} Z" fill="var(--off)" opacity="0.35" stroke="none"/>`);
+    out.push(`<text x="${X1}" y="${lyH + 10}" text-anchor="end" font-size="10" fill="var(--muted)">max ${maxHeld}</text>`);
+    // outcomes
+    const lyO = lane('outcomes', 'produced · engine failure', 22);
+    out.push(`<line x1="${x(0)}" y1="${lyO + 11}" x2="${X1}" y2="${lyO + 11}" stroke="currentColor" stroke-opacity="0.15"/>`);
+    for (const t of sim.events.ok) out.push(`<rect x="${x(t) - 1.2}" y="${lyO + 4}" width="2.4" height="14" fill="var(--ok)"/>`);
+    for (const t of sim.events.fail) out.push(`<rect x="${x(t) - 1.2}" y="${lyO + 2}" width="2.4" height="18" fill="var(--bad)"/>`);
+    // demand window
+    const lyD = lane('demand window', 'none · running · cold', 12);
+    for (const b of sim.demandBands) if (b.key !== 'none') out.push(`<rect x="${x(b.t0)}" y="${lyD}" width="${x(b.t1) - x(b.t0)}" height="12" fill="${b.key === 'cold' ? 'var(--startup)' : 'var(--accent)'}" opacity="0.8"/>`);
+    // verdict
+    const lyV = lane(p.side === 'sched' ? 'snapshot verdict' : 'HTTP-side verdict', p.side === 'sched' ? 'as published by the scheduler' : 'live counters', 14);
+    for (const b of sim.verdictBands) out.push(`<rect x="${x(b.t0)}" y="${lyV}" width="${x(b.t1) - x(b.t0)}" height="14" fill="${b.key === 'unhealthy' ? 'var(--bad)' : 'var(--ok)'}" opacity="0.85"/>`);
+    if (p.side === 'sched') for (const t of sim.writes) out.push(`<line x1="${x(t)}" y1="${lyV - 3}" x2="${x(t)}" y2="${lyV + 17}" stroke="currentColor" stroke-opacity="0.6"/>`);
+    if (scen.hang !== null) out.push(`<line x1="${x(scen.hang)}" y1="20" x2="${x(scen.hang)}" y2="${400 - 34}" stroke="var(--bad)" stroke-dasharray="4 3"/><text x="${x(scen.hang) + 4}" y="30" font-size="10" fill="var(--bad)">scheduler hangs</text>`);
+    // probes
+    const lyP = lane('/health_generate', 'every 10 s', 24);
+    out.push(`<line x1="${X0}" y1="${lyP + 12}" x2="${X1}" y2="${lyP + 12}" stroke="currentColor" stroke-opacity="0.15"/>`);
+    for (const pr of sim.probes) { const c = pr.code === 'start' ? 'var(--startup)' : pr.code === 503 ? 'var(--bad)' : 'var(--ok)'; out.push(`<circle cx="${x(pr.t)}" cy="${lyP + 12}" r="${pr.code === 503 ? 5.5 : 4}" fill="${c}"><title>t=${pr.t}s: ${pr.code === 'start' ? '503 starting' : pr.code}</title></circle>`); }
+    out.push(`</g>`);
+    $('tl').innerHTML = out.join('');
+    const first503 = sim.probes.find(pr => pr.t >= 0 && pr.code === 503);
+    const back = first503 ? sim.probes.find(pr => pr.t > first503.t && pr.code === 200) : null;
+    const facts = [first503 ? `First 503 at t = ${first503.t} s` : 'No 503 during the workload'];
+    if (back) facts.push(`200 again at t = ${back.t} s`);
+    if (p.side === 'sched') facts.push(`${sim.writes.length} snapshot writes caused by verdict changes`);
+    $('tl-cap').textContent = `${scen.cap} ${facts.join('; ')}.`;
+  }
+  const scenEl = $('scen');
+  scenarios.forEach(sc => { const b = document.createElement('button'); b.type = 'button'; b.textContent = sc.name; b.id = 'scen-' + sc.id; b.setAttribute('aria-pressed', String(sc === scen)); b.addEventListener('click', () => { scen = sc; scenEl.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); render(); }); scenEl.appendChild(b); });
+  ['s-t', 's-cold', 's-timeout', 's-fail', 's-side'].forEach(id => $(id).addEventListener('input', render));
+  render();
+})();
+</script>
+
+</body></html>

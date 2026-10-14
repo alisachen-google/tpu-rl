@@ -4,6 +4,10 @@ Design conclusion for sglang-torchtpu issue #1276, written 2026-10-13 after the 
 campaign. Interactive version with diagrams and a fault simulator:
 https://claude.ai/artifact/4SLGSg2rHqw9xceLFwFBsR
 
+Follow-up (2026-10-14): the progress-rule readiness design that the PRs implement, with the
+HTTP-side against scheduler-side trade-offs, is in `pd_disagg_progress_rule_readiness.md`
+(interactive page https://claude.ai/artifact/3GnECC2gY9jNyTgtBK1dYg, offline copy beside it).
+
 ## 1. Problem
 
 A P/D decode keeps answering 200 on `/health` and `/health_generate` while every KV transfer
