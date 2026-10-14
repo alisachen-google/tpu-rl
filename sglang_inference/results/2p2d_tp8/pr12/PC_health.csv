@@ -21,3 +21,9 @@
 09:55:24,200,0.001322,
 09:55:29,200,0.001308,
 09:55:34,200,0.001086,
+09:55:39,200,0.000942,
+09:55:44,200,0.001083,
+09:55:49,{"role":"prefill","state":"unhealthy","reason":"stalled: 1 requests held, outstanding for 125s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"
+09:55:54,{"role":"prefill","state":"unhealthy","reason":"stalled: 1 requests held, outstanding for 130s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"
+09:55:59,{"role":"prefill","state":"unhealthy","reason":"stalled: 1 requests held, outstanding for 135s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"
+09:56:04,{"role":"prefill","state":"unhealthy","reason":"stalled: 1 requests held, outstanding for 140s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"

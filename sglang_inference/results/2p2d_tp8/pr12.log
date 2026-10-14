@@ -49,3 +49,22 @@ Try 'cut --help' for more information.
 2026-10-14T09:53:42Z [pr12]    p1 health 200 after 136 s
 2026-10-14T09:53:42Z [pr12]    LB health: 200
 2026-10-14T09:53:43Z [pr12]    hook installs on p1: 9
+2026-10-14T09:56:03Z [pr12]    +140 s: {"role":"prefill","state":"unhealthy","reason":"stalled: 1 requests held, outstanding for 139s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"stalled: 1 requests held, outstanding for 139s, nothing prod
+2026-10-14T09:56:09Z [pr12]    p1 /health_generate during: 200 x25 {"role":"prefill" x4  (n=29); first 503 at:  (traffic started 09:53:43)
+2026-10-14T09:56:09Z [pr12] === P-E. restore p1 to main
+2026-10-14T09:56:16Z [pr12]    p1 down after 1 s
+2026-10-14T09:58:32Z [pr12]    p1 health 200 after 136 s
+2026-10-14T09:58:32Z [pr12]    LB health: 200
+2026-10-14T09:58:34Z [pr12]    traffic: 200 x6 
+2026-10-14T09:58:35Z [pr12]    p1 /health_generate:  200 1.002405
+2026-10-14T09:58:35Z [pr12] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T09:58:41Z [pr12] phase pr12 done
