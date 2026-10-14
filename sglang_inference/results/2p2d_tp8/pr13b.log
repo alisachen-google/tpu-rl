@@ -10,3 +10,26 @@
 2026-10-14T10:36:31Z [pr13]    hook installs on p1: 18
 2026-10-14T10:45:15Z [pr13]    batch 1 (12 req, c=4, LB alternates prefills): 200 x6 500 x2 ERR:TimeoutError x4 
 2026-10-14T10:45:15Z [pr13]    +524 s:  200 0.001292
+2026-10-14T10:58:37Z [pr13]    batch 2 (12 req, c=4, LB alternates prefills): 200 x4 500 x1 ERR:TimeoutError x7 
+2026-10-14T10:58:37Z [pr13]    +1326 s:  200 0.000871
+2026-10-14T11:06:18Z [pr13]    batch 3 (12 req, c=4, LB alternates prefills): 200 x7 500 x3 ERR:TimeoutError x2 
+2026-10-14T11:06:18Z [pr13]    +1787 s:  200 0.001020
+2026-10-14T11:06:26Z [pr13]    d1 /health_generate during: 200 x308 {"role":"decode" x48  (n=356); first 503 at:  (traffic started 10:36:31)
+2026-10-14T11:06:27Z [pr13]    d2 (main) probe for comparison: 200 1.003120
+2026-10-14T11:06:27Z [pr13] === X-E. restore p1 and d1 to main
+2026-10-14T11:06:33Z [pr13]    p1 down after 0 s
+2026-10-14T11:08:50Z [pr13]    p1 health 200 after 136 s
+2026-10-14T11:08:55Z [pr13]    d1 down after 0 s
+2026-10-14T11:10:55Z [pr13]    d1 health 200 after 120 s
+2026-10-14T11:10:57Z [pr13]    traffic: 200 x6 
+2026-10-14T11:10:57Z [pr13] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T11:11:03Z [pr13] phase pr13 done

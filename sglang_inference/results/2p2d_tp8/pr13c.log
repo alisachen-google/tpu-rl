@@ -1,0 +1,22 @@
+2026-10-14T11:11:16Z [pr13c] === per-peer rule (PR #1393) live validation, client timeout 75 s so traffic keeps flowing; branch a532e7df95; T=60 s, cold 120 s; peer streak 2, ratio 50%
+2026-10-14T11:11:16Z [pr13c] === X-A. d1 on the peers branch, p1 with the sender fault, p2 healthy: d1 must report p1 failing (1 of 2) while its engine rule stays ready
+2026-10-14T11:11:21Z [pr13c]    d1 down after 0 s
+2026-10-14T11:13:21Z [pr13c]    d1 health 200 after 120 s
+2026-10-14T11:13:24Z [pr13c]    baseline traffic: 200 x8 
+2026-10-14T11:13:24Z [pr13c]    d1 probe:  200 0.001373
+2026-10-14T11:13:30Z [pr13c]    p1 down after 0 s
+2026-10-14T11:15:46Z [pr13c]    p1 health 200 after 135 s
+2026-10-14T11:15:46Z [pr13c]    LB health: 200
+2026-10-14T11:15:48Z [pr13c]    hook installs on p1: 27
+2026-10-14T11:17:49Z [pr13c]    batch 1 (12 req, c=4, LB alternates prefills): 200 x7 500 x4 ERR:TimeoutError x1 
+2026-10-14T11:17:49Z [pr13c]    +121 s: {"role":"decode","state":"unhealthy","reason":"peers failing: 1 of 2 active (threshold 50%, 2 aborts in a row or 60s in flight with nothing back): 10.128.15.217:8998","pd_health":{"role":"decode","state":"ready","reason":"ready","requests_present":0,"requests_age_s":120.9,"last_failure_age_s":0.0,"last_progress_age_s":59.2,"window_s":60.0,"since_s":371.9},"pd_peers":{"state":"unhealthy","reason":"peers failing: 1 of 2 active (threshold 50%, 2 aborts in a row or 60s in flight with nothing back): 10.128.15.217:8998",
+2026-10-14T11:20:19Z [pr13c]    batch 2 (12 req, c=4, LB alternates prefills): 200 x7 ERR:TimeoutError x5 
+2026-10-14T11:20:19Z [pr13c]    +271 s:  200 0.000907
+2026-10-14T11:23:20Z [pr13c]    batch 3 (12 req, c=4, LB alternates prefills): 200 x3 500 x4 ERR:TimeoutError x5 
+2026-10-14T11:23:20Z [pr13c]    +452 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 180s, nothing produced for 104s, last failed 0s ago (window 60s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 180s, nothing produced for 104s, last failed 0s ago (window 60s)","requests_present":0,"requests_age_s":180.1,"last_failure_age_s":0.0,"last_progress_age_s":104.2,"window_s":60.0,"since_s":43.4},"pd_peers":{"state":"unhealthy","reason":"peers failing: 1 of 1 activ
+2026-10-14T11:23:27Z [pr13c]    d1 /health_generate during: 200 x42 {"role":"decode" x49  (n=91); first 503 at:  (traffic started 11:15:48)
+2026-10-14T11:23:28Z [pr13c]    d2 (main) probe for comparison: 200 1.002668
+2026-10-14T11:23:28Z [pr13c] === X-E. restore p1 and d1 to main
+2026-10-14T11:23:34Z [pr13c]    p1 down after 0 s
+2026-10-14T11:25:50Z [pr13c]    p1 health 200 after 135 s
+2026-10-14T11:25:55Z [pr13c]    d1 down after 0 s
