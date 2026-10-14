@@ -5,3 +5,28 @@
 2026-10-14T03:51:44Z [pr2d]    batch 1 (4 req, c=4): 200 x3 500 x1 
 2026-10-14T03:52:49Z [pr2d]    batch 2 (4 req, c=4): 200 x3 500 x1 
 2026-10-14T03:53:55Z [pr2d]    batch 3 (4 req, c=4): 200 x2 500 x2 
+2026-10-14T03:55:00Z [pr2d]    batch 4 (4 req, c=4): 500 x4 
+2026-10-14T03:55:05Z [pr2d]    d1 /health_generate: {"state":"unhealthy","reason":"peer_failure_ratio: 2/2 peers open (> 0.50) ['10.128.15.217:8998', '10.128.15.239:8998']; probation 60s after the last failure","known_peers":2,"open_peers":["10.128.15.
+2026-10-14T03:55:05Z [pr2d]    d1 health_json: {"state":"unhealthy","reason":"peer_failure_ratio: 2/2 peers open (> 0.50) ['10.128.15.217:8998', '10.128.15.239:8998']; probation 60s after the last failure","known_peers":2,"open_peers":2,"failure_ratio":1.0,"failure_ratio_threshold":0.5,"peers":[{"peer":"10.128.15.217:8998","open":true,"consecuti
+2026-10-14T03:55:05Z [pr2d] === D. probation -> one failing request -> wait must be exactly 120 s, then probation again after 120 s
+2026-10-14T03:56:15Z [pr2d]    after 70 s quiet: {"state":"probation","reason":"probation: 2/2 peers still open ['10.128.15.217:8998', '10.128.15.239:8998']; the first admitted transfer must complete within 60
+2026-10-14T03:57:16Z [pr2d]    traffic (4 req, c=4): 200 x2 500 x2 
+2026-10-14T03:57:19Z [pr2d]    right after: {"state":"unhealthy","reason":"peer_failure_ratio: 2/2 peers open (> 0.50) ['10.128.15.217:8998', '10.128.15.239:8998']; probation 120s after the last failure","known_peers":2,"open_peers":2,"failure_ratio":1.0,"failure_ratio_threshold":0.5,"peers":[{"peer":"1
+2026-10-14T03:58:29Z [pr2d]    after 70 s: {"state":"unhealthy","reason":"peer_failure_ratio: 2/2 peers open (> 0.50) ['10.128.15.217:8998', '10.128.15.239:8998'];
+2026-10-14T03:59:24Z [pr2d]    after 125 s: {"state":"probation","reason":"probation: 2/2 peers still open ['10.128.15.217:8998', '10.128.15.239:8998']; the first admitted transfer must complete within 60s","known_peers":2,"open_peers":2,"failu
+2026-10-14T03:59:24Z [pr2d] === E. restore d1 to main
+2026-10-14T03:59:29Z [pr2d]    d1 down after 0 s
+2026-10-14T04:01:29Z [pr2d]    d1 health 200 after 120 s
+2026-10-14T04:01:31Z [pr2d]    traffic: 200 x6 
+2026-10-14T04:01:32Z [pr2d]    d1 /health_generate:  200 1.001306
+2026-10-14T04:01:32Z [pr2d] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T04:01:38Z [pr2d] phase pr2d done
