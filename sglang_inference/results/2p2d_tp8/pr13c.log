@@ -20,3 +20,16 @@
 2026-10-14T11:23:34Z [pr13c]    p1 down after 0 s
 2026-10-14T11:25:50Z [pr13c]    p1 health 200 after 135 s
 2026-10-14T11:25:55Z [pr13c]    d1 down after 0 s
+2026-10-14T11:27:55Z [pr13c]    d1 health 200 after 120 s
+2026-10-14T11:27:58Z [pr13c]    traffic: 200 x6 
+2026-10-14T11:27:58Z [pr13c] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T11:28:04Z [pr13c] phase pr13c done

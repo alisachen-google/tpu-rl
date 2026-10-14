@@ -1,0 +1,27 @@
+2026-10-14T11:28:33Z [pr11] === scheduler-side /health_generate (PR #1390) hang validation; branch 7ef244dcc8; T=60 s, cold 120 s
+2026-10-14T11:28:33Z [pr11] === D-H. scheduler hang on d1 (loop blocks once 2 requests are in its queues, after warm traffic) with more requests sent after: the slots stop refreshing with requests held -> 503 at T from the frozen slots
+2026-10-14T11:28:38Z [pr11]    d1 down after 0 s
+2026-10-14T11:30:39Z [pr11]    d1 health 200 after 121 s
+2026-10-14T11:30:41Z [pr11]    hang hook installs: 9; warm traffic (output produced, window 60 s): 200 x4 
+2026-10-14T11:30:41Z [pr11]    4 more requests sent; the loop blocks once 6 have been ingested
+2026-10-14T11:40:43Z [pr11]    waiting for the hang: 11:40:43 hung=0
+2026-10-14T11:42:53Z [pr11]    +130 s: {"role":"decode","state":"unhealthy","reason":"scheduler stopped judging: slot 130s old with 1 requests held (limit 60s)","pd_health":[{"role":"decode","state":"unhealthy","reason":"scheduler stopped judging: slot 130s old with 1 requests held (limit 60s)","requests_present":1,"demand_age_s":0.0,"la
+2026-10-14T11:42:53Z [pr11]    slots: tp0 ready held=1 age=130s; tp1 ready held=1 age=130s; 
+cut: invalid decreasing range
+Try 'cut --help' for more information.
+2026-10-14T11:43:00Z [pr11]    d1 /health_generate during: 200 x1 503 x2 {"role":"decode" x16  (n=19); first 503 at: 11:40:54 (hang at 11:43:00)
+2026-10-14T11:43:00Z [pr11] === D-E. restore d1 to main
+2026-10-14T11:43:05Z [pr11]    d1 down after 0 s
+2026-10-14T11:45:05Z [pr11]    d1 health 200 after 120 s
+2026-10-14T11:45:07Z [pr11]    traffic: 200 x6 
+2026-10-14T11:45:07Z [pr11] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T11:45:13Z [pr11] phase pr11 done
