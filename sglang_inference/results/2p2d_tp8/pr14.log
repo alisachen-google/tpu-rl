@@ -1,0 +1,36 @@
+2026-10-14T19:45:28Z [pr14] === idle fallthrough live validation; branch 0989ad530d; T=60 s, cold 120 s; hang hook armed on /home/alisachen_google_com/pd_disagg/results/2p2d_tp8/pr14/hang.flag
+2026-10-14T19:45:28Z [pr14] === A. d1 on the branch
+2026-10-14T19:45:33Z [pr14]    d1 down after 0 s
+2026-10-14T19:47:49Z [pr14]    d1 health 200 after 136 s
+2026-10-14T19:47:49Z [pr14]    hook installs: 9; patch errors: 0
+2026-10-14T19:47:50Z [pr14]    idle right after start (cold, no traffic yet): probe path expected, ~1 s:  200 1.001335
+2026-10-14T19:47:53Z [pr14]    traffic (8 req, c=4): 200 x8 
+2026-10-14T19:47:54Z [pr14]    idle right after traffic: probe path expected:  200 1.001442
+2026-10-14T19:47:59Z [pr14]    during traffic #1 (tracker path expected, ms):  200 1.002296
+2026-10-14T19:48:03Z [pr14]    during traffic #2 (tracker path expected, ms):  200 1.001341
+2026-10-14T19:48:07Z [pr14]    during traffic #3 (tracker path expected, ms):  200 1.001490
+2026-10-14T19:49:10Z [pr14]    traffic finished: 200 x6 
+2026-10-14T19:50:41Z [pr14]    idle 90 s:  200 1.001455
+2026-10-14T19:50:41Z [pr14] === B. hang the scheduler loop while idle
+2026-10-14T19:50:44Z [pr14]    hung ranks: 6 at 19:50:41
+2026-10-14T19:51:04Z [pr14]    +3 s: /health_generate 503 20.017367  (expected: 503 after ~20 s, empty body)
+2026-10-14T19:51:24Z [pr14]    +23 s: /health_generate 503 20.029156  (expected: 503 after ~20 s, empty body)
+2026-10-14T19:51:44Z [pr14]    +43 s: /health_generate 503 20.004167  (expected: 503 after ~20 s, empty body)
+2026-10-14T19:51:44Z [pr14]    /health (no probe on this recipe): 200 0.000748
+2026-10-14T19:51:44Z [pr14]    core log lines: 3
+2026-10-14T19:51:44Z [pr14] === C. restore d1 to main
+2026-10-14T19:51:49Z [pr14]    d1 down after 0 s
+2026-10-14T19:53:49Z [pr14]    d1 health 200 after 120 s
+2026-10-14T19:53:51Z [pr14]    traffic: 200 x6 
+2026-10-14T19:53:52Z [pr14]    d1 /health_generate:  200 1.002302
+2026-10-14T19:53:52Z [pr14] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T19:53:58Z [pr14] phase pr14 done

@@ -1,4 +1,4 @@
-[launch] 2026-10-14T11:43:05Z host=t1v-n-eb299eb1-w-1 rank=2 label=d1 role=decode run=2p2d_tp8_B3 recipe=/home/alisachen_google_com/pd_disagg/recipes/gpt-oss_B_128k_2p2d.json sglang=35cf024212
+[launch] 2026-10-14T19:51:49Z host=t1v-n-eb299eb1-w-1 rank=2 label=d1 role=decode run=2p2d_tp8_B3 recipe=/home/alisachen_google_com/pd_disagg/recipes/gpt-oss_B_128k_2p2d.json sglang=35cf024212
 [launch] env: SGLANG_LAUNCHER_HOSTNAMES=10.128.15.217,10.128.15.239,10.128.0.90,10.128.0.20 RANK=2 HOST_IP=10.128.0.90 LB_PORT=8080
 {
   "command": [
