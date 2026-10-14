@@ -1,3 +1,35 @@
 2026-10-14T19:56:28Z [pr14b] === busy path of the idle fallthrough; branch 0989ad530d
 2026-10-14T19:56:33Z [pr14b]    d1 down after 0 s
 2026-10-14T19:58:34Z [pr14b]    d1 health 200 after 121 s
+2026-10-14T19:58:35Z [pr14b]    idle after start:  200 1.001111   (probe path, ~1 s)
+2026-10-14T19:58:35Z [pr14b]    d1 requests before: 
+2026-10-14T19:59:08Z [pr14b]    during traffic (time, d1 requests so far, code, latency):
+      19:58:43,,200,0.001004,
+      19:58:45,,200,0.001002,
+      19:58:47,,200,0.000998,
+      19:58:49,,200,0.000984,
+      19:58:51,,200,0.000897,
+      19:58:53,,200,0.001287,
+      19:58:55,,200,0.000895,
+      19:58:57,1.0,200,0.001149,
+      19:58:59,2.0,200,0.006523,
+      19:59:02,2.0,200,0.001386,
+      19:59:04,2.0,200,0.001134,
+      19:59:06,2.0,200,0.001241,
+2026-10-14T19:59:08Z [pr14b]    latencies during: max 0.006523 s, min 0.000895 s; d1 requests after: 2.0
+2026-10-14T19:59:28Z [pr14b]    traffic result: 200 x8 
+2026-10-14T19:59:29Z [pr14b]    idle again:  200 1.001664   (probe path, ~1 s)
+2026-10-14T19:59:29Z [pr14b] === restore d1 to main
+2026-10-14T19:59:34Z [pr14b]    d1 down after 0 s
+2026-10-14T20:01:34Z [pr14b]    d1 health 200 after 120 s
+2026-10-14T20:01:36Z [pr14b]    traffic: 200 x4 
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T20:01:42Z [pr14b] phase pr14b done
