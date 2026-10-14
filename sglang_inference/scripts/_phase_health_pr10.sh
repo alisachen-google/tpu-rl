@@ -45,13 +45,13 @@ PY
 
 hgp(){ curl -s -m 40 -w ' %{http_code} %{time_total}' http://$1:30000/health_generate | tr -d '\n' | cut -c1-360; }
 log "=== HTTP-side /health_generate (PR #1392) hang validation; branch $(git -C $WT rev-parse --short HEAD); T=60 s, cold 120 s"
-log "=== D-H. scheduler hang on d1 (loop blocks once 2 requests are in its queues) with more requests sent after: 503 at T from the HTTP side alone"
+log "=== D-H. scheduler hang on d1 (loop blocks once 2 requests are in its queues, after warm traffic) with more requests sent after: 503 at T from the HTTP side alone"
 kill_engine $D1 d1; start_engine $D1 2 gpt-oss_B_128k_2p2d_d1plug_hangreqs.json 2p2d_tp8_pr10dg $WT; wait_up $D1 d1
-log "   hang hook installs: $(grep -a -c 'HOOK-HANG.*installed' $R/runs/2p2d_tp8_pr10dg/d1/server.log)"; ( traffic 4 4 $OUT/DH0_traffic.txt > /dev/null 2>&1 & ); log "   4 requests sent; the loop blocks once 2 are in its queues"
+log "   hang hook installs: $(grep -a -c 'HOOK-HANG.*installed' $R/runs/2p2d_tp8_pr10dg/d1/server.log); warm traffic (output produced, window 60 s): $(traffic 4 2 $OUT/DH0_traffic.txt)"; ( traffic 4 4 $OUT/DH1_traffic.txt > /dev/null 2>&1 & ); log "   4 more requests sent; the loop blocks once 6 have been ingested"
 DEADLINE=$(( $(date +%s) + 600 )); log "   waiting for the hang: $(until grep -a -q 'hanging the scheduler loop' $R/runs/2p2d_tp8_pr10dg/d1/server.log || (( $(date +%s) > DEADLINE )); do sleep 2; done; date -u +%T) hung=$(grep -a -c 'hanging the scheduler loop' $R/runs/2p2d_tp8_pr10dg/d1/server.log)"
 : > $OUT/DH_health.csv; ( while [[ ! -f $OUT/.stop ]]; do echo "$(date -u +%T),$(hgp $D1 | sed -E 's/^(.*) ([0-9]{3}) ([0-9.]+)$/\2,\3,\1/' | cut -c1-220)" >> $OUT/DH_health.csv; sleep 5; done ) & POLL=$!
-T_START=$(date +%s); ( traffic 4 4 $OUT/DH_traffic.txt > /dev/null 2>&1 & ) ; sleep 100
-log "   +100 s: $(hgp $D1 | cut -c1-300)"
+T_START=$(date +%s); ( traffic 4 4 $OUT/DH_traffic.txt > /dev/null 2>&1 & ) ; sleep 130
+log "   +130 s: $(hgp $D1 | cut -c1-300)"
 sleep 6; touch $OUT/.stop; wait $POLL 2>/dev/null; rm -f $OUT/.stop
 log "   d1 /health_generate during: $(awk -F, '{print $2}' $OUT/DH_health.csv | sort | uniq -c | awk '{printf "%s x%s ", $2, $1}') (n=$(wc -l < $OUT/DH_health.csv)); first 503 at: $(awk -F, '$2==503 {print $1; exit}' $OUT/DH_health.csv) (hang at $(grep -a -m1 'hanging the scheduler loop' $R/runs/2p2d_tp8_pr10dg/d1/server.log | cut -c1-0)$(date -u +%T))"
 log "=== D-E. restore d1 to main"

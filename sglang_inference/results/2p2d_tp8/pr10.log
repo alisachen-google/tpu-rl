@@ -1,0 +1,6 @@
+2026-10-14T09:16:41Z [pr10] === HTTP-side /health_generate (PR #1392) hang validation; branch 8d98317119; T=60 s, cold 120 s
+2026-10-14T09:16:41Z [pr10] === D-H. scheduler hang on d1 (loop blocks once 2 requests are in its queues, after warm traffic) with more requests sent after: 503 at T from the HTTP side alone
+2026-10-14T09:16:46Z [pr10]    d1 down after 0 s
+2026-10-14T09:19:01Z [pr10]    d1 health 200 after 135 s
+2026-10-14T09:19:03Z [pr10]    hang hook installs: 9; warm traffic (output produced, window 60 s): 200 x4 
+2026-10-14T09:19:03Z [pr10]    4 more requests sent; the loop blocks once 6 have been ingested

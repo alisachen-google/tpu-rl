@@ -35,7 +35,7 @@
     "PYTHONPATH": "/home/alisachen_google_com/pd_disagg/hooks/hang:/home/alisachen_google_com/wt-health-progress/python:/home/alisachen_google_com/wt-health-progress/sgl-model-gateway/bindings/python/src:/home/alisachen_google_com/wt-health-progress",
     "SGLANG_TPU_PD_HEALTH_WINDOW_S": "60",
     "SGLANG_TPU_PD_HEALTH_COLD_WINDOW_S": "120",
-    "SGLANG_HOOK_HANG_AFTER_REQS": "2"
+    "SGLANG_HOOK_HANG_AFTER_REQS": "6"
   },
   "prefill": {
     "server_args": {
