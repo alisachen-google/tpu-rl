@@ -1,0 +1,7 @@
+2026-10-14T03:48:38Z [pr2d] === PR #1340 re-validation of probation backoff after the fix; branch 7624ea5080 on d1 (N=3, T=60 s, ratio 0.5, P=60 s)
+2026-10-14T03:48:38Z [pr2d] === C. #1276 hook on d1; sustained traffic so each peer spans >= T
+2026-10-14T03:48:43Z [pr2d]    d1 down after 0 s
+2026-10-14T03:50:44Z [pr2d]    d1 health 200 after 121 s
+2026-10-14T03:51:44Z [pr2d]    batch 1 (4 req, c=4): 200 x3 500 x1 
+2026-10-14T03:52:49Z [pr2d]    batch 2 (4 req, c=4): 200 x3 500 x1 
+2026-10-14T03:53:55Z [pr2d]    batch 3 (4 req, c=4): 200 x2 500 x2 

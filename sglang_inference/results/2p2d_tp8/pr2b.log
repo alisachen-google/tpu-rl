@@ -26,3 +26,23 @@
 2026-10-14T03:22:33Z [pr2b] === D. probation: no traffic for T=60 s -> ready again on probation; one more failing request -> unhealthy, wait doubled
 2026-10-14T03:23:44Z [pr2b]    after 70 s quiet: d1 /health_generate:  200 1.001509
 2026-10-14T03:23:44Z [pr2b]    d1 health_json: {"state":"ready","reason":"ready","known_peers":2,"open_peers":0,"failure_ratio":0.0,"failure_ratio_threshold":0.5,"peers":[{"peer":"10.128.15.217:8998","open":false,"consecutive_failures":2,"failures_span_s":2.2,"last_failure_age_s":142.6,"last_success_age_s":null},{"peer":"10.128.15.239:8998","open":false,"consecutive_failures":2,"failures_span_s":0.2,"last_failure_age_s":82.5,"last_success_age_s":null}],"probation_wait_s":60.0,"probation_deadline_in_s":null,"since_s":226.0}
+2026-10-14T03:25:44Z [pr2b]    traffic (4 req, c=2): 200 x1 500 x3 
+2026-10-14T03:25:47Z [pr2b]    d1 /health_generate: {"state":"unhealthy","reason":"peer_failure_ratio: 2/2 peers open (> 0.50) ['10.128.15.217:8998', '10.128.15.239:8998']; probation 60s after the last failure","known_peers":2,"open_peers":["10.128.15.217:8998","10.128.15.239:8998"],"pd_health":[{"state":"unhealthy","reason":"peer_failure_ratio: 2/2 
+2026-10-14T03:25:47Z [pr2b]    d1 health_json: {"state":"unhealthy","reason":"peer_failure_ratio: 2/2 peers open (> 0.50) ['10.128.15.217:8998', '10.128.15.239:8998']; probation 60s after the last failure","known_peers":2,"open_peers":2,"failure_ratio":1.0,"failure_ratio_threshold":0.5,"peers":[{"peer":"10.128.15.217:8998","open":true,"consecutive_failures":3,"failures_span_s":205.0,"last_failure_age_s":63.2,"last_success_age_s":null},{"peer":"10.128.15.239:8998","open":true,"consecutive_failures":4,"failures_span_s":203.0,"last_failure_age_s":3.1,"last_success_age_s":null}],"probation_wait_s":60.0,"probation_deadline_in_s":null,"since_s":62.4}
+2026-10-14T03:25:47Z [pr2b]    d1 /metrics pd_health: 
+2026-10-14T03:25:47Z [pr2b] === E. restore d1 to main with the standard recipe
+2026-10-14T03:25:52Z [pr2b]    d1 down after 0 s
+2026-10-14T03:27:52Z [pr2b]    d1 health 200 after 120 s
+2026-10-14T03:27:54Z [pr2b]    traffic: 200 x6 
+2026-10-14T03:27:55Z [pr2b]    d1 /health_generate:  200 1.001326
+2026-10-14T03:27:55Z [pr2b] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T03:28:02Z [pr2b] phase pr2 done
