@@ -1,0 +1,12 @@
+2026-10-14T10:32:00Z [pr13] === per-peer rule (PR #1393) live validation; branch a532e7df95; T=60 s, cold 120 s; peer streak 2, ratio 50%
+2026-10-14T10:32:00Z [pr13] === X-A. d1 on the peers branch, p1 with the sender fault, p2 healthy: d1 must report p1 failing (1 of 2) while its engine rule stays ready
+2026-10-14T10:32:05Z [pr13]    d1 down after 0 s
+2026-10-14T10:34:05Z [pr13]    d1 health 200 after 120 s
+2026-10-14T10:34:07Z [pr13]    baseline traffic: 200 x8 
+2026-10-14T10:34:07Z [pr13]    d1 probe:  200 0.002075
+2026-10-14T10:34:14Z [pr13]    p1 down after 1 s
+2026-10-14T10:36:30Z [pr13]    p1 health 200 after 136 s
+2026-10-14T10:36:30Z [pr13]    LB health: 200
+2026-10-14T10:36:31Z [pr13]    hook installs on p1: 18
+2026-10-14T10:45:15Z [pr13]    batch 1 (12 req, c=4, LB alternates prefills): 200 x6 500 x2 ERR:TimeoutError x4 
+2026-10-14T10:45:15Z [pr13]    +524 s:  200 0.001292

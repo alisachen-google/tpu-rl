@@ -12,3 +12,24 @@
 2026-10-14T10:11:41Z [pr13]    +462 s: {"role":"decode","state":"unhealthy","reason":"peers failing: 1 of 2 active (threshold 50%, 2 aborts in a row): 10.128.15.217:8998","pd_health":{"role":"decode","state":"ready","reason":"ready","requests_present":0,"requests_age_s":60.8,"last_failure_age_s":0.1,"last_progress_age_s":0.9,"window_s":60.0,"since_s":341.1},"pd_peers":{"state":"unhealthy","reason":"peers failing: 1 of 2 active (threshold 50%, 2 aborts in a row): 10.128.15.217:8998","active_peers":2,"failing_peers":1,"failure_ratio":0.5,"failure_streak":
 2026-10-14T10:19:21Z [pr13]    batch 2 (12 req, c=4, LB alternates prefills): 200 x4 500 x6 ERR:TimeoutError x2 
 2026-10-14T10:19:21Z [pr13]    +922 s:  200 0.000773
+2026-10-14T10:27:03Z [pr13]    batch 3 (12 req, c=4, LB alternates prefills): 200 x7 500 x3 ERR:TimeoutError x2 
+2026-10-14T10:27:03Z [pr13]    +1384 s:  200 0.000906
+2026-10-14T10:27:10Z [pr13]    d1 /health_generate during: 200 x216 {"role":"decode" x60  (n=276); first 503 at:  (traffic started 10:03:59)
+2026-10-14T10:27:11Z [pr13]    d2 (main) probe for comparison: 200 1.002668
+2026-10-14T10:27:11Z [pr13] === X-E. restore p1 and d1 to main
+2026-10-14T10:27:17Z [pr13]    p1 down after 0 s
+2026-10-14T10:29:33Z [pr13]    p1 health 200 after 135 s
+2026-10-14T10:29:38Z [pr13]    d1 down after 0 s
+2026-10-14T10:31:38Z [pr13]    d1 health 200 after 120 s
+2026-10-14T10:31:40Z [pr13]    traffic: 200 x6 
+2026-10-14T10:31:40Z [pr13] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T10:31:47Z [pr13] phase pr13 done

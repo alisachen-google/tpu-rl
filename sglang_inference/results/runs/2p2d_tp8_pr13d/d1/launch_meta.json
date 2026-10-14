@@ -161,17 +161,17 @@
   "git": {
     "sglang_torchtpu": {
       "branch": "pd-health-peers",
-      "commit": "4b7eaf979fd725a406a98e8d56f7d4aefe65d30d",
+      "commit": "a532e7df954aa0d4cfed58c2567ce65e084d71c6",
       "dirty": false,
       "remote": "https://github.com/sgl-project/sglang-torchtpu.git",
       "root": "/home/alisachen_google_com/wt-health-peers",
-      "short": "4b7eaf979fd7"
+      "short": "a532e7df954a"
     }
   },
   "hostname": "t1v-n-eb299eb1-w-1",
   "kind": "launch",
   "schema_version": 1,
-  "timestamp": "2026-10-14T09:59:02+00:00",
+  "timestamp": "2026-10-14T10:32:05+00:00",
   "versions": {
     "jax": "0.10.2",
     "jaxlib": "0.10.2",
