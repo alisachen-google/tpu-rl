@@ -1,0 +1,51 @@
+2026-10-14T09:27:01Z [pr12] === HTTP-side /health_generate (PR #1392) final live validation; branch a05b4116d9; T=60 s, cold 120 s; transport timeouts 60 s
+2026-10-14T09:27:01Z [pr12] === D-A. d1 on the branch, baseline; probes must answer 200 fast without a probe request
+2026-10-14T09:27:06Z [pr12]    d1 down after 0 s
+2026-10-14T09:29:06Z [pr12]    d1 health 200 after 120 s
+2026-10-14T09:29:06Z [pr12]    patch errors on d1: PATCH-ERR: 0
+2026-10-14T09:29:09Z [pr12]    traffic: 200 x8 
+2026-10-14T09:29:09Z [pr12]    d1 /health_generate:  200 0.002618
+2026-10-14T09:29:09Z [pr12]    d1 /health: 200 0.000835
+2026-10-14T09:30:39Z [pr12]    idle 90 s (longer than T):  200 0.001495
+2026-10-14T09:30:39Z [pr12] === D-C. hook on d1: transfers never complete; the engine's aborts at 60 s keep demand -> 503 at T_cold
+2026-10-14T09:30:44Z [pr12]    d1 down after 0 s
+2026-10-14T09:32:44Z [pr12]    d1 health 200 after 120 s
+2026-10-14T09:32:44Z [pr12]    hook installs on d1: 8
+2026-10-14T09:33:45Z [pr12]    batch 1 (6 req, c=3): 200 x5 500 x1 
+2026-10-14T09:33:45Z [pr12]    +61 s:  200 0.003370
+2026-10-14T09:35:46Z [pr12]    batch 2 (6 req, c=3): 200 x2 500 x4 
+2026-10-14T09:35:46Z [pr12]    +182 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 181s, nothing produced since start, last failed 0s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 
+2026-10-14T09:37:46Z [pr12]    batch 3 (6 req, c=3): 500 x6 
+2026-10-14T09:37:46Z [pr12]    +302 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 301s, nothing produced since start, last failed 0s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 
+2026-10-14T09:37:56Z [pr12]    d1 /health_generate during: 200 x25 {"role":"decode" x37  (n=62); first 503 at:  (traffic started 09:32:44)
+2026-10-14T09:37:56Z [pr12] === D-D. recovery: no traffic; the last abort ages out -> 200; one request -> aborts -> 503 again at T
+2026-10-14T09:39:06Z [pr12]    +70 s quiet: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 381s, nothing produced since start, last failed 80s ago (window 120s)","pd_health":{"role":"decode","state":"un
+2026-10-14T09:40:06Z [pr12]    +130 s quiet (abort aged out: must be 200):  200 0.001419
+2026-10-14T09:41:07Z [pr12]    traffic (2 req, c=2): 200 x1 500 x1 
+2026-10-14T09:41:07Z [pr12]    right after:  200 0.001119
+2026-10-14T09:42:17Z [pr12]    +70 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 130s, nothing produced since start, last failed 70s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests h
+2026-10-14T09:42:17Z [pr12] === D-H. scheduler hang on d1 (loop blocks once 2 requests are in its queues, after warm traffic) with more requests sent after: 503 at T from the HTTP side alone
+2026-10-14T09:42:22Z [pr12]    d1 down after 0 s
+2026-10-14T09:44:22Z [pr12]    d1 health 200 after 120 s
+2026-10-14T09:44:24Z [pr12]    hang hook installs: 9; warm traffic (output produced, window 60 s): 200 x4 
+2026-10-14T09:44:24Z [pr12]    4 more requests sent; the loop blocks once 6 have been ingested
+2026-10-14T09:44:26Z [pr12]    waiting for the hang: 09:44:26 hung=7
+2026-10-14T09:46:36Z [pr12]    +130 s: {"role":"decode","state":"unhealthy","reason":"stalled: 4 requests held, outstanding for 132s, nothing produced for 132s (window 60s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 4 requests held, outstanding for 132s, nothing produced for 132s (window 60s)","requests_present"
+cut: invalid decreasing range
+Try 'cut --help' for more information.
+2026-10-14T09:46:47Z [pr12]    d1 /health_generate during: 200 x12 {"role":"decode" x16  (n=28); first 503 at:  (hang at 09:46:47)
+2026-10-14T09:46:47Z [pr12] === D-E. restore d1 to main
+2026-10-14T09:46:52Z [pr12]    d1 down after 0 s
+2026-10-14T09:48:52Z [pr12]    d1 health 200 after 120 s
+2026-10-14T09:48:54Z [pr12]    traffic: 200 x6 
+2026-10-14T09:48:54Z [pr12] === P-A. p1 on the branch, baseline
+2026-10-14T09:49:01Z [pr12]    p1 down after 0 s
+2026-10-14T09:51:17Z [pr12]    p1 health 200 after 136 s
+2026-10-14T09:51:17Z [pr12]    LB health: 200
+2026-10-14T09:51:19Z [pr12]    traffic: 200 x8 
+2026-10-14T09:51:19Z [pr12]    p1 /health_generate:  200 0.001803
+2026-10-14T09:51:19Z [pr12] === P-C. sender fault on p1: pushes never complete -> requests in flight, nothing back -> 503 at T_cold
+2026-10-14T09:51:26Z [pr12]    p1 down after 0 s
+2026-10-14T09:53:42Z [pr12]    p1 health 200 after 136 s
+2026-10-14T09:53:42Z [pr12]    LB health: 200
+2026-10-14T09:53:43Z [pr12]    hook installs on p1: 9
