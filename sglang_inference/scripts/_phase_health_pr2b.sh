@@ -51,6 +51,7 @@ log "   traffic: $(traffic 8 4 $OUT/A_traffic.txt)"; log "   d1 /health_generate
 log "=== B. one prefill dead: kill p2; requests paired with p2 fail on d1 at the 60 s bootstrap timeout, p1 ones succeed"
 kill_engine $P2 p2
 log "   traffic (12 req, c=4): $(traffic 12 4 $OUT/B_traffic.txt)"
+log "   waiting 75 s: d1 records the p2-paired failures at the 60 s bootstrap timeout"; sleep 75
 log "   d1 /health_generate: $(hg $D1)"; log "   d1 health_json: $(health_json $D1)"
 log "   d2 (main) /health_generate for comparison: $(hg $D2)"
 log "   restoring p2 in the background"; start_engine $P2 1 gpt-oss_B_128k_2p2d.json 2p2d_tp8_B3
@@ -58,7 +59,7 @@ log "   restoring p2 in the background"; start_engine $P2 1 gpt-oss_B_128k_2p2d.
 log "=== C. #1276 hook on d1: every transfer into d1 fails at the 60 s waiting timeout"
 kill_engine $D1 d1; start_engine $D1 2 gpt-oss_B_128k_2p2d_d1ready_hook1276.json 2p2d_tp8_pr2bh $WT; wait_up $D1 d1 & wait_up $P2 p2 & wait
 log "   hook installs on d1: $(grep -a -c 'HOOK-1276.*installed' $R/runs/2p2d_tp8_pr2bh/d1/server.log)"
-: > $OUT/C_health.csv; ( while [[ ! -f $OUT/.stop ]]; do echo "$(date -u +%T),$(hg $D1 | sed -E 's/^(.{0,120}).* ([0-9]{3}) ([0-9.]+)$/\2,\3,\1/')" >> $OUT/C_health.csv; sleep 5; done ) & POLL=$!
+: > $OUT/C_health.csv; ( while [[ ! -f $OUT/.stop ]]; do echo "$(date -u +%T),$(hg $D1 | sed -E 's/^(.*) ([0-9]{3}) ([0-9.]+)$/\2,\3,\1/' | cut -c1-200)" >> $OUT/C_health.csv; sleep 5; done ) & POLL=$!
 log "   traffic (10 req, c=2; d1-paired ones fail after 60 s): $(traffic 10 2 $OUT/C_traffic.txt)"
 sleep 6; touch $OUT/.stop; wait $POLL 2>/dev/null; rm -f $OUT/.stop
 log "   d1 /health_generate during the traffic: $(awk -F, '{print $2}' $OUT/C_health.csv | sort | uniq -c | awk '{printf "%s x%s ", $2, $1}') (n=$(wc -l < $OUT/C_health.csv))"
@@ -69,6 +70,7 @@ log "=== D. probation: no traffic for T=60 s -> ready again on probation; one mo
 sleep 70; log "   after 70 s quiet: d1 /health_generate: $(hg $D1)"; log "   d1 health_json: $(health_json $D1)"
 log "   traffic (4 req, c=2): $(traffic 4 2 $OUT/D_traffic.txt)"; sleep 3
 log "   d1 /health_generate: $(hg $D1)"; log "   d1 health_json: $(health_json $D1)"
+log "   d1 /metrics pd_health: $(curl -s -m 5 http://$D1:30000/metrics | grep -E '^sglang:pd_health' | tr '\n' ' ' | cut -c1-600)"
 
 log "=== E. restore d1 to main with the standard recipe"
 kill_engine $D1 d1; start_engine $D1 2 gpt-oss_B_128k_2p2d.json 2p2d_tp8_B3; wait_up $D1 d1

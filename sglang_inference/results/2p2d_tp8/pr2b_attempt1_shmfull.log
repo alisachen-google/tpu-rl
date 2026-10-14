@@ -1,0 +1,88 @@
+2026-10-14T02:12:29Z [pr2b] === PR #1340 live validation; branch ff5cdb4472 on d1 (N=3, T=60 s, P=60 s, bootstrap/waiting timeout 60 s)
+2026-10-14T02:12:29Z [pr2b] === A. d1 on the branch, baseline
+2026-10-14T02:12:34Z [pr2b]    d1 down after 0 s
+2026-10-14T02:14:34Z [pr2b]    d1 health 200 after 120 s
+2026-10-14T02:14:37Z [pr2b]    traffic: 200 x8 
+2026-10-14T02:14:38Z [pr2b]    d1 /health_generate:  200 1.001920
+2026-10-14T02:14:38Z [pr2b]    d1 health_json: {"state":"ready","reason":"ready","known_peers":2,"open_peers":0,"failure_ratio":0.0,"failure_ratio_threshold":0.5,"peers":[{"peer":"10.128.15.217:8998","open":false,"consecutive_failures":0,"failures_span_s":0.0,"last_failure_age_s":null,"last_success_age_s":2.9},{"peer":"10.128.15.239:8998","open":false,"consecutive_failures":0,"failures_span_s":0.0,"last_failure_age_s":null,"last_success_age_s":1.9}],"probation_wait_s":60.0,"probation_deadline_in_s":null,"since_s":7.2}
+2026-10-14T02:14:38Z [pr2b] === B. one prefill dead: kill p2; requests paired with p2 fail on d1 at the 60 s bootstrap timeout, p1 ones succeed
+2026-10-14T02:14:44Z [pr2b]    p2 down after 0 s
+2026-10-14T02:14:45Z [pr2b]    traffic (12 req, c=4): 200 x3 500 x9 
+2026-10-14T02:14:46Z [pr2b]    d1 /health_generate:  200 1.001039
+2026-10-14T02:14:46Z [pr2b]    d1 health_json: {"state":"ready","reason":"ready","known_peers":2,"open_peers":0,"failure_ratio":0.0,"failure_ratio_threshold":0.5,"peers":[{"peer":"10.128.15.217:8998","open":false,"consecutive_failures":0,"failures_span_s":0.0,"last_failure_age_s":null,"last_success_age_s":1.7},{"peer":"10.128.15.239:8998","open":false,"consecutive_failures":0,"failures_span_s":0.0,"last_failure_age_s":null,"last_success_age_s":10.0}],"probation_wait_s":60.0,"probation_deadline_in_s":null,"since_s":15.3}
+2026-10-14T02:14:47Z [pr2b]    d2 (main) /health_generate for comparison:  200 1.002172
+2026-10-14T02:14:47Z [pr2b]    restoring p2 in the background
+2026-10-14T02:14:48Z [pr2b] === C. #1276 hook on d1: every transfer into d1 fails at the 60 s waiting timeout
+2026-10-14T02:14:53Z [pr2b]    d1 down after 0 s
+2026-10-14T02:17:10Z [pr2b]    p2 health 200 after 137 s
+2026-10-14T02:39:56Z [pr2b]    d1 health 000 after 1503 s
+2026-10-14T02:39:56Z [pr2b]    hook installs on d1: 8
+2026-10-14T02:39:58Z [pr2b]    traffic (10 req, c=2; d1-paired ones fail after 60 s): 200 x4 500 x6 
+2026-10-14T02:40:06Z [pr2b]    d1 /health_generate during the traffic: 000 x2  (n=2)
+2026-10-14T02:40:06Z [pr2b]    first 503 at:  ; first failures in traffic at ~60 s
+2026-10-14T02:40:06Z [pr2b]    d1 /health_generate now:  000 0.000048
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-10-14T02:40:06Z [pr2b]    d1 health_json: 
+2026-10-14T02:40:06Z [pr2b] === D. probation: no traffic for T=60 s -> ready again on probation; one more failing request -> unhealthy, wait doubled
+2026-10-14T02:41:16Z [pr2b]    after 70 s quiet: d1 /health_generate:  000 0.000057
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-10-14T02:41:16Z [pr2b]    d1 health_json: 
+2026-10-14T02:41:18Z [pr2b]    traffic (4 req, c=2): 200 x3 500 x1 
+2026-10-14T02:41:21Z [pr2b]    d1 /health_generate:  000 0.000055
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-10-14T02:41:21Z [pr2b]    d1 health_json: 
+2026-10-14T02:41:21Z [pr2b] === E. restore d1 to main with the standard recipe
+2026-10-14T02:41:25Z [pr2b]    d1 down after 1 s
+2026-10-14T03:06:28Z [pr2b]    d1 health 000 after 1503 s
+2026-10-14T03:06:29Z [pr2b]    traffic: 200 x3 500 x3 
+2026-10-14T03:06:29Z [pr2b]    d1 /health_generate:  000 0.000055
+2026-10-14T03:06:29Z [pr2b] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=000
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 0
+   d2 vfio held: 
+2026-10-14T03:06:35Z [pr2b] phase pr2 done
