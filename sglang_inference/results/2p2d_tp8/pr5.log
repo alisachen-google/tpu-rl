@@ -23,3 +23,17 @@
 2026-10-14T06:52:36Z [pr5]    traffic: 200 x6 
 2026-10-14T06:52:36Z [pr5] === P-C. sender fault on p1: pushes never complete; decodes abort at 60 s -> p1 failures keep demand -> 503 at T_cold
 2026-10-14T06:52:42Z [pr5]    p1 down after 0 s
+2026-10-14T06:54:58Z [pr5]    p1 health 200 after 135 s
+2026-10-14T06:54:58Z [pr5]    LB health: 200
+2026-10-14T06:54:59Z [pr5]    hook installs on p1: 9
+2026-10-14T07:08:20Z [pr5]    batch 1 (6 req, c=3; p1-paired fail at the decodes' 60 s timeout): 200 x2 ERR:TimeoutError x4 
+2026-10-14T07:08:20Z [pr5]    +801 s p1 health_json: {"role":"prefill","state":"unhealthy","reason":"stalled: 4 requests held, demand for 800s, nothing produced since start (window 120s)","requests_present":4,"demand_age_s":799.8,"last_failure_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":679
+2026-10-14T07:15:02Z [pr5]    batch 2 (6 req, c=3; p1-paired fail at the decodes' 60 s timeout): 200 x3 ERR:TimeoutError x3 
+2026-10-14T07:15:02Z [pr5]    +1203 s p1 health_json: {"role":"prefill","state":"unhealthy","reason":"stalled: 7 requests held, demand for 1203s, nothing produced since start (window 120s)","requests_present":7,"demand_age_s":1202.6,"last_failure_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":1
+2026-10-14T07:21:44Z [pr5]    batch 3 (6 req, c=3; p1-paired fail at the decodes' 60 s timeout): 200 x5 ERR:TimeoutError x1 
+2026-10-14T07:21:44Z [pr5]    +1605 s p1 health_json: {"role":"prefill","state":"unhealthy","reason":"stalled: 8 requests held, demand for 1604s, nothing produced since start (window 120s)","requests_present":8,"demand_age_s":1603.8,"last_failure_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":1
+2026-10-14T07:21:52Z [pr5]    p1 /health_generate during: 200 x20 {"role":"prefill" x296  (n=316); first 503 at:  (traffic started 06:54:59)
+2026-10-14T07:21:52Z [pr5]    p1 /health_generate now: {"role":"prefill","state":"unhealthy","reason":"stalled: 8 requests held, demand for 1612s, nothing produced since start (window 120s)","pd_health":[{"role":"prefill","state":"unhealthy","reason":"stalled: 8 requests held, demand for 1612s, nothing produced since start (window 120s)","requests_present":8,"demand_age_s":1612.4,"last_failure_age_s":null,"last_
+2026-10-14T07:24:02Z [pr5]    recovery after 130 s quiet: {"role":"prefill","state":"unhealthy","reason":"stalled: 8 requests held, demand for 1742s, nothing produced since start (window 120s)","requests_present":8,"demand_age_s":1742.4,"last_failure_age_s":
+2026-10-14T07:24:02Z [pr5] === P-E. restore p1 to main
+2026-10-14T07:24:09Z [pr5]    p1 down after 1 s
