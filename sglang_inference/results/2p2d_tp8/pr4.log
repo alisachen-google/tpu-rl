@@ -51,3 +51,86 @@
 2026-10-14T06:04:47Z [pr4] === P-C. sender fault on p1: no push completes -> held requests, no KV released -> 503 at T
 2026-10-14T06:04:52Z [pr4]    p1 down after 0 s
 2026-10-14T06:06:54Z [pr4]    d2 health 200 after 121 s
+2026-10-14T06:29:57Z [pr4]    p1 health 000 after 1504 s
+2026-10-14T06:29:58Z [pr4]    hook installs on p1: 9
+2026-10-14T06:30:00Z [pr4]    traffic (8 req, c=4; p1-paired fail at the decodes' 60 s timeout): 200 x6 500 x2 
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-10-14T06:30:20Z [pr4]    +20 s p1 health_json: 
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-10-14T06:30:40Z [pr4]    +40 s p1 health_json: 
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-10-14T06:31:00Z [pr4]    +60 s p1 health_json: 
+2026-10-14T06:31:08Z [pr4]    p1 /health_generate during: 000 x14  (n=14); first 503 at: 
+2026-10-14T06:31:08Z [pr4]    p1 /health_generate now:  000 0.000291
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-10-14T06:32:18Z [pr4]    recovery after 70 s quiet: 
+2026-10-14T06:32:18Z [pr4] === P-E. restore p1 to main
+2026-10-14T06:32:23Z [pr4]    p1 down after 0 s
+2026-10-14T06:39:09Z [pr4]    p1 health 200 after 406 s
+/home/alisachen_google_com/pd_disagg/scripts/_phase_health_pr4.sh: line 96: e: command not found
+2026-10-14T06:39:11Z [pr4]    p1 health 200 after 1 s
+2026-10-14T06:39:13Z [pr4]    traffic: 200 x6 
+2026-10-14T06:39:14Z [pr4]    p1 /health_generate:  200 1.002090
+2026-10-14T06:39:14Z [pr4] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T06:39:20Z [pr4] phase pr4 done

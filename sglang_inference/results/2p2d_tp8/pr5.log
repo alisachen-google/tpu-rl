@@ -1,25 +1,25 @@
-2026-10-13T11:14:05Z [pr5] === PR #1342 live validation; branch a926c3beb0 on d1 with the #1276 hook, N=3, T=60 s
-2026-10-13T11:14:10Z [pr5]    d1 down after 0 s
-2026-10-13T11:16:26Z [pr5]    d1 (gpt-oss_B_128k_2p2d_d1metrics_hook1276.json) health 200 after 136 s
-2026-10-13T11:16:26Z [pr5]    metrics at start: sglang:pd_health_state{} 1.0 sglang:pd_health_state{} 0.0 sglang:pd_health_state{} 0.0 sglang:pd_health_consecutive_failures{} 0.0 sglang:pd_health_probation_wait_seconds{} 60.0
-2026-10-13T11:20:27Z [pr5]    traffic (10 req, c=2; d1-paired ones fail after 60 s): 200 x3 500 x7
-2026-10-13T11:20:32Z [pr5]    metrics after failures: sglang:pd_health_state{} 0.0 sglang:pd_health_state{} 1.0 sglang:pd_health_state{} 0.0 sglang:pd_health_consecutive_failures{} 7.0 sglang:pd_health_probation_wait_seconds{} 60.0
-2026-10-13T11:20:32Z [pr5]    /health_generate: 503 0.002114
-2026-10-13T11:21:42Z [pr5]    metrics after 70 s quiet: sglang:pd_health_state{} 0.0 sglang:pd_health_state{} 0.0 sglang:pd_health_state{} 1.0 sglang:pd_health_consecutive_failures{} 7.0 sglang:pd_health_probation_wait_seconds{} 60.0
-2026-10-13T11:21:43Z [pr5]    /health_generate: 200 1.001274
-2026-10-13T11:21:43Z [pr5] === restore d1 to main
-2026-10-13T11:21:48Z [pr5]    d1 down after 0 s
-2026-10-13T11:23:49Z [pr5]    d1 (gpt-oss_B_128k_2p2d.json) health 200 after 121 s
-2026-10-13T11:23:50Z [pr5]    d1 /health_generate: 200 1.001523
-2026-10-13T11:23:51Z [pr5]    traffic: 200 x4
-2026-10-13T11:23:51Z [pr5] === status after
-   p1      10.128.15.217:30000 health=200
-   p2      10.128.15.239:30000 health=200
-   d1      10.128.0.90:30000 health=200
-   d2      10.128.0.20:30000 health=200
-   router  10.128.15.217:8080 health=200
-   p1 vfio held: 
-   p2 vfio held: 
-   d1 vfio held: 8
-   d2 vfio held: 
-2026-10-13T11:23:57Z [pr5] phase pr5 done
+2026-10-14T06:39:50Z [pr5] === progress-rule re-validation after the failures-as-demand fix; branch 6d6a1e1e53; T=60 s, cold 120 s; transport timeouts 60 s
+2026-10-14T06:39:50Z [pr5] === D-C. hook on d1: transfers never complete; requests fail at 60 s but the failures keep demand alive -> 503 at T_cold (120 s, nothing ever produced)
+2026-10-14T06:39:55Z [pr5]    d1 down after 0 s
+2026-10-14T06:41:55Z [pr5]    d1 health 200 after 120 s
+2026-10-14T06:41:55Z [pr5]    hook installs on d1: 8
+2026-10-14T06:43:56Z [pr5]    batch 1 (6 req, c=3; d1-paired hang then fail at 60 s): 200 x2 500 x4 
+2026-10-14T06:43:56Z [pr5]    +121 s health_json: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 120s, nothing produced since start, last failed 0s ago (window 120s)","requests_present":0,"demand_age_s":120.2,"last_failure_age_s":0.1,"last_progress_age_s":null,"window_s":1
+2026-10-14T06:44:58Z [pr5]    batch 2 (6 req, c=3; d1-paired hang then fail at 60 s): 200 x3 500 x3 
+2026-10-14T06:44:58Z [pr5]    +183 s health_json: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 182s, nothing produced since start, last failed 0s ago (window 120s)","requests_present":0,"demand_age_s":182.3,"last_failure_age_s":0.0,"last_progress_age_s":null,"window_s":1
+2026-10-14T06:46:58Z [pr5]    batch 3 (6 req, c=3; d1-paired hang then fail at 60 s): 200 x2 500 x4 
+2026-10-14T06:46:58Z [pr5]    +303 s health_json: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 303s, nothing produced since start, last failed 0s ago (window 120s)","requests_present":0,"demand_age_s":302.7,"last_failure_age_s":0.0,"last_progress_age_s":null,"window_s":1
+2026-10-14T06:47:08Z [pr5]    d1 /health_generate during: 200 x20 {"role":"decode" x38  (n=58); first 503 at:  (traffic started 06:41:55)
+2026-10-14T06:47:08Z [pr5]    d1 /health_generate now: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 312s, nothing produced since start, last failed 10s ago (window 120s)","pd_health":[{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 312s, nothing produced since start, last failed 10s ago (window 120s)","requests_present":0,"demand_age_s":3
+2026-10-14T06:47:08Z [pr5] === D-D. recovery: no traffic; the last failure ages out of the window -> ready; then one request -> fails -> window again
+2026-10-14T06:48:18Z [pr5]    +70 s quiet: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 382s, nothing produced since start, last failed 80s ago (window 120s)","requests_present":0,"demand_age_s":382.2,"last_failure_age_s":79.6,"last_progress_ag
+2026-10-14T06:49:18Z [pr5]    +130 s quiet: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_failure_age_s":139.6,"last_progress_age_s":null,"window_s":120.0,"since_s":19.6}
+2026-10-14T06:49:19Z [pr5]    traffic (2 req, c=2): 200 x2 
+2026-10-14T06:49:19Z [pr5]    right after: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_failure_age_s":140.7,"last_progress_age_s":null,"window_s":120.0,"since_s":20.7}
+2026-10-14T06:50:29Z [pr5]    +70 s: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_failure_age_s":210.7,"last_progress_age_s":null,"window_s":120.0,"since_s":90.7}
+2026-10-14T06:50:29Z [pr5] === D-E. restore d1 to main
+2026-10-14T06:50:33Z [pr5]    d1 down after 0 s
+2026-10-14T06:52:34Z [pr5]    d1 health 200 after 121 s
+2026-10-14T06:52:36Z [pr5]    traffic: 200 x6 
+2026-10-14T06:52:36Z [pr5] === P-C. sender fault on p1: pushes never complete; decodes abort at 60 s -> p1 failures keep demand -> 503 at T_cold
+2026-10-14T06:52:42Z [pr5]    p1 down after 0 s
