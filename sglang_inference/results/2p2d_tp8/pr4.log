@@ -27,3 +27,27 @@
 2026-10-14T05:52:51Z [pr4] === D-D. recovery: traffic stopped, held requests fail at their timeout and leave -> ready; one new request -> T later 503 again
 2026-10-14T05:54:01Z [pr4]    waiting 70 s: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":216.1}
 2026-10-14T05:54:02Z [pr4]    d1 /health_generate:  200 1.001201
+2026-10-14T05:55:02Z [pr4]    traffic (2 req, c=2): 200 x1 500 x1 
+2026-10-14T05:55:02Z [pr4]    right after: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":277.4}
+2026-10-14T05:55:42Z [pr4]    +40 s: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":317.4}
+2026-10-14T05:56:12Z [pr4]    +70 s: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":347.5}
+2026-10-14T05:56:12Z [pr4] === D-E. restore d1 to main
+2026-10-14T05:56:17Z [pr4]    d1 down after 0 s
+2026-10-14T05:58:18Z [pr4]    d1 health 200 after 121 s
+2026-10-14T05:58:20Z [pr4]    traffic: 200 x6 
+2026-10-14T05:58:20Z [pr4] === P-A. p1 on the branch, baseline
+2026-10-14T05:58:26Z [pr4]    p1 down after 0 s
+2026-10-14T06:02:42Z [pr4]    p1 health 200 after 256 s
+2026-10-14T06:02:45Z [pr4]    traffic: 200 x8 
+2026-10-14T06:02:46Z [pr4]    p1 /health_generate:  200 1.001527
+2026-10-14T06:02:46Z [pr4]    p1 health_json: {"role":"prefill","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":1.8,"window_s":60.0,"since_s":18.1}
+2026-10-14T06:02:46Z [pr4] === P-B. decode d2 killed: p1 still releases KV for d1-paired requests -> ready
+2026-10-14T06:02:51Z [pr4]    d2 down after 0 s
+2026-10-14T06:02:52Z [pr4]    batch 1 (8 req, c=4): 200 x4 500 x4 
+2026-10-14T06:03:15Z [pr4]    batch 2 (8 req, c=4): 200 x7 500 x1 
+2026-10-14T06:04:45Z [pr4]    waiting 70 s: {"role":"prefill","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":90.9,"window_s":60.0,"since_s":136.6}
+2026-10-14T06:04:46Z [pr4]    p1 /health_generate:  200 1.002507
+2026-10-14T06:04:46Z [pr4]    restoring d2 in the background
+2026-10-14T06:04:47Z [pr4] === P-C. sender fault on p1: no push completes -> held requests, no KV released -> 503 at T
+2026-10-14T06:04:52Z [pr4]    p1 down after 0 s
+2026-10-14T06:06:54Z [pr4]    d2 health 200 after 121 s
