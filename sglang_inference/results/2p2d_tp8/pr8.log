@@ -1,0 +1,3 @@
+2026-10-14T07:54:28Z [pr8] === scheduler-side readiness (PR #1390) hang validation; branch 884d97c9b7; T=60 s, cold 120 s
+2026-10-14T07:54:28Z [pr8] === D-H. scheduler hang on d1 (loop blocks 420 s after import) with requests in flight: the slot stops refreshing -> 503 at T from the frozen slot
+2026-10-14T07:54:31Z [pr8]    d1 down after 0 s

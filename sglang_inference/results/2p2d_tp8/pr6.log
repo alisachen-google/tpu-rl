@@ -1,0 +1,27 @@
+2026-10-14T07:32:48Z [pr6] === HTTP-side readiness (PR #1392) live validation; branch b3587390bd; T=60 s, cold 120 s; transport timeouts 60 s
+2026-10-14T07:32:48Z [pr6] === D-A. d1 on the branch, baseline; probes must answer 200 fast without a probe request
+2026-10-14T07:32:53Z [pr6]    d1 down after 0 s
+2026-10-14T07:35:09Z [pr6]    d1 health 200 after 136 s
+2026-10-14T07:35:11Z [pr6]    traffic: 200 x8 
+2026-10-14T07:35:12Z [pr6]    d1 /health_generate:  200 0.001177
+2026-10-14T07:35:12Z [pr6]    d1 /health: 200 0.000977
+2026-10-14T07:36:42Z [pr6]    idle 90 s (longer than T):  200 0.000950
+2026-10-14T07:36:42Z [pr6] === D-C. hook on d1: transfers never complete; the engine's aborts at 60 s keep demand -> 503 at T_cold
+2026-10-14T07:36:45Z [pr6]    d1 down after 0 s
+2026-10-14T07:39:01Z [pr6]    d1 health 200 after 136 s
+2026-10-14T07:39:01Z [pr6]    hook installs on d1: 8
+2026-10-14T07:40:01Z [pr6]    batch 1 (6 req, c=3): 200 x4 500 x2 
+2026-10-14T07:40:01Z [pr6]    +60 s:  200 0.001075
+2026-10-14T07:42:01Z [pr6]    batch 2 (6 req, c=3): 200 x1 500 x5 
+2026-10-14T07:42:01Z [pr6]    +180 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 180s, nothing produced since start, last failed 0s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 180s, noth
+2026-10-14T07:43:02Z [pr6]    batch 3 (6 req, c=3): 200 x5 500 x1 
+2026-10-14T07:43:02Z [pr6]    +241 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 241s, nothing produced since start, last failed 0s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 241s, noth
+2026-10-14T07:43:13Z [pr6]    d1 /health_generate during: 200 x24 {"role":"decode" x26  (n=50); first 503 at:  (traffic started 07:39:01)
+2026-10-14T07:43:13Z [pr6] === D-D. recovery: no traffic; the last abort ages out -> 200; one request -> aborts -> 503 again at T
+2026-10-14T07:44:23Z [pr6]    +70 s quiet: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 322s, nothing produced since start, last failed 81s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+2026-10-14T07:45:23Z [pr6]    +130 s quiet: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 382s, nothing produced since start, last failed 141s ago (window 120s)","pd_health":{"role":"decode","state":"unheal
+2026-10-14T07:46:23Z [pr6]    traffic (2 req, c=2): 200 x1 500 x1 
+2026-10-14T07:46:23Z [pr6]    right after: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 442s, nothing produced since start, last failed 0s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, d
+2026-10-14T07:47:33Z [pr6]    +70 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 512s, nothing produced since start, last failed 70s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, 
+2026-10-14T07:47:33Z [pr6] === D-H. scheduler hang on d1 (loop blocks 420 s after import) with requests in flight: 503 from the HTTP side alone
+2026-10-14T07:47:37Z [pr6]    d1 down after 0 s
