@@ -1,0 +1,29 @@
+2026-10-14T05:42:20Z [pr4] === progress-rule live validation; branch c3d7b00660; T=60 s, cold 120 s; bootstrap/waiting timeout 60 s
+2026-10-14T05:42:20Z [pr4] === D-A. d1 on the branch, baseline
+2026-10-14T05:42:25Z [pr4]    d1 down after 0 s
+2026-10-14T05:44:41Z [pr4]    d1 health 200 after 136 s
+2026-10-14T05:44:44Z [pr4]    traffic: 200 x8 
+2026-10-14T05:44:45Z [pr4]    d1 /health_generate:  200 1.013177
+2026-10-14T05:44:45Z [pr4]    d1 health_json: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":1.0,"window_s":60.0,"since_s":14.5}
+2026-10-14T05:46:15Z [pr4]    idle 90 s (longer than T): {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":91.1,"window_s":60.0,"since_s":104.5}
+2026-10-14T05:46:15Z [pr4] === D-B. prefill p2 killed: p1-paired requests still produce tokens on d1 -> d1 stays ready
+2026-10-14T05:46:21Z [pr4]    p2 down after 0 s
+2026-10-14T05:46:22Z [pr4]    batch 1 (8 req, c=4): 200 x3 500 x5 
+2026-10-14T05:46:43Z [pr4]    batch 2 (8 req, c=4): 200 x2 500 x6 
+2026-10-14T05:48:13Z [pr4]    waiting 70 s: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":90.1,"window_s":60.0,"since_s":223.0}
+2026-10-14T05:48:14Z [pr4]    d1 /health_generate:  200 1.001582
+2026-10-14T05:48:14Z [pr4]    restoring p2 in the background
+2026-10-14T05:48:16Z [pr4] === D-C. hook on d1: transfers never complete -> requests held, nothing produced -> 503 at T; probes must not count as progress
+2026-10-14T05:48:21Z [pr4]    d1 down after 0 s
+2026-10-14T05:50:36Z [pr4]    d1 health 200 after 135 s
+2026-10-14T05:50:37Z [pr4]    p2 health 200 after 136 s
+2026-10-14T05:50:37Z [pr4]    hook installs on d1: 8
+2026-10-14T05:51:38Z [pr4]    traffic (8 req, c=4; d1-paired hang then fail at 60 s): 200 x6 500 x2 
+2026-10-14T05:51:58Z [pr4]    +20 s health_json: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":93.0}
+2026-10-14T05:52:18Z [pr4]    +40 s health_json: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":113.0}
+2026-10-14T05:52:38Z [pr4]    +60 s health_json: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":133.1}
+2026-10-14T05:52:50Z [pr4]    d1 /health_generate during: 200 x22  (n=22); first 503 at: 
+2026-10-14T05:52:51Z [pr4]    d1 /health_generate now:  200 1.001905
+2026-10-14T05:52:51Z [pr4] === D-D. recovery: traffic stopped, held requests fail at their timeout and leave -> ready; one new request -> T later 503 again
+2026-10-14T05:54:01Z [pr4]    waiting 70 s: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_progress_age_s":null,"window_s":120.0,"since_s":216.1}
+2026-10-14T05:54:02Z [pr4]    d1 /health_generate:  200 1.001201
