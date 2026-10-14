@@ -35,7 +35,8 @@
     "PYTHONPATH": "/home/alisachen_google_com/wt-health-ready/python:/home/alisachen_google_com/wt-health-ready/sgl-model-gateway/bindings/python/src:/home/alisachen_google_com/wt-health-ready",
     "SGLANG_PD_HEALTH_FAILURE_THRESHOLD": "3",
     "SGLANG_PD_HEALTH_FAILURE_WINDOW_S": "60",
-    "SGLANG_PD_HEALTH_PROBATION_OUTPUT_TIMEOUT_S": "60"
+    "SGLANG_PD_HEALTH_PROBATION_OUTPUT_TIMEOUT_S": "60",
+    "SGLANG_PD_HEALTH_FAILURE_RATIO": "0.5"
   },
   "prefill": {
     "server_args": {

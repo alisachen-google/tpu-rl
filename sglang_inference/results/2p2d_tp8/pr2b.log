@@ -1,0 +1,17 @@
+2026-10-14T02:12:29Z [pr2b] === PR #1340 live validation; branch ff5cdb4472 on d1 (N=3, T=60 s, P=60 s, bootstrap/waiting timeout 60 s)
+2026-10-14T02:12:29Z [pr2b] === A. d1 on the branch, baseline
+2026-10-14T02:12:34Z [pr2b]    d1 down after 0 s
+2026-10-14T02:14:34Z [pr2b]    d1 health 200 after 120 s
+2026-10-14T02:14:37Z [pr2b]    traffic: 200 x8 
+2026-10-14T02:14:38Z [pr2b]    d1 /health_generate:  200 1.001920
+2026-10-14T02:14:38Z [pr2b]    d1 health_json: {"state":"ready","reason":"ready","known_peers":2,"open_peers":0,"failure_ratio":0.0,"failure_ratio_threshold":0.5,"peers":[{"peer":"10.128.15.217:8998","open":false,"consecutive_failures":0,"failures_span_s":0.0,"last_failure_age_s":null,"last_success_age_s":2.9},{"peer":"10.128.15.239:8998","open":false,"consecutive_failures":0,"failures_span_s":0.0,"last_failure_age_s":null,"last_success_age_s":1.9}],"probation_wait_s":60.0,"probation_deadline_in_s":null,"since_s":7.2}
+2026-10-14T02:14:38Z [pr2b] === B. one prefill dead: kill p2; requests paired with p2 fail on d1 at the 60 s bootstrap timeout, p1 ones succeed
+2026-10-14T02:14:44Z [pr2b]    p2 down after 0 s
+2026-10-14T02:14:45Z [pr2b]    traffic (12 req, c=4): 200 x3 500 x9 
+2026-10-14T02:14:46Z [pr2b]    d1 /health_generate:  200 1.001039
+2026-10-14T02:14:46Z [pr2b]    d1 health_json: {"state":"ready","reason":"ready","known_peers":2,"open_peers":0,"failure_ratio":0.0,"failure_ratio_threshold":0.5,"peers":[{"peer":"10.128.15.217:8998","open":false,"consecutive_failures":0,"failures_span_s":0.0,"last_failure_age_s":null,"last_success_age_s":1.7},{"peer":"10.128.15.239:8998","open":false,"consecutive_failures":0,"failures_span_s":0.0,"last_failure_age_s":null,"last_success_age_s":10.0}],"probation_wait_s":60.0,"probation_deadline_in_s":null,"since_s":15.3}
+2026-10-14T02:14:47Z [pr2b]    d2 (main) /health_generate for comparison:  200 1.002172
+2026-10-14T02:14:47Z [pr2b]    restoring p2 in the background
+2026-10-14T02:14:48Z [pr2b] === C. #1276 hook on d1: every transfer into d1 fails at the 60 s waiting timeout
+2026-10-14T02:14:53Z [pr2b]    d1 down after 0 s
+2026-10-14T02:17:10Z [pr2b]    p2 health 200 after 137 s
