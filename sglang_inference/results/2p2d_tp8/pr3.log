@@ -1,3 +1,47 @@
 2026-10-14T04:03:05Z [pr3] === PR #1386 live validation: prefill p1 on 51803c1b08 (N=3, T=60 s, ratio 0.5, P=60 s; waiting/bootstrap timeout 60 s)
 2026-10-14T04:03:05Z [pr3] === A. p1 on the branch, baseline
 2026-10-14T04:03:10Z [pr3]    p1 down after 0 s
+2026-10-14T04:28:15Z [pr3]    p1 health 000 after 1504 s
+2026-10-14T04:28:15Z [pr3]    LB health (MiniLB survives the engine kill): 000
+2026-10-14T04:28:15Z [pr3]    traffic: ERR:URLError x12 
+2026-10-14T04:28:15Z [pr3]    p1 /health_generate:  000 0.000258
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-10-14T04:28:15Z [pr3]    p1 health_json: 
+2026-10-14T04:28:15Z [pr3] === B. decode d2 killed: requests paired with d2 reach p1 but no decode ever registers -> unattributed failures, p1 stays ready
+2026-10-14T04:28:21Z [pr3]    d2 down after 0 s
+2026-10-14T04:28:22Z [pr3]    batch 1 (8 req, c=4): ERR:URLError x8 
+2026-10-14T04:28:42Z [pr3]    batch 2 (8 req, c=4): ERR:URLError x8 
+2026-10-14T04:29:02Z [pr3]    waiting 70 s for the waiting timeouts
+2026-10-14T04:30:12Z [pr3]    p1 /health_generate:  000 0.000285
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-10-14T04:30:12Z [pr3]    p1 health_json: 
+2026-10-14T04:30:12Z [pr3]    restoring d2 in the background
+2026-10-14T04:30:13Z [pr3] === C. prefill fault on p1 (sender never replies): every push from p1 fails at the decodes' 60 s waiting timeout
+2026-10-14T04:30:18Z [pr3]    p1 down after 0 s
+2026-10-14T04:32:20Z [pr3]    d2 health 200 after 121 s
