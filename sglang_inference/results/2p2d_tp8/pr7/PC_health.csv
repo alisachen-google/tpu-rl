@@ -1,0 +1,29 @@
+08:39:16,200,0.002556,
+08:39:21,200,0.001201,
+08:39:26,200,0.001294,
+08:39:31,200,0.001318,
+08:39:36,200,0.001199,
+08:39:41,200,0.001101,
+08:39:47,200,0.001276,
+08:39:52,200,0.001228,
+08:39:57,200,0.000931,
+08:40:02,200,0.001088,
+08:40:07,200,0.000941,
+08:40:12,200,0.001301,
+08:40:17,200,0.000992,
+08:40:22,200,0.001140,
+08:40:27,200,0.001527,
+08:40:32,200,0.001024,
+08:40:37,200,0.001409,
+08:40:42,200,0.001285,
+08:40:47,200,0.001096,
+08:40:52,200,0.001281,
+08:40:57,200,0.000979,
+08:41:02,200,0.000970,
+08:41:07,200,0.001231,
+08:41:12,200,0.001093,
+08:41:17,{"role":"prefill","state":"unhealthy","reason":"stalled: 3 requests held, demand for 121s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"stall
+08:41:22,{"role":"prefill","state":"unhealthy","reason":"stalled: 3 requests held, demand for 126s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"stall
+08:41:27,{"role":"prefill","state":"unhealthy","reason":"stalled: 3 requests held, demand for 131s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"stall
+08:41:32,{"role":"prefill","state":"unhealthy","reason":"stalled: 3 requests held, demand for 136s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"stall
+08:41:37,{"role":"prefill","state":"unhealthy","reason":"stalled: 3 requests held, demand for 141s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"stall

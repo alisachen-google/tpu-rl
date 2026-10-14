@@ -1,0 +1,17 @@
+2026-10-14T08:47:10Z [pr9] === scheduler-side /health_generate as patches.py patches (PR #1390) live validation; branch 7ef244dcc8; T=60 s, cold 120 s; transport timeouts 60 s
+2026-10-14T08:47:10Z [pr9] === D-A. d1 on the branch, baseline; probes keep the core probe; ready engines answer 200
+2026-10-14T08:47:15Z [pr9]    d1 down after 0 s
+2026-10-14T08:49:16Z [pr9]    d1 health 200 after 121 s
+2026-10-14T08:49:16Z [pr9]    patch errors on d1: PATCH-ERR: 0
+2026-10-14T08:49:18Z [pr9]    traffic: 200 x8 
+2026-10-14T08:49:19Z [pr9]    d1 /health_generate:  200 1.002580
+2026-10-14T08:49:19Z [pr9]    d1 /health: 200 0.001135
+2026-10-14T08:50:51Z [pr9]    idle 90 s (longer than T):  200 1.001076
+2026-10-14T08:50:51Z [pr9] === D-C. hook on d1: transfers never complete; the engine's aborts at 60 s keep demand -> 503 at T_cold
+2026-10-14T08:50:55Z [pr9]    d1 down after 0 s
+2026-10-14T08:52:56Z [pr9]    d1 health 200 after 121 s
+2026-10-14T08:52:56Z [pr9]    hook installs on d1: 8
+2026-10-14T08:53:58Z [pr9]    batch 1 (6 req, c=3): 200 x3 500 x3 
+2026-10-14T08:53:59Z [pr9]    +62 s:  200 1.000986
+2026-10-14T08:55:00Z [pr9]    batch 2 (6 req, c=3): 200 x4 500 x2 
+2026-10-14T08:55:00Z [pr9]    +124 s: {"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 120s, nothing produced since start, last failed 58s ago (window 120s)","pd_health":[{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 120s, no

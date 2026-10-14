@@ -20,3 +20,48 @@
 2026-10-14T08:23:41Z [pr7]    d1 /health_generate during: 200 x24 {"role":"decode" x14  (n=38); first 503 at:  (traffic started 08:20:30)
 2026-10-14T08:23:41Z [pr7] === D-D. recovery: no traffic; the last abort ages out -> 200; one request -> aborts -> 503 again at T
 2026-10-14T08:24:51Z [pr7]    +70 s quiet: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 262s, nothing produced since start, last failed 78s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+2026-10-14T08:25:52Z [pr7]    +130 s quiet (abort aged out: must be 200):  200 0.000976
+2026-10-14T08:26:52Z [pr7]    traffic (2 req, c=2): 200 x1 500 x1 
+2026-10-14T08:26:52Z [pr7]    right after:  200 0.001297
+2026-10-14T08:28:02Z [pr7]    +70 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 130s, nothing produced since start, last failed 70s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, 
+2026-10-14T08:28:02Z [pr7] === D-H. scheduler hang on d1 (loop blocks 420 s after import) with requests in flight: 503 from the HTTP side alone
+2026-10-14T08:28:07Z [pr7]    d1 down after 0 s
+2026-10-14T08:30:22Z [pr7]    d1 health 200 after 135 s
+2026-10-14T08:30:25Z [pr7]    hang hook installs: 9; warm traffic: 200 x4 
+2026-10-14T08:30:25Z [pr7]    waiting for the hang: 08:30:25 hung=0
+2026-10-14T08:31:40Z [pr7]    +75 s after requests into the hung d1:  200 0.000837
+2026-10-14T08:31:50Z [pr7]    d1 /health_generate during: 200 x17  (n=17); first 503 at:  (traffic started 08:30:25)
+2026-10-14T08:31:50Z [pr7] === D-E. restore d1 to main
+2026-10-14T08:31:55Z [pr7]    d1 down after 0 s
+2026-10-14T08:33:56Z [pr7]    d1 health 200 after 121 s
+2026-10-14T08:33:57Z [pr7]    traffic: 200 x6 
+2026-10-14T08:33:57Z [pr7] === P-A. p1 on the branch, baseline
+2026-10-14T08:34:04Z [pr7]    p1 down after 0 s
+2026-10-14T08:36:35Z [pr7]    p1 health 200 after 150 s
+2026-10-14T08:36:35Z [pr7]    LB health: 200
+2026-10-14T08:36:38Z [pr7]    traffic: 200 x8 
+2026-10-14T08:36:38Z [pr7]    p1 /health_generate:  200 0.001825
+2026-10-14T08:36:38Z [pr7] === P-C. sender fault on p1: pushes never complete -> requests in flight, nothing back -> 503 at T_cold
+2026-10-14T08:36:44Z [pr7]    p1 down after 0 s
+2026-10-14T08:39:15Z [pr7]    p1 health 200 after 150 s
+2026-10-14T08:39:15Z [pr7]    LB health: 200
+2026-10-14T08:39:16Z [pr7]    hook installs on p1: 9
+2026-10-14T08:41:36Z [pr7]    +140 s: {"role":"prefill","state":"unhealthy","reason":"stalled: 3 requests held, demand for 140s, nothing produced since start (window 120s)","pd_health":{"role":"prefill","state":"unhealthy","reason":"stalled: 3 requests held, demand for 140s, nothing produced since
+2026-10-14T08:41:42Z [pr7]    p1 /health_generate during: 200 x24 {"role":"prefill" x5  (n=29); first 503 at:  (traffic started 08:39:16)
+2026-10-14T08:41:42Z [pr7] === P-E. restore p1 to main
+2026-10-14T08:41:49Z [pr7]    p1 down after 0 s
+2026-10-14T08:44:05Z [pr7]    p1 health 200 after 135 s
+2026-10-14T08:44:05Z [pr7]    LB health: 200
+2026-10-14T08:44:07Z [pr7]    traffic: 200 x6 
+2026-10-14T08:44:08Z [pr7]    p1 /health_generate:  200 1.001478
+2026-10-14T08:44:08Z [pr7] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T08:44:14Z [pr7] phase pr6 done

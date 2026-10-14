@@ -33,9 +33,9 @@
     "LB_PORT": "8080",
     "HEALTH_TIMEOUT": "5400",
     "PYTHONPATH": "/home/alisachen_google_com/pd_disagg/hooks/1276p:/home/alisachen_google_com/wt-health-progress/python:/home/alisachen_google_com/wt-health-progress/sgl-model-gateway/bindings/python/src:/home/alisachen_google_com/wt-health-progress",
-    "SGLANG_HOOK_1276P": "1",
-    "SGLANG_PD_HEALTH_WINDOW_S": "60",
-    "SGLANG_PD_HEALTH_COLD_WINDOW_S": "120"
+    "SGLANG_TPU_PD_HEALTH_WINDOW_S": "60",
+    "SGLANG_TPU_PD_HEALTH_COLD_WINDOW_S": "120",
+    "SGLANG_HOOK_1276P": "1"
   },
   "prefill": {
     "server_args": {
