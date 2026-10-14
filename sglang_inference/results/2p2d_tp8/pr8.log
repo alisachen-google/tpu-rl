@@ -1,3 +1,24 @@
 2026-10-14T07:54:28Z [pr8] === scheduler-side readiness (PR #1390) hang validation; branch 884d97c9b7; T=60 s, cold 120 s
 2026-10-14T07:54:28Z [pr8] === D-H. scheduler hang on d1 (loop blocks 420 s after import) with requests in flight: the slot stops refreshing -> 503 at T from the frozen slot
 2026-10-14T07:54:31Z [pr8]    d1 down after 0 s
+2026-10-14T07:56:47Z [pr8]    d1 health 200 after 136 s
+2026-10-14T07:56:49Z [pr8]    hang hook installs: 9; warm traffic: 200 x4 
+2026-10-14T07:56:49Z [pr8]    health_json: {"role":"decode","state":"ready","reason":"ready","requests_present":0,"demand_age_s":null,"last_failure_age_s":null,"last_progress_age_s":0.0,"window_s":60.0,"since_s":11.3}
+2026-10-14T08:01:54Z [pr8]    waiting for the hang: 08:01:54 hung=1
+2026-10-14T08:03:54Z [pr8]    +100 s after requests into the hung d1:  503 20.004756
+2026-10-14T08:04:24Z [pr8]    d1 /health_generate during: 503 x6  (n=6); first 503 at: 08:01:54 (traffic started 08:01:54)
+2026-10-14T08:04:24Z [pr8] === D-E. restore d1 to main
+2026-10-14T08:04:29Z [pr8]    d1 down after 0 s
+2026-10-14T08:06:30Z [pr8]    d1 health 200 after 121 s
+2026-10-14T08:06:32Z [pr8]    traffic: 200 x6 
+2026-10-14T08:06:32Z [pr8] === status after
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-14T08:06:38Z [pr8] phase pr8 done

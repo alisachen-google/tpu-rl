@@ -1,0 +1,22 @@
+2026-10-14T08:14:47Z [pr7] === HTTP-side /health_generate as a patches.py patch (PR #1392) live validation; branch 8d98317119; T=60 s, cold 120 s; transport timeouts 60 s
+2026-10-14T08:14:47Z [pr7] === D-A. d1 on the branch, baseline; probes must answer 200 fast without a probe request
+2026-10-14T08:14:52Z [pr7]    d1 down after 0 s
+2026-10-14T08:16:52Z [pr7]    d1 health 200 after 120 s
+2026-10-14T08:16:52Z [pr7]    patch errors on d1: PATCH-ERR: 1
+2026-10-14T08:16:54Z [pr7]    traffic: 200 x8 
+2026-10-14T08:16:54Z [pr7]    d1 /health_generate:  200 0.001927
+2026-10-14T08:16:54Z [pr7]    d1 /health: 200 0.000978
+2026-10-14T08:18:24Z [pr7]    idle 90 s (longer than T):  200 0.001275
+2026-10-14T08:18:24Z [pr7] === D-C. hook on d1: transfers never complete; the engine's aborts at 60 s keep demand -> 503 at T_cold
+2026-10-14T08:18:29Z [pr7]    d1 down after 0 s
+2026-10-14T08:20:30Z [pr7]    d1 health 200 after 121 s
+2026-10-14T08:20:30Z [pr7]    hook installs on d1: 16
+2026-10-14T08:21:30Z [pr7]    batch 1 (6 req, c=3): 200 x4 500 x2 
+2026-10-14T08:21:30Z [pr7]    +60 s:  200 0.000904
+2026-10-14T08:22:32Z [pr7]    batch 2 (6 req, c=3): 200 x4 500 x2 
+2026-10-14T08:22:32Z [pr7]    +122 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 122s, nothing produced since start, last failed 0s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 122s, noth
+2026-10-14T08:23:33Z [pr7]    batch 3 (6 req, c=3): 200 x4 500 x2 
+2026-10-14T08:23:33Z [pr7]    +183 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 183s, nothing produced since start, last failed 0s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 183s, noth
+2026-10-14T08:23:41Z [pr7]    d1 /health_generate during: 200 x24 {"role":"decode" x14  (n=38); first 503 at:  (traffic started 08:20:30)
+2026-10-14T08:23:41Z [pr7] === D-D. recovery: no traffic; the last abort ages out -> 200; one request -> aborts -> 503 again at T
+2026-10-14T08:24:51Z [pr7]    +70 s quiet: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 262s, nothing produced since start, last failed 78s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt

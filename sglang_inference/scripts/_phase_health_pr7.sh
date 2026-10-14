@@ -44,10 +44,10 @@ PY
   awk '{print $1}' $file | sort | uniq -c | awk '{printf "%s x%s ", $2, $1}'; }
 
 hgp(){ curl -s -m 40 -w ' %{http_code} %{time_total}' http://$1:30000/health_generate | tr -d '\n' | cut -c1-360; }
-log "=== HTTP-side readiness as plugin hooks (PR #1392) live validation; branch $(git -C $WT rev-parse --short HEAD); T=60 s, cold 120 s; transport timeouts 60 s"
+log "=== HTTP-side /health_generate as a patches.py patch (PR #1392) live validation; branch $(git -C $WT rev-parse --short HEAD); T=60 s, cold 120 s; transport timeouts 60 s"
 log "=== D-A. d1 on the branch, baseline; probes must answer 200 fast without a probe request"
 kill_engine $D1 d1; start_engine $D1 2 gpt-oss_B_128k_2p2d_d1plug.json 2p2d_tp8_pr7d $WT; wait_up $D1 d1
-log "   plugin hooks registered on d1: $(grep -a -c 'sglang_tpu: registered' $R/runs/2p2d_tp8_pr7d/d1/server.log) (lines mentioning hook); HOOK-ERR: $(grep -a -c -i 'hook.*error\|Traceback' $R/runs/2p2d_tp8_pr7d/d1/server.log)"
+log "   patch errors on d1: PATCH-ERR: $(grep -a -c -i 'hook.*error\|Traceback' $R/runs/2p2d_tp8_pr7d/d1/server.log)"
 log "   traffic: $(traffic 8 4 $OUT/DA_traffic.txt)"; log "   d1 /health_generate: $(hgp $D1)"; log "   d1 /health: $(curl -s -m 10 -o /dev/null -w '%{http_code} %{time_total}' http://$D1:30000/health)"
 log "   idle 90 s (longer than T): $(sleep 90; hgp $D1)"
 log "=== D-C. hook on d1: transfers never complete; the engine's aborts at 60 s keep demand -> 503 at T_cold"

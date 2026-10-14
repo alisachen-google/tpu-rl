@@ -1,0 +1,38 @@
+08:20:30,200,0.003241,
+08:20:35,200,0.001514,
+08:20:40,200,0.000987,
+08:20:45,200,0.001230,
+08:20:50,200,0.001270,
+08:20:55,200,0.000880,
+08:21:00,200,0.001446,
+08:21:05,200,0.000909,
+08:21:10,200,0.000870,
+08:21:15,200,0.000912,
+08:21:20,200,0.000959,
+08:21:25,200,0.000937,
+08:21:30,200,0.000873,
+08:21:35,200,0.001054,
+08:21:40,200,0.001277,
+08:21:45,200,0.000835,
+08:21:50,200,0.000903,
+08:21:55,200,0.000905,
+08:22:01,200,0.001408,
+08:22:06,200,0.000896,
+08:22:11,200,0.000773,
+08:22:16,200,0.000957,
+08:22:21,200,0.001408,
+08:22:26,200,0.001576,
+08:22:31,{"role":"decode","state":"unhealthy","reason":"stalled: 1 requests held, demand for 121s, nothing produced since start, last failed 0s ago (window 120s)","pd_health":{"role":"decode","state":"unhealth
+08:22:36,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 126s, nothing produced since start, last failed 4s ago (window 120s)","pd_health":{"role":"decode","state":"unhealth
+08:22:41,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 131s, nothing produced since start, last failed 9s ago (window 120s)","pd_health":{"role":"decode","state":"unhealth
+08:22:46,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 136s, nothing produced since start, last failed 14s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+08:22:51,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 141s, nothing produced since start, last failed 19s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+08:22:56,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 146s, nothing produced since start, last failed 24s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+08:23:01,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 151s, nothing produced since start, last failed 29s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+08:23:06,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 156s, nothing produced since start, last failed 34s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+08:23:11,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 161s, nothing produced since start, last failed 39s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+08:23:16,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 166s, nothing produced since start, last failed 44s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+08:23:21,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 171s, nothing produced since start, last failed 49s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+08:23:26,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 176s, nothing produced since start, last failed 54s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+08:23:31,{"role":"decode","state":"unhealthy","reason":"stalled: 2 requests held, demand for 181s, nothing produced since start, last failed 59s ago (window 120s)","pd_health":{"role":"decode","state":"unhealt
+08:23:36,{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, demand for 186s, nothing produced since start, last failed 3s ago (window 120s)","pd_health":{"role":"decode","state":"unhealth
