@@ -1,0 +1,17 @@
+2026-10-15T05:22:25Z [pr16] === review-finding live checks; branch 49f01db1f5
+2026-10-15T05:22:26Z [pr16] === A. 4xx aborts only
+2026-10-15T05:22:31Z [pr16]    d1 down after 0 s
+2026-10-15T05:24:46Z [pr16]    d1 health 200 after 135 s
+2026-10-15T05:24:46Z [pr16]    hook installs: 9
+2026-10-15T05:27:35Z [pr16]    client codes: 200 x8 ; hook rejections on d1: 54
+2026-10-15T05:27:35Z [pr16]    /health_generate over 150 s of 4xx-only traffic: 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1  (expected: 200 x15; before the fix 503 from ~120 s)
+2026-10-15T05:27:35Z [pr16]    last line: 165,200 1.001205,
+2026-10-15T05:27:35Z [pr16] === B. scheduler-side running-timeout aborts (15 s), then idle
+2026-10-15T05:27:43Z [pr16]    +8 s (running): 200 0.001110
+2026-10-15T05:27:53Z [pr16]    client result: 503 x2  ; d1 requests: 7.0 -> 9.0
+2026-10-15T05:27:54Z [pr16]    right after the aborts: 200 1.001522
+2026-10-15T05:28:25Z [pr16]    idle +30 s: 200 1.001145   (expected 200 ~1 s via the core probe; the old handler read 503 at 60 s)
+2026-10-15T05:28:56Z [pr16]    idle +60 s: 200 1.002267   (expected 200 ~1 s via the core probe; the old handler read 503 at 60 s)
+2026-10-15T05:29:37Z [pr16]    idle +100 s: 200 1.001316   (expected 200 ~1 s via the core probe; the old handler read 503 at 60 s)
+2026-10-15T05:29:37Z [pr16] === C. duty cycle of a permanently broken decode (hook 1276), 8 min
+2026-10-15T05:29:42Z [pr16]    d1 down after 0 s
