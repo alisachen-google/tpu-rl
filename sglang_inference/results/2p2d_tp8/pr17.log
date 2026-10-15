@@ -1,0 +1,8 @@
+2026-10-15T06:24:43Z [pr17] === smoke of head 3fac03df28; T=60 s, cold 120 s, transport timeouts 60 s
+2026-10-15T06:24:43Z [pr17] === A. transfers never complete (hook 1276)
+2026-10-15T06:24:49Z [pr17]    d1 down after 1 s
+2026-10-15T06:26:49Z [pr17]    d1 health 200 after 120 s
+2026-10-15T06:26:50Z [pr17]    tracebacks: 0; idle: 200 1.006009; /ready 200
+2026-10-15T06:30:37Z [pr17]    probes: 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 {"role":"decode" x5 ; first 503 at + s; /ready at that moment: 
+2026-10-15T06:30:37Z [pr17]    body at first 503: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 29s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 29s
+2026-10-15T06:30:37Z [pr17]    clients: 200 x7 500 x5 

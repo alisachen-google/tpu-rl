@@ -1,0 +1,44 @@
+0,200 1.000769,200
+6,200 0.001103,200
+11,200 0.000873,200
+16,200 0.001123,200
+21,200 0.001132,200
+26,200 0.003333,200
+32,200 0.000913,200
+37,200 0.000824,200
+42,200 0.001175,200
+47,200 0.000947,200
+52,200 0.001530,200
+57,200 0.001163,200
+62,200 1.001174,200
+68,200 1.002000,200
+74,200 0.001866,200
+79,200 0.001236,200
+84,200 0.001248,200
+89,200 0.001127,200
+94,200 0.000894,200
+99,200 0.001157,200
+104,200 0.001279,200
+109,200 0.001156,200
+114,200 0.001187,200
+119,200 0.001122,200
+124,200 0.001094,200
+130,200 0.000884,200
+135,200 1.001019,200
+141,200 0.000881,200
+146,200 0.000846,200
+151,200 0.001308,200
+156,200 0.000916,200
+161,200 0.001060,200
+166,200 0.001202,200
+171,200 0.001210,200
+176,200 0.002464,200
+181,200 0.001152,200
+186,200 0.001019,200
+191,200 0.001182,200
+196,200 0.001095,200
+201,{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 3s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 3s a,503
+206,{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 9s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 9s a,503
+211,{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 14s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 14s,503
+217,{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 19s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 19s,503
+222,{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 24s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 24s,503
