@@ -1,0 +1,30 @@
+2026-10-15T04:01:22Z [pr15] === review-fix smoke; branch fbdfe7cf2d; T=60 s, cold 120 s, transport timeouts 60 s
+2026-10-15T04:01:22Z [pr15] === A. d1 on the branch with the 1276 hook (receive never completes)
+2026-10-15T04:01:27Z [pr15]    d1 down after 0 s
+2026-10-15T04:03:27Z [pr15]    d1 health 200 after 120 s
+2026-10-15T04:03:27Z [pr15]    hook installs: 8; tracebacks: 0
+2026-10-15T04:03:28Z [pr15]    idle after start:  200 1.001889
+2026-10-15T04:03:48Z [pr15]    +20 s (requests held):  200 0.001135
+2026-10-15T04:05:43Z [pr15]    +135 s: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 134s, nothing produced since start, last failed 74s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 134s, nothing produced since start, last failed 74s ago (window 120s)","requests_present":0,"requests_age_s":134.4,"last_failure_age_s":74.1,"last_progress_age
+2026-10-15T04:05:43Z [pr15]    traffic: 200 x4 500 x2 
+2026-10-15T04:05:43Z [pr15]    abort status codes seen by the engine: 
+2026-10-15T04:05:43Z [pr15]    +135 s, all aborted: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 134s, nothing produced since start, last failed 74s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, outstanding for 134s, nothing produced since start, last failed 74s ago (window 120s)","requests_present":0,"requests_age_s":134.4,"last_failure_age_s":74.1,"last_progress_age
+2026-10-15T04:05:43Z [pr15] === B. quiet gap with NO probes, then one request: must not read 503 at once
+2026-10-15T04:08:13Z [pr15]    one request sent (it will abort at 60 s); probe 3 s after send:
+2026-10-15T04:08:16Z [pr15]     200 0.001224
+2026-10-15T04:08:36Z [pr15]    +23 s:  200 0.001258
+2026-10-15T04:09:16Z [pr15]    request result: 500 x1 
+2026-10-15T04:09:16Z [pr15] === C. restore d1 to main
+2026-10-15T04:09:21Z [pr15]    d1 down after 0 s
+2026-10-15T04:11:22Z [pr15]    d1 health 200 after 121 s
+2026-10-15T04:11:23Z [pr15]    traffic: 200 x4 
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-15T04:11:30Z [pr15] phase pr15 done
