@@ -6,3 +6,30 @@
 2026-10-15T06:30:37Z [pr17]    probes: 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 200 x1 {"role":"decode" x5 ; first 503 at + s; /ready at that moment: 
 2026-10-15T06:30:37Z [pr17]    body at first 503: {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 29s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 29s
 2026-10-15T06:30:37Z [pr17]    clients: 200 x7 500 x5 
+2026-10-15T06:32:48Z [pr17]    recovery: +70 s quiet {"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 99s ago (window 120s)","pd_health":{"role":"decode","state":"unhealthy","reason":"stalled: 0 requests held, engine failures spanning 137s, nothing produced since start, last failed 99s /ready 503; +130 s quiet 200 1.001715 /ready 200   (expected 200 once the last failure is a window old)
+2026-10-15T06:32:48Z [pr17] === B. buffered (non-streaming) long generations: progress must still be seen
+2026-10-15T06:32:53Z [pr17]    d1 down after 0 s
+2026-10-15T06:34:53Z [pr17]    d1 health 200 after 120 s
+2026-10-15T06:35:19Z [pr17]    traffic: 200 x4 ; probes during (code x n, max latency): 200 x1 200 x1 200 x1  max  s over 10 s
+2026-10-15T06:35:19Z [pr17]    progress signals seen by the HTTP process are internal; detokenizer forwarded HealthCheckOutput: 0 log lines; tracebacks: 0
+2026-10-15T06:35:19Z [pr17] === C. hang while idle
+2026-10-15T06:35:23Z [pr17]    d1 down after 0 s
+2026-10-15T06:37:24Z [pr17]    d1 health 200 after 121 s
+2026-10-15T06:37:26Z [pr17]    warm traffic: 200 x2 ; idle: 200 1.002374
+2026-10-15T06:37:29Z [pr17]    hung ranks: 4
+2026-10-15T06:37:49Z [pr17]    probe: 503 20.006893  /ready 503   (expected 503 after ~20 s, /ready 503)
+2026-10-15T06:38:09Z [pr17]    probe: 503 20.039514  /ready 503   (expected 503 after ~20 s, /ready 503)
+2026-10-15T06:38:09Z [pr17] === D. restore d1 to main
+2026-10-15T06:38:14Z [pr17]    d1 down after 0 s
+2026-10-15T06:40:14Z [pr17]    d1 health 200 after 120 s
+2026-10-15T06:40:16Z [pr17]    traffic: 200 x4 
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-15T06:40:22Z [pr17] phase pr17 done
