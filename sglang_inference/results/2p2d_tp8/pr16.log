@@ -15,3 +15,27 @@
 2026-10-15T05:29:37Z [pr16]    idle +100 s: 200 1.001316   (expected 200 ~1 s via the core probe; the old handler read 503 at 60 s)
 2026-10-15T05:29:37Z [pr16] === C. duty cycle of a permanently broken decode (hook 1276), 8 min
 2026-10-15T05:29:42Z [pr16]    d1 down after 0 s
+2026-10-15T05:31:42Z [pr16]    d1 health 200 after 120 s
+2026-10-15T05:39:44Z [pr16]    samples: 200 x49 {"role":"decode" x45 ; bursts sent: 7; share of time at 200: 52%
+2026-10-15T05:39:44Z [pr16]    timeline (s,code): 2:200 132:{"role":"decode" 269:200 391:{"role":"decode" 
+2026-10-15T05:39:44Z [pr16] === D. tokenizer_worker_num=2
+2026-10-15T05:39:49Z [pr16]    d1 down after 0 s
+2026-10-15T05:42:19Z [pr16]    d1 health 200 after 150 s
+2026-10-15T05:42:19Z [pr16]    warning lines: 1; tracebacks: 0
+2026-10-15T05:42:26Z [pr16]    during traffic: 200 1.001224   (expected ~1 s: the worker keeps the core probe)
+2026-10-15T05:42:27Z [pr16]    again: 200 1.000976
+2026-10-15T05:42:27Z [pr16]    traffic: 200 x4 
+2026-10-15T05:42:27Z [pr16] === E. restore d1 to main
+2026-10-15T05:42:32Z [pr16]    d1 down after 0 s
+2026-10-15T05:44:33Z [pr16]    d1 health 200 after 121 s
+2026-10-15T05:44:35Z [pr16]    traffic: 200 x4 
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-15T05:44:42Z [pr16] phase pr16 done
