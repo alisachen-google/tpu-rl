@@ -35,7 +35,7 @@
   "PYTHONPATH": "/home/alisachen_google_com/pd_disagg/hooks/abort400:/home/alisachen_google_com/wt-health-http2/python:/home/alisachen_google_com/wt-health-http2/sgl-model-gateway/bindings/python/src:/home/alisachen_google_com/wt-health-http2",
   "SGLANG_HOOK_ABORT400_WHEN_FILE": "/home/alisachen_google_com/pd_disagg/results/2p2d_tp8/pr16/abort400.flag",
   "SGLANG_REQ_RUNNING_TIMEOUT": "15",
-  "SGLANG_HEALTH_GENERATE_STALL_WINDOW_S": "48"
+  "SGLANG_TPU_PD_HEALTH_WINDOW_S": "48"
  },
  "prefill": {
   "server_args": {

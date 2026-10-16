@@ -34,7 +34,7 @@
   "HEALTH_TIMEOUT": "5400",
   "PYTHONPATH": "/home/alisachen_google_com/wt-health-peers/python:/home/alisachen_google_com/wt-health-peers/sgl-model-gateway/bindings/python/src:/home/alisachen_google_com/wt-health-peers",
   "SGLANG_TPU_PD_HEALTH_PEER_FAILURE_STREAK": "2",
-  "SGLANG_HEALTH_GENERATE_STALL_WINDOW_S": "48"
+  "SGLANG_TPU_PD_HEALTH_WINDOW_S": "48"
  },
  "prefill": {
   "server_args": {

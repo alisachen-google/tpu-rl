@@ -33,7 +33,7 @@
   "LB_PORT": "8080",
   "HEALTH_TIMEOUT": "5400",
   "PYTHONPATH": "/home/alisachen_google_com/wt-health-http2/python:/home/alisachen_google_com/wt-health-http2/sgl-model-gateway/bindings/python/src:/home/alisachen_google_com/wt-health-http2",
-  "SGLANG_HEALTH_GENERATE_STALL_WINDOW_S": "60"
+  "SGLANG_TPU_PD_HEALTH_WINDOW_S": "60"
  },
  "prefill": {
   "server_args": {

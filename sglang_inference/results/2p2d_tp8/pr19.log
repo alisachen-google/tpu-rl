@@ -1,0 +1,12 @@
+2026-10-16T04:29:04Z [pr19] === branch 8b94f976bb; window 48 s, transport timeouts 60 s, probe timeout 20 s
+2026-10-16T04:29:04Z [pr19] === A. transfers never complete (hook 1276): bursts every 20 s, probe every 4 s for 150 s
+2026-10-16T04:29:08Z [pr19]    d1 down after 0 s
+2026-10-16T04:32:23Z [pr19]    d1 health 200 after 195 s
+2026-10-16T04:32:24Z [pr19]    idle: 200 1.001969 /ready 200; tracebacks: 0
+2026-10-16T04:35:36Z [pr19]    codes: 200 x23 503 x15 ; first 503 at +52 s (expected ~48-60 s after the first burst)
+2026-10-16T04:35:36Z [pr19]    timeline (s:code/ready): 1:200/200 6:200/200 11:200/200 16:200/200 21:200/200 27:200/200 32:200/200 37:200/200 42:200/200 47:200/200 52:503/503 57:503/503 62:503/503 67:200/200 72:503/503 77:503/503 82:200/200 87:200/200 92:503/503 97:503/503 102:200/200 107:200/200 112:503/503 117:503/503 123:200/200 128:200/200 133:503/503 138:503/503 143:200/200 148:200/200 153:503/503 158:503/503 163:200/200 168:200/200 173:503/503 178:503/503 183:200/200 188:200/200 
+2026-10-16T04:35:36Z [pr19]    first 503 reason: "reason":"stalled: 9 requests held
+2026-10-16T04:35:36Z [pr19]    clients (expected 5xx on d1 after 60 s, 200 via d2): 200 x20 500 x22 
+2026-10-16T04:36:42Z [pr19]    quiet 65 s later (table drained): 200 1.001319 /ready 200   (expected 200 at once, no window to age out)
+2026-10-16T04:36:42Z [pr19] === B. hang while idle
+2026-10-16T04:36:47Z [pr19]    d1 down after 0 s
