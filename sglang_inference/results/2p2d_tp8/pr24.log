@@ -12,3 +12,29 @@
 2026-10-16T09:07:15Z [pr24] === P2. transfers never complete, W = 48 s against 60 s aborts: 12 s of 503 per burst, under 3 polls
 2026-10-16T09:07:20Z [pr24]    d1 down after 0 s
 2026-10-16T09:09:21Z [pr24]    d1 health 200 after 121 s
+2026-10-16T09:14:23Z [pr24]    gateway sees d1 healthy=True after 302 s
+2026-10-16T09:17:07Z [pr24]    engine codes: 200 x14 503 x13 ; gateway d1 healthy values: True x27    (expected: 503 bursts of ~12 s, gateway stays true)
+2026-10-16T09:17:07Z [pr24]    timeline: 0:200/True 6:200/True 12:200/True 19:200/True 25:200/True 31:200/True 37:200/True 43:200/True 49:503/True 55:503/True 61:200/True 67:200/True 73:503/True 79:503/True 85:200/True 91:503/True 98:503/True 104:200/True 110:503/True 116:503/True 122:200/True 128:503/True 134:503/True 140:503/True 146:200/True 152:503/True 158:503/True 
+2026-10-16T09:17:07Z [pr24]    clients: 200 x42 
+2026-10-16T09:17:07Z [pr24] === P2b. same with W = 30 s: 30 s of 503 per burst, 3 polls
+2026-10-16T09:17:13Z [pr24]    d1 down after 0 s
+2026-10-16T09:19:28Z [pr24]    d1 health 200 after 135 s
+2026-10-16T09:24:31Z [pr24]    gateway sees d1 healthy=True after 303 s
+2026-10-16T09:27:53Z [pr24]    engine codes: 200 x16 503 x14 ; gateway first unhealthy at + s   (expected: removed once three 10 s polls land in a 30 s 503 span)
+2026-10-16T09:27:53Z [pr24]    timeline: 0:200/True 6:200/True 12:200/True 18:200/True 24:200/True 30:503/True 37:503/True 43:503/True 49:503/True 55:503/True 61:503/False 67:503/False 73:503/False 79:503/False 85:503/False 91:503/False 97:503/False 103:200/False 109:200/False 116:200/False 122:200/True 128:200/True 134:200/True 140:200/True 146:200/True 152:200/True 158:200/True 164:200/True 170:503/True 176:503/True 
+2026-10-16T09:27:53Z [pr24]    clients: 200 x48 
+2026-10-16T09:27:53Z [pr24] === P3. restore d1 to main; the gateway must take it back
+2026-10-16T09:27:58Z [pr24]    d1 down after 0 s
+2026-10-16T09:29:58Z [pr24]    d1 health 200 after 120 s
+2026-10-16T09:35:01Z [pr24]    gateway sees d1 healthy=True after 303 s
+2026-10-16T09:35:03Z [pr24]    traffic via gateway: 200 200 200 200 200 200 200 200
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-16T09:35:10Z [pr24] phase pr24 done
