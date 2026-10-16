@@ -1,0 +1,3 @@
+2026-10-16T05:36:21Z [pr20] === branch 982c701a0a; probe timeout 20 s; transport timeouts 60 s
+2026-10-16T05:36:21Z [pr20] === A. d1 with W = 20 s
+2026-10-16T05:36:24Z [pr20]    d1 down after 0 s
