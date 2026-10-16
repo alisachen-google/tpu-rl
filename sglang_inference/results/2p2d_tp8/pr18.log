@@ -1,0 +1,3 @@
+2026-10-16T04:02:14Z [pr18] === branch a63d45517e; window 48 s, transport timeouts 60 s, probe timeout 20 s
+2026-10-16T04:02:14Z [pr18] === A. transfers never complete (hook 1276): bursts every 20 s, probe every 4 s for 150 s
+2026-10-16T04:02:20Z [pr18]    d1 down after 0 s
