@@ -1,3 +1,31 @@
 2026-10-16T00:56:16Z [1237] === squashed head: 9b6416379b [TPU] Warn when compile policies install but none covers the decoder; main: 5a0dd35181
 2026-10-16T00:56:16Z [1237] === A. stop d1 of the P/D group, start the monolithic Qwen3-VL golden on b from /home/alisachen_google_com/wt-1136
 2026-10-16T00:56:22Z [1237]    b engine down after 0 s
+   2026-10-16 01:17:15 golden(b) /health ready after 1248 s
+2026-10-16T01:17:15Z [1237]    launched from: sglang=9b6416379b   (must be the squashed head)
+2026-10-16T01:17:15Z [1237]    health 200
+2026-10-16T01:17:15Z [1237] === B. compile policies
+   policies:  8 Installed Qwen3VLDecoderTpuCompilePolicy on Qwen3MoeLLMModel.forward; 8 VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder;
+   'decode steps run eager' warning lines: 0   (expected 0)
+   policy lines (TP0): VisionTpuCompilePolicy: installed qwen3_vl_vit_encoder on ViTTpuCompileRunner.forward.|VisionTpuCompilePolicy.run: compiled-fn arg shapes=((196, 1, 1152), (2,), (196, 36), (196, 36), (1, 196))|VisionTpuCompilePolicy.precompile: submitted; 0 deferred warmups.|[TPU] [decoder compile policy] _install_forward_shim for Qwen3MoeLLMModel (is_draft=False, is_eagle3_draft=False, shim_target=forward)|
+2026-10-16T01:17:15Z [1237] === C. generation
+   story 1024 tokens: completion 1024 e2e_ms 5602 wall 5.6s   (eager main was 161.5 s; compiled 6.3 s)
+   decode gen throughput (last 3 batches): 194.19 188.39 192.53 
+   8k prompts: tokens=1024 tokens=1024 ; ttft=352.79ms ttft=349.01ms ; e2e=5783.19ms e2e=5924.74ms ; errors 0
+   identity vs previous fix head (8k, 64 greedy tokens): 2 ids, 2 identical, 2 failed gates -> /home/alisachen_google_com/pd_disagg/results/fix_validate_1237/8k_diff.json
+   story identical to previous fix head: True
+   recompiles after warmup: 23472; exceptions: 0; health 200
+2026-10-16T01:17:33Z [1237] === D. restore d1 to main in the P/D group
+2026-10-16T01:17:37Z [1237]    b engine down after 0 s
+2026-10-16T01:22:07Z [1237]    d1 health 200 after 270 s
+2026-10-16T01:32:08Z [1237]    traffic via router: 200 x2 ERR:TimeoutError x2 
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=000
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-16T01:32:15Z [1237] phase 1237 done
