@@ -1,0 +1,38 @@
+2026-10-16T06:51:36Z [pr21] === branch 6a2efd5baa; W = 48 s, transport timeouts 60 s, probe timeout 20 s; crash-only rejection
+2026-10-16T06:51:36Z [pr21] === A. transfers never complete (hook 1276): bursts every 20 s, probe every 4 s for 120 s
+2026-10-16T06:51:41Z [pr21]    d1 down after 0 s
+2026-10-16T06:53:42Z [pr21]    d1 health 200 after 121 s
+2026-10-16T06:53:43Z [pr21]    idle:  200 1.002109   /ready 200
+2026-10-16T06:56:24Z [pr21]    codes: 200 x30 ; /ready: 200 x30 ; stalled field:  x28 "stalled":true x2 
+2026-10-16T06:56:24Z [pr21]    first stalled diagnostic at +51 s: "reason":"stalled: 7 requests held   (expected: all 200, /ready 200, stalled:true from ~48 s)
+2026-10-16T06:56:24Z [pr21]    clients: 200 x19 500 x17    (expected 5xx from d1 after the 60 s aborts)
+2026-10-16T06:56:24Z [pr21]    diagnostics logged on d1: 2
+2026-10-16T06:56:24Z [pr21] === B. hang while idle
+2026-10-16T06:56:29Z [pr21]    d1 down after 0 s
+2026-10-16T06:58:29Z [pr21]    d1 health 200 after 120 s
+2026-10-16T06:58:31Z [pr21]    warm traffic: 200 200; idle: 200
+2026-10-16T06:58:34Z [pr21]    hung ranks: 2
+2026-10-16T06:58:54Z [pr21]    probe: {"ok":true,"probe_ok":false,"stalled":false,"held":0,"waiting":0,"oldest_wait_s":0.0,"idle_s":24.081,"window_s":48.0,"reason":"probe: no scheduler output within the probe timeout, last message 24s ago","worker_failures":[]} 200 20.013995
+2026-10-16T06:58:55Z [pr21]    /ready 200   (expected 200 after ~20 s with a 'probe:' reason in the body; /ready 200)
+2026-10-16T06:58:55Z [pr21] === C. one scheduler rank killed
+2026-10-16T06:59:00Z [pr21]    d1 down after 0 s
+2026-10-16T07:01:00Z [pr21]    d1 health 200 after 120 s
+2026-10-16T07:01:02Z [pr21]    warm traffic: 200 200; idle: 200
+2026-10-16T07:01:02Z [pr21]    killing scheduler TP3 pid 1665293
+2026-10-16T07:01:09Z [pr21]    codes after the kill: 000 x1 ; /ready: 000 x1 
+2026-10-16T07:01:09Z [pr21]    first 503 at + s:    (expected 'worker crash: ... exitcode -9' until the launcher tears the server down)
+2026-10-16T07:01:09Z [pr21]    server gone at +7 s; launcher exit line: 1
+2026-10-16T07:01:09Z [pr21] === D. restore d1 to main
+2026-10-16T07:01:12Z [pr21]    d1 down after 0 s
+2026-10-16T07:03:13Z [pr21]    d1 health 200 after 121 s
+2026-10-16T07:03:14Z [pr21]    traffic: 200 200 200 200
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-16T07:03:21Z [pr21] phase pr21 done

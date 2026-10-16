@@ -1,0 +1,11 @@
+2026-10-16T07:03:23Z [pr22] === branch 1850407a92; W = 48 s, transport timeouts 60 s, probe timeout 20 s; crash-only rejection; abort outputs no longer count as progress
+2026-10-16T07:03:23Z [pr22] === A. transfers never complete (hook 1276): bursts every 20 s, probe every 4 s for 120 s
+2026-10-16T07:03:28Z [pr22]    d1 down after 0 s
+2026-10-16T07:05:28Z [pr22]    d1 health 200 after 120 s
+2026-10-16T07:05:29Z [pr22]    idle:  200 1.001791   /ready 200
+2026-10-16T07:08:11Z [pr22]    codes: 200 x30 ; /ready: 200 x30 ; stalled field:  x20 "stalled":true x10 
+2026-10-16T07:08:11Z [pr22]    first stalled diagnostic at +52 s: "reason":"stalled: 7 requests held   (expected: all 200, /ready 200, stalled:true from ~48 s)
+2026-10-16T07:08:11Z [pr22]    clients: 200 x20 500 x16    (expected 5xx from d1 after the 60 s aborts)
+2026-10-16T07:08:11Z [pr22]    diagnostics logged on d1: 10
+2026-10-16T07:08:11Z [pr22] === D. restore d1 to main
+2026-10-16T07:08:16Z [pr22]    d1 down after 0 s
