@@ -10,3 +10,39 @@
 2026-10-16T04:36:42Z [pr19]    quiet 65 s later (table drained): 200 1.001319 /ready 200   (expected 200 at once, no window to age out)
 2026-10-16T04:36:42Z [pr19] === B. hang while idle
 2026-10-16T04:36:47Z [pr19]    d1 down after 0 s
+2026-10-16T04:38:48Z [pr19]    d1 health 200 after 121 s
+2026-10-16T04:38:50Z [pr19]    warm traffic: 200 x2 ; idle: 200 1.002059
+2026-10-16T04:38:53Z [pr19]    hung ranks: 3
+2026-10-16T04:39:13Z [pr19]    probe: {"ok":false,"probe_ok":false,"stalled":false,"held":0,"waiting":0,"oldest_wait_s":0.0,"idle_s":null,"window_s":48.0,"reason":"probe: no scheduler output within the probe timeout, last message 24s ago"
+2026-10-16T04:39:13Z [pr19]    /ready 503   (expected 503 after ~20 s with reason 'probe: ...', /ready 503)
+2026-10-16T04:39:13Z [pr19] === C. 4xx-only rejections for 100 s
+2026-10-16T04:39:18Z [pr19]    d1 down after 0 s
+2026-10-16T04:41:18Z [pr19]    d1 health 200 after 120 s
+2026-10-16T04:43:09Z [pr19]    probes: 200 x10   (expected 200 x10); hook rejections: 13
+2026-10-16T04:43:09Z [pr19] === D. busy, healthy: 4 x 2048-token generations
+2026-10-16T04:43:16Z [pr19]    during traffic: 200 1.001234   (expected 200 in ms)
+2026-10-16T04:43:20Z [pr19]    during traffic: 200 1.002271   (expected 200 in ms)
+2026-10-16T04:43:24Z [pr19]    during traffic: 200 1.001430   (expected 200 in ms)
+2026-10-16T04:43:48Z [pr19]    traffic: 200 x4 ; idle after: 200 1.001763   (expected 200 ~1 s)
+2026-10-16T04:43:48Z [pr19] === E. window 60 s with 60 s transport timeouts: launcher must refuse
+2026-10-16T04:43:53Z [pr19]    d1 down after 0 s
+2026-10-16T04:45:23Z [pr19]    ValueError lines: 1; launcher alive: 0; health 000   (expected 1 / 0 / 000)
+2026-10-16T04:45:23Z [pr19] === F. tokenizer_worker_num=2
+2026-10-16T04:45:26Z [pr19]    d1 down after 0 s
+2026-10-16T04:47:42Z [pr19]    d1 health 200 after 136 s
+2026-10-16T04:47:49Z [pr19]    during traffic: 200 1.001182; again: 200 1.001080
+2026-10-16T04:47:50Z [pr19]    traffic: 200 x4 ; idle: 200 1.001353; tracebacks: 0
+2026-10-16T04:47:50Z [pr19] === G. restore d1 to main
+2026-10-16T04:47:55Z [pr19]    d1 down after 0 s
+2026-10-16T04:51:11Z [pr19]    d1 health 200 after 196 s
+2026-10-16T04:51:12Z [pr19]    traffic: 200 x4 
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-16T04:51:19Z [pr19] phase pr19 done
