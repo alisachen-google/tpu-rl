@@ -1,3 +1,51 @@
 2026-10-16T05:36:21Z [pr20] === branch 982c701a0a; probe timeout 20 s; transport timeouts 60 s
 2026-10-16T05:36:21Z [pr20] === A. d1 with W = 20 s
 2026-10-16T05:36:24Z [pr20]    d1 down after 0 s
+2026-10-16T05:38:40Z [pr20]    d1 health 200 after 136 s
+2026-10-16T05:38:41Z [pr20]    idle: 200
+2026-10-16T05:38:41Z [pr20] --- A1. one 127999-token prompt, 32 tokens, non-streaming (TTFT above W)
+2026-10-16T05:38:49Z [pr20]    request (code total_s first_byte_s): 200 7.1 7.1; probes: 1:200 5:200 
+2026-10-16T05:38:49Z [pr20]    first 503 at + s, last 503 at + s; reason:    (expected 503 from ~21 s until the first token, then 200)
+2026-10-16T05:38:55Z [pr20]    after: 200
+2026-10-16T05:38:55Z [pr20] --- A2. one 8192-token non-streaming generation (duration above W)
+2026-10-16T05:39:35Z [pr20]    request: 200 39.3 39.3; probes: 1:200 5:200 9:200 13:200 17:200 21:200 25:200 29:200 33:200 37:200 
+2026-10-16T05:39:35Z [pr20]    first 503 at + s, last 503 at + s   (expected 503 from ~21 s until the request finishes)
+2026-10-16T05:39:41Z [pr20]    after: 200
+2026-10-16T05:39:41Z [pr20] --- A3. the same 8192-token generation, streaming
+2026-10-16T05:40:22Z [pr20]    request: 200 38.7 0.4; probes: 200 x10    (expected 200 throughout: every chunk advances last_time)
+2026-10-16T05:40:22Z [pr20] === B. d1 with W = 48 s and a 15 s running timeout (hook inert without its flag)
+2026-10-16T05:40:27Z [pr20]    d1 down after 0 s
+2026-10-16T05:42:27Z [pr20]    d1 health 200 after 120 s
+2026-10-16T05:42:27Z [pr20] --- B1. two 4096-token requests the engine aborts at 15 s
+2026-10-16T05:42:43Z [pr20]    clients: 503 15.7 None | 503 15.6 None; probes: 1:200 5:200 9:200 13:200 ; abort lines +0   (expected clients 5xx at ~15 s, probes 200 throughout)
+2026-10-16T05:42:49Z [pr20]    after the aborts: 200   (expected 200: the table drained)
+2026-10-16T05:42:55Z [pr20]    after the aborts: 200   (expected 200: the table drained)
+2026-10-16T05:42:55Z [pr20] --- B2. client disconnects after 5 s from a streaming 4096-token request
+2026-10-16T05:43:11Z [pr20]    client: 200 15.4 0.4
+2026-10-16T05:43:16Z [pr20]    +4 s: 200
+2026-10-16T05:43:21Z [pr20]    +8 s: 200
+2026-10-16T05:43:26Z [pr20]    +12 s: 200
+2026-10-16T05:43:26Z [pr20]    abort lines after the disconnect: +0   (expected 200 throughout; the entry leaves when the scheduler answers the abort)
+2026-10-16T05:43:26Z [pr20] === C. prefill p1 on the branch with hook 1276p (its KV never reaches the decode)
+2026-10-16T05:43:32Z [pr20]    p1 down after 0 s
+2026-10-16T05:45:49Z [pr20]    p1 health 200 after 136 s
+2026-10-16T05:45:49Z [pr20]    router back
+2026-10-16T05:52:54Z [pr20]    p1 probes: 200 x24 ; first p1 503 at + s; reason: 
+2026-10-16T05:52:54Z [pr20]    timeline p1 (s:code): 0:200 5:200 10:200 15:200 20:200 25:200 30:200 35:200 40:200 45:200 51:200 56:200 61:200 66:200 71:200 76:200 81:200 86:200 91:200 96:200 101:200 106:200 111:200 116:200 
+2026-10-16T05:52:54Z [pr20]    d1 probes meanwhile: 200 x22 503 x2 ; clients: ERR:TimeoutError 500 200 200 ERR:TimeoutError 200 200 200 200 200 200 200 
+2026-10-16T05:52:54Z [pr20] === D. restore p1 and d1 to main
+2026-10-16T05:53:00Z [pr20]    p1 down after 0 s
+2026-10-16T05:53:06Z [pr20]    d1 down after 0 s
+2026-10-16T05:55:23Z [pr20]    p1 health 200 after 137 s
+2026-10-16T05:55:23Z [pr20]    d1 health 200 after 0 s
+2026-10-16T05:55:24Z [pr20]    router traffic: 200 200 200 200
+   p1      10.128.15.217:30000 health=200
+   p2      10.128.15.239:30000 health=200
+   d1      10.128.0.90:30000 health=200
+   d2      10.128.0.20:30000 health=200
+   router  10.128.15.217:8080 health=200
+   p1 vfio held: 
+   p2 vfio held: 
+   d1 vfio held: 8
+   d2 vfio held: 
+2026-10-16T05:55:31Z [pr20] phase pr20 done
