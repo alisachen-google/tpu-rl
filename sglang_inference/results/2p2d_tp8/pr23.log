@@ -1,0 +1,26 @@
+2026-10-16T08:26:19Z [pr23] === branch 82d276932c; window 48 s, transport timeouts 60 s, probe timeout 20 s; completed-work signal
+2026-10-16T08:26:19Z [pr23] === A. transfers never complete (hook 1276): bursts every 20 s, probe every 4 s for 150 s
+2026-10-16T08:26:24Z [pr23]    d1 down after 0 s
+2026-10-16T08:28:25Z [pr23]    d1 health 200 after 121 s
+2026-10-16T08:28:26Z [pr23]    idle: 200 1.001191 /ready 200; tracebacks: 0
+2026-10-16T08:31:38Z [pr23]    codes: 200 x24 {"ok":false x14 ; first 503 at + s (expected ~48-60 s after the first burst)
+2026-10-16T08:31:38Z [pr23]    timeline (s:code/ready): 1:200/200 6:200/200 11:200/200 16:200/200 21:200/200 26:200/200 31:200/200 36:200/200 41:200/200 46:200/200 51:{"ok":false/"probe_ok":true 56:{"ok":false/"probe_ok":true 61:200/200 67:200/200 72:{"ok":false/"probe_ok":true 77:{"ok":false/"probe_ok":true 82:200/200 87:200/200 92:{"ok":false/"probe_ok":true 97:{"ok":false/"probe_ok":true 102:200/200 107:200/200 112:{"ok":false/"probe_ok":true 117:{"ok":false/"probe_ok":true 122:200/200 127:200/200 132:{"ok":false/"probe_ok":true 137:{"ok":false/"probe_ok":true 142:200/200 147:200/200 152:{"ok":false/"probe_ok":true 157:{"ok":false/"probe_ok":true 163:200/200 168:200/200 173:{"ok":false/"probe_ok":true 178:{"ok":false/"probe_ok":true 183:200/200 188:200/200 
+2026-10-16T08:31:38Z [pr23]    first 503 reason: 
+2026-10-16T08:31:38Z [pr23]    clients (expected 5xx on d1 after 60 s, 200 via d2): 200 x22 500 x20 
+2026-10-16T08:32:44Z [pr23]    quiet 65 s later (table drained): 200 1.002878 /ready 200   (expected 200 at once, no window to age out)
+2026-10-16T08:32:44Z [pr23] === B. hang while idle
+2026-10-16T08:32:49Z [pr23]    d1 down after 0 s
+2026-10-16T08:34:50Z [pr23]    d1 health 200 after 121 s
+2026-10-16T08:34:51Z [pr23]    warm traffic: 200 x2 ; idle: 200 1.002901
+2026-10-16T08:34:54Z [pr23]    hung ranks: 6
+2026-10-16T08:35:14Z [pr23]    probe: {"ok":false,"probe_ok":false,"stalled":false,"held":0,"waiting":0,"oldest_wait_s":0.0,"idle_s":24.084,"window_s":48.0,"reason":"probe: no scheduler output within the probe timeout, last message 24s ag
+2026-10-16T08:35:14Z [pr23]    /ready 503   (expected 503 after ~20 s with reason 'probe: ...', /ready 503)
+2026-10-16T08:35:14Z [pr23] === D. busy, healthy: 4 x 2048-token generations
+2026-10-16T08:35:20Z [pr23]    d1 down after 0 s
+2026-10-16T08:37:35Z [pr23]    d1 health 200 after 135 s
+2026-10-16T08:37:42Z [pr23]    during traffic: 200 1.004430   (expected 200 in ms)
+2026-10-16T08:37:46Z [pr23]    during traffic: 200 1.001553   (expected 200 in ms)
+2026-10-16T08:37:50Z [pr23]    during traffic: 200 1.001376   (expected 200 in ms)
+2026-10-16T08:38:14Z [pr23]    traffic: 200 x4 ; idle after: 200 1.002708   (expected 200 ~1 s)
+2026-10-16T08:38:14Z [pr23] === G. restore d1 to main
+2026-10-16T08:38:19Z [pr23]    d1 down after 0 s

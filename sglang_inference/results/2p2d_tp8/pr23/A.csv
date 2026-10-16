@@ -1,0 +1,38 @@
+1,200,200,
+6,200,200,
+11,200,200,
+16,200,200,
+21,200,200,
+26,200,200,
+31,200,200,
+36,200,200,
+41,200,200,
+46,200,200,
+51,{"ok":false,"probe_ok":true,"stalled":true,"held":9,"waiting":9,"oldest_wait_s":51.203,"idle_s":null,"window_s":48.0,"reason":"stalled: 9 requests held, oldest waiting 51s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 9 requests held, oldest waiting 51s for a first token, no completed chunk or token since dispatch (wi
+56,{"ok":false,"probe_ok":true,"stalled":true,"held":9,"waiting":9,"oldest_wait_s":56.258,"idle_s":null,"window_s":48.0,"reason":"stalled: 9 requests held, oldest waiting 56s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 9 requests held, oldest waiting 56s for a first token, no completed chunk or token since dispatch (wi
+61,200,200,
+67,200,200,
+72,{"ok":false,"probe_ok":true,"stalled":true,"held":8,"waiting":8,"oldest_wait_s":51.391,"idle_s":null,"window_s":48.0,"reason":"stalled: 8 requests held, oldest waiting 51s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 8 requests held, oldest waiting 51s for a first token, no completed chunk or token since dispatch (wi
+77,{"ok":false,"probe_ok":true,"stalled":true,"held":8,"waiting":8,"oldest_wait_s":56.449,"idle_s":null,"window_s":48.0,"reason":"stalled: 8 requests held, oldest waiting 56s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 8 requests held, oldest waiting 56s for a first token, no completed chunk or token since dispatch (wi
+82,200,200,
+87,200,200,
+92,{"ok":false,"probe_ok":true,"stalled":true,"held":8,"waiting":8,"oldest_wait_s":51.61,"idle_s":null,"window_s":48.0,"reason":"stalled: 8 requests held, oldest waiting 52s for a first token, no completed chunk or token since dispatch (window 48s)","worker_failu,503,"reason":"stalled: 8 requests held, oldest waiting 52s for a first token, no completed chunk or token since dispatch (wi
+97,{"ok":false,"probe_ok":true,"stalled":true,"held":8,"waiting":8,"oldest_wait_s":56.665,"idle_s":null,"window_s":48.0,"reason":"stalled: 8 requests held, oldest waiting 57s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 8 requests held, oldest waiting 57s for a first token, no completed chunk or token since dispatch (wi
+102,200,200,
+107,200,200,
+112,{"ok":false,"probe_ok":true,"stalled":true,"held":8,"waiting":8,"oldest_wait_s":51.939,"idle_s":null,"window_s":48.0,"reason":"stalled: 8 requests held, oldest waiting 52s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 8 requests held, oldest waiting 52s for a first token, no completed chunk or token since dispatch (wi
+117,{"ok":false,"probe_ok":true,"stalled":true,"held":8,"waiting":8,"oldest_wait_s":56.992,"idle_s":null,"window_s":48.0,"reason":"stalled: 8 requests held, oldest waiting 57s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 8 requests held, oldest waiting 57s for a first token, no completed chunk or token since dispatch (wi
+122,200,200,
+127,200,200,
+132,{"ok":false,"probe_ok":true,"stalled":true,"held":8,"waiting":8,"oldest_wait_s":52.032,"idle_s":null,"window_s":48.0,"reason":"stalled: 8 requests held, oldest waiting 52s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 8 requests held, oldest waiting 52s for a first token, no completed chunk or token since dispatch (wi
+137,{"ok":false,"probe_ok":true,"stalled":true,"held":8,"waiting":8,"oldest_wait_s":57.086,"idle_s":null,"window_s":48.0,"reason":"stalled: 8 requests held, oldest waiting 57s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 8 requests held, oldest waiting 57s for a first token, no completed chunk or token since dispatch (wi
+142,200,200,
+147,200,200,
+152,{"ok":false,"probe_ok":true,"stalled":true,"held":5,"waiting":5,"oldest_wait_s":52.219,"idle_s":null,"window_s":48.0,"reason":"stalled: 5 requests held, oldest waiting 52s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 5 requests held, oldest waiting 52s for a first token, no completed chunk or token since dispatch (wi
+157,{"ok":false,"probe_ok":true,"stalled":true,"held":5,"waiting":5,"oldest_wait_s":57.266,"idle_s":null,"window_s":48.0,"reason":"stalled: 5 requests held, oldest waiting 57s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 5 requests held, oldest waiting 57s for a first token, no completed chunk or token since dispatch (wi
+163,200,200,
+168,200,200,
+173,{"ok":false,"probe_ok":true,"stalled":true,"held":3,"waiting":3,"oldest_wait_s":52.538,"idle_s":null,"window_s":48.0,"reason":"stalled: 3 requests held, oldest waiting 53s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 3 requests held, oldest waiting 53s for a first token, no completed chunk or token since dispatch (wi
+178,{"ok":false,"probe_ok":true,"stalled":true,"held":3,"waiting":3,"oldest_wait_s":57.592,"idle_s":null,"window_s":48.0,"reason":"stalled: 3 requests held, oldest waiting 58s for a first token, no completed chunk or token since dispatch (window 48s)","worker_fail,503,"reason":"stalled: 3 requests held, oldest waiting 58s for a first token, no completed chunk or token since dispatch (wi
+183,200,200,
+188,200,200,
