@@ -1,0 +1,14 @@
+2026-10-16T08:54:51Z [pr24] === branch f9779a71ba; gateway http://127.0.0.1:8081 health=200, d1 healthy=True
+2026-10-16T08:54:51Z [pr24] === P1. hang while busy (resumable hook), then release; W = 48 s
+2026-10-16T08:54:56Z [pr24]    d1 down after 0 s
+2026-10-16T08:57:12Z [pr24]    d1 health 200 after 136 s
+2026-10-16T09:02:14Z [pr24]    gateway sees d1 healthy=True after 302 s
+2026-10-16T09:07:15Z [pr24]    events: 09:02:34 flag set;09:04:54 flag removed;
+2026-10-16T09:07:15Z [pr24]    engine first 503 at +50 s (flag at +20: expected ~+70); gateway first unhealthy at + s (expected <= 30 s later)
+2026-10-16T09:07:15Z [pr24]    after release at +160: engine first 200 at +166 s; gateway healthy again at + s
+2026-10-16T09:07:15Z [pr24]    timeline (s:engine/gateway): 0:200/True 6:200/True 13:200/True 19:200/True 25:200/True 50:503/True 75:503/True 100:503/True 125:503/False 150:200/False 166:200/True 172:200/True 178:200/True 184:200/True 190:200/True 197:200/True 203:200/True 209:200/True 215:200/True 221:200/True 227:200/True 233:200/True 239:200/True 245:200/True 251:200/True 257:200/True 263:200/True 269:200/True 276:200/True 282:200/True 288:200/True 294:200/True 
+2026-10-16T09:07:15Z [pr24]    clients by phase: before flag 200 x5  | flag..removal 200 x35  | after 200 x35 
+2026-10-16T09:07:15Z [pr24]    hung/resumed log lines on d1: 5 / 7
+2026-10-16T09:07:15Z [pr24] === P2. transfers never complete, W = 48 s against 60 s aborts: 12 s of 503 per burst, under 3 polls
+2026-10-16T09:07:20Z [pr24]    d1 down after 0 s
+2026-10-16T09:09:21Z [pr24]    d1 health 200 after 121 s
