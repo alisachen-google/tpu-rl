@@ -1,0 +1,2388 @@
+diff --git a/sglang_tpu/kv_pool_host.py b/sglang_tpu/kv_pool_host.py
+index f7096e673881ba1d5753a766c90893f0667a90c6..6ebd915f94197d111a6a78ae696348bc434b3382 100644
+--- a/sglang_tpu/kv_pool_host.py
++++ b/sglang_tpu/kv_pool_host.py
+@@ -13,8 +13,8 @@ consistent under fragmentation, this pool allocates and frees at page
+ granularity and only ever hands out whole, page-aligned token runs, so
+ ``host_index // page_size`` is an exact raiden page id.
+ 
+-Scope is L2 (TPU<->host) only; the L3 flat-page accessors raise so a future
+-storage-backend port has an explicit, loud extension point.
++The Raiden remote DRAM backend uses these host-page IDs directly. Generic L3
++flat-tensor accessors remain unavailable because Raiden owns the allocation.
+ """
+ 
+ from __future__ import annotations
+@@ -154,8 +154,24 @@ class TpuRaidenHostKVCache(HostKVCache):
+ 
+     def clear(self) -> None:
+         with self.lock:
++            # A cancelled remote RPC can outlive its Python caller. Retired
++            # slots stay unavailable even across flush_cache/reset; only a
++            # process restart establishes that the old DMA cannot touch them.
++            if not hasattr(self, "_quarantined_pages"):
++                self._quarantined_pages = set()
+             # Free list of host *pages*. Page 0..page_num-1.
+-            self.free_pages = deque(range(self.page_num))
++            self.free_pages = deque(
++                p for p in range(self.page_num) if p not in self._quarantined_pages
++            )
++
++    def quarantine(self, indices: torch.Tensor) -> None:
++        """Retire pages whose remote transfer may still be reading/writing."""
++        pages = set(self._to_page_ids(indices))
++        if any(p < 0 or p >= self.page_num for p in pages):
++            raise ValueError("Quarantined page is outside the host pool")
++        with self.lock:
++            self._quarantined_pages.update(pages)
++            self.free_pages = deque(p for p in self.free_pages if p not in pages)
+ 
+     def available_size(self) -> int:
+         return len(self.free_pages) * self.page_size
+@@ -183,8 +199,9 @@ class TpuRaidenHostKVCache(HostKVCache):
+     def free(self, indices: torch.Tensor) -> int:
+         page_ids = torch.unique(indices.cpu() // self.page_size).tolist()
+         with self.lock:
+-            self.free_pages.extend(page_ids)
+-        return len(indices)
++            reusable = [p for p in page_ids if p not in self._quarantined_pages]
++            self.free_pages.extend(reusable)
++        return len(reusable) * self.page_size
+ 
+     # ------------------------------------------------------------------ #
+     # Transfer (token indices -> raiden page ids)
+@@ -233,14 +250,14 @@ class TpuRaidenHostKVCache(HostKVCache):
+         )
+ 
+     # ------------------------------------------------------------------ #
+-    # L3 storage seams (not yet supported on TPU)
++    # Generic flat-tensor storage seams (remote Raiden uses page IDs instead)
+     # ------------------------------------------------------------------ #
+ 
+     def get_data_page(self, index, flat: bool = True):
+-        raise NotImplementedError("L3 storage not yet supported on TPU raiden path")
++        raise NotImplementedError("Raiden host storage requires the page-ID interface")
+ 
+     def get_dummy_flat_data_page(self):
+-        raise NotImplementedError("L3 storage not yet supported on TPU raiden path")
++        raise NotImplementedError("Raiden host storage requires the page-ID interface")
+ 
+     def set_from_flat_data_page(self, index: int, data_page: torch.Tensor) -> None:
+-        raise NotImplementedError("L3 storage not yet supported on TPU raiden path")
++        raise NotImplementedError("Raiden host storage requires the page-ID interface")
+diff --git a/sglang_tpu/raiden_dram/README.md b/sglang_tpu/raiden_dram/README.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..334b8c337630783e1f83ddb93b335d9d0118bbcd
+--- /dev/null
++++ b/sglang_tpu/raiden_dram/README.md
+@@ -0,0 +1,219 @@
++# Experimental decode-host DRAM spill and recall
++
++This dynamic HiCache storage backend lets a TPU prefill engine spill cached KV
++pages into Raiden host-store processes running on decode hosts. A later request
++can discover those pages through the global registry and recall them to prefill.
++The decode host lends **CPU DRAM**; its model engine does not recompute those
++pages or supply decode-generated tokens to this path.
++
++This is an experimental prototype. CPU tests exercise real gRPC with simulated payload
++movement. Native TPU DMA and multi-host model-serving validation are still
++required before treating this as a supported feature.
++
++## Data flow and ownership
++
++```text
++Prefill HBM
++  -> existing Raiden D2H + HiCache completion fence
++  -> prefill HiCache host slots (held by the backup operation)
++  -> WriteRemote: decode-host store allocates slots and pulls from prefill
++  -> COMMITTED: remote index and global registry contain the pages
++
++Next turn / local cache eviction
++  -> registry Lookup + ResolveStore
++  -> Fetch: remote store pins its source and copies to new prefill host slots
++  -> existing HiCache H2D + forward completion gate
++  -> prefill HBM, then ordinary prefill execution and P/D handoff
++```
++
++`storage.py` implements SGLang's dynamic `HiCacheStorage` v1/v2 interfaces.
++`client.py` implements the Raiden store RPC lifecycle. KV bytes travel through
++Raiden's native block transport; Python sends identities and page IDs only.
++The existing local `KVCacheManager` exposes its endpoints and geometry through
++`RaidenKVTransfer.host_store_descriptor()`.
++
++Only the remote process creates a `KVCacheStore`. SGLang remains the allocator
++for the prefill host pool; attaching another Raiden allocator to that pool would
++allow both owners to allocate the same slots.
++
++This follows vLLM TorchTPU's remote DRAM storage and recall mechanism, with a
++different spill trigger. SGLang's `write_back` can copy ahead of HBM eviction;
++`write_through` backs up after caching a prefix. Both then enqueue the remote
++write after D2H completion. This implementation does **not** port vLLM's native
++`KVCacheStore::SweepOnce` low-watermark policy for prefill DRAM. It also uses an
++explicit ordered target list instead of `GetPlacementTargets`, because the
++prefill HiCache allocator is not a registered native store.
++
++Initial scope: fused MHA/GQA KV, PP=1, attention CP=1, and separate `kv`/`swa`
++host pools. Each TP/DP rank and pool has an independent remote store identity.
++MLA, draft/state pools, heterogeneous prefill layout reuse, and flat-tensor L3
++interfaces are rejected or outside this implementation. Use host-memory mode
++`cache`, without page-envelope/unified-memory layouts, for initial validation.
++
++## Runtime and protocol version
++
++Install the normal SGLang TorchTPU environment, including `torch_tpu`, `tpu_sync`,
++`grpcio`, and `protobuf>=6.31.1`. The Raiden wheel/source build must provide
++`global_registry_server` and `kv_cache_host_store_node_main`.
++
++The wire subset and transfer lifecycle were checked against
++[google/tpu-sync at 73499f1d463608d1337be92a9ef5eae8f7f431c0](https://github.com/google/tpu-sync/tree/73499f1d463608d1337be92a9ef5eae8f7f431c0).
++Raiden describes its API as unstable: rerun the wire check when changing that
++dependency, and review the native transfer/lifetime semantics too. The private
++protobuf package avoids descriptor-name collisions with tpu_sync; RPC service
++paths and field numbers remain upstream-compatible.
++
++```bash
++python -m sglang_tpu.raiden_dram.check_wire \
++  --tpu-sync-source /path/to/tpu-sync
++```
++
++This developer check requires `grpcio-tools`. Serving does not. To regenerate
++`wire_pb2.py`, use `grpcio-tools==1.76.0` (protobuf compiler 6.31.1):
++
++```bash
++python -m grpc_tools.protoc -I . --python_out=. sglang_tpu/raiden_dram/wire.proto
++```
++
++## Launch configuration
++
++1. Start a reachable native registry:
++
++   ```bash
++   global_registry_server --port=50051
++   ```
++
++2. Add these flags to a working **prefill** launch command. Keep the existing
++   model, topology and Raiden P/D transport flags. Replace the address and cache
++   namespace before launching:
++
++   ```bash
++   --enable-hierarchical-cache \
++   --hicache-io-backend raiden \
++   --hicache-mem-layout page_first_fused \
++   --hicache-host-memory-mode cache \
++   --hicache-write-policy write_through \
++   --hicache-storage-backend dynamic \
++   --hicache-storage-prefetch-policy wait_complete \
++   --hicache-storage-backend-extra-config '{
++     "backend_name": "raiden_dram",
++     "module_path": "sglang_tpu.raiden_dram.storage",
++     "class_name": "RaidenDramStorage",
++     "interface_v1": true,
++     "global_registry_address": "REGISTRY_HOST:50051",
++     "kv_pool_group": "sglang-prefill-cache",
++     "cache_namespace": "CHECKPOINT_REVISION_AND_KV_CONFIG",
++     "decode_store_job": "sglang-decode-dram",
++     "decode_store_replicas": ["0"],
++     "manifest_dir": "/tmp/raiden-dram-manifests",
++     "rpc_timeout_s": 30,
++     "prefetch_threshold": 64
++   }'
++   ```
++
++   `interface_v1` selects SGLang's indexed host-pool interface. The backend also
++   implements v2 for hybrid KV/SWA models. It does not serialize flat tensors.
++   Choose a host-pool size suitable for the deployment with the usual HiCache
++   sizing flags. Keep `write_through` for the validation recipe so the first
++   request creates remote data without needing a pressure workload.
++
++   `cache_namespace` must identify the immutable checkpoint, quantization and
++   KV scales, RoPE configuration and adapters. Change it for any weight/config
++   change, and restart/re-attach with the new namespace. Physical layout, model
++   name, page size, rank and pool are added automatically. This prototype does
++   not automatically version remote entries on hot weight updates; do not reuse
++   a namespace after one. Namespace isolation is not an authentication boundary.
++
++3. Prefill startup publishes each pool's `KVTransferSpec` and writes one JSON
++   manifest per rank/pool. Copy those manifests to the corresponding decode
++   host, then launch the stores **on that host**, alongside its decode engine:
++
++   ```bash
++   python -m sglang_tpu.raiden_dram.launch_stores \
++     --manifest /path/to/copied-manifests/*.json \
++     --replica 0 \
++     --store-server-ip DECODE_HOST_IP \
++     --dram-budget-bytes-per-store 1073741824
++   ```
++
++   `--dry-run` prints commands without starting processes. The DRAM budget is
++   **per manifest/process**, not a total: eight rank manifests at the example
++   budget allocate about 8 GiB in aggregate, plus process/transport overhead.
++   KV and SWA each add a store. Reserve this capacity separately from decode's
++   own local cache. The native stores use ephemeral, registry-advertised ports;
++   prefill and decode hosts must reach each other's native transport endpoints.
++
++   To add target hosts, list their distinct replica strings in the prefill
++   configuration and launch the same group manifests on each, with its own
++   replica and IP. Writes try them in order; this is capacity fallback, not
++   replication or load balancing. A read follows the registry's current owner.
++
++4. Send traffic only after all stores have registered. A missing/full store
++   makes the backup fail; SGLang can still serve from local cache or recompute.
++   Entries are best-effort and subject to the native store's eviction policy.
++   Restarting a host store loses that process's cached DRAM.
++
++## Completion and failure behavior
++
++Write admission is not completion. `WriteRemote` must report `COMMITTED` or
++existing data before backup success is returned. Partial existing offers retry
++only missing pages. A lost result stream triggers `PollWriteRemote` recovery.
++`STORED_UNREGISTERED` is not a successful discoverable backup.
++
++The native `Fetch` implementation pins the source during the transfer and
++returns success only after its copy completes. Registry lookup alone does not
++pin data; eviction between lookup and fetch produces a miss and recomputation.
++
++A gRPC timeout does not cancel native DMA. On an uncertain result, the backend
++quarantines source/destination slots before HiCache can free them. Quarantined
++slots remain unavailable across `/flush_cache` and are reclaimed only by process
++restart. Repeated transport failures can reduce local host-cache capacity;
++`get_stats()` exposes `quarantined_pages`, `failed_pages`, `spill_pages` and
++`recall_pages`. These are per-backend counters, not new Prometheus metrics.
++Storage operations are currently serialized per rank; no throughput claims
++have been validated.
++
++## Verification
++
++CPU unit and gRPC integration tests (payload DMA is a test double):
++
++```bash
++PYTHONPATH=python:. python -m pytest -q \
++  test/registered/unit/hardware_backend/tpu/test_raiden_dram_storage.py
++```
++
++Native transport round trip on a TPU, with real registry/store binaries on PATH:
++
++```bash
++PYTHONPATH=python:. python -m pytest -v -rs \
++  test/manual/tpu/test_raiden_dram_spill_recall_ondevice.py
++```
++
++This test erases every prefill host slot after spilling, recalls into different
++slots, reloads different TPU pages and checks every value. Its store is a
++separate local process. It skips explicitly if the native environment is absent;
++a skip does not establish hardware correctness.
++
++For a full serving check, launch an isolated P/D deployment with the flags above
++and native host stores on the decode machines. Use a prompt substantially longer
++than the page size and prefetch threshold, then run:
++
++```bash
++python -m sglang_tpu.raiden_dram.verify_engine \
++  --generate-url http://ROUTER:30000 \
++  --flush-url http://PREFILL:30001 \
++  --flush-url http://DECODE:30002 \
++  --prompt-file /path/to/long-prompt.txt
++```
++
++Include **every** engine the router may select in `--flush-url`. This script
++clears their local caches twice, so run it on a dedicated test deployment.
++It makes a unique cold request, waits for write-through backup, flushes HBM and
++local DRAM, then repeats it. It requires positive `cached_tokens_details.storage`,
++zero local-tier hits and identical greedy output. Remote stores are preserved.
++For a single combined engine, use its URL for both generate and flush.
++
++The implementation reference was
++[vllm-torchtpu at e785dfa6e8367ffa92cd5031e7f3116ec6a74764](https://github.com/vllm-project/vllm-torchtpu/tree/e785dfa6e8367ffa92cd5031e7f3116ec6a74764);
++the destination-pull protocol, commit handling and recall source pinning live
++in Raiden's `kv_cache_store_service.cc` at the pinned tpu-sync revision above.
+diff --git a/sglang_tpu/raiden_dram/__init__.py b/sglang_tpu/raiden_dram/__init__.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..8df9eef4e28024cd4f49303949805567d24278c9
+--- /dev/null
++++ b/sglang_tpu/raiden_dram/__init__.py
+@@ -0,0 +1 @@
++"""Raiden host-store transport for TPU HiCache remote DRAM storage."""
+diff --git a/sglang_tpu/raiden_dram/check_wire.py b/sglang_tpu/raiden_dram/check_wire.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..8df8069555f77ae4569feb572a350a344a9caea8
+--- /dev/null
++++ b/sglang_tpu/raiden_dram/check_wire.py
+@@ -0,0 +1,135 @@
++# SPDX-License-Identifier: Apache-2.0
++"""Check the private wire subset against a local tpu-sync source checkout.
++
++Requires grpcio-tools for this developer check only, not for serving.
++"""
++
++from __future__ import annotations
++
++import argparse
++import subprocess
++import sys
++import tempfile
++from pathlib import Path
++
++from google.protobuf import descriptor_pb2
++
++from . import wire_pb2
++from .client import REGISTRY_SERVICE, STORE_SERVICE
++
++
++def check(source: Path) -> int:
++    protos = [
++        "tpu_sync/kv_cache/global_registry/global_registry.proto",
++        "tpu_sync/proto/kv_cache_store_service.proto",
++    ]
++    with tempfile.TemporaryDirectory(prefix="sglang-raiden-wire-") as directory:
++        output = Path(directory) / "upstream.pb"
++        subprocess.run(
++            [
++                sys.executable,
++                "-m",
++                "grpc_tools.protoc",
++                f"-I{source}",
++                f"--descriptor_set_out={output}",
++                "--include_imports",
++                *protos,
++            ],
++            cwd=source,
++            check=True,
++        )
++        upstream = descriptor_pb2.FileDescriptorSet.FromString(output.read_bytes())
++    local = descriptor_pb2.FileDescriptorProto.FromString(
++        wire_pb2.DESCRIPTOR.serialized_pb
++    )
++    messages, enums, services = {}, {}, {}
++
++    def collect(container, prefix=""):
++        for message in getattr(
++            container, "message_type", getattr(container, "nested_type", [])
++        ):
++            name = prefix + message.name
++            if name in messages:
++                raise ValueError(f"Ambiguous upstream message {name}")
++            messages[name] = message
++            collect(message, name + ".")
++        for enum in container.enum_type:
++            enums[prefix + enum.name] = enum
++
++    for file in upstream.file:
++        collect(file)
++        for service in file.service:
++            services[f"{file.package}.{service.name}"] = service
++
++    checked = 0
++
++    def compare(container, prefix=""):
++        nonlocal checked
++        for message in getattr(
++            container, "message_type", getattr(container, "nested_type", [])
++        ):
++            name = prefix + message.name
++            original = messages[name]
++            fields = {field.number: field for field in original.field}
++            for field in message.field:
++                other = fields[field.number]
++                for attribute in ("name", "type", "label", "proto3_optional"):
++                    if getattr(field, attribute) != getattr(other, attribute):
++                        raise ValueError(f"{name}.{field.name}: {attribute} differs")
++                # Package names intentionally differ; leaf type identities and
++                # every included message's fields are checked independently.
++                if (
++                    field.type_name.rsplit(".", 1)[-1]
++                    != other.type_name.rsplit(".", 1)[-1]
++                ):
++                    raise ValueError(f"{name}.{field.name}: referenced type differs")
++                for candidate, owner in ((field, message), (other, original)):
++                    if candidate.HasField("oneof_index"):
++                        oneof = owner.oneof_decl[candidate.oneof_index].name
++                    else:
++                        oneof = None
++                    if candidate is field:
++                        expected_oneof = oneof
++                    elif oneof != expected_oneof:
++                        raise ValueError(f"{name}.{field.name}: oneof differs")
++                checked += 1
++            compare(message, name + ".")
++        for enum in container.enum_type:
++            name = prefix + enum.name
++            if [(x.name, x.number) for x in enum.value] != [
++                (x.name, x.number) for x in enums[name].value
++            ]:
++                raise ValueError(f"{name}: enum values differ")
++
++    compare(local)
++    methods = {
++        REGISTRY_SERVICE: ["Lookup", "ResolveStore", "RegisterKVTransferSpec"],
++        STORE_SERVICE: ["Fetch", "WriteRemote", "PollWriteRemote"],
++    }
++    for service_name, names in methods.items():
++        actual = {method.name: method for method in services[service_name].method}
++        for name in names:
++            method = actual[name]
++            response = (
++                "WriteRemoteEvent" if name == "WriteRemote" else name + "Response"
++            )
++            if (
++                method.input_type.rsplit(".", 1)[-1] != name + "Request"
++                or method.output_type.rsplit(".", 1)[-1] != response
++                or method.client_streaming
++                or method.server_streaming != (name == "WriteRemote")
++            ):
++                raise ValueError(f"{service_name}/{name}: RPC signature differs")
++    return checked
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--tpu-sync-source", required=True, type=Path)
++    args = parser.parse_args()
++    count = check(args.tpu_sync_source.resolve())
++    print(f"Compatible: {count} fields, enum values, and all 6 RPC signatures")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/sglang_tpu/raiden_dram/client.py b/sglang_tpu/raiden_dram/client.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..0d73b3b6ccfcce90f6639802668af0915bf47a25
+--- /dev/null
++++ b/sglang_tpu/raiden_dram/client.py
+@@ -0,0 +1,298 @@
++# SPDX-License-Identifier: Apache-2.0
++"""Raiden's store RPCs; payload stays on the native block transport.
++
++SGLang owns and pins the caller's host slots. The destination owns its slots.
++Never treat WriteRemote admission as completion. An uncertain DMA result must
++quarantine the caller's slots before HiCache is allowed to release them.
++"""
++
++from __future__ import annotations
++
++import logging
++from collections import defaultdict
++from dataclasses import dataclass
++
++import grpc
++
++from . import wire_pb2 as w
++
++logger = logging.getLogger(__name__)
++REGISTRY_SERVICE = "tpu_raiden.kv_cache.global_registry.GlobalRegistryService"
++STORE_SERVICE = "tpu_raiden.kv_cache.proto.KVCacheStoreService"
++
++
++@dataclass(frozen=True)
++class IOResult:
++    # Indices into the submitted batch, not physical host-page IDs.
++    done: frozenset[int] = frozenset()
++    quarantine: frozenset[int] = frozenset()
++
++
++class RaidenDramClient:
++    def __init__(self, registry_address: str, timeout_s: float = 30):
++        self.timeout_s = timeout_s
++        self._channels = {}
++        self._registry_address = registry_address
++
++    def _rpc(self, address, service, method, response_cls, *, stream=False):
++        channel = self._channels.setdefault(address, None)
++        if channel is None:
++            channel = self._channels[address] = grpc.insecure_channel(address)
++        make = channel.unary_stream if stream else channel.unary_unary
++        return make(
++            f"/{service}/{method}",
++            request_serializer=lambda req: req.SerializeToString(),
++            response_deserializer=response_cls.FromString,
++        )
++
++    def publish_spec(self, group: str, block_bytes: list[int]):
++        response = self._rpc(
++            self._registry_address,
++            REGISTRY_SERVICE,
++            "RegisterKVTransferSpec",
++            w.RegisterKVTransferSpecResponse,
++        )(
++            w.RegisterKVTransferSpecRequest(
++                kv_pool_group=group,
++                spec=w.KVTransferSpec(
++                    block_arrays=[
++                        w.KVTransferSpec.BlockArray(block_bytes=n) for n in block_bytes
++                    ],
++                    num_kv_shards=1,
++                    num_workers=1,
++                ),
++            ),
++            timeout=self.timeout_s,
++        )
++        if not response.success:
++            raise ValueError(
++                f"Raiden rejected KVTransferSpec for {group}: {response.error_message}"
++            )
++
++    def lookup(self, hashes: list[bytes], source_id):
++        if not hashes:
++            return []
++        response = self._rpc(
++            self._registry_address,
++            REGISTRY_SERVICE,
++            "Lookup",
++            w.LookupResponse,
++        )(
++            w.LookupRequest(prefix_hashes=hashes, client_raiden_id=source_id),
++            timeout=self.timeout_s,
++        )
++        if len(response.results) > len(hashes):
++            raise RuntimeError("Raiden registry returned more hits than requested")
++        return list(response.results)
++
++    def resolve(self, identity, group):
++        # Resolve afresh: a restarted host-store may listen on another port.
++        response = self._rpc(
++            self._registry_address,
++            REGISTRY_SERVICE,
++            "ResolveStore",
++            w.ResolveStoreResponse,
++        )(w.ResolveStoreRequest(raiden_id=identity), timeout=self.timeout_s)
++        if not response.found:
++            return None
++        store = response.store
++        if store.kv_pool_group != group or store.evict_tier < 1:
++            raise ValueError(
++                "Raiden destination is not a higher-tier store in this KV pool group"
++            )
++        if not store.store_server_address or store.raiden_id != identity:
++            raise ValueError("Invalid Raiden store registration")
++        return store.store_server_address
++
++    @staticmethod
++    def _subset(hashes, reported):
++        reported = set(reported)
++        if not reported.issubset(hashes):
++            raise ValueError("Raiden reported hashes outside the submitted batch")
++        return frozenset(i for i, key in enumerate(hashes) if key in reported)
++
++    def _write(self, address, source_id, endpoints, hashes, pages):
++        """One offer. The caller retains every source slot through this call."""
++        all_indices = frozenset(range(len(hashes)))
++        operation_id = 0
++        acknowledged = False
++        call = None
++        try:
++            call = self._rpc(
++                address,
++                STORE_SERVICE,
++                "WriteRemote",
++                w.WriteRemoteEvent,
++                stream=True,
++            )(
++                w.WriteRemoteRequest(
++                    src_raiden_id=source_id,
++                    block_hashes=hashes,
++                    src_host_block_ids=pages,
++                    src_worker_endpoints=endpoints,
++                    # Leave time for the terminal result before the RPC deadline.
++                    deadline_ms=max(1, int(self.timeout_s * 800)),
++                ),
++                timeout=self.timeout_s,
++            )
++            for event in call:
++                kind = event.WhichOneof("event")
++                if kind == "ack" and not acknowledged:
++                    acknowledged = True
++                    ack = event.ack
++                    if ack.exist_state == w.WRITE_ALL_EXIST:
++                        return IOResult(all_indices)
++                    if ack.exist_state == w.WRITE_PARTIAL_EXIST:
++                        return IOResult(self._subset(hashes, ack.existing_hashes))
++                    if (
++                        ack.exist_state != w.WRITE_EXIST_STATE_UNSPECIFIED
++                        or not ack.operation_id
++                    ):
++                        raise ValueError("Invalid WriteRemote admission")
++                    operation_id = ack.operation_id
++                elif kind == "result" and operation_id:
++                    return self._write_verdict(hashes, event.result)
++                else:
++                    raise ValueError("WriteRemote events arrived out of order")
++        except (grpc.RpcError, ValueError) as exc:
++            logger.warning("Raiden WriteRemote did not settle on its stream: %s", exc)
++            # These statuses are rejections before any transfer in the pinned
++            # native service. No page was borrowed by the receiver.
++            if (
++                not acknowledged
++                and isinstance(exc, grpc.RpcError)
++                and exc.code()
++                in (
++                    grpc.StatusCode.RESOURCE_EXHAUSTED,
++                    grpc.StatusCode.INVALID_ARGUMENT,
++                    grpc.StatusCode.FAILED_PRECONDITION,
++                    grpc.StatusCode.UNIMPLEMENTED,
++                )
++            ):
++                return IOResult()
++        finally:
++            if call is not None:
++                call.cancel()
++
++        # An accepted operation survives stream cancellation. Ask once, as the
++        # native client does; never turn an unknown outcome into a success.
++        if operation_id:
++            try:
++                status = self._rpc(
++                    address,
++                    STORE_SERVICE,
++                    "PollWriteRemote",
++                    w.PollWriteRemoteResponse,
++                )(
++                    w.PollWriteRemoteRequest(operation_id=operation_id, wait_ms=0),
++                    timeout=self.timeout_s,
++                )
++                return self._write_verdict(hashes, status)
++            except (grpc.RpcError, ValueError) as exc:
++                logger.warning("Raiden write recovery failed: %s", exc)
++        # The peer might still be pulling. Preserve memory until process exit;
++        # a gRPC cancellation is not a native DMA cancellation.
++        return IOResult(quarantine=all_indices)
++
++    def _write_verdict(self, hashes, result):
++        all_indices = frozenset(range(len(hashes)))
++        state = result.state
++        if state in (
++            w.PollWriteRemoteResponse.COMMITTED,
++            w.PollWriteRemoteResponse.ALL_EXIST,
++        ):
++            return IOResult(all_indices)
++        if state == w.PollWriteRemoteResponse.PARTIAL_EXIST:
++            return IOResult(self._subset(hashes, result.existing_hashes))
++        if state == w.PollWriteRemoteResponse.STORED_UNREGISTERED:
++            # The copy finished, but future readers cannot discover it.
++            return IOResult()
++        # FAILED can be an expired operation whose native pull is still running.
++        return IOResult(quarantine=all_indices)
++
++    def spill(self, group, targets, source_id, endpoints, hashes, pages):
++        remaining = list(range(len(hashes)))
++        done, quarantine = set(), set()
++        for target in targets:
++            try:
++                address = self.resolve(target, group)
++            except (grpc.RpcError, ValueError) as exc:
++                logger.warning("Raiden spill target resolution failed: %s", exc)
++                continue
++            if address is None:
++                continue
++            # PARTIAL_EXIST can make progress without copying. Re-offer only
++            # the missing suffix/subset, bounded by progress on every iteration.
++            while remaining:
++                result = self._write(
++                    address,
++                    source_id,
++                    endpoints,
++                    [hashes[i] for i in remaining],
++                    [pages[i] for i in remaining],
++                )
++                done.update(remaining[i] for i in result.done)
++                quarantine.update(remaining[i] for i in result.quarantine)
++                old = remaining
++                remaining = [i for i in old if i not in done and i not in quarantine]
++                if len(remaining) == len(old):
++                    break
++            if not remaining:
++                break
++        return IOResult(frozenset(done), frozenset(quarantine))
++
++    def recall(self, group, source_id, endpoints, hashes, pages):
++        done, quarantine = set(), set()
++        try:
++            hits = self.lookup(hashes, source_id)
++        except (grpc.RpcError, RuntimeError) as exc:
++            logger.warning("Raiden recall lookup failed: %s", exc)
++            return IOResult()
++        owners = defaultdict(list)
++        for i, hit in enumerate(hits):
++            owners[hit.raiden_id.SerializeToString()].append(i)
++        for owner, indices in owners.items():
++            try:
++                address = self.resolve(w.RaidenIdProto.FromString(owner), group)
++                if address is None:
++                    continue
++            except (grpc.RpcError, ValueError) as exc:
++                logger.warning("Raiden recall owner resolution failed: %s", exc)
++                continue
++            try:
++                response = self._rpc(address, STORE_SERVICE, "Fetch", w.FetchResponse)(
++                    w.FetchRequest(
++                        block_hashes=[hashes[i] for i in indices],
++                        host_block_ids=[pages[i] for i in indices],
++                        client_raiden_id=source_id,
++                        client_worker_endpoints=endpoints,
++                    ),
++                    timeout=self.timeout_s,
++                )
++                expected = {hashes[i] for i in indices}
++                # Native Fetch returns only after copying and pins its source
++                # through the entire operation. Validate the complete verdict.
++                if (
++                    response.error_message
++                    or response.failed_block_hashes
++                    or set(response.done_block_hashes) != expected
++                ):
++                    raise ValueError("Incomplete Raiden Fetch result")
++                done.update(indices)
++            except (grpc.RpcError, ValueError) as exc:
++                logger.warning("Raiden Fetch failed: %s", exc)
++                if isinstance(exc, grpc.RpcError) and exc.code() in (
++                    grpc.StatusCode.NOT_FOUND,
++                    grpc.StatusCode.INVALID_ARGUMENT,
++                    grpc.StatusCode.FAILED_PRECONDITION,
++                    grpc.StatusCode.UNIMPLEMENTED,
++                ):
++                    continue  # Native validation failed before writing.
++                # Timeout/transport failure may leave a remote write running.
++                quarantine.update(indices)
++        return IOResult(frozenset(done), frozenset(quarantine))
++
++    def close(self):
++        for channel in self._channels.values():
++            channel.close()
++        self._channels.clear()
+diff --git a/sglang_tpu/raiden_dram/launch_stores.py b/sglang_tpu/raiden_dram/launch_stores.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..093688bca86db1c92116c623a641ebd663026760
+--- /dev/null
++++ b/sglang_tpu/raiden_dram/launch_stores.py
+@@ -0,0 +1,101 @@
++# SPDX-License-Identifier: Apache-2.0
++"""Run Raiden host-store processes on a decode host using prefill manifests."""
++
++from __future__ import annotations
++
++import argparse
++import json
++import shlex
++import signal
++import subprocess
++import time
++from pathlib import Path
++
++
++def build_commands(manifests, *, replica, server_ip, budget, binary):
++    if budget <= 0:
++        raise ValueError("DRAM budget per store must be positive")
++    commands, seen = [], set()
++    for path in manifests:
++        manifest = json.loads(Path(path).read_text())
++        if manifest["version"] != 1:
++            raise ValueError(f"Unknown manifest version in {path}")
++        if replica not in manifest["replicas"]:
++            raise ValueError(f"Replica {replica} is not a configured target in {path}")
++        group = manifest["group"]
++        if not group or group in seen:
++            raise ValueError(f"Empty or duplicate pool group in {path}")
++        seen.add(group)
++        block_bytes = sum(manifest["block_bytes"])
++        if block_bytes <= 0 or budget < block_bytes:
++            raise ValueError(f"Budget cannot hold one KV page for {group}")
++        commands.append(
++            [
++                binary,
++                f'--job_name={manifest["job_name"]}',
++                f"--job_replica_id={replica}",
++                f'--data_name={manifest["data_name"]}',
++                "--data_replica_idx=0",
++                f"--store_server_ip={server_ip}",
++                f'--global_registry_address={manifest["global_registry_address"]}',
++                f"--kv_pool_group={group}",
++                f"--dram_budget_bytes={budget}",
++                "--evict_tier=1",
++            ]
++        )
++    return commands
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--manifest", nargs="+", required=True, type=Path)
++    parser.add_argument("--replica", default="0")
++    parser.add_argument("--store-server-ip", required=True)
++    parser.add_argument("--dram-budget-bytes-per-store", type=int, required=True)
++    parser.add_argument("--binary", default="kv_cache_host_store_node_main")
++    parser.add_argument("--dry-run", action="store_true")
++    args = parser.parse_args()
++    commands = build_commands(
++        args.manifest,
++        replica=args.replica,
++        server_ip=args.store_server_ip,
++        budget=args.dram_budget_bytes_per_store,
++        binary=args.binary,
++    )
++    for command in commands:
++        print(shlex.join(command), flush=True)
++    if args.dry_run:
++        return
++
++    def stop(signum, frame):
++        raise KeyboardInterrupt
++
++    previous_handler = signal.signal(signal.SIGTERM, stop)
++    processes = []
++    try:
++        for command in commands:
++            processes.append(subprocess.Popen(command))
++        while True:
++            for process in processes:
++                if process.poll() is not None:
++                    raise RuntimeError(
++                        f"Host store {process.pid} exited with {process.returncode}"
++                    )
++            time.sleep(0.5)
++    except KeyboardInterrupt:
++        pass
++    finally:
++        signal.signal(signal.SIGTERM, previous_handler)
++        for process in processes:
++            if process.poll() is None:
++                process.terminate()
++        for process in processes:
++            try:
++                process.wait(timeout=10)
++            except subprocess.TimeoutExpired:
++                process.kill()
++                process.wait()
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/sglang_tpu/raiden_dram/storage.py b/sglang_tpu/raiden_dram/storage.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..27689c29c876b38ad6039c9cab9612ace791979f
+--- /dev/null
++++ b/sglang_tpu/raiden_dram/storage.py
+@@ -0,0 +1,390 @@
++# SPDX-License-Identifier: Apache-2.0
++"""Dynamic HiCache storage backend for Raiden stores on decode hosts.
++
++The ordinary HiCache D2H fence and host references protect backups. Recall
++lands in HiCache-owned host slots, then ordinary Raiden H2D and its forward
++gate restore prefill HBM. Only the remote node runs a KVCacheStore allocator.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import logging
++import math
++import os
++import threading
++import uuid
++from pathlib import Path
++
++import grpc
++import torch
++
++from sglang.srt.mem_cache.hicache_storage import (
++    HiCacheStorage,
++    PoolHitPolicy,
++    PoolName,
++    PoolTransferResult,
++)
++
++from . import wire_pb2 as w
++from .client import IOResult, RaidenDramClient
++
++logger = logging.getLogger(__name__)
++
++
++class RaidenDramStorage(HiCacheStorage):
++    """Load with --hicache-storage-backend dynamic; see README.md.
++
++    Per-rank, per-pool stores keep independent allocation spaces. Their keys
++    include physical layout and rank identity; cross-layout reuse fails closed.
++    """
++
++    def __init__(self, storage_config, unused_dynamic_kwargs=None):
++        self.config = storage_config
++        options = dict(storage_config.extra_config or {})
++        for field in (
++            "global_registry_address",
++            "kv_pool_group",
++            "cache_namespace",
++            "decode_store_job",
++        ):
++            if not isinstance(options.get(field), str) or not options[field].strip():
++                raise ValueError(f"Raiden DRAM storage requires a nonempty {field}")
++        if not options.get("interface_v1"):
++            raise ValueError("Raiden DRAM storage requires interface_v1=true")
++        if not storage_config.model_name:
++            raise ValueError("Raiden DRAM storage requires a model identity")
++        if (
++            storage_config.is_mla_model
++            or storage_config.pp_size != 1
++            or storage_config.attn_cp_size != 1
++        ):
++            raise NotImplementedError(
++                "Raiden DRAM storage currently supports MHA/GQA, PP=1, attention CP=1"
++            )
++        timeout = float(options.get("rpc_timeout_s", 30))
++        if not math.isfinite(timeout) or timeout <= 0:
++            raise ValueError("rpc_timeout_s must be positive and finite")
++        replicas = options.get("decode_store_replicas", ["0"])
++        if (
++            not isinstance(replicas, list)
++            or not replicas
++            or not all(isinstance(x, str) and x for x in replicas)
++        ):
++            raise ValueError("decode_store_replicas must be a nonempty list of strings")
++        self.options = options
++        self.replicas = replicas
++        self.client = RaidenDramClient(options["global_registry_address"], timeout)
++        self._lock = threading.RLock()
++        self._pools = {}
++        self._closed = False
++        self._instance = uuid.uuid4().hex
++        self._stats = dict(
++            spill_pages=0, recall_pages=0, failed_pages=0, quarantined_pages=0
++        )
++
++    def register_mem_pool_host(self, mem_pool_host):
++        super().register_mem_pool_host(mem_pool_host)
++        # HybridCacheController supplies its anchor here and registers the
++        # extra pools through register_mem_host_pool_v2 afterwards.
++        self.register_mem_host_pool_v2(mem_pool_host, PoolName.KV)
++
++    def register_mem_host_pool_v2(self, host_pool, host_pool_name):
++        name = str(host_pool_name)
++        if name not in ("kv", "swa"):
++            raise NotImplementedError(
++                f"Raiden remote DRAM does not support the {name} pool yet"
++            )
++        with self._lock:
++            if name in self._pools:
++                if self._pools[name]["pool"] is not host_pool:
++                    raise ValueError(f"Cannot replace the live Raiden {name} pool")
++                return
++            if not callable(getattr(host_pool, "quarantine", None)):
++                raise TypeError(
++                    "Raiden DRAM storage requires TpuRaidenHostKVCache with quarantine support"
++                )
++            description = host_pool.transfer.host_store_descriptor()
++            block_bytes = description["block_bytes"]
++            if not block_bytes or any(n <= 0 for n in block_bytes):
++                raise ValueError("Invalid Raiden block geometry")
++            # Every SGLang TPU rank has one native manager, with one shard.
++            if description["node_id"] != 0 or sorted(
++                s for ep in description["endpoints"] for s in ep["shards"]
++            ) != [0]:
++                raise NotImplementedError(
++                    "Raiden DRAM expects one node_id=0 worker with one shard per SGLang rank"
++                )
++            if not description["endpoints"] or any(
++                not ep["endpoint"] for ep in description["endpoints"]
++            ):
++                raise ValueError("Raiden manager has no reachable data-plane endpoint")
++            material = {
++                "version": 1,
++                "namespace": self.options["cache_namespace"],
++                "model": self.config.model_name,
++                "tp_rank": self.config.tp_rank,
++                "tp_size": self.config.tp_size,
++                "dp_rank": self.config.dp_rank,
++                "pp_rank": self.config.pp_rank,
++                "pool": name,
++                "page_size": host_pool.page_size,
++                "layout": description["layout"],
++                "base_group": self.options["kv_pool_group"],
++            }
++            namespace = hashlib.sha256(
++                json.dumps(material, sort_keys=True, separators=(",", ":")).encode()
++            ).digest()
++            group = f'{self.options["kv_pool_group"]}.{name}.{namespace.hex()[:24]}'
++            source = w.RaidenIdProto(
++                job_name="sglang-prefill-hicache",
++                job_replica_id=self._instance,
++                data_name=group,
++            )
++            endpoints = [
++                w.RaidenWorkerEndpointsProto(
++                    node_id=0,
++                    worker_id=f"sglang-{self.config.tp_rank}-{name}",
++                    endpoints=[
++                        w.RaidenTransferEndpointProto(**ep)
++                        for ep in description["endpoints"]
++                    ],
++                )
++            ]
++            targets = [
++                w.RaidenIdProto(
++                    job_name=self.options["decode_store_job"],
++                    job_replica_id=replica,
++                    data_name=group,
++                )
++                for replica in self.replicas
++            ]
++            # A native host-store node bootstraps from this exact geometry.
++            self.client.publish_spec(group, block_bytes)
++            self._pools[name] = dict(
++                pool=host_pool,
++                namespace=namespace,
++                group=group,
++                source=source,
++                endpoints=endpoints,
++                targets=targets,
++            )
++            super().register_mem_host_pool_v2(host_pool, host_pool_name)
++            manifest = {
++                "version": 1,
++                "group": group,
++                "pool": name,
++                "global_registry_address": self.options["global_registry_address"],
++                "job_name": self.options["decode_store_job"],
++                "data_name": group,
++                "replicas": self.replicas,
++                "block_bytes": block_bytes,
++                "namespace": material,
++            }
++            if self.options.get("manifest_dir"):
++                directory = Path(self.options["manifest_dir"])
++                directory.mkdir(parents=True, exist_ok=True)
++                path = directory / f"{namespace.hex()}.json"
++                temporary = path.with_suffix(f".{self._instance}.tmp")
++                temporary.write_text(json.dumps(manifest, indent=2) + "\n")
++                os.replace(temporary, path)
++            logger.info(
++                "Raiden remote DRAM pool registered: %s",
++                json.dumps(manifest, sort_keys=True),
++            )
++
++    def _state(self, name):
++        if self._closed:
++            raise RuntimeError("Raiden DRAM backend is closed")
++        return self._pools[str(name)]
++
++    @staticmethod
++    def _hashes(state, keys):
++        # get_hash_str produces strings; reject ambiguous/untyped identities.
++        if not all(isinstance(key, str) and key for key in keys):
++            raise ValueError("Storage keys must be nonempty hash strings")
++        return [
++            hashlib.sha256(state["namespace"] + key.encode()).digest() for key in keys
++        ]
++
++    @staticmethod
++    def _pages(pool, keys, indices):
++        if (
++            not isinstance(indices, torch.Tensor)
++            or indices.device.type != "cpu"
++            or indices.ndim != 1
++        ):
++            raise ValueError(
++                "Raiden storage indices must be a one-dimensional CPU tensor"
++            )
++        if indices.dtype not in (torch.int32, torch.int64):
++            raise ValueError("Raiden storage indices must be integers")
++        values = indices.tolist()
++        size = pool.page_size
++        if len(values) != len(keys) * size:
++            raise ValueError(
++                "Raiden storage requires exactly one complete host page per key"
++            )
++        pages = []
++        for offset in range(0, len(values), size):
++            start = values[offset]
++            if (
++                start < 0
++                or start % size
++                or start // size >= pool.page_num
++                or values[offset : offset + size] != list(range(start, start + size))
++            ):
++                raise ValueError(
++                    "Raiden storage requires aligned contiguous host-page runs"
++                )
++            pages.append(start // size)
++        if len(set(pages)) != len(pages) or len(set(keys)) != len(keys):
++            raise ValueError("Duplicate host pages or keys in a Raiden storage batch")
++        return pages
++
++    def _io(self, name, keys, indices, *, write):
++        keys = list(keys)
++        if not keys:
++            return []
++        with self._lock:
++            state = self._state(name)
++            pool = state["pool"]
++            pages = self._pages(pool, keys, indices)
++            hashes = self._hashes(state, keys)
++            try:
++                if write:
++                    result = self.client.spill(
++                        state["group"],
++                        state["targets"],
++                        state["source"],
++                        state["endpoints"],
++                        hashes,
++                        pages,
++                    )
++                else:
++                    result = self.client.recall(
++                        state["group"],
++                        state["source"],
++                        state["endpoints"],
++                        hashes,
++                        pages,
++                    )
++            except Exception:
++                # Keep the controller's IO worker alive, and fail closed if an
++                # unexpected error occurred after a peer borrowed these slots.
++                logger.exception("Raiden storage IO failed; retiring its host slots")
++                result = IOResult(quarantine=frozenset(range(len(keys))))
++            if result.quarantine:
++                selected = torch.cat(
++                    [
++                        indices[i * pool.page_size : (i + 1) * pool.page_size]
++                        for i in sorted(result.quarantine)
++                    ]
++                )
++                pool.quarantine(selected)
++                self._stats["quarantined_pages"] += len(result.quarantine)
++            self._stats["spill_pages" if write else "recall_pages"] += len(result.done)
++            self._stats["failed_pages"] += len(keys) - len(result.done)
++            return [i in result.done for i in range(len(keys))]
++
++    def batch_get_v1(self, keys, host_indices, extra_info=None):
++        return self._io(PoolName.KV, keys, host_indices, write=False)
++
++    def batch_set_v1(self, keys, host_indices, extra_info=None):
++        return self._io(PoolName.KV, keys, host_indices, write=True)
++
++    def batch_get_v2(self, transfers, extra_info=None):
++        return {
++            transfer.name: self._io(
++                transfer.name, transfer.keys or [], transfer.host_indices, write=False
++            )
++            for transfer in transfers
++        }
++
++    def batch_set_v2(self, transfers, extra_info=None):
++        return {
++            transfer.name: self._io(
++                transfer.name, transfer.keys or [], transfer.host_indices, write=True
++            )
++            for transfer in transfers
++        }
++
++    def _hit_count(self, name, keys):
++        state = self._state(name)
++        try:
++            return len(self.client.lookup(self._hashes(state, keys), state["source"]))
++        except (grpc.RpcError, RuntimeError) as exc:
++            logger.warning("Raiden storage lookup failed; treating as a miss: %s", exc)
++            return 0
++
++    def batch_exists(self, keys, extra_info=None):
++        with self._lock:
++            return self._hit_count(PoolName.KV, keys)
++
++    def exists(self, key):
++        return self.batch_exists([key]) == 1
++
++    def batch_exists_v2(self, keys, pool_transfers=None, extra_info=None):
++        with self._lock:
++            kv_pages = self._hit_count(PoolName.KV, keys)
++            candidates = set(range(1, kv_pages + 1))
++            extra_hits = {}
++            for transfer in pool_transfers or []:
++                if not candidates:
++                    break
++                name = transfer.name
++                if transfer.hit_policy == PoolHitPolicy.ALL_PAGES:
++                    count = self._hit_count(name, keys[:kv_pages])
++                    allowed = set(range(1, count + 1))
++                elif transfer.hit_policy == PoolHitPolicy.TRAILING_PAGES:
++                    # Registry Lookup stops at the first gap. Probe individual
++                    # sidecar pages so a missing early SWA page cannot hide a
++                    # complete later window. Intersect valid boundaries across
++                    # pools (and let HiCache intersect them across ranks).
++                    present = [
++                        bool(self._hit_count(name, [key])) for key in keys[:kv_pages]
++                    ]
++                    window = max(1, len(transfer.keys or []))
++                    allowed = {
++                        end
++                        for end in candidates
++                        if all(present[max(0, end - window) : end])
++                    }
++                else:
++                    raise ValueError(f"Unknown pool hit policy {transfer.hit_policy}")
++                candidates &= allowed
++                extra_hits[str(name)] = max(allowed, default=0)
++            final = max(candidates, default=0)
++            return PoolTransferResult(
++                final,
++                {k: min(v, final) for k, v in extra_hits.items()},
++                restorable_prefix_pages=sorted(candidates),
++            )
++
++    # Fail loudly if the generic tensor-serialization path is selected.
++    def get(self, *args, **kwargs):
++        raise NotImplementedError("Use the Raiden HiCache v1/v2 host-index interface")
++
++    def batch_get(self, *args, **kwargs):
++        return self.get(*args, **kwargs)
++
++    def set(self, *args, **kwargs):
++        return self.get(*args, **kwargs)
++
++    def batch_set(self, *args, **kwargs):
++        return self.get(*args, **kwargs)
++
++    def clear(self):
++        raise NotImplementedError(
++            "A serving process must not clear a shared remote DRAM pool"
++        )
++
++    def get_stats(self):
++        with self._lock:
++            return dict(self._stats)
++
++    def close(self):
++        with self._lock:
++            self.client.close()
++            self._closed = True
+diff --git a/sglang_tpu/raiden_dram/verify_engine.py b/sglang_tpu/raiden_dram/verify_engine.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..76747fbbdabf026aa48ad6a83e23068930810dc9
+--- /dev/null
++++ b/sglang_tpu/raiden_dram/verify_engine.py
+@@ -0,0 +1,103 @@
++# SPDX-License-Identifier: Apache-2.0
++"""Verify an isolated, running SGLang deployment by flushing its local caches.
++
++Run after starting prefill with RaidenDramStorage and the decode-host stores.
++The generate URL can be a PD router; flush URLs must cover every serving engine
++that router can choose. This intentionally clears engine HBM/local DRAM caches.
++It never clears the remote host stores.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++import time
++import uuid
++from pathlib import Path
++
++import requests
++
++
++def verify(*, generate_url, flush_urls, prompt, spill_wait_s, max_tokens, timeout_s):
++    session = requests.Session()
++    request = {
++        # Prevent a previous run's remote entry from satisfying the first pass.
++        "text": f"Cache verification run {uuid.uuid4().hex}\n{prompt}",
++        "sampling_params": {"temperature": 0, "max_new_tokens": max_tokens},
++        "stream": False,
++    }
++
++    def flush():
++        for base in flush_urls:
++            response = session.post(
++                base.rstrip("/") + "/flush_cache",
++                params={"timeout": 30},
++                timeout=timeout_s,
++            )
++            response.raise_for_status()
++
++    def generate():
++        response = session.post(
++            generate_url.rstrip("/") + "/generate", json=request, timeout=timeout_s
++        )
++        response.raise_for_status()
++        result = response.json()
++        if not isinstance(result, dict) or "text" not in result:
++            raise AssertionError(f"Unexpected generate response: {result}")
++        return result
++
++    try:
++        flush()
++        first = generate()
++        first_details = first.get("meta_info", {}).get("cached_tokens_details") or {}
++        if first_details.get("storage", 0):
++            raise AssertionError(
++                "The unique cold prompt unexpectedly hit remote storage"
++            )
++        # Write-through backup is asynchronous. A shortfall is a test failure,
++        # never reported as a successful recall. Increase for slow test hosts.
++        time.sleep(spill_wait_s)
++        flush()
++        recalled = generate()
++        details = recalled.get("meta_info", {}).get("cached_tokens_details") or {}
++        if details.get("storage", 0) <= 0:
++            raise AssertionError(
++                f"No remote-storage recall after flushing local caches: {details}"
++            )
++        if details.get("device", 0) or details.get("host", 0):
++            raise AssertionError(f"Local caches were not completely flushed: {details}")
++        if first["text"] != recalled["text"]:
++            raise AssertionError("Greedy output changed after spill and recall")
++        return {
++            "status": "passed",
++            "cold": first["meta_info"],
++            "recalled": recalled["meta_info"],
++        }
++    finally:
++        session.close()
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--generate-url", required=True)
++    parser.add_argument("--flush-url", action="append", required=True)
++    parser.add_argument("--prompt-file", type=Path, required=True)
++    parser.add_argument("--spill-wait-s", type=float, default=10)
++    parser.add_argument("--max-tokens", type=int, default=32)
++    parser.add_argument("--timeout-s", type=float, default=300)
++    args = parser.parse_args()
++    if args.spill_wait_s < 0 or args.max_tokens <= 0 or args.timeout_s <= 0:
++        parser.error("Invalid wait, token count, or request timeout")
++    result = verify(
++        generate_url=args.generate_url,
++        flush_urls=args.flush_url,
++        prompt=args.prompt_file.read_text(),
++        spill_wait_s=args.spill_wait_s,
++        max_tokens=args.max_tokens,
++        timeout_s=args.timeout_s,
++    )
++    print(json.dumps(result, indent=2))
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/sglang_tpu/raiden_dram/wire.proto b/sglang_tpu/raiden_dram/wire.proto
+new file mode 100644
+index 0000000000000000000000000000000000000000..04252b5b4d1b236d3348337e943b7733879ff69d
+--- /dev/null
++++ b/sglang_tpu/raiden_dram/wire.proto
+@@ -0,0 +1,105 @@
++// SPDX-License-Identifier: Apache-2.0
++// Wire-compatible subset of google/tpu-sync at 73499f1d4636.
++// The private package avoids collisions with Raiden's generated descriptors.
++// RPC paths use the upstream service names (see client.py).
++// Field numbers are checked against upstream protos by check_wire.py.
++syntax = "proto3";
++package sglang.tpu.raiden_dram;
++
++message RaidenIdProto {
++  string job_name = 1;
++  string job_replica_id = 2;
++  string data_name = 3;
++  int32 data_replica_idx = 4;
++}
++message RaidenTransferEndpointProto {
++  string endpoint = 1;
++  repeated int64 shards = 2;
++}
++message RaidenWorkerEndpointsProto {
++  repeated RaidenTransferEndpointProto endpoints = 1;
++  int64 node_id = 2;
++  string worker_id = 3;
++}
++message KVBlockMetadata { RaidenIdProto raiden_id = 1; int32 block_id = 2; }
++message LookupRequest { repeated bytes prefix_hashes = 1; RaidenIdProto client_raiden_id = 2; }
++message LookupResponse { repeated KVBlockMetadata results = 1; }
++message StoreInfo {
++  RaidenIdProto raiden_id = 1;
++  string store_server_address = 2;
++  string controller_address = 3;
++  int64 ttl_seconds = 4;
++  string kv_pool_group = 5;
++  int32 evict_tier = 6;
++}
++message ResolveStoreRequest { RaidenIdProto raiden_id = 1; }
++message ResolveStoreResponse { bool found = 1; StoreInfo store = 2; }
++message KVTransferSpec {
++  message BlockArray { int64 block_bytes = 1; }
++  repeated BlockArray block_arrays = 1;
++  int32 num_kv_shards = 2;
++  int32 num_workers = 3;
++}
++message RegisterKVTransferSpecRequest { KVTransferSpec spec = 1; string kv_pool_group = 2; }
++message RegisterKVTransferSpecResponse {
++  bool success = 1;
++  string error_message = 2;
++  KVTransferSpec registered_spec = 3;
++}
++message FetchRequest {
++  repeated bytes block_hashes = 1;
++  repeated int32 device_block_ids = 2;
++  repeated int32 host_block_ids = 3;
++  RaidenIdProto client_raiden_id = 4;
++  repeated RaidenWorkerEndpointsProto client_worker_endpoints = 5;
++}
++message FetchResponse {
++  repeated bytes done_block_hashes = 1;
++  repeated bytes failed_block_hashes = 2;
++  string error_message = 3;
++}
++enum WriteExistState {
++  WRITE_EXIST_STATE_UNSPECIFIED = 0;
++  WRITE_ALL_EXIST = 1;
++  WRITE_PARTIAL_EXIST = 2;
++}
++message WriteRemoteRequest {
++  RaidenIdProto src_raiden_id = 1;
++  repeated bytes block_hashes = 2;
++  repeated int32 src_host_block_ids = 3;
++  repeated RaidenWorkerEndpointsProto src_worker_endpoints = 4;
++  int64 deadline_ms = 5;
++}
++message WriteRemoteEvent {
++  oneof event { WriteRemoteAck ack = 1; WriteRemoteResult result = 2; }
++}
++message WriteRemoteAck {
++  uint64 operation_id = 1;
++  WriteExistState exist_state = 2;
++  repeated bytes existing_hashes = 3;
++  int64 granted_deadline_ms = 4;
++  int64 record_ttl_ms = 5;
++}
++message WriteRemoteResult {
++  PollWriteRemoteResponse.State state = 1;
++  repeated bytes existing_hashes = 2;
++  repeated bytes unregistered_hashes = 3;
++}
++message PollWriteRemoteRequest { uint64 operation_id = 1; int64 wait_ms = 2; }
++message PollWriteRemoteResponse {
++  enum State {
++    STATE_UNSPECIFIED = 0;
++    PENDING = 1;
++    COMMITTED = 2;
++    ALL_EXIST = 3;
++    PARTIAL_EXIST = 4;
++    FAILED = 5;
++    UNKNOWN = 6;
++    STORED_UNREGISTERED = 7;
++  }
++  State state = 1;
++  repeated bytes committed_hashes = 2;
++  repeated bytes failed_hashes = 3;
++  repeated bytes existing_hashes = 4;
++  repeated bytes unregistered_hashes = 5;
++}
+diff --git a/sglang_tpu/raiden_dram/wire_pb2.py b/sglang_tpu/raiden_dram/wire_pb2.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..1e3b85bd9258b800b544b1e2832386135121aa4a
+--- /dev/null
++++ b/sglang_tpu/raiden_dram/wire_pb2.py
+@@ -0,0 +1,80 @@
++# -*- coding: utf-8 -*-
++# Generated by the protocol buffer compiler.  DO NOT EDIT!
++# NO CHECKED-IN PROTOBUF GENCODE
++# source: sglang_tpu/raiden_dram/wire.proto
++# Protobuf Python Version: 6.31.1
++"""Generated protocol buffer code."""
++from google.protobuf import descriptor as _descriptor
++from google.protobuf import descriptor_pool as _descriptor_pool
++from google.protobuf import runtime_version as _runtime_version
++from google.protobuf import symbol_database as _symbol_database
++from google.protobuf.internal import builder as _builder
++_runtime_version.ValidateProtobufRuntimeVersion(
++    _runtime_version.Domain.PUBLIC,
++    6,
++    31,
++    1,
++    '',
++    'sglang_tpu/raiden_dram/wire.proto'
++)
++# @@protoc_insertion_point(imports)
++
++_sym_db = _symbol_database.Default()
++
++
++
++
++DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!sglang_tpu/raiden_dram/wire.proto\x12\x16sglang.tpu.raiden_dram\"f\n\rRaidenIdProto\x12\x10\n\x08job_name\x18\x01 \x01(\t\x12\x16\n\x0ejob_replica_id\x18\x02 \x01(\t\x12\x11\n\tdata_name\x18\x03 \x01(\t\x12\x18\n\x10\x64\x61ta_replica_idx\x18\x04 \x01(\x05\"?\n\x1bRaidenTransferEndpointProto\x12\x10\n\x08\x65ndpoint\x18\x01 \x01(\t\x12\x0e\n\x06shards\x18\x02 \x03(\x03\"\x88\x01\n\x1aRaidenWorkerEndpointsProto\x12\x46\n\tendpoints\x18\x01 \x03(\x0b\x32\x33.sglang.tpu.raiden_dram.RaidenTransferEndpointProto\x12\x0f\n\x07node_id\x18\x02 \x01(\x03\x12\x11\n\tworker_id\x18\x03 \x01(\t\"]\n\x0fKVBlockMetadata\x12\x38\n\traiden_id\x18\x01 \x01(\x0b\x32%.sglang.tpu.raiden_dram.RaidenIdProto\x12\x10\n\x08\x62lock_id\x18\x02 \x01(\x05\"g\n\rLookupRequest\x12\x15\n\rprefix_hashes\x18\x01 \x03(\x0c\x12?\n\x10\x63lient_raiden_id\x18\x02 \x01(\x0b\x32%.sglang.tpu.raiden_dram.RaidenIdProto\"J\n\x0eLookupResponse\x12\x38\n\x07results\x18\x01 \x03(\x0b\x32\'.sglang.tpu.raiden_dram.KVBlockMetadata\"\xbf\x01\n\tStoreInfo\x12\x38\n\traiden_id\x18\x01 \x01(\x0b\x32%.sglang.tpu.raiden_dram.RaidenIdProto\x12\x1c\n\x14store_server_address\x18\x02 \x01(\t\x12\x1a\n\x12\x63ontroller_address\x18\x03 \x01(\t\x12\x13\n\x0bttl_seconds\x18\x04 \x01(\x03\x12\x15\n\rkv_pool_group\x18\x05 \x01(\t\x12\x12\n\nevict_tier\x18\x06 \x01(\x05\"O\n\x13ResolveStoreRequest\x12\x38\n\traiden_id\x18\x01 \x01(\x0b\x32%.sglang.tpu.raiden_dram.RaidenIdProto\"W\n\x14ResolveStoreResponse\x12\r\n\x05\x66ound\x18\x01 \x01(\x08\x12\x30\n\x05store\x18\x02 \x01(\x0b\x32!.sglang.tpu.raiden_dram.StoreInfo\"\xa8\x01\n\x0eKVTransferSpec\x12G\n\x0c\x62lock_arrays\x18\x01 \x03(\x0b\x32\x31.sglang.tpu.raiden_dram.KVTransferSpec.BlockArray\x12\x15\n\rnum_kv_shards\x18\x02 \x01(\x05\x12\x13\n\x0bnum_workers\x18\x03 \x01(\x05\x1a!\n\nBlockArray\x12\x13\n\x0b\x62lock_bytes\x18\x01 \x01(\x03\"l\n\x1dRegisterKVTransferSpecRequest\x12\x34\n\x04spec\x18\x01 \x01(\x0b\x32&.sglang.tpu.raiden_dram.KVTransferSpec\x12\x15\n\rkv_pool_group\x18\x02 \x01(\t\"\x89\x01\n\x1eRegisterKVTransferSpecResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x15\n\rerror_message\x18\x02 \x01(\t\x12?\n\x0fregistered_spec\x18\x03 \x01(\x0b\x32&.sglang.tpu.raiden_dram.KVTransferSpec\"\xec\x01\n\x0c\x46\x65tchRequest\x12\x14\n\x0c\x62lock_hashes\x18\x01 \x03(\x0c\x12\x18\n\x10\x64\x65vice_block_ids\x18\x02 \x03(\x05\x12\x16\n\x0ehost_block_ids\x18\x03 \x03(\x05\x12?\n\x10\x63lient_raiden_id\x18\x04 \x01(\x0b\x32%.sglang.tpu.raiden_dram.RaidenIdProto\x12S\n\x17\x63lient_worker_endpoints\x18\x05 \x03(\x0b\x32\x32.sglang.tpu.raiden_dram.RaidenWorkerEndpointsProto\"^\n\rFetchResponse\x12\x19\n\x11\x64one_block_hashes\x18\x01 \x03(\x0c\x12\x1b\n\x13\x66\x61iled_block_hashes\x18\x02 \x03(\x0c\x12\x15\n\rerror_message\x18\x03 \x01(\t\"\xeb\x01\n\x12WriteRemoteRequest\x12<\n\rsrc_raiden_id\x18\x01 \x01(\x0b\x32%.sglang.tpu.raiden_dram.RaidenIdProto\x12\x14\n\x0c\x62lock_hashes\x18\x02 \x03(\x0c\x12\x1a\n\x12src_host_block_ids\x18\x03 \x03(\x05\x12P\n\x14src_worker_endpoints\x18\x04 \x03(\x0b\x32\x32.sglang.tpu.raiden_dram.RaidenWorkerEndpointsProto\x12\x13\n\x0b\x64\x65\x61\x64line_ms\x18\x05 \x01(\x03\"\x8f\x01\n\x10WriteRemoteEvent\x12\x35\n\x03\x61\x63k\x18\x01 \x01(\x0b\x32&.sglang.tpu.raiden_dram.WriteRemoteAckH\x00\x12;\n\x06result\x18\x02 \x01(\x0b\x32).sglang.tpu.raiden_dram.WriteRemoteResultH\x00\x42\x07\n\x05\x65vent\"\xb1\x01\n\x0eWriteRemoteAck\x12\x14\n\x0coperation_id\x18\x01 \x01(\x04\x12<\n\x0b\x65xist_state\x18\x02 \x01(\x0e\x32\'.sglang.tpu.raiden_dram.WriteExistState\x12\x17\n\x0f\x65xisting_hashes\x18\x03 \x03(\x0c\x12\x1b\n\x13granted_deadline_ms\x18\x04 \x01(\x03\x12\x15\n\rrecord_ttl_ms\x18\x05 \x01(\x03\"\x8f\x01\n\x11WriteRemoteResult\x12\x44\n\x05state\x18\x01 \x01(\x0e\x32\x35.sglang.tpu.raiden_dram.PollWriteRemoteResponse.State\x12\x17\n\x0f\x65xisting_hashes\x18\x02 \x03(\x0c\x12\x1b\n\x13unregistered_hashes\x18\x03 \x03(\x0c\"?\n\x16PollWriteRemoteRequest\x12\x14\n\x0coperation_id\x18\x01 \x01(\x04\x12\x0f\n\x07wait_ms\x18\x02 \x01(\x03\"\xd7\x02\n\x17PollWriteRemoteResponse\x12\x44\n\x05state\x18\x01 \x01(\x0e\x32\x35.sglang.tpu.raiden_dram.PollWriteRemoteResponse.State\x12\x18\n\x10\x63ommitted_hashes\x18\x02 \x03(\x0c\x12\x15\n\rfailed_hashes\x18\x03 \x03(\x0c\x12\x17\n\x0f\x65xisting_hashes\x18\x04 \x03(\x0c\x12\x1b\n\x13unregistered_hashes\x18\x05 \x03(\x0c\"\x8e\x01\n\x05State\x12\x15\n\x11STATE_UNSPECIFIED\x10\x00\x12\x0b\n\x07PENDING\x10\x01\x12\r\n\tCOMMITTED\x10\x02\x12\r\n\tALL_EXIST\x10\x03\x12\x11\n\rPARTIAL_EXIST\x10\x04\x12\n\n\x06\x46\x41ILED\x10\x05\x12\x0b\n\x07UNKNOWN\x10\x06\x12\x17\n\x13STORED_UNREGISTERED\x10\x07*b\n\x0fWriteExistState\x12!\n\x1dWRITE_EXIST_STATE_UNSPECIFIED\x10\x00\x12\x13\n\x0fWRITE_ALL_EXIST\x10\x01\x12\x17\n\x13WRITE_PARTIAL_EXIST\x10\x02\x62\x06proto3')
++
++_globals = globals()
++_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
++_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'sglang_tpu.raiden_dram.wire_pb2', _globals)
++if not _descriptor._USE_C_DESCRIPTORS:
++  DESCRIPTOR._loaded_options = None
++  _globals['_WRITEEXISTSTATE']._serialized_start=2886
++  _globals['_WRITEEXISTSTATE']._serialized_end=2984
++  _globals['_RAIDENIDPROTO']._serialized_start=61
++  _globals['_RAIDENIDPROTO']._serialized_end=163
++  _globals['_RAIDENTRANSFERENDPOINTPROTO']._serialized_start=165
++  _globals['_RAIDENTRANSFERENDPOINTPROTO']._serialized_end=228
++  _globals['_RAIDENWORKERENDPOINTSPROTO']._serialized_start=231
++  _globals['_RAIDENWORKERENDPOINTSPROTO']._serialized_end=367
++  _globals['_KVBLOCKMETADATA']._serialized_start=369
++  _globals['_KVBLOCKMETADATA']._serialized_end=462
++  _globals['_LOOKUPREQUEST']._serialized_start=464
++  _globals['_LOOKUPREQUEST']._serialized_end=567
++  _globals['_LOOKUPRESPONSE']._serialized_start=569
++  _globals['_LOOKUPRESPONSE']._serialized_end=643
++  _globals['_STOREINFO']._serialized_start=646
++  _globals['_STOREINFO']._serialized_end=837
++  _globals['_RESOLVESTOREREQUEST']._serialized_start=839
++  _globals['_RESOLVESTOREREQUEST']._serialized_end=918
++  _globals['_RESOLVESTORERESPONSE']._serialized_start=920
++  _globals['_RESOLVESTORERESPONSE']._serialized_end=1007
++  _globals['_KVTRANSFERSPEC']._serialized_start=1010
++  _globals['_KVTRANSFERSPEC']._serialized_end=1178
++  _globals['_KVTRANSFERSPEC_BLOCKARRAY']._serialized_start=1145
++  _globals['_KVTRANSFERSPEC_BLOCKARRAY']._serialized_end=1178
++  _globals['_REGISTERKVTRANSFERSPECREQUEST']._serialized_start=1180
++  _globals['_REGISTERKVTRANSFERSPECREQUEST']._serialized_end=1288
++  _globals['_REGISTERKVTRANSFERSPECRESPONSE']._serialized_start=1291
++  _globals['_REGISTERKVTRANSFERSPECRESPONSE']._serialized_end=1428
++  _globals['_FETCHREQUEST']._serialized_start=1431
++  _globals['_FETCHREQUEST']._serialized_end=1667
++  _globals['_FETCHRESPONSE']._serialized_start=1669
++  _globals['_FETCHRESPONSE']._serialized_end=1763
++  _globals['_WRITEREMOTEREQUEST']._serialized_start=1766
++  _globals['_WRITEREMOTEREQUEST']._serialized_end=2001
++  _globals['_WRITEREMOTEEVENT']._serialized_start=2004
++  _globals['_WRITEREMOTEEVENT']._serialized_end=2147
++  _globals['_WRITEREMOTEACK']._serialized_start=2150
++  _globals['_WRITEREMOTEACK']._serialized_end=2327
++  _globals['_WRITEREMOTERESULT']._serialized_start=2330
++  _globals['_WRITEREMOTERESULT']._serialized_end=2473
++  _globals['_POLLWRITEREMOTEREQUEST']._serialized_start=2475
++  _globals['_POLLWRITEREMOTEREQUEST']._serialized_end=2538
++  _globals['_POLLWRITEREMOTERESPONSE']._serialized_start=2541
++  _globals['_POLLWRITEREMOTERESPONSE']._serialized_end=2884
++  _globals['_POLLWRITEREMOTERESPONSE_STATE']._serialized_start=2742
++  _globals['_POLLWRITEREMOTERESPONSE_STATE']._serialized_end=2884
++# @@protoc_insertion_point(module_scope)
+diff --git a/sglang_tpu/raiden_transfer.py b/sglang_tpu/raiden_transfer.py
+index 5ef0a3e89e3eb38945579a402cbef8771a1c9c57..8f0e90649ab0de7c61630c9d9fa0641ab9e67cb8 100644
+--- a/sglang_tpu/raiden_transfer.py
++++ b/sglang_tpu/raiden_transfer.py
+@@ -14,6 +14,7 @@ the running model), and a DMA that completes with an error raises at the poll.
+ from __future__ import annotations
+ 
+ import logging
++import math
+ import os
+ import time
+ from typing import TYPE_CHECKING, List
+@@ -166,6 +167,27 @@ class RaidenKVTransfer:
+             device_pool.page_size,
+         )
+ 
++    def host_store_descriptor(self) -> dict:
++        """Describe this rank's host pool for a Raiden remote-store peer.
++
++        Endpoints refer to the existing native pool, so storage IO uses exactly
++        the slots HiCache pins. No second allocator is attached to this pool.
++        """
++        layout = [
++            {"shape": list(layer[0].shape[1:]), "dtype": str(layer[0].dtype)}
++            for layer in self._device_tensors
++        ]
++        block_bytes = [
++            math.prod(layer[0].shape[1:]) * layer[0].element_size()
++            for layer in self._device_tensors
++        ]
++        return {
++            "layout": layout,
++            "block_bytes": block_bytes,
++            "node_id": self._mgr.node_id,
++            "endpoints": self._mgr.get_local_endpoints(),
++        }
++
+     def backup(
+         self, device_page_ids: List[int], host_page_ids: List[int]
+     ) -> RaidenFutureEvent:
+diff --git a/test/manual/tpu/test_raiden_dram_spill_recall_ondevice.py b/test/manual/tpu/test_raiden_dram_spill_recall_ondevice.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..caa1f10ef547e3ffcddef6e6adb41373f41d5f56
+--- /dev/null
++++ b/test/manual/tpu/test_raiden_dram_spill_recall_ondevice.py
+@@ -0,0 +1,158 @@
++"""Native TPU -> prefill DRAM -> remote store -> prefill DRAM -> TPU test.
++
++Uses real Raiden registry/store processes and real DMA. The store is a separate
++process on the same machine; multi-host serving is tested by verify_engine.py.
++Requires torch_tpu, tpu_sync and its registry/host-store binaries on PATH.
++"""
++
++import shutil
++import socket
++import subprocess
++import time
++from types import SimpleNamespace
++
++import pytest
++
++
++def test_native_spill_forget_and_recall(tmp_path):
++    pytest.importorskip(
++        "torch_tpu", reason="Native spill/recall needs torch_tpu and a TPU"
++    )
++    pytest.importorskip("tpu_sync")
++    import grpc
++    import torch
++
++    from sglang.srt.mem_cache.hicache_storage import HiCacheStorageConfig
++    from sglang.srt.mem_cache.storage.backend_factory import StorageBackendFactory
++    from sglang_tpu.kv_pool_host import TpuRaidenHostKVCache
++    from sglang_tpu.raiden_dram.launch_stores import build_commands
++
++    registry_binary = shutil.which("global_registry_server")
++    store_binary = shutil.which("kv_cache_host_store_node_main")
++    if not registry_binary or not store_binary:
++        pytest.skip("tpu_sync native registry and host-store binaries must be on PATH")
++    if torch.accelerator.device_count() == 0:
++        pytest.skip("No TPU exposed to this process")
++
++    with socket.socket() as listener:
++        listener.bind(("127.0.0.1", 0))
++        port = listener.getsockname()[1]
++    address = f"127.0.0.1:{port}"
++    processes, logs = [], []
++    storage = None
++
++    def start(command, name):
++        log = (tmp_path / f"{name}.log").open("w")
++        logs.append(log)
++        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
++        processes.append(process)
++        return process
++
++    def poll(event):
++        deadline = time.monotonic() + 60
++        while not event.query():
++            if time.monotonic() > deadline:
++                raise TimeoutError("Native DMA did not settle")
++            time.sleep(0.001)
++
++    try:
++        start([registry_binary, f"--port={port}"], "registry")
++        with grpc.insecure_channel(address) as channel:
++            grpc.channel_ready_future(channel).result(timeout=20)
++        page_size = 64
++        pattern = torch.zeros(8, page_size, 2, 2, 128, dtype=torch.bfloat16)
++        pattern[1] = 101
++        pattern[2] = 102
++        # All writes happen BEFORE registration. Eager writes after registration
++        # can replace the PJRT buffer and invalidate Raiden's raw pointer.
++        data = pattern.to("tpu:0")
++        device_pool = SimpleNamespace(
++            layer_num=1,
++            start_layer=0,
++            end_layer=1,
++            page_size=page_size,
++            size=8 * page_size,
++            store_dtype=data.dtype,
++            get_fused_kv_buffer=lambda layer: data,
++        )
++        pool = TpuRaidenHostKVCache(
++            device_pool,
++            host_to_device_ratio=2,
++            host_size=0,
++            page_size=page_size,
++            layout="fused_raiden",
++        )
++        config = HiCacheStorageConfig(
++            tp_rank=0,
++            tp_size=1,
++            pp_rank=0,
++            pp_size=1,
++            attn_cp_rank=0,
++            attn_cp_size=1,
++            is_mla_model=False,
++            enable_storage_metrics=True,
++            is_page_first_layout=True,
++            model_name="native-roundtrip-fixture",
++            extra_config=dict(
++                backend_name="raiden_dram",
++                module_path="sglang_tpu.raiden_dram.storage",
++                class_name="RaidenDramStorage",
++                interface_v1=True,
++                global_registry_address=address,
++                kv_pool_group="native-roundtrip",
++                cache_namespace="stable-bf16-pattern-v1",
++                decode_store_job="decode-stores",
++                manifest_dir=str(tmp_path / "manifests"),
++                rpc_timeout_s=30,
++            ),
++        )
++        storage = StorageBackendFactory.create_backend("dynamic", config, pool)
++        storage.register_mem_pool_host(pool)
++        commands = build_commands(
++            sorted((tmp_path / "manifests").glob("*.json")),
++            replica="0",
++            server_ip="127.0.0.1",
++            budget=32 * 1024 * 1024,
++            binary=store_binary,
++        )
++        assert len(commands) == 1
++        remote = start(commands[0], "host-store")
++        state = storage._pools["kv"]
++        deadline = time.monotonic() + 30
++        while storage.client.resolve(state["targets"][0], state["group"]) is None:
++            assert remote.poll() is None, (tmp_path / "host-store.log").read_text()
++            if time.monotonic() > deadline:
++                raise TimeoutError("Host store failed to register")
++            time.sleep(0.1)
++
++        source = pool.alloc(2 * page_size)
++        poll(pool.transfer.backup([1, 2], pool._to_page_ids(source)))
++        assert storage.batch_set_v1(["prefix-a", "prefix-b"], source) == [True, True]
++        assert storage.batch_exists(["prefix-a", "prefix-b"]) == 2
++        # Erase EVERY prefill host slot via DMA from a known-zero device page.
++        poll(pool.transfer.backup([0] * pool.page_num, list(range(pool.page_num))))
++        destination = pool.alloc(2 * page_size)
++        assert pool._to_page_ids(source) != pool._to_page_ids(destination)
++        assert storage.batch_get_v1(["prefix-a", "prefix-b"], destination) == [
++            True,
++            True,
++        ]
++        poll(pool.transfer.load(pool._to_page_ids(destination), [4, 5]))
++        torch.accelerator.synchronize()
++        actual = data.cpu()
++        torch.testing.assert_close(actual[4], pattern[1], rtol=0, atol=0)
++        torch.testing.assert_close(actual[5], pattern[2], rtol=0, atol=0)
++        assert storage.get_stats()["recall_pages"] == 2
++    finally:
++        if storage is not None:
++            storage.close()
++        for process in reversed(processes):
++            if process.poll() is None:
++                process.terminate()
++            try:
++                process.wait(timeout=10)
++            except subprocess.TimeoutExpired:
++                process.kill()
++                process.wait()
++        for log in logs:
++            log.close()
+diff --git a/test/registered/unit/hardware_backend/tpu/test_raiden_dram_storage.py b/test/registered/unit/hardware_backend/tpu/test_raiden_dram_storage.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..958dd4845c9736bfc396da9317a748622cf8eaec
+--- /dev/null
++++ b/test/registered/unit/hardware_backend/tpu/test_raiden_dram_storage.py
+@@ -0,0 +1,620 @@
++"""CPU integration/unit coverage. RPCs are real gRPC; DMA is a test double.
++
++The separate native end-to-end test is required for actual TPU/DMA validation.
++"""
++
++from concurrent.futures import ThreadPoolExecutor
++from dataclasses import replace
++import json
++import threading
++from types import SimpleNamespace
++
++import grpc
++import pytest
++import torch
++
++from sglang.test.ci.ci_register import register_cpu_ci
++from sglang.srt.mem_cache.hicache_storage import (
++    HiCacheStorageConfig,
++    PoolHitPolicy,
++    PoolName,
++    PoolTransfer,
++)
++from sglang.srt.mem_cache.storage.backend_factory import StorageBackendFactory
++from sglang_tpu.kv_pool_host import TpuRaidenHostKVCache
++from sglang_tpu.raiden_dram import wire_pb2 as w
++from sglang_tpu.raiden_dram.client import REGISTRY_SERVICE, STORE_SERVICE
++from sglang_tpu.raiden_dram.launch_stores import build_commands
++from sglang_tpu.raiden_dram.storage import RaidenDramStorage
++from sglang_tpu.raiden_transfer import RaidenKVTransfer
++
++register_cpu_ci(est_time=15, suite="base-a-test-cpu")
++
++
++def make_pool(
++    endpoint="cpu-fixture:1", *, page_num=16, page_size=2, dtype="torch.bfloat16"
++):
++    pool = object.__new__(TpuRaidenHostKVCache)
++    pool.page_size, pool.page_num = page_size, page_num
++    pool.size = page_size * page_num
++    pool.layout = "fused_raiden"
++    pool.lock = threading.RLock()
++    pool.clear()
++    pool.payload = {}
++    pool.transfer = SimpleNamespace(
++        host_store_descriptor=lambda: dict(
++            block_bytes=[8],
++            node_id=0,
++            layout=[dict(shape=[2, 2], dtype=dtype)],
++            endpoints=[dict(endpoint=endpoint, shards=[0])],
++        )
++    )
++    return pool
++
++
++class StoreFixture:
++    """Protocol peer only: never presented as a native Raiden server."""
++
++    def __init__(self):
++        self.pools = {}
++        self.blocks = {}
++        self.metadata = {}
++        self.specs = {}
++        self.group = None
++        self.state = w.PollWriteRemoteResponse.COMMITTED
++        self.stream_break = False
++        self.ack_only = False
++        self.fetch_error = None
++        self.write_error = None
++        self.incomplete_fetch = False
++        self.reject_spec = False
++        self.oversized_lookup = False
++        self.writes = []
++        self.fetches = []
++        self.commit_gate = None
++        self.accepted = threading.Event()
++        self.server = grpc.server(ThreadPoolExecutor(max_workers=4))
++        self.address = f"127.0.0.1:{self.server.add_insecure_port('127.0.0.1:0')}"
++
++        def unary(fn, request):
++            return grpc.unary_unary_rpc_method_handler(
++                fn,
++                request_deserializer=request.FromString,
++                response_serializer=lambda x: x.SerializeToString(),
++            )
++
++        self.server.add_generic_rpc_handlers(
++            [
++                grpc.method_handlers_generic_handler(
++                    REGISTRY_SERVICE,
++                    {
++                        "RegisterKVTransferSpec": unary(
++                            self.spec, w.RegisterKVTransferSpecRequest
++                        ),
++                        "Lookup": unary(self.lookup, w.LookupRequest),
++                        "ResolveStore": unary(self.resolve, w.ResolveStoreRequest),
++                    },
++                ),
++                grpc.method_handlers_generic_handler(
++                    STORE_SERVICE,
++                    {
++                        "WriteRemote": grpc.unary_stream_rpc_method_handler(
++                            self.write,
++                            request_deserializer=w.WriteRemoteRequest.FromString,
++                            response_serializer=lambda x: x.SerializeToString(),
++                        ),
++                        "PollWriteRemote": unary(self.poll, w.PollWriteRemoteRequest),
++                        "Fetch": unary(self.fetch, w.FetchRequest),
++                    },
++                ),
++            ]
++        )
++        self.server.start()
++
++    def spec(self, request, context):
++        self.specs[request.kv_pool_group] = request.spec
++        return w.RegisterKVTransferSpecResponse(
++            success=not self.reject_spec,
++            error_message="test mismatch" if self.reject_spec else "",
++        )
++
++    def lookup(self, request, context):
++        response = w.LookupResponse()
++        if self.oversized_lookup:
++            for _ in range(len(request.prefix_hashes) + 1):
++                response.results.add()
++            return response
++        for key in request.prefix_hashes:
++            if key not in self.metadata:
++                break
++            response.results.add().CopyFrom(self.metadata[key])
++        return response
++
++    def resolve(self, request, context):
++        return w.ResolveStoreResponse(
++            found=True,
++            store=w.StoreInfo(
++                raiden_id=request.raiden_id,
++                store_server_address=self.address,
++                controller_address=self.address,
++                kv_pool_group=self.group or request.raiden_id.data_name,
++                evict_tier=1,
++            ),
++        )
++
++    def write(self, request, context):
++        self.writes.append(request)
++        if self.write_error:
++            context.abort(self.write_error, "injected write refusal")
++        existing = [key for key in request.block_hashes if key in self.blocks]
++        if existing:
++            yield w.WriteRemoteEvent(
++                ack=w.WriteRemoteAck(
++                    exist_state=(
++                        w.WRITE_ALL_EXIST
++                        if len(existing) == len(request.block_hashes)
++                        else w.WRITE_PARTIAL_EXIST
++                    ),
++                    existing_hashes=existing,
++                )
++            )
++            return
++        yield w.WriteRemoteEvent(
++            ack=w.WriteRemoteAck(
++                operation_id=9, granted_deadline_ms=request.deadline_ms
++            )
++        )
++        self.accepted.set()
++        if self.commit_gate:
++            assert self.commit_gate.wait(5)
++        if self.state == w.PollWriteRemoteResponse.COMMITTED:
++            pool = self.pools[request.src_worker_endpoints[0].endpoints[0].endpoint]
++            for key, page in zip(request.block_hashes, request.src_host_block_ids):
++                self.blocks[key] = pool.payload[page]
++                self.metadata[key] = w.KVBlockMetadata(
++                    raiden_id=w.RaidenIdProto(
++                        job_name="decode-stores",
++                        job_replica_id="0",
++                        data_name=request.src_raiden_id.data_name,
++                    ),
++                    block_id=len(self.blocks) - 1,
++                )
++        if self.stream_break:
++            context.abort(grpc.StatusCode.UNAVAILABLE, "lost result stream")
++        if not self.ack_only:
++            yield w.WriteRemoteEvent(result=w.WriteRemoteResult(state=self.state))
++
++    def poll(self, request, context):
++        return w.PollWriteRemoteResponse(state=self.state)
++
++    def fetch(self, request, context):
++        self.fetches.append(request)
++        if self.fetch_error:
++            context.abort(self.fetch_error, "injected fetch failure")
++        if not all(key in self.blocks for key in request.block_hashes):
++            context.abort(grpc.StatusCode.NOT_FOUND, "evicted between lookup and fetch")
++        pool = self.pools[request.client_worker_endpoints[0].endpoints[0].endpoint]
++        for key, page in zip(request.block_hashes, request.host_block_ids):
++            pool.payload[page] = self.blocks[key]
++        return w.FetchResponse(
++            done_block_hashes=[] if self.incomplete_fetch else request.block_hashes
++        )
++
++
++def config(address, **overrides):
++    result = HiCacheStorageConfig(
++        tp_rank=0,
++        tp_size=1,
++        pp_rank=0,
++        pp_size=1,
++        attn_cp_rank=0,
++        attn_cp_size=1,
++        is_mla_model=False,
++        enable_storage_metrics=True,
++        is_page_first_layout=True,
++        model_name="test-model@revision-1",
++        extra_config=dict(
++            backend_name="raiden_dram",
++            module_path="sglang_tpu.raiden_dram.storage",
++            class_name="RaidenDramStorage",
++            interface_v1=True,
++            global_registry_address=address,
++            kv_pool_group="test-pool",
++            cache_namespace="immutable-model-and-kv-config-1",
++            decode_store_job="decode-stores",
++            rpc_timeout_s=2,
++        ),
++    )
++    return replace(result, **overrides)
++
++
++@pytest.fixture
++def setup_storage():
++    peer = StoreFixture()
++    pool = make_pool()
++    peer.pools["cpu-fixture:1"] = pool
++    storage = StorageBackendFactory.create_backend(
++        "dynamic", config(peer.address), pool
++    )
++    storage.register_mem_pool_host(pool)
++    try:
++        yield storage, pool, peer
++    finally:
++        if peer.commit_gate:
++            peer.commit_gate.set()
++        storage.close()
++        peer.server.stop(0).wait()
++
++
++def save_pages(storage, pool, keys):
++    indices = pool.alloc(len(keys) * pool.page_size)
++    assert indices is not None
++    for key, page in zip(keys, pool._to_page_ids(indices)):
++        pool.payload[page] = f"payload-for-{key}".encode()
++    return indices, storage.batch_set_v1(keys, indices)
++
++
++def test_spill_forget_local_recall_into_different_slots(setup_storage):
++    storage, pool, peer = setup_storage
++    source, result = save_pages(storage, pool, ["a", "b"])
++    assert result == [True, True]
++    pool.payload.clear()  # No local byte copy can satisfy recall.
++    destination = pool.alloc(4)
++    assert pool._to_page_ids(source) != pool._to_page_ids(destination)
++    assert storage.batch_exists(["a", "b", "missing"]) == 2
++    assert storage.batch_get_v1(["a", "b"], destination) == [True, True]
++    assert [pool.payload[p] for p in pool._to_page_ids(destination)] == [
++        b"payload-for-a",
++        b"payload-for-b",
++    ]
++    assert len(peer.writes) == len(peer.fetches) == 1
++    assert storage.get_stats()["recall_pages"] == 2
++
++
++def test_admission_ack_does_not_finish_backup(setup_storage):
++    storage, pool, peer = setup_storage
++    peer.commit_gate = threading.Event()
++    with ThreadPoolExecutor(1) as executor:
++        task = executor.submit(save_pages, storage, pool, ["a"])
++        assert peer.accepted.wait(2)
++        assert not task.done()
++        peer.commit_gate.set()
++        assert task.result(timeout=3)[1] == [True]
++
++
++@pytest.mark.parametrize(
++    "state",
++    [
++        w.PollWriteRemoteResponse.FAILED,
++        w.PollWriteRemoteResponse.PENDING,
++        w.PollWriteRemoteResponse.UNKNOWN,
++    ],
++)
++def test_uncertain_write_retires_slots_across_reset(setup_storage, state):
++    storage, pool, peer = setup_storage
++    peer.state = state
++    source, result = save_pages(storage, pool, ["a"])
++    assert result == [False]
++    assert pool.free(source) == 0
++    pool.clear()
++    assert 0 not in pool.free_pages
++    assert pool.available_size() == (pool.page_num - 1) * pool.page_size
++    assert storage.get_stats()["quarantined_pages"] == 1
++
++
++def test_publication_failure_is_not_success(setup_storage):
++    storage, pool, peer = setup_storage
++    peer.state = w.PollWriteRemoteResponse.STORED_UNREGISTERED
++    source, result = save_pages(storage, pool, ["a"])
++    assert result == [False]
++    assert pool.free(source) == pool.page_size  # Transfer has settled.
++
++
++def test_lost_stream_recovers_committed_write(setup_storage):
++    storage, pool, peer = setup_storage
++    peer.stream_break = True
++    assert save_pages(storage, pool, ["a"])[1] == [True]
++    assert not pool._quarantined_pages
++
++
++def test_partial_existing_offer_retries_only_missing_keys(setup_storage):
++    storage, pool, peer = setup_storage
++    assert save_pages(storage, pool, ["a"])[1] == [True]
++    assert save_pages(storage, pool, ["a", "b"])[1] == [True, True]
++    assert [len(req.block_hashes) for req in peer.writes] == [1, 2, 1]
++
++
++def test_all_existing_offer_is_success_without_operation(setup_storage):
++    storage, pool, peer = setup_storage
++    assert save_pages(storage, pool, ["a"])[1] == [True]
++    assert save_pages(storage, pool, ["a"])[1] == [True]
++
++
++@pytest.mark.parametrize(
++    "error,quarantined",
++    [
++        (grpc.StatusCode.NOT_FOUND, False),
++        (grpc.StatusCode.DEADLINE_EXCEEDED, True),
++        (grpc.StatusCode.UNAVAILABLE, True),
++    ],
++)
++def test_failed_fetch_never_admits_data_and_protects_late_writes(
++    setup_storage, error, quarantined
++):
++    storage, pool, peer = setup_storage
++    save_pages(storage, pool, ["a"])
++    target = pool.alloc(2)
++    peer.fetch_error = error
++    assert storage.batch_get_v1(["a"], target) == [False]
++    assert pool.free(target) == (0 if quarantined else 2)
++
++
++def test_eviction_race_recomputes_instead_of_using_stale_data(setup_storage):
++    storage, pool, peer = setup_storage
++    save_pages(storage, pool, ["a"])
++    peer.blocks.clear()  # Registry still has stale metadata.
++    assert storage.batch_exists(["a"]) == 1
++    target = pool.alloc(2)
++    assert storage.batch_get_v1(["a"], target) == [False]
++    assert pool.free(target) == 2
++
++
++def test_wrong_group_never_transfers(setup_storage):
++    storage, pool, peer = setup_storage
++    peer.group = "incompatible-layout"
++    assert save_pages(storage, pool, ["a"])[1] == [False]
++    assert not peer.writes
++
++
++@pytest.mark.parametrize(
++    "field,value", [("tp_rank", 1), ("model_name", "another-model")]
++)
++def test_namespace_prevents_incompatible_hits(setup_storage, field, value):
++    storage, pool, peer = setup_storage
++    save_pages(storage, pool, ["a"])
++    other = RaidenDramStorage(config(peer.address, **{field: value}))
++    try:
++        other.register_mem_pool_host(pool)
++        assert not other.exists("a")
++    finally:
++        other.close()
++
++
++def test_layout_dtype_is_part_of_namespace(setup_storage):
++    storage, pool, peer = setup_storage
++    save_pages(storage, pool, ["a"])
++    other = RaidenDramStorage(config(peer.address))
++    try:
++        other.register_mem_pool_host(make_pool(dtype="torch.float8_e4m3fn"))
++        assert not other.exists("a")
++    finally:
++        other.close()
++
++
++@pytest.mark.parametrize(
++    "indices",
++    [
++        torch.tensor([1, 2]),
++        torch.tensor([0, 3]),
++        torch.tensor([-2, -1]),
++        torch.tensor([32, 33]),
++        torch.tensor([0.0, 1.0]),
++        torch.tensor([[0, 1]]),
++    ],
++)
++def test_invalid_host_indices_are_rejected_before_rpc(setup_storage, indices):
++    storage, _, peer = setup_storage
++    with pytest.raises(ValueError):
++        storage.batch_set_v1(["a"], indices)
++    assert not peer.writes
++
++
++def test_duplicate_slots_are_rejected(setup_storage):
++    storage, _, peer = setup_storage
++    with pytest.raises(ValueError):
++        storage.batch_set_v1(["a", "b"], torch.tensor([0, 1, 0, 1]))
++    assert not peer.writes
++
++
++def test_empty_batches_do_not_allocate_or_issue_rpc(setup_storage):
++    storage, _, peer = setup_storage
++    assert storage.batch_set_v1([], torch.tensor([], dtype=torch.int64)) == []
++    assert storage.batch_get_v1([], torch.tensor([], dtype=torch.int64)) == []
++    assert storage.batch_exists([]) == 0
++    assert not peer.writes and not peer.fetches
++
++
++def test_hybrid_swa_recall_and_noncontiguous_restorable_boundaries(setup_storage):
++    storage, pool, peer = setup_storage
++    swa = make_pool("cpu-fixture:2")
++    peer.pools["cpu-fixture:2"] = swa
++    storage.register_mem_host_pool_v2(swa, PoolName.SWA)
++    save_pages(storage, pool, ["a", "b", "c", "d"])
++    source = swa.alloc(4)
++    swa.payload.update({0: b"swa-c", 1: b"swa-d"})
++    assert storage.batch_set_v2(
++        [PoolTransfer(PoolName.SWA, source, keys=["c", "d"])]
++    ) == {PoolName.SWA: [True, True]}
++    requirement = PoolTransfer(
++        PoolName.SWA, keys=["c", "d"], hit_policy=PoolHitPolicy.TRAILING_PAGES
++    )
++    hits = storage.batch_exists_v2(["a", "b", "c", "d"], [requirement])
++    assert hits.kv_hit_pages == 4
++    assert hits.restorable_prefix_pages == [4]
++    target = swa.alloc(4)
++    swa.payload.clear()
++    assert storage.batch_get_v2([PoolTransfer(PoolName.SWA, target, keys=["c", "d"])])[
++        PoolName.SWA
++    ] == [True, True]
++    assert [swa.payload[p] for p in swa._to_page_ids(target)] == [b"swa-c", b"swa-d"]
++
++
++def test_unexpected_io_error_fails_closed(setup_storage, monkeypatch):
++    storage, pool, _ = setup_storage
++
++    def broken(*args):
++        raise RuntimeError("native client failed unexpectedly")
++
++    monkeypatch.setattr(storage.client, "spill", broken)
++    source, result = save_pages(storage, pool, ["a"])
++    assert result == [False]
++    assert pool.free(source) == 0
++
++
++def test_descriptor_uses_metadata_without_tensor_indexing():
++    transfer = object.__new__(RaidenKVTransfer)
++
++    class Buffer:
++        shape = (100, 4, 8)
++        dtype = torch.bfloat16
++
++        def element_size(self):
++            return 2
++
++        def __getitem__(self, index):
++            raise AssertionError("TPU operation during metadata inspection")
++
++    transfer._device_tensors = [[Buffer()]]
++    transfer._mgr = SimpleNamespace(
++        node_id=0, get_local_endpoints=lambda: [dict(endpoint="host:1", shards=[0])]
++    )
++    assert transfer.host_store_descriptor()["block_bytes"] == [64]
++
++
++@pytest.mark.parametrize(
++    "overrides", [{"pp_size": 2}, {"attn_cp_size": 2}, {"is_mla_model": True}]
++)
++def test_unimplemented_topologies_rejected(overrides):
++    with pytest.raises(NotImplementedError):
++        RaidenDramStorage(config("localhost:1", **overrides))
++
++
++def test_missing_namespace_rejected():
++    cfg = config("localhost:1")
++    del cfg.extra_config["cache_namespace"]
++    with pytest.raises(ValueError, match="cache_namespace"):
++        RaidenDramStorage(cfg)
++
++
++def test_spec_mismatch_rejects_attach(setup_storage):
++    storage, pool, peer = setup_storage
++    peer.reject_spec = True
++    other = RaidenDramStorage(config(peer.address))
++    try:
++        with pytest.raises(ValueError, match="KVTransferSpec"):
++            other.register_mem_pool_host(pool)
++    finally:
++        other.close()
++
++
++def test_new_prefill_instance_recalls_through_registry(setup_storage):
++    storage, pool, peer = setup_storage
++    save_pages(storage, pool, ["a", "b"])
++    storage.close()
++    pool.payload.clear()
++    other_pool = make_pool("other-prefill:1")
++    peer.pools["other-prefill:1"] = other_pool
++    other = RaidenDramStorage(config(peer.address))
++    try:
++        other.register_mem_pool_host(other_pool)
++        assert other.batch_exists(["a", "b"]) == 2
++        target = other_pool.alloc(4)
++        assert other.batch_get_v1(["a", "b"], target) == [True, True]
++        assert other_pool.payload == {0: b"payload-for-a", 1: b"payload-for-b"}
++    finally:
++        other.close()
++
++
++def test_recall_groups_owners_and_preserves_destination_order(setup_storage):
++    storage, pool, peer = setup_storage
++    save_pages(storage, pool, ["a", "b", "c"])
++    hashes = storage._hashes(storage._pools["kv"], ["a", "b", "c"])
++    peer.metadata[hashes[1]].raiden_id.job_replica_id = "another-owner"
++    target = pool.alloc(6)
++    assert storage.batch_get_v1(["a", "b", "c"], target) == [True, True, True]
++    assert [list(req.host_block_ids) for req in peer.fetches] == [[3, 5], [4]]
++    assert [pool.payload[p] for p in [3, 4, 5]] == [
++        b"payload-for-a",
++        b"payload-for-b",
++        b"payload-for-c",
++    ]
++
++
++@pytest.mark.parametrize(
++    "error,quarantined",
++    [
++        (grpc.StatusCode.RESOURCE_EXHAUSTED, False),
++        (grpc.StatusCode.INVALID_ARGUMENT, False),
++        (grpc.StatusCode.UNAVAILABLE, True),
++    ],
++)
++def test_write_refusal_before_ack_has_safe_slot_lifetime(
++    setup_storage, error, quarantined
++):
++    storage, pool, peer = setup_storage
++    peer.write_error = error
++    source, result = save_pages(storage, pool, ["a"])
++    assert result == [False]
++    assert pool.free(source) == (0 if quarantined else 2)
++
++
++def test_incomplete_fetch_response_cannot_admit_cache_hit(setup_storage):
++    storage, pool, peer = setup_storage
++    save_pages(storage, pool, ["a"])
++    peer.incomplete_fetch = True
++    target = pool.alloc(2)
++    assert storage.batch_get_v1(["a"], target) == [False]
++    assert pool.free(target) == 0
++
++
++def test_invalid_lookup_verdict_is_a_miss_before_any_transfer(setup_storage):
++    storage, pool, peer = setup_storage
++    peer.oversized_lookup = True
++    assert storage.batch_exists(["a"]) == 0
++    target = pool.alloc(2)
++    assert storage.batch_get_v1(["a"], target) == [False]
++    assert not peer.fetches
++    assert pool.free(target) == 2
++
++
++def test_manifest_bootstraps_rank_specific_native_store(setup_storage, tmp_path):
++    _, pool, peer = setup_storage
++    cfg = config(peer.address)
++    cfg.extra_config["manifest_dir"] = str(tmp_path)
++    other = RaidenDramStorage(cfg)
++    try:
++        other.register_mem_pool_host(pool)
++        paths = list(tmp_path.glob("*.json"))
++        assert len(paths) == 1
++        manifest = json.loads(paths[0].read_text())
++        assert manifest["group"] == other._pools["kv"]["group"]
++        assert manifest["block_bytes"] == [8]
++        commands = build_commands(
++            paths,
++            replica="0",
++            server_ip="decode-host",
++            budget=1024,
++            binary="native-store",
++        )
++        assert len(commands) == 1
++        assert f'--data_name={manifest["group"]}' in commands[0]
++        assert "--dram_budget_bytes=1024" in commands[0]
++        assert "--store_server_ip=decode-host" in commands[0]
++        with pytest.raises(ValueError, match="duplicate"):
++            build_commands(
++                paths * 2,
++                replica="0",
++                server_ip="decode-host",
++                budget=1024,
++                binary="native-store",
++            )
++        with pytest.raises(ValueError, match="configured target"):
++            build_commands(
++                paths,
++                replica="unknown",
++                server_ip="decode-host",
++                budget=1024,
++                binary="native-store",
++            )
++    finally:
++        other.close()

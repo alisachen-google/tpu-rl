@@ -1,0 +1,105 @@
+// SPDX-License-Identifier: Apache-2.0
+// Wire-compatible subset of google/tpu-sync at 73499f1d4636.
+// The private package avoids collisions with Raiden's generated descriptors.
+// RPC paths use the upstream service names (see client.py).
+// Field numbers are checked against upstream protos by check_wire.py.
+syntax = "proto3";
+package sglang.tpu.raiden_dram;
+
+message RaidenIdProto {
+  string job_name = 1;
+  string job_replica_id = 2;
+  string data_name = 3;
+  int32 data_replica_idx = 4;
+}
+message RaidenTransferEndpointProto {
+  string endpoint = 1;
+  repeated int64 shards = 2;
+}
+message RaidenWorkerEndpointsProto {
+  repeated RaidenTransferEndpointProto endpoints = 1;
+  int64 node_id = 2;
+  string worker_id = 3;
+}
+message KVBlockMetadata { RaidenIdProto raiden_id = 1; int32 block_id = 2; }
+message LookupRequest { repeated bytes prefix_hashes = 1; RaidenIdProto client_raiden_id = 2; }
+message LookupResponse { repeated KVBlockMetadata results = 1; }
+message StoreInfo {
+  RaidenIdProto raiden_id = 1;
+  string store_server_address = 2;
+  string controller_address = 3;
+  int64 ttl_seconds = 4;
+  string kv_pool_group = 5;
+  int32 evict_tier = 6;
+}
+message ResolveStoreRequest { RaidenIdProto raiden_id = 1; }
+message ResolveStoreResponse { bool found = 1; StoreInfo store = 2; }
+message KVTransferSpec {
+  message BlockArray { int64 block_bytes = 1; }
+  repeated BlockArray block_arrays = 1;
+  int32 num_kv_shards = 2;
+  int32 num_workers = 3;
+}
+message RegisterKVTransferSpecRequest { KVTransferSpec spec = 1; string kv_pool_group = 2; }
+message RegisterKVTransferSpecResponse {
+  bool success = 1;
+  string error_message = 2;
+  KVTransferSpec registered_spec = 3;
+}
+message FetchRequest {
+  repeated bytes block_hashes = 1;
+  repeated int32 device_block_ids = 2;
+  repeated int32 host_block_ids = 3;
+  RaidenIdProto client_raiden_id = 4;
+  repeated RaidenWorkerEndpointsProto client_worker_endpoints = 5;
+}
+message FetchResponse {
+  repeated bytes done_block_hashes = 1;
+  repeated bytes failed_block_hashes = 2;
+  string error_message = 3;
+}
+enum WriteExistState {
+  WRITE_EXIST_STATE_UNSPECIFIED = 0;
+  WRITE_ALL_EXIST = 1;
+  WRITE_PARTIAL_EXIST = 2;
+}
+message WriteRemoteRequest {
+  RaidenIdProto src_raiden_id = 1;
+  repeated bytes block_hashes = 2;
+  repeated int32 src_host_block_ids = 3;
+  repeated RaidenWorkerEndpointsProto src_worker_endpoints = 4;
+  int64 deadline_ms = 5;
+}
+message WriteRemoteEvent {
+  oneof event { WriteRemoteAck ack = 1; WriteRemoteResult result = 2; }
+}
+message WriteRemoteAck {
+  uint64 operation_id = 1;
+  WriteExistState exist_state = 2;
+  repeated bytes existing_hashes = 3;
+  int64 granted_deadline_ms = 4;
+  int64 record_ttl_ms = 5;
+}
+message WriteRemoteResult {
+  PollWriteRemoteResponse.State state = 1;
+  repeated bytes existing_hashes = 2;
+  repeated bytes unregistered_hashes = 3;
+}
+message PollWriteRemoteRequest { uint64 operation_id = 1; int64 wait_ms = 2; }
+message PollWriteRemoteResponse {
+  enum State {
+    STATE_UNSPECIFIED = 0;
+    PENDING = 1;
+    COMMITTED = 2;
+    ALL_EXIST = 3;
+    PARTIAL_EXIST = 4;
+    FAILED = 5;
+    UNKNOWN = 6;
+    STORED_UNREGISTERED = 7;
+  }
+  State state = 1;
+  repeated bytes committed_hashes = 2;
+  repeated bytes failed_hashes = 3;
+  repeated bytes existing_hashes = 4;
+  repeated bytes unregistered_hashes = 5;
+}

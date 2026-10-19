@@ -11,6 +11,7 @@ TPU v7x (Ironwood) RL benchmarking — runbooks, launchers, and command referenc
 - [gemma4/GEMMA4_E2B_RUN.md](gemma4/GEMMA4_E2B_RUN.md) — commands for running gemma4-e2b GRPO RL
 - [gemma4/GEMMA_BENCH_PLAN.md](gemma4/GEMMA_BENCH_PLAN.md) — benchmark ladder
 - [RUNBOOK.md](RUNBOOK.md) — Fix Catalog #1–21
+- [SGLang decode-host DRAM spill/recall](sglang_inference/patches/decode_dram_spill/README.md) — experimental implementation, patch, launch instructions, and CPU validation; TPU e2e pending.
 
 ## Launchers
 - [gemma4/benchmarks/README.md](gemma4/benchmarks/README.md) — reproducible one-command TP1/DP64,
