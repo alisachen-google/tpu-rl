@@ -1,5 +1,45 @@
+diff --git a/python/sglang/srt/arg_groups/hicache_hook.py b/python/sglang/srt/arg_groups/hicache_hook.py
+index 28bfc714bb..a7e35c247a 100644
+--- a/python/sglang/srt/arg_groups/hicache_hook.py
++++ b/python/sglang/srt/arg_groups/hicache_hook.py
+@@ -152,6 +152,22 @@ def resolve_hicache_dcp_compatibility(server_args: Any):
+     )
+ 
+ 
++def _is_raiden_dram_storage(cfg) -> bool:
++    """The experimental Raiden remote-DRAM backend is the one L3 path the
++    raiden io backend supports: it moves pages by host page id over the same
++    native transport, so it needs no flat-page accessors."""
++    if cfg.hicache_storage_backend != "dynamic":
++        return False
++    raw = cfg.hicache_storage_backend_extra_config or ""
++    try:
++        import json
++
++        extra = json.loads(raw) if raw and not raw.startswith("@") else {}
++    except ValueError:
++        return False
++    return str(extra.get("module_path", "")).startswith("sglang_tpu.raiden_dram")
++
++
+ def resolve_layout_io_compatibility(server_args: Any):
+     cfg = resolving_view(server_args)
+     if cfg.hicache_io_backend in ("torch_tpu", "raiden"):
+@@ -234,7 +250,11 @@ def resolve_layout_io_compatibility(server_args: Any):
+                 "--enable-hierarchical-cache."
+             )
+ 
+-    if cfg.hicache_io_backend == "raiden" and cfg.hicache_storage_backend is not None:
++    if (
++        cfg.hicache_io_backend == "raiden"
++        and cfg.hicache_storage_backend is not None
++        and not _is_raiden_dram_storage(cfg)
++    ):
+         raise ValueError(
+             "raiden io backend supports only L2 (TPU<->host) offload and has "
+             "no L3 storage path. Remove --hicache-storage-backend "
 diff --git a/sglang_tpu/kv_pool_host.py b/sglang_tpu/kv_pool_host.py
-index f7096e673881ba1d5753a766c90893f0667a90c6..6ebd915f94197d111a6a78ae696348bc434b3382 100644
+index f7096e6738..6ebd915f94 100644
 --- a/sglang_tpu/kv_pool_host.py
 +++ b/sglang_tpu/kv_pool_host.py
 @@ -13,8 +13,8 @@ consistent under fragmentation, this pool allocates and frees at page
@@ -72,7 +112,7 @@ index f7096e673881ba1d5753a766c90893f0667a90c6..6ebd915f94197d111a6a78ae696348bc
 +        raise NotImplementedError("Raiden host storage requires the page-ID interface")
 diff --git a/sglang_tpu/raiden_dram/README.md b/sglang_tpu/raiden_dram/README.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..334b8c337630783e1f83ddb93b335d9d0118bbcd
+index 0000000000..334b8c3376
 --- /dev/null
 +++ b/sglang_tpu/raiden_dram/README.md
 @@ -0,0 +1,219 @@
@@ -297,14 +337,14 @@ index 0000000000000000000000000000000000000000..334b8c337630783e1f83ddb93b335d9d
 +in Raiden's `kv_cache_store_service.cc` at the pinned tpu-sync revision above.
 diff --git a/sglang_tpu/raiden_dram/__init__.py b/sglang_tpu/raiden_dram/__init__.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..8df9eef4e28024cd4f49303949805567d24278c9
+index 0000000000..8df9eef4e2
 --- /dev/null
 +++ b/sglang_tpu/raiden_dram/__init__.py
 @@ -0,0 +1 @@
 +"""Raiden host-store transport for TPU HiCache remote DRAM storage."""
 diff --git a/sglang_tpu/raiden_dram/check_wire.py b/sglang_tpu/raiden_dram/check_wire.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..8df8069555f77ae4569feb572a350a344a9caea8
+index 0000000000..8df8069555
 --- /dev/null
 +++ b/sglang_tpu/raiden_dram/check_wire.py
 @@ -0,0 +1,135 @@
@@ -445,10 +485,10 @@ index 0000000000000000000000000000000000000000..8df8069555f77ae4569feb572a350a34
 +    main()
 diff --git a/sglang_tpu/raiden_dram/client.py b/sglang_tpu/raiden_dram/client.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..0d73b3b6ccfcce90f6639802668af0915bf47a25
+index 0000000000..446fcaafef
 --- /dev/null
 +++ b/sglang_tpu/raiden_dram/client.py
-@@ -0,0 +1,298 @@
+@@ -0,0 +1,311 @@
 +# SPDX-License-Identifier: Apache-2.0
 +"""Raiden's store RPCs; payload stays on the native block transport.
 +
@@ -484,6 +524,7 @@ index 0000000000000000000000000000000000000000..0d73b3b6ccfcce90f6639802668af091
 +        self.timeout_s = timeout_s
 +        self._channels = {}
 +        self._registry_address = registry_address
++        self._warned_legacy_store_info = False
 +
 +    def _rpc(self, address, service, method, response_cls, *, stream=False):
 +        channel = self._channels.setdefault(address, None)
@@ -547,7 +588,19 @@ index 0000000000000000000000000000000000000000..0d73b3b6ccfcce90f6639802668af091
 +        if not response.found:
 +            return None
 +        store = response.store
-+        if store.kv_pool_group != group or store.evict_tier < 1:
++        if not store.kv_pool_group and store.evict_tier == 0:
++            # Older tpu-sync registries (e.g. the 2026-10-02 wheel) accept
++            # --kv_pool_group/--evict_tier at the store node but do not echo
++            # them in StoreInfo. The identity match below is the remaining
++            # guard; the KVTransferSpec check happens at the store itself.
++            if not self._warned_legacy_store_info:
++                self._warned_legacy_store_info = True
++                logger.warning(
++                    "Raiden registry returned no kv_pool_group/evict_tier for %s; "
++                    "accepting on identity only (legacy tpu-sync wheel)",
++                    identity.data_name,
++                )
++        elif store.kv_pool_group != group or store.evict_tier < 1:
 +            raise ValueError(
 +                "Raiden destination is not a higher-tier store in this KV pool group"
 +            )
@@ -749,7 +802,7 @@ index 0000000000000000000000000000000000000000..0d73b3b6ccfcce90f6639802668af091
 +        self._channels.clear()
 diff --git a/sglang_tpu/raiden_dram/launch_stores.py b/sglang_tpu/raiden_dram/launch_stores.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..093688bca86db1c92116c623a641ebd663026760
+index 0000000000..093688bca8
 --- /dev/null
 +++ b/sglang_tpu/raiden_dram/launch_stores.py
 @@ -0,0 +1,101 @@
@@ -856,10 +909,10 @@ index 0000000000000000000000000000000000000000..093688bca86db1c92116c623a641ebd6
 +    main()
 diff --git a/sglang_tpu/raiden_dram/storage.py b/sglang_tpu/raiden_dram/storage.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..27689c29c876b38ad6039c9cab9612ace791979f
+index 0000000000..3790ee708c
 --- /dev/null
 +++ b/sglang_tpu/raiden_dram/storage.py
-@@ -0,0 +1,390 @@
+@@ -0,0 +1,401 @@
 +# SPDX-License-Identifier: Apache-2.0
 +"""Dynamic HiCache storage backend for Raiden stores on decode hosts.
 +
@@ -1243,8 +1296,19 @@ index 0000000000000000000000000000000000000000..27689c29c876b38ad6039c9cab9612ac
 +        )
 +
 +    def get_stats(self):
++        # unified_radix_cache.check_hicache_events() expects a StorageMetrics
++        # object (it sets .prefetch_stats on it); tests read the counters by key.
++        from sglang.srt.observability.metrics_collector import StorageMetrics
++
++        class _Stats(StorageMetrics):
++            def __getitem__(self, key):
++                return getattr(self, key)
++
 +        with self._lock:
-+            return dict(self._stats)
++            metrics = _Stats()
++            for key, value in self._stats.items():
++                setattr(metrics, key, value)
++            return metrics
 +
 +    def close(self):
 +        with self._lock:
@@ -1252,7 +1316,7 @@ index 0000000000000000000000000000000000000000..27689c29c876b38ad6039c9cab9612ac
 +            self._closed = True
 diff --git a/sglang_tpu/raiden_dram/verify_engine.py b/sglang_tpu/raiden_dram/verify_engine.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..76747fbbdabf026aa48ad6a83e23068930810dc9
+index 0000000000..76747fbbda
 --- /dev/null
 +++ b/sglang_tpu/raiden_dram/verify_engine.py
 @@ -0,0 +1,103 @@
@@ -1361,7 +1425,7 @@ index 0000000000000000000000000000000000000000..76747fbbdabf026aa48ad6a83e230689
 +    main()
 diff --git a/sglang_tpu/raiden_dram/wire.proto b/sglang_tpu/raiden_dram/wire.proto
 new file mode 100644
-index 0000000000000000000000000000000000000000..04252b5b4d1b236d3348337e943b7733879ff69d
+index 0000000000..04252b5b4d
 --- /dev/null
 +++ b/sglang_tpu/raiden_dram/wire.proto
 @@ -0,0 +1,105 @@
@@ -1472,7 +1536,7 @@ index 0000000000000000000000000000000000000000..04252b5b4d1b236d3348337e943b7733
 +}
 diff --git a/sglang_tpu/raiden_dram/wire_pb2.py b/sglang_tpu/raiden_dram/wire_pb2.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..1e3b85bd9258b800b544b1e2832386135121aa4a
+index 0000000000..1e3b85bd92
 --- /dev/null
 +++ b/sglang_tpu/raiden_dram/wire_pb2.py
 @@ -0,0 +1,80 @@
@@ -1557,7 +1621,7 @@ index 0000000000000000000000000000000000000000..1e3b85bd9258b800b544b1e283238613
 +  _globals['_POLLWRITEREMOTERESPONSE_STATE']._serialized_end=2884
 +# @@protoc_insertion_point(module_scope)
 diff --git a/sglang_tpu/raiden_transfer.py b/sglang_tpu/raiden_transfer.py
-index 5ef0a3e89e3eb38945579a402cbef8771a1c9c57..8f0e90649ab0de7c61630c9d9fa0641ab9e67cb8 100644
+index 5ef0a3e89e..8f0e90649a 100644
 --- a/sglang_tpu/raiden_transfer.py
 +++ b/sglang_tpu/raiden_transfer.py
 @@ -14,6 +14,7 @@ the running model), and a DMA that completes with an error raises at the poll.
@@ -1598,7 +1662,7 @@ index 5ef0a3e89e3eb38945579a402cbef8771a1c9c57..8f0e90649ab0de7c61630c9d9fa0641a
      ) -> RaidenFutureEvent:
 diff --git a/test/manual/tpu/test_raiden_dram_spill_recall_ondevice.py b/test/manual/tpu/test_raiden_dram_spill_recall_ondevice.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..caa1f10ef547e3ffcddef6e6adb41373f41d5f56
+index 0000000000..caa1f10ef5
 --- /dev/null
 +++ b/test/manual/tpu/test_raiden_dram_spill_recall_ondevice.py
 @@ -0,0 +1,158 @@
@@ -1762,7 +1826,7 @@ index 0000000000000000000000000000000000000000..caa1f10ef547e3ffcddef6e6adb41373
 +            log.close()
 diff --git a/test/registered/unit/hardware_backend/tpu/test_raiden_dram_storage.py b/test/registered/unit/hardware_backend/tpu/test_raiden_dram_storage.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..958dd4845c9736bfc396da9317a748622cf8eaec
+index 0000000000..958dd4845c
 --- /dev/null
 +++ b/test/registered/unit/hardware_backend/tpu/test_raiden_dram_storage.py
 @@ -0,0 +1,620 @@

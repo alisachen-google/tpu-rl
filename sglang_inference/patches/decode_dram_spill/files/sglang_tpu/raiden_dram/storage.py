@@ -381,8 +381,19 @@ class RaidenDramStorage(HiCacheStorage):
         )
 
     def get_stats(self):
+        # unified_radix_cache.check_hicache_events() expects a StorageMetrics
+        # object (it sets .prefetch_stats on it); tests read the counters by key.
+        from sglang.srt.observability.metrics_collector import StorageMetrics
+
+        class _Stats(StorageMetrics):
+            def __getitem__(self, key):
+                return getattr(self, key)
+
         with self._lock:
-            return dict(self._stats)
+            metrics = _Stats()
+            for key, value in self._stats.items():
+                setattr(metrics, key, value)
+            return metrics
 
     def close(self):
         with self._lock:

@@ -33,6 +33,7 @@ class RaidenDramClient:
         self.timeout_s = timeout_s
         self._channels = {}
         self._registry_address = registry_address
+        self._warned_legacy_store_info = False
 
     def _rpc(self, address, service, method, response_cls, *, stream=False):
         channel = self._channels.setdefault(address, None)
@@ -96,7 +97,19 @@ class RaidenDramClient:
         if not response.found:
             return None
         store = response.store
-        if store.kv_pool_group != group or store.evict_tier < 1:
+        if not store.kv_pool_group and store.evict_tier == 0:
+            # Older tpu-sync registries (e.g. the 2026-10-02 wheel) accept
+            # --kv_pool_group/--evict_tier at the store node but do not echo
+            # them in StoreInfo. The identity match below is the remaining
+            # guard; the KVTransferSpec check happens at the store itself.
+            if not self._warned_legacy_store_info:
+                self._warned_legacy_store_info = True
+                logger.warning(
+                    "Raiden registry returned no kv_pool_group/evict_tier for %s; "
+                    "accepting on identity only (legacy tpu-sync wheel)",
+                    identity.data_name,
+                )
+        elif store.kv_pool_group != group or store.evict_tier < 1:
             raise ValueError(
                 "Raiden destination is not a higher-tier store in this KV pool group"
             )

@@ -8,6 +8,14 @@ HiCache storage interface using Raiden's native remote-store protocol.
 remain pending.** This is a source-and-patch bundle for `sglang-torchtpu`, not an
 enabled feature of the existing `tpu-rl` inference or RL launchers.
 
+## Live validation (2026-10-20)
+
+Validated on a 1P/1D pair (gpt-oss-120b, TP8 + TP8) after four local fixes that the bundle
+now carries. Single-turn recall after a flush is 1.8x to 3.4x faster than recompute; under an
+agentic multi-session workload the store gives 2.3x to 2.9x output throughput and 4x to 8x lower
+median turn latency in `buffer_only` host-memory mode. Details, limits and raw data:
+[LIVE_VALIDATION.md](LIVE_VALIDATION.md) and `live_test/`.
+
 ## How it works
 
 HiCache is SGLang's hierarchical KV cache. Its prefix matching and cache
