@@ -1,0 +1,4 @@
+[env] host=t1v-n-eb299eb1-w-1 ip=10.128.0.90 TPU_WORKER_HOSTNAMES=t1v-n-eb299eb1-w-1 python=/home/alisachen_google_com/venv/sglang/bin/python sglang=f2588cdf79
+[launch] root disk low (9 GB free): pruning inductor caches
+/dev/root        96G   88G  8.8G  91% /
+[launch] plan written to /home/alisachen_google_com/pd_disagg/results/runs/agentic_base_r05/decode/launch_plan.txt; starting server (log: /home/alisachen_google_com/pd_disagg/results/runs/agentic_base_r05/decode/server.log)
