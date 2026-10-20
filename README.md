@@ -12,6 +12,8 @@ TPU v7x (Ironwood) RL benchmarking — runbooks, launchers, and command referenc
 - [gemma4/GEMMA_BENCH_PLAN.md](gemma4/GEMMA_BENCH_PLAN.md) — benchmark ladder
 - [RUNBOOK.md](RUNBOOK.md) — Fix Catalog #1–21
 - [SGLang decode-host DRAM spill/recall](sglang_inference/patches/decode_dram_spill/README.md) — experimental implementation, patch, launch instructions, and CPU validation; TPU e2e pending.
+- [SGLang versus vLLM TorchTPU disaggregation](sglang_inference/DISAGG_FEATURE_COMPARISON.md) — feature differences beyond DRAM spill, implementation priorities, pinned sources, and open PRs.
+- [Disaggregation benchmark plan](sglang_inference/DISAGG_BENCHMARK_PLAN.md) — controlled experiments, correctness gates, and performance metrics; proposed runs, not measured results.
 
 ## Launchers
 - [gemma4/benchmarks/README.md](gemma4/benchmarks/README.md) — reproducible one-command TP1/DP64,

@@ -1,5 +1,19 @@
 # sglang-torchtpu 1P/1D disaggregation break-test — runbook
 
+## Feature research beyond the campaign
+
+- [SGLang versus vLLM TorchTPU disaggregation](DISAGG_FEATURE_COMPARISON.md) —
+  October 20 source comparison covering block-major KV, P/D topology, GDN
+  state resharding, independent block sizes, short-suffix prefill on decode,
+  existing overlap/cache features, routing, and open implementation PRs.
+- [Benchmark and validation plan](DISAGG_BENCHMARK_PLAN.md) — proposed
+  experiments and evidence requirements. No new TPU results are claimed.
+
+The research uses its own pinned revisions. The runbook below records the
+older campaign environment.
+
+## Campaign environment
+
 Hosts: prefill `10.128.15.217` (wyzhang-tpu7x-16-a, t1v-n-eb299eb1-w-0), decode `10.128.0.90` (-b, w-1, this box).
 Driver runs on **-b** as `alisachen_google_com`; -a is reached as the VM service-account OS Login user
 (`ssh -i ~/.ssh/google_compute_engine sa_101411256518727260534@10.128.15.217`, sudo → `sudo -iu alisachen_google_com`).

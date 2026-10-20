@@ -1,5 +1,11 @@
 # SGLang implementation versus vLLM TorchTPU
 
+For the broader feature review beyond remote spill, see
+[SGLang versus vLLM disaggregation](../../DISAGG_FEATURE_COMPARISON.md) and its
+[benchmark plan](../../DISAGG_BENCHMARK_PLAN.md). That review uses newer
+framework revisions; the spill-specific comparison below retains its original
+implementation pins.
+
 Both paths aim to preserve prefill-generated KV in remote host DRAM and reuse
 it on a later request. Both rely on Raiden for native transport. This SGLang
 prototype integrates that mechanism through HiCache; it is not a full port of
