@@ -70,6 +70,27 @@ share, 112k private context, 2k tool tokens and 256 output tokens per turn, thin
 From turn 3 on, all 12 sessions got their private context from the store at each turn. The
 prefill counters: 127.3M tokens of storage hits, 127.2M prefetched, 0 unfulfilled.
 
+## Capacity ladder (`live_test/phase_capacity.sh`)
+
+Throughput as a function of the working set. 4, 8, 12, 16 and 20 concurrent sessions, 128k
+context each, 4 turns, 4k tool tokens and 256 output tokens per turn. Baseline = HBM (786k
+tokens) + the full local host tier (ratio 2, 1.57M tokens, `cache` mode). Store pair = HBM +
+`buffer_only` staging + 16 stores x 28 GiB on the decode host. Caches flushed and stores
+restarted between points.
+
+| Sessions | Working set | Baseline tok/s | Store tok/s | Gain | Baseline TTFT p50 | Store TTFT p50 | Prefix tokens by tier (baseline -> store) |
+|---|---|---|---|---|---|---|---|
+| 4 | 0.53M | 100.8 | 103.9 | 1.0x | 1.5 s | 1.4 s | 1.62M HBM -> 1.62M HBM |
+| 8 | 1.05M | 121.0 | 112.8 | 0.9x | 1.7 s | 6.0 s | 0.13M HBM + 3.11M host -> 1.87M HBM + 1.38M store |
+| 12 | 1.58M | 94.2 | 97.2 | 1.0x | 22.7 s | 19.9 s | 0.13M HBM + 3.95M host -> 0.39M HBM + 4.47M store |
+| **16** | 2.11M | 45.6 | **94.4** | **2.1x** | 90.6 s | **26.1 s** | 0.13M HBM + 0.65M host -> 0.25M HBM + 6.24M store |
+| **20** | 2.64M | 43.7 | **95.2** | **2.2x** | 114.1 s | **33.2 s** | 0.13M HBM + 0.38M host -> 0.25M HBM + 7.86M store |
+
+The added capacity does not raise peak throughput. It removes the cliff. The local tiers hold
+about 12 to 14 concurrent 128k sessions on this rig. Past that, the baseline recomputes almost
+every context and its throughput halves; the store pair stays flat at about 95 tok/s with
+0 unfulfilled prefetches (159.6M tokens of storage hits over the ladder).
+
 ## Race, deadlock and hang checks
 
 CPU (`files/test/.../test_raiden_dram_concurrency.py`, 5 tests): 8 threads and a flusher for 10 s
