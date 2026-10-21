@@ -1,0 +1,8 @@
+[env] host=t1v-n-eb299eb1-w-1 ip=10.128.0.90 TPU_WORKER_HOSTNAMES=t1v-n-eb299eb1-w-1 python=/home/alisachen_google_com/venv/sglang/bin/python sglang=97cbd52308
+[launch] root disk low (4 GB free): pruning inductor caches
+/dev/root        96G   93G  3.6G  97% /
+[launch] plan written to /home/alisachen_google_com/pd_disagg/results/runs/planc_1/decode/launch_plan.txt; starting server (log: /home/alisachen_google_com/pd_disagg/results/runs/planc_1/decode/server.log)
+[env] host=t1v-n-eb299eb1-w-1 ip=10.128.0.90 TPU_WORKER_HOSTNAMES=t1v-n-eb299eb1-w-1 python=/home/alisachen_google_com/venv/sglang/bin/python sglang=97cbd52308
+[launch] root disk low (4 GB free): pruning inductor caches
+/dev/root        96G   93G  3.7G  97% /
+[launch] plan written to /home/alisachen_google_com/pd_disagg/results/runs/planc_1/decode/launch_plan.txt; starting server (log: /home/alisachen_google_com/pd_disagg/results/runs/planc_1/decode/server.log)
