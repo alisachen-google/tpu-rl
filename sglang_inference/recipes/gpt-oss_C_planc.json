@@ -139,7 +139,7 @@
    "hicache_mem_layout": "page_first_fused",
    "disaggregation_decode_enable_radix_cache": true,
    "enable_hierarchical_cache": true,
-   "hicache_ratio": 2,
+   "hicache_ratio": 4,
    "hicache_write_policy": "write_through"
   },
   "runtime_envs": {
