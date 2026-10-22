@@ -74,11 +74,3 @@ Engines: `http://<ip>:30000`; LB: `http://10.128.15.217:8080` (`/workers`, `/hea
 ## Gates in practice (see results/COVERAGE.md, FINDINGS.md F-3/F-4)
 - Strict token-exact differential only at matched concurrency 1 (greedy decode is not batch-invariant on this stack).
 - Always: needles 3/3, completion_tokens exact, finish_reason, no errors, resource return (`sglang:num_running_reqs`=0, `full_token_usage`≈0), GSM8K-100 ≥ 0.96.
-
-## Experimental decode-host DRAM spill/recall
-
-[Source and patch bundle](patches/decode_dram_spill/README.md) for
-**prefill KV → decode-host DRAM → prefill**, implemented as a dynamic HiCache
-storage backend over Raiden. Includes launch instructions and tests. Apply it
-to its pinned SGLang revision, which is newer than this campaign's build above.
-126 CPU tests passed; native TPU and two-host serving validation remain pending.
