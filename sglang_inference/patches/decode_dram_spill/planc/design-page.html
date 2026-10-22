@@ -1,0 +1,931 @@
+<title>Decode-DRAM Spill Design</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (68ch) with full-width figure and table bands; sticky part nav on wide screens. */
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --fg:#1d2430; --muted:#5b6678; --line:#d9dee6;
+  --accent:#b5541c; --accent-ink:#8a3f12; --ok:#2f7d4f; --warn:#b7770d; --bad:#b3362b;
+  --code-bg:#eef1f5; --display:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif; --mono:"IBM Plex Mono",Menlo,Consolas,monospace;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --chart-surface:#fcfcfb; --grid:#e3e6ea;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121619;--panel:#1a2024;--fg:#e6eaef;--muted:#9aa5b4;--line:#2c353d;--accent:#e08a4c;--accent-ink:#f0a66d;--ok:#5fbf86;--warn:#e0a63a;--bad:#e5695c;--code-bg:#222a30;--s1:#3987e5;--s2:#d95926;--s3:#199e70;--chart-surface:#1a1a19;--grid:#2f3840;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121619;--panel:#1a2024;--fg:#e6eaef;--muted:#9aa5b4;--line:#2c353d;--accent:#e08a4c;--accent-ink:#f0a66d;--ok:#5fbf86;--warn:#e0a63a;--bad:#e5695c;--code-bg:#222a30;--s1:#3987e5;--s2:#d95926;--s3:#199e70;--chart-surface:#1a1a19;--grid:#2f3840;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55;margin:0;padding-block:0 4rem;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:72rem;margin:0 auto;display:grid;grid-template-columns:14rem minmax(0,1fr);gap:2.5rem}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}nav.toc{display:none}}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;padding-top:2.5rem;font-size:.85rem}
+nav.toc a{display:block;color:var(--muted);text-decoration:none;padding:.2rem 0;border-left:2px solid transparent;padding-left:.6rem}
+nav.toc a.part{font-weight:600;color:var(--fg);margin-top:.5rem}
+nav.toc a:hover,nav.toc a:focus{color:var(--accent-ink);border-color:var(--accent)}
+main{min-width:0}
+header.hero{padding-top:2.5rem;border-bottom:1px solid var(--line);margin-bottom:1.5rem}
+.eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink)}
+h1{font-family:var(--display);font-weight:600;font-size:2.2rem;line-height:1.15;margin:.3rem 0 .6rem;text-wrap:balance}
+h2{font-family:var(--display);font-weight:600;font-size:1.6rem;margin:3rem 0 .8rem;text-wrap:balance;scroll-margin-top:1rem;padding-top:1rem;border-top:1px solid var(--line)}
+h2 .partno{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);display:block;margin-bottom:.2rem}
+h3{font-size:1.1rem;font-weight:600;margin:1.8rem 0 .5rem;scroll-margin-top:1rem}
+p,li{max-width:68ch}
+.lede{font-size:1.1rem;color:var(--muted);max-width:68ch}
+a{color:var(--accent-ink)}
+code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);padding:.1em .35em;border-radius:3px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.5;background:var(--code-bg);padding:.9rem 1rem;border-radius:6px;overflow-x:auto;max-width:100%}
+pre code{background:none;padding:0;font-size:inherit}
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:.8rem;margin:1.2rem 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:.9rem 1rem;min-width:0}
+.card .k{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.card .v{font-family:var(--display);font-size:1.35rem;font-weight:600;margin-top:.2rem}
+.card .s{font-size:.85rem;color:var(--muted);margin-top:.25rem}
+.pill{display:inline-block;font-family:var(--mono);font-size:.72rem;padding:.1rem .5rem;border-radius:999px;border:1px solid var(--line);vertical-align:middle}
+.ok{color:var(--ok);border-color:var(--ok)}.warn{color:var(--warn);border-color:var(--warn)}.bad{color:var(--bad);border-color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:.8rem 0}
+.tbl{overflow-x:auto;max-width:100%}
+th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:.85rem}
+figure{margin:1.4rem 0;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:1rem}
+figure svg{display:block;max-width:100%;height:auto;color:var(--fg)}
+figcaption{font-size:.85rem;color:var(--muted);margin-top:.6rem;max-width:68ch}
+.chart{background:var(--chart-surface);border-radius:6px;padding:.4rem}
+.legend{display:flex;gap:1.2rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin:.4rem .2rem 0}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.4rem;vertical-align:-1px;background:var(--sw)}
+.finding{border-left:3px solid var(--line);padding:.2rem 0 .2rem 1rem;margin:.9rem 0}
+.finding.risk{border-color:var(--warn)}.finding.gap{border-color:var(--bad)}.finding.good{border-color:var(--ok)}
+.finding b{display:block;margin-bottom:.15rem}
+.path{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+ol.flow li{margin:.35rem 0}
+.caution{border:1px solid var(--warn);border-radius:6px;padding:.6rem .9rem;max-width:68ch;margin:.8rem 0}
+.caution b{color:var(--warn)}
+.tip{position:fixed;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:.35rem .6rem;font-size:.8rem;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:20}
+.tip[hidden]{display:none}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Sections">
+  <a href="#summary">Summary</a>
+  <a class="part" href="#background">Background · HiCache</a>
+  <a href="#bg-hicache">HiCache on sglang-torchtpu</a>
+  <a href="#bg-vllm">vllm-torchtpu offload</a>
+  <a href="#bg-diff">Differences</a>
+  <a class="part" href="#design">1 · Design</a>
+  <a href="#problem">Problem and goal</a>
+  <a href="#arch">Architecture</a>
+  <a href="#ownership">Ownership rules</a>
+  <a href="#config">Configuration</a>
+  <a class="part" href="#trace">2 · Code path trace</a>
+  <a href="#entry">Entry points</a>
+  <a href="#spill">Spill path</a>
+  <a href="#recall">Recall path</a>
+  <a href="#impl">Implementation details</a>
+  <a href="#fixes">Fixes applied</a>
+  <a class="part" href="#plan">3 · Benchmarking plan</a>
+  <a href="#rig">Rig and build</a>
+  <a href="#workloads">Workloads</a>
+  <a href="#metrics">Metrics and criteria</a>
+  <a class="part" href="#results">4 · Results</a>
+  <a href="#r-single">Single turn</a>
+  <a href="#r-agentic">Agentic</a>
+  <a href="#r-capacity">Capacity vs throughput</a>
+  <a href="#r-stress">Stress and hangs</a>
+  <a href="#limits">Limits and risks</a>
+  <a class="part" href="#planc">5 · Plan C</a>
+  <a href="#c-rule">The rule</a>
+  <a href="#c-exists">What exists</a>
+  <a href="#c-flow">Data flow</a>
+  <a href="#c-seq">Interaction sequence</a>
+  <a href="#c-tiers">Prefill DRAM vs decode DRAM</a>
+  <a href="#c-recall">Recall steps</a>
+  <a href="#c-gaps">What to add</a>
+  <a href="#c-tradeoffs">Trade-offs</a>
+  <a href="#c-step1">Step 1 result</a>
+  <a href="#c-results">Step 4 result</a>
+  <a href="#c-plan">Order of work</a>
+  <a href="#runbook">Procedure</a>
+  <a href="#sources">Sources</a>
+</nav>
+<main>
+<header class="hero">
+  <div class="eyebrow">sglang-torchtpu · experimental · validated 2026-10-20</div>
+  <h1>Prefill KV goes to the decode host's DRAM and comes back</h1>
+  <p class="lede">Design, code path trace, benchmarking plan and results for the <code>decode_dram_spill</code> bundle in tpu-rl. The feature lets a TPU prefill engine spill cached KV pages into Raiden host-store processes on the decode host, and recall them on a later turn.</p>
+</header>
+
+<h2 id="summary" style="border-top:0;padding-top:0;margin-top:1rem">Summary</h2>
+<div class="verdict">
+  <div class="card"><div class="k">Plan validity</div><div class="v">Valid after four fixes</div><div class="s">The patch applies to base f2588cdf. As shipped, the prefill engine does not start and no store is accepted. Four local fixes made it run. They are in the bundle now.</div></div>
+  <div class="card"><div class="k">Is it in main?</div><div class="v">No</div><div class="s">Main's TPU host pool still refuses L3 storage. No PR or issue proposes a Raiden store backend.</div></div>
+  <div class="card"><div class="k">Single turn, after a flush</div><div class="v">1.8× to 3.4× faster</div><div class="s">Plan B: recall from decode-host store DRAM against recompute, 128k and 256k prefixes.</div></div>
+  <div class="card"><div class="k">Plan C, decode HiCache pull</div><div class="v">3.8× to 8.0× faster</div><div class="s">Single-turn recall from the decode engine's HiCache against recompute. No gain past decode HBM on gpt-oss until the decode offloads its sliding-window pages (Part 5).</div></div>
+  <div class="card"><div class="k">Agentic churn</div><div class="v">2.3× to 2.9× throughput</div><div class="s">8 and 12 concurrent sessions. Median turn latency 4× to 8× lower, in <code>buffer_only</code> host mode.</div></div>
+  <div class="card"><div class="k">Capacity ladder</div><div class="v">Flat at 95 tok/s to 20 sessions</div><div class="s">Baseline falls to 44 tok/s past local capacity (16+ sessions). The added DRAM capacity gives 2.1× to 2.2× throughput there and 3.4× lower median turn latency.</div></div>
+  <div class="card"><div class="k">Races, deadlocks, hangs</div><div class="v">None found</div><div class="s">5 CPU tests, 4 live phases, 264 health probes clean. Two bounded stalls documented.</div></div>
+  <div class="card"><div class="k">Tests</div><div class="v">93 CPU + native TPU</div><div class="s">41 bundle, 5 concurrency, 47 existing Raiden tests; native round trip with real DMA passed.</div></div>
+</div>
+
+<!-- ============================ BACKGROUND ============================ -->
+<h2 id="background"><span class="partno">Background</span>HiCache on sglang-torchtpu, and how vllm-torchtpu differs</h2>
+<p>Both stacks move KV between TPU HBM and host DRAM over tpu-sync (Raiden). They put the control of that movement in different places. This section describes the sglang-torchtpu design that Parts 1 to 5 build on, then sets it against the vllm-torchtpu design.</p>
+
+<h3 id="bg-hicache">HiCache in sglang-torchtpu</h3>
+<p>HiCache is upstream SGLang's hierarchical KV cache. The radix tree keeps one entry per cached token run and records, for each node, where its KV lives: on the device (L1), in the host pool (L2), or in a storage backend (L3). The scheduler thread owns the tree. A cache controller moves pages between tiers on background threads and reports back through ack queues that the scheduler drains each step.</p>
+<div class="tbl"><table>
+<tr><th>Tier</th><th>Memory</th><th>Owner</th><th>Fill policy</th><th>Hit cost on this rig, 128k</th></tr>
+<tr><td>L1</td><td>TPU HBM, the fused KV pool</td><td>the allocator and the radix tree</td><td>every computed page</td><td>0.9 s turn-2 TTFT</td></tr>
+<tr><td>L2</td><td>host DRAM, <code>TpuRaidenHostKVCache</code>, one pool per sub-pool</td><td>the same radix tree, host values on the nodes</td><td><code>write_through</code> at production, or <code>write_back</code> at eviction</td><td>1.2 to 2.0 s</td></tr>
+<tr><td>L3</td><td>a storage backend: file, mooncake, hf3fs, nixl, or <code>dynamic</code></td><td>the backend's own directory</td><td>backup of every L2 page, prefetch on a miss</td><td>Plan B: 2.8 to 5.8 s</td></tr>
+</table></div>
+<p>The TPU plugin replaces only the data plane, in <code>sglang_tpu/</code>:</p>
+<ul>
+  <li><b><code>raiden_transfer.py</code></b> owns one Raiden <code>KVCacheManager</code> per rank over the fused device pool and the host pool. D2H and H2D are raw-buffer DMAs that return a pollable future. No device stream and no CUDA event exist on TPU, so the controller gates the whole forward on a batch event instead of per-layer events.</li>
+  <li><b><code>raiden_cache_controller.py</code></b> overrides the three transfer-issuing methods of the upstream controller. Queues, ack draining and write policy stay upstream.</li>
+  <li><b><code>kv_pool_host.py</code></b> is a page-granular host pool. Raiden owns the pinned memory; SGLang owns the free list. Plan B added <code>quarantine()</code> to it.</li>
+  <li><b><code>kv_free_fence.py</code></b> and the hybrid controller hold a D2H until the forward that wrote the page has landed, because Raiden's D2H is not ordered against TPU compute.</li>
+  <li><b>Hybrid sliding-window models</b> get one host pool per sub-pool with the raiden io backend. The torch_tpu io backend mirrors only the full-attention pool and rejects hybrid models.</li>
+  <li><b>Decode side</b>: with <code>--disaggregation-decode-enable-radix-cache</code> and HiCache, the decode engine keeps finished requests in its tree and host pool. <code>pd_decode_swa_hicache.py</code> keeps only full-attention KV in RAM for sliding-window models and holds a request that reuses pages of an unfinished restore.</li>
+</ul>
+<p>Two knobs matter for this work. <code>--hicache-host-memory-mode cache</code> keeps L2 as a resident tier; <code>buffer_only</code> turns it into pass-through staging for L3, which Plan B needed so that recalls had landing slots. <code>--hicache-ratio</code> sizes L2 as a multiple of L1.</p>
+
+<h3 id="bg-vllm">How vllm-torchtpu does it</h3>
+<p>vllm-torchtpu has no host tier inside its scheduler's prefix cache. Host offload is a KV connector, <code>TPURaidenOffloadingConnector</code>, that subclasses vLLM's <code>OffloadingConnector</code>. The memory, the directory, the LRU, the pins and the DMA all live in tpu-sync's native <code>KVCacheStore</code>, which runs in the scheduler process. Workers register their device KV buffers once with the store's <code>KVCacheManager</code> and act as passive DMA endpoints for the store's <code>save</code> and <code>load</code> jobs.</p>
+<ul>
+  <li><b>Save fence.</b> Each rank records a TPU event after the forward that wrote the blocks and acknowledges the job only when the event has retired. The scheduler launches the save after all ranks acknowledged. Same problem as the sglang D2H fence, solved per job instead of per batch.</li>
+  <li><b>Block reuse.</b> When a device block is about to be reused, the scheduler cancels fence-pending stores and drains active transfers before it ships the step's metadata. sglang keeps the host reference on the tree node instead, so the page cannot be reused while a backup reads it.</li>
+  <li><b>Failure.</b> A failed load reports its destination blocks and the request recomputes them. A failed save is retried once. Plan B copied both rules.</li>
+  <li><b>Granularity.</b> One store entry per physical kernel block, with a logical vLLM block mapped to several entries by a size factor. Keys are coarse, in the thousand-token range. SGLang keys are 64-token pages.</li>
+  <li><b>P/D.</b> A decode engine stacks the offload connector under the P/D transfer connector in a <code>TPUMultiConnector</code>, so the decode host's DRAM holds KV for the decode engine's own reuse. The prefill engine does not read it back.</li>
+</ul>
+
+<h3 id="bg-diff">The differences that matter here</h3>
+<div class="tbl"><table>
+<tr><th>Question</th><th>sglang-torchtpu HiCache</th><th>vllm-torchtpu offload connector</th></tr>
+<tr><td>Who knows where a page is</td><td>the Python radix tree in each scheduler rank, with host values on nodes</td><td>the native <code>KVCacheStore</code> directory in the scheduler process</td></tr>
+<tr><td>Who moves bytes</td><td>each rank's own <code>KVCacheManager</code>, driven by the controller threads</td><td>the store, with workers as passive endpoints</td></tr>
+<tr><td>Unit of a key</td><td>64-token page, hash chained from the root</td><td>kernel block, a few thousand tokens, sub-hashed per entry</td></tr>
+<tr><td>Eviction</td><td>radix-tree LRU over nodes, per tier</td><td>store LRU over entries</td></tr>
+<tr><td>Ordering against compute</td><td>D2H fence and KV free fence, whole batch</td><td>per-job TPU event fence and scheduler-side drain</td></tr>
+<tr><td>Decode engine in P/D</td><td>its own HiCache, with prefix match and restore before the pull</td><td>offload connector stacked under the transfer connector</td></tr>
+<tr><td>Prefill recall of an evicted prefix</td><td>Plan B: a store-backed L3. Plan C: the decode engine's HiCache over the reverse pull</td><td>not a feature; the offload serves the engine that saved</td></tr>
+<tr><td>Cross-engine sharing</td><td>only through an L3 backend</td><td>the store is per engine; a global store exists as a separate mode</td></tr>
+</table></div>
+<p>Plan B is the vllm-torchtpu shape ported to SGLang: a native store owns the lending memory, the engine talks to it through a storage backend. Plan C is the HiCache shape: the radix trees stay the only directories, and Raiden is transport only. The reviewer's request for Plan C is a request to stay with the SGLang design rather than import the vLLM one.</p>
+
+<!-- ============================ PART 1 ============================ -->
+<h2 id="design"><span class="partno">Part 1</span>Design</h2>
+
+<h3 id="problem">Problem and goal</h3>
+<p>In a 1P/1D deployment the prefill engine computes the KV cache of a long prompt and sends it to the decode engine. When the same user comes back, the prefix is often gone from the prefill engine: its HBM and its host DRAM tier are private and small. The engine then recomputes the prefix. At 128k tokens this costs 6 s, at 256k it costs 17 s, on each turn.</p>
+<p>The goal is to keep an evicted prefix addressable in DRAM that the prefill engine does not own: the decode host's DRAM. The decode host lends memory through separate Raiden store processes. A later request finds the pages in a global registry and pulls them back over the native Raiden transport. The decode engine is not changed.</p>
+<div class="tbl"><table>
+<tr><th>Tier</th><th>Owner and location</th><th>Size in this test</th></tr>
+<tr><td>L1</td><td>Prefill engine's TPU HBM (device KV pool)</td><td>786k tokens</td></tr>
+<tr><td>L2</td><td>Prefill engine's HiCache host pool, local CPU DRAM, owned by SGLang</td><td>393k tokens (ratio 0.5) or 944k (ratio 1.2, buffer_only)</td></tr>
+<tr><td>L3</td><td><code>kv_cache_host_store_node</code> processes on the decode host, one for each rank and pool</td><td>16 × 16 GiB</td></tr>
+</table></div>
+
+<h3 id="arch">Architecture on the pair</h3>
+<figure>
+<svg viewBox="0 0 980 420" role="img" aria-label="Prefill host a and decode host b. On a: TPU HBM (L1), HiCache host DRAM (L2) owned by SGLang, RaidenDramStorage in the scheduler process. On b: decode engine, separate kv_cache_host_store_node processes (L3) that lend DRAM, and the global registry. Arrows: D2H fence between L1 and L2; WriteRemote pull from L2 to the stores; Fetch copy from the stores back into L2; registry lookups and registrations.">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+<g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor" stroke="currentColor">
+  <rect x="20" y="20" width="440" height="380" rx="8" fill="none" stroke-dasharray="4 4"/>
+  <text x="34" y="42" font-weight="600" stroke="none">Host a · prefill engine (TP8)</text>
+  <rect x="40" y="60" width="180" height="60" rx="6" fill="none"/>
+  <text x="50" y="82" stroke="none">L1 · TPU HBM</text><text x="50" y="100" stroke="none" font-size="11">device KV pool, 64-token pages</text>
+  <rect x="40" y="170" width="180" height="80" rx="6" fill="none"/>
+  <text x="50" y="192" stroke="none">L2 · HiCache host DRAM</text><text x="50" y="210" stroke="none" font-size="11">TpuRaidenHostKVCache</text><text x="50" y="226" stroke="none" font-size="11">SGLang allocates; Raiden DMA endpoints</text>
+  <rect x="260" y="170" width="180" height="80" rx="6" fill="none" stroke="var(--accent)"/>
+  <text x="270" y="192" stroke="none" fill="var(--accent-ink)" font-weight="600">RaidenDramStorage</text><text x="270" y="210" stroke="none" font-size="11">HiCache backup / prefetch threads</text><text x="270" y="226" stroke="none" font-size="11">page ids + hashes only</text>
+  <rect x="40" y="300" width="400" height="60" rx="6" fill="none"/>
+  <text x="50" y="322" stroke="none">Radix tree · scheduler</text><text x="50" y="340" stroke="none" font-size="11">write_through: each cached page goes L1→L2→L3 · prefetch: wait_complete</text>
+  <line x1="130" y1="120" x2="130" y2="170" marker-end="url(#ar)" marker-start="url(#ar)"/>
+  <text x="138" y="150" stroke="none" font-size="11">D2H / H2D + fence</text>
+  <line x1="220" y1="210" x2="260" y2="210" marker-end="url(#ar)"/>
+  <rect x="520" y="20" width="440" height="380" rx="8" fill="none" stroke-dasharray="4 4"/>
+  <text x="534" y="42" font-weight="600" stroke="none">Host b · decode engine (TP8)</text>
+  <rect x="540" y="60" width="180" height="60" rx="6" fill="none"/>
+  <text x="550" y="82" stroke="none">Decode TPU HBM</text><text x="550" y="100" stroke="none" font-size="11">gets KV over raiden P/D</text>
+  <rect x="540" y="170" width="400" height="90" rx="6" fill="none" stroke="var(--accent)"/>
+  <text x="550" y="192" stroke="none" fill="var(--accent-ink)" font-weight="600">L3 · kv_cache_host_store_node × (rank × pool)</text>
+  <text x="550" y="210" stroke="none" font-size="11">a native KVCacheStore owns its DRAM: directory, LRU, pins</text><text x="550" y="226" stroke="none" font-size="11">--dram_budget_bytes for each process · --evict_tier=1</text><text x="550" y="244" stroke="none" font-size="11">separate from the decode engine's memory</text>
+  <rect x="540" y="300" width="180" height="60" rx="6" fill="none"/>
+  <text x="550" y="322" stroke="none">global_registry_server</text><text x="550" y="340" stroke="none" font-size="11">:50051 · hash → owner store</text>
+  <path d="M440 190 C 490 150, 500 150, 540 185" fill="none" marker-end="url(#ar)" stroke="var(--accent)"/>
+  <text x="455" y="150" stroke="none" font-size="11" fill="var(--accent-ink)">WriteRemote: the store pulls pages from L2</text>
+  <path d="M540 235 C 500 270, 490 270, 440 240" fill="none" marker-end="url(#ar)" stroke="var(--accent)"/>
+  <text x="455" y="284" stroke="none" font-size="11" fill="var(--accent-ink)">Fetch: the store copies into new L2 slots</text>
+  <path d="M350 250 C 350 330, 480 330, 540 330" fill="none" marker-end="url(#ar)"/>
+  <text x="372" y="352" stroke="none" font-size="11">Lookup / ResolveStore / RegisterKVTransferSpec</text>
+  <path d="M630 260 L630 300" fill="none" marker-end="url(#ar)"/>
+  <text x="640" y="285" stroke="none" font-size="11">RegisterStore + heartbeat</text>
+  <path d="M220 90 C 380 60, 420 60, 540 90" fill="none" marker-end="url(#ar)" stroke-dasharray="3 3"/>
+  <text x="300" y="64" stroke="none" font-size="11">raiden P/D transfer (not changed)</text>
+</g>
+</svg>
+<figcaption>Only the decode host runs native <code>KVCacheStore</code> allocators. SGLang stays the owner of the prefill host slots and exports its DMA endpoints. Two allocators never manage the same memory.</figcaption>
+</figure>
+
+<h3 id="ownership">Ownership and safety rules</h3>
+<ul>
+  <li><b>One allocator for each memory.</b> The prefill host slots belong to SGLang's <code>TpuRaidenHostKVCache</code>. The store processes own their DRAM.</li>
+  <li><b>The prefill side pins with references.</b> HiCache holds the host reference during <code>batch_set_v1</code>. On the store side, <code>Fetch</code> pins the source during the full copy.</li>
+  <li><b>Quarantine, not reuse.</b> When native DMA can still touch a slot, the backend retires the slot until the process restarts. A gRPC cancel is not a DMA cancel.</li>
+  <li><b>The namespace is the identity.</b> The store group name is <code>kv_pool_group.pool.sha256(material)[:24]</code>. The material contains your <code>cache_namespace</code>, the model name, the TP/DP/PP ranks, the pool, the page size, and the shape and dtype of each layer. If you change the weights and keep the namespace, the engine serves old KV.</li>
+  <li><b>Manifests start the stores.</b> Each rank and pool writes <code>&lt;manifest_dir&gt;/&lt;namespace&gt;.json</code> at attach time. <code>launch_stores.py</code> turns the manifests into store processes on the decode host.</li>
+  <li><b>Python moves identities, Raiden moves bytes.</b> The wire subset is 6 RPCs and 62 fields, carried in a private protobuf package.</li>
+</ul>
+
+<h3 id="config">Configuration used</h3>
+<p>The recipe adds these flags to the prefill engine. The decode engine is not changed. For a workload with cache churn, use <code>buffer_only</code> host-memory mode (see Part 4).</p>
+<pre><code>--enable-hierarchical-cache --hicache-io-backend raiden --hicache-mem-layout page_first_fused \
+--hicache-write-policy write_through --hicache-host-memory-mode buffer_only --hicache-ratio 1.2 \
+--hicache-storage-backend dynamic --hicache-storage-prefetch-policy wait_complete \
+--hicache-storage-backend-extra-config '{"backend_name":"raiden_dram","module_path":"sglang_tpu.raiden_dram.storage",
+  "class_name":"RaidenDramStorage","interface_v1":true,"global_registry_address":"10.128.0.90:50051",
+  "kv_pool_group":"sglang-prefill-cache","cache_namespace":"gpt-oss-120b-b5c939d-fp8e4m3-page64-v1",
+  "decode_store_job":"sglang-decode-dram","decode_store_replicas":["0"],
+  "manifest_dir":"/home/alisachen_google_com/pd_disagg/spill/manifests","rpc_timeout_s":60,"prefetch_threshold":64}'</code></pre>
+
+<!-- ============================ PART 2 ============================ -->
+<h2 id="trace"><span class="partno">Part 2</span>Code path trace</h2>
+<p>Line numbers refer to sglang-torchtpu <code>f2588cdf79</code> with the bundle applied. The bundle's own files are under <code>sglang_tpu/raiden_dram/</code>.</p>
+
+<h3 id="entry">Entry points</h3>
+<div class="tbl"><table>
+<tr><th>Step</th><th>Function</th><th>File and line</th><th>Thread</th></tr>
+<tr><td>Backup request</td><td><code>write_backup_storage</code> → <code>HiCacheController.write_storage</code></td><td><span class="path">sglang_tpu/hiradix_cache.py:970</span>, <span class="path">managers/cache_controller.py:1421</span></td><td>scheduler</td></tr>
+<tr><td>Backup drain</td><td><code>backup_thread_func</code> → <code>_page_backup</code> → <code>_page_set_zero_copy</code></td><td><span class="path">cache_controller.py:1473, :1441</span></td><td>backup thread</td></tr>
+<tr><td>Spill</td><td><code>RaidenDramStorage.batch_set_v1</code> → <code>_io</code> → <code>RaidenDramClient.spill</code> → <code>_write</code> → <code>_write_verdict</code></td><td><span class="path">raiden_dram/storage.py:294, :246</span>, <span class="path">client.py:213, :114, :197</span></td><td>backup thread</td></tr>
+<tr><td>Lookup</td><td><code>prefetch_from_storage</code> → <code>prefetch_thread_func</code> → <code>_storage_hit_query</code> → <code>batch_exists</code> → <code>client.lookup</code></td><td><span class="path">managers/scheduler.py:3392</span>, <span class="path">cache_controller.py:1375, :1350</span>, <span class="path">storage.py:321</span>, <span class="path">client.py:72</span></td><td>prefetch thread</td></tr>
+<tr><td>Recall</td><td><code>_page_get_zero_copy</code> → <code>batch_get_v1</code> → <code>client.recall</code> → <code>Fetch</code></td><td><span class="path">cache_controller.py:1155</span>, <span class="path">storage.py:291</span>, <span class="path">client.py:244</span></td><td>prefetch IO thread</td></tr>
+<tr><td>Load to HBM</td><td><code>TpuRaidenHiCacheController.load</code> → <code>RaidenKVTransfer.load</code></td><td><span class="path">sglang_tpu/raiden_cache_controller.py:57</span>, <span class="path">raiden_transfer.py</span></td><td>scheduler</td></tr>
+<tr><td>Quarantine</td><td><code>TpuRaidenHostKVCache.quarantine / clear / free</code></td><td><span class="path">sglang_tpu/kv_pool_host.py:156-205</span></td><td>backup or prefetch thread</td></tr>
+<tr><td>Store side</td><td><code>WriteRemote</code>, <code>PollWriteRemote</code>, <code>Fetch</code></td><td><span class="path">tpu-sync kv_cache_store_service.cc</span></td><td>store process on host b</td></tr>
+</table></div>
+
+<h3 id="spill">Spill path, one call at a time</h3>
+<ol class="flow">
+  <li><b>A page is cached on the prefill engine.</b> After a prefill chunk, the radix tree inserts nodes. With <code>write_through</code>, the TPU HiRadix cache starts the D2H backup. The Raiden fence confirms the host copy. The cache then calls <code>write_backup_storage</code>, which puts a <code>StorageOperation</code> with the host indices and page hashes in the backup queue.</li>
+  <li><b>The backup thread takes the operation.</b> <code>_page_backup</code> processes it in batches of <code>STORAGE_BATCH_SIZE = 128</code> pages and calls <code>storage.batch_set_v1(hashes, host_indices)</code>. For hybrid SWA models the <code>HybridCacheController</code> calls <code>batch_set_v2</code> with one <code>PoolTransfer</code> for each pool.</li>
+  <li><b>The backend prepares the batch.</b> <code>_io(write=True)</code> takes the backend lock. It changes the host indices into whole page ids. It rejects an index that is not aligned or a page that occurs twice. It hashes <code>namespace ‖ key</code> with SHA-256. It calls <code>client.spill</code>.</li>
+  <li><b>The client finds the store.</b> <code>spill</code> goes through the ordered replica list and asks the registry <code>ResolveStore</code> for each store's address.</li>
+  <li><b>The client sends WriteRemote.</b> The request has the source Raiden id, the hashes, the prefill host page ids and the prefill DMA endpoints. The store answers with an <code>ack</code>: <code>ALL_EXIST</code> (done), <code>PARTIAL_EXIST</code> (send the rest again), or an <code>operation_id</code> (admitted, pull in progress). Admission is never success.</li>
+  <li><b>The client reads the result.</b> <code>COMMITTED</code> and <code>ALL_EXIST</code> are success. <code>STORED_UNREGISTERED</code> is failure. <code>FAILED</code> and unknown states cause quarantine. If the stream breaks after admission, the client asks <code>PollWriteRemote</code> one time.</li>
+  <li><b>The backend records the result.</b> Quarantined batch indices become host pages given to <code>pool.quarantine()</code>. The boolean list returns to the controller, which stops at the first failed batch.</li>
+</ol>
+<figure>
+<svg viewBox="0 0 980 300" role="img" aria-label="Sequence of a spill: the backup thread calls batch_set_v1, the backend resolves the store through the registry, opens WriteRemote, the store pulls pages from prefill DRAM over native transport, replies ack then result; the backend maps the result to success, retry or quarantine.">
+<defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+<g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor" stroke="currentColor">
+  <g font-weight="600" stroke="none"><text x="60" y="24" text-anchor="middle">backup thread</text><text x="300" y="24" text-anchor="middle">RaidenDramStorage</text><text x="540" y="24" text-anchor="middle">registry (b)</text><text x="800" y="24" text-anchor="middle">host store (b)</text></g>
+  <g stroke-dasharray="3 4" opacity=".6"><line x1="60" y1="34" x2="60" y2="290"/><line x1="300" y1="34" x2="300" y2="290"/><line x1="540" y1="34" x2="540" y2="290"/><line x1="800" y1="34" x2="800" y2="290"/></g>
+  <line x1="60" y1="60" x2="300" y2="60" marker-end="url(#ar2)"/><text x="70" y="54" stroke="none" font-size="11">batch_set_v1(128 hashes, host_indices)</text>
+  <line x1="300" y1="95" x2="540" y2="95" marker-end="url(#ar2)"/><text x="310" y="89" stroke="none" font-size="11">ResolveStore(decode job, replica "0")</text>
+  <line x1="540" y1="115" x2="300" y2="115" marker-end="url(#ar2)" stroke-dasharray="4 3"/><text x="310" y="131" stroke="none" font-size="11">store address (pool group, evict_tier when the wheel sends them)</text>
+  <line x1="300" y1="155" x2="800" y2="155" marker-end="url(#ar2)" stroke="var(--accent)"/><text x="310" y="149" stroke="none" font-size="11" fill="var(--accent-ink)">WriteRemote(src id, hashes, src page ids, src endpoints, deadline)</text>
+  <line x1="800" y1="178" x2="300" y2="178" marker-end="url(#ar2)" stroke-dasharray="4 3"/><text x="310" y="193" stroke="none" font-size="11">ack: operation_id (or ALL/PARTIAL_EXIST)</text>
+  <rect x="640" y="200" width="320" height="34" rx="4" fill="none" stroke="var(--accent)"/><text x="650" y="221" stroke="none" font-size="11">the store allocates, then pulls pages a→b over Raiden transport</text>
+  <line x1="800" y1="252" x2="300" y2="252" marker-end="url(#ar2)" stroke-dasharray="4 3"/><text x="310" y="267" stroke="none" font-size="11">result: COMMITTED | PARTIAL_EXIST | STORED_UNREGISTERED | FAILED</text>
+  <line x1="300" y1="285" x2="60" y2="285" marker-end="url(#ar2)" stroke-dasharray="4 3"/><text x="70" y="279" stroke="none" font-size="11">[True]*n, or quarantine + [False]</text>
+</g>
+</svg>
+<figcaption>One <code>WriteRemote</code> carries a maximum of 128 pages. HiCache holds the prefill host slots during the full call. The store pulls from these slots, commits the pages and registers the hashes.</figcaption>
+</figure>
+
+<h3 id="recall">Recall path, one call at a time</h3>
+<ol class="flow">
+  <li><b>The scheduler asks the storage.</b> When a prefix is not fully in L1 or L2, <code>prefetch_from_storage</code> gives a <code>PrefetchOperation</code> (uncached token ids, last local hash) to the controller's prefetch queue.</li>
+  <li><b>The prefetch thread asks for hits.</b> <code>_storage_hit_query</code> computes page hashes with <code>get_storage_hash_str</code> and calls <code>storage.batch_exists</code> in batches of 128 pages until the first miss. In the backend that is a registry <code>Lookup</code>. For SWA pools the v2 variant also probes a trailing window.</li>
+  <li><b>The ranks agree.</b> An all-reduce (MIN) across the TP ranks sets the hit count.</li>
+  <li><b>The backend fetches into L2.</b> With <code>wait_complete</code>, the scheduler allocates host slots for the hit pages. <code>client.recall</code> looks the hashes up again, groups them by owner store, resolves each owner and sends <code>Fetch</code> with the destination page ids. The store pins its source, copies into the prefill DRAM and returns <code>done_block_hashes</code>. The client accepts the batch only when the done set is equal to the request.</li>
+  <li><b>HiCache loads into HBM.</b> The existing H2D path runs. The forward gate waits for the Raiden events. The scheduler runs the request with the pages marked as cached (<code>cached_tokens_details.storage</code>).</li>
+  <li><b>Failures.</b> <code>NOT_FOUND</code>, <code>INVALID_ARGUMENT</code>, <code>FAILED_PRECONDITION</code> and <code>UNIMPLEMENTED</code> are clean misses; the request recomputes. A timeout or transport error quarantines the destination slots.</li>
+</ol>
+
+<h3 id="impl">Implementation details, file by file</h3>
+<p>This section reads the code with you. Each block names the file, says what the code owns, and shows the lines that carry the rule. The bundle adds five files and changes three. All paths are relative to the sglang-torchtpu tree.</p>
+<div class="tbl"><table>
+<tr><th>File</th><th>Status</th><th>Lines</th><th>What it owns</th></tr>
+<tr><td><code>sglang_tpu/raiden_dram/storage.py</code></td><td>new</td><td class="num">401</td><td>The HiCache L3 backend. Validates config, derives the namespace, maps host slots to page ids, calls the client, applies quarantine.</td></tr>
+<tr><td><code>sglang_tpu/raiden_dram/client.py</code></td><td>new</td><td class="num">311</td><td>The gRPC control plane. Lookup, ResolveStore, WriteRemote, PollWriteRemote, Fetch. Decides success, retry or quarantine.</td></tr>
+<tr><td><code>sglang_tpu/raiden_dram/wire.proto</code>, <code>wire_pb2.py</code></td><td>new</td><td class="num">95</td><td>A private copy of the tpu-sync messages the client uses. <code>check_wire.py</code> compares it with the installed wheel.</td></tr>
+<tr><td><code>sglang_tpu/raiden_dram/launch_stores.py</code></td><td>new</td><td class="num">110</td><td>Turns the manifests into one <code>kv_cache_host_store_node_main</code> process for each rank and pool on the decode host.</td></tr>
+<tr><td><code>sglang_tpu/kv_pool_host.py</code></td><td>changed</td><td class="num">+40</td><td><code>quarantine()</code>, and <code>clear()</code> / <code>free()</code> that never give a quarantined page back.</td></tr>
+<tr><td><code>sglang_tpu/raiden_transfer.py</code></td><td>changed</td><td class="num">+20</td><td><code>host_store_descriptor()</code>: layout, block bytes and DMA endpoints of this rank's host pool.</td></tr>
+<tr><td><code>python/sglang/srt/arg_groups/hicache_hook.py</code></td><td>changed</td><td class="num">+16</td><td>Lets the raiden io backend accept this one storage backend.</td></tr>
+</table></div>
+
+<h3 id="impl-attach">1. Attach: what happens at engine start</h3>
+<p>The HiCache controller creates the backend through <code>StorageBackendFactory</code> and then calls <code>register_mem_pool_host</code> with the host pool. The constructor only checks the configuration. The registration does the real work.</p>
+<pre><code>def register_mem_host_pool_v2(self, host_pool, host_pool_name):
+    ...
+    if not callable(getattr(host_pool, "quarantine", None)):
+        raise TypeError("Raiden DRAM storage requires TpuRaidenHostKVCache with quarantine support")
+    description = host_pool.transfer.host_store_descriptor()
+    block_bytes = description["block_bytes"]
+    ...
+    material = {
+        "version": 1, "namespace": self.options["cache_namespace"],
+        "model": self.config.model_name,
+        "tp_rank": self.config.tp_rank, "tp_size": self.config.tp_size,
+        "dp_rank": self.config.dp_rank, "pp_rank": self.config.pp_rank,
+        "pool": name, "page_size": host_pool.page_size,
+        "layout": description["layout"], "base_group": self.options["kv_pool_group"],
+    }
+    namespace = hashlib.sha256(json.dumps(material, sort_keys=True, separators=(",", ":")).encode()).digest()
+    group = f'{self.options["kv_pool_group"]}.{name}.{namespace.hex()[:24]}'</code></pre>
+<p>Four things come out of this function.</p>
+<ol class="flow">
+  <li><b>The namespace.</b> A SHA-256 over the material above. Every storage key is later hashed together with it. Two engines with a different rank, page size, dtype or layer shape can never hit each other's pages, even if they share a registry.</li>
+  <li><b>The store group.</b> The string that names the store for this rank and pool. The registry and the store processes use it as the <code>kv_pool_group</code>.</li>
+  <li><b>The KV transfer spec.</b> <code>client.publish_spec(group, block_bytes)</code> tells the registry the byte size of one page in each layer. A store that starts later with a different geometry is refused by the native code.</li>
+  <li><b>The manifest.</b> A JSON file named by the namespace in <code>manifest_dir</code>. It holds the group, the registry address, the decode job name, the replica list and the block bytes. The file is written to a temporary name and then renamed, so the launcher never reads a half file.</li>
+</ol>
+<p>The descriptor comes from the transfer object that already owns the Raiden manager for this rank. It reads the layer shapes from metadata and exports the DMA endpoints of the existing host pool. No second allocator is created.</p>
+<pre><code>def host_store_descriptor(self) -> dict:
+    layout = [{"shape": list(layer[0].shape[1:]), "dtype": str(layer[0].dtype)} for layer in self._device_tensors]
+    block_bytes = [math.prod(layer[0].shape[1:]) * layer[0].element_size() for layer in self._device_tensors]
+    return {"layout": layout, "block_bytes": block_bytes,
+            "node_id": self._mgr.node_id, "endpoints": self._mgr.get_local_endpoints()}</code></pre>
+<p>On the decode host, <code>launch_stores.py</code> reads each manifest and starts one native store with the matching flags. The budget is one number for all stores. A store that exits stops the launcher, so a dead store is visible at once.</p>
+<pre><code>commands.append([binary,
+    f'--job_name={manifest["job_name"]}', f"--job_replica_id={replica}",
+    f'--data_name={manifest["data_name"]}', "--data_replica_idx=0",
+    f"--store_server_ip={server_ip}",
+    f'--global_registry_address={manifest["global_registry_address"]}',
+    f"--kv_pool_group={group}", f"--dram_budget_bytes={budget}", "--evict_tier=1"])</code></pre>
+
+<h3 id="impl-pages">2. Keys and pages: how a HiCache call becomes a Raiden call</h3>
+<p>HiCache speaks in page hash strings and host token indices. Raiden speaks in 32-byte hashes and host page ids. Two static helpers in <code>storage.py</code> translate, and both fail closed.</p>
+<pre><code>@staticmethod
+def _hashes(state, keys):
+    if not all(isinstance(key, str) and key for key in keys):
+        raise ValueError("Storage keys must be nonempty hash strings")
+    return [hashlib.sha256(state["namespace"] + key.encode()).digest() for key in keys]
+
+@staticmethod
+def _pages(pool, keys, indices):
+    ...
+    if len(values) != len(keys) * size:
+        raise ValueError("Raiden storage requires exactly one complete host page per key")
+    pages = []
+    for offset in range(0, len(values), size):
+        start = values[offset]
+        if (start < 0 or start % size or start // size >= pool.page_num
+                or values[offset : offset + size] != list(range(start, start + size))):
+            raise ValueError("Raiden storage requires aligned contiguous host-page runs")
+        pages.append(start // size)
+    if len(set(pages)) != len(pages) or len(set(keys)) != len(keys):
+        raise ValueError("Duplicate host pages or keys in a Raiden storage batch")
+    return pages</code></pre>
+<p>The page check is strict on purpose. The Raiden host pool allocates whole pages, so each key must map to one page-aligned run of <code>page_size</code> token slots. A batch that breaks this rule is rejected before any RPC, and the controller sees a failed batch, not a wrong page.</p>
+
+<h3 id="impl-io">3. The shared IO routine</h3>
+<p>Spill and recall share one routine. It holds the backend lock for the full call, which is the cause of Risk 1 in Part 4.</p>
+<pre><code>def _io(self, name, keys, indices, *, write):
+    keys = list(keys)
+    if not keys:
+        return []
+    with self._lock:
+        state = self._state(name)
+        pool = state["pool"]
+        pages = self._pages(pool, keys, indices)
+        hashes = self._hashes(state, keys)
+        try:
+            if write:
+                result = self.client.spill(state["group"], state["targets"], state["source"], state["endpoints"], hashes, pages)
+            else:
+                result = self.client.recall(state["group"], state["source"], state["endpoints"], hashes, pages)
+        except Exception:
+            logger.exception("Raiden storage IO failed; retiring its host slots")
+            result = IOResult(quarantine=frozenset(range(len(keys))))
+        if result.quarantine:
+            selected = torch.cat([indices[i * pool.page_size : (i + 1) * pool.page_size] for i in sorted(result.quarantine)])
+            pool.quarantine(selected)
+            self._stats["quarantined_pages"] += len(result.quarantine)
+        self._stats["spill_pages" if write else "recall_pages"] += len(result.done)
+        self._stats["failed_pages"] += len(keys) - len(result.done)
+        return [i in result.done for i in range(len(keys))]</code></pre>
+<p>Three rules live here.</p>
+<ul>
+  <li><b>An unexpected exception is a quarantine, not a crash.</b> The controller's IO worker thread must stay alive. The slots are retired because a peer may have borrowed them before the exception.</li>
+  <li><b>The result is a list of booleans in batch order.</b> <code>IOResult.done</code> and <code>IOResult.quarantine</code> hold indices into the batch, not page ids. The controller stops at the first <code>False</code>.</li>
+  <li><b>Counters are updated under the lock.</b> <code>get_stats()</code> reads them under the same lock, so a metrics scrape never sees a half update.</li>
+</ul>
+
+<h3 id="impl-write">4. WriteRemote: admission is not success</h3>
+<p>The spill RPC is a server stream. The store first sends an <code>ack</code>, then pulls the pages from the prefill host, then sends a <code>result</code>. The client reads both events and maps them to one of three outcomes. The comment at the top of <code>client.py</code> states the rule: never treat admission as completion.</p>
+<pre><code>for event in call:
+    kind = event.WhichOneof("event")
+    if kind == "ack" and not acknowledged:
+        acknowledged = True
+        ack = event.ack
+        if ack.exist_state == w.WRITE_ALL_EXIST:
+            return IOResult(all_indices)                      # nothing to copy
+        if ack.exist_state == w.WRITE_PARTIAL_EXIST:
+            return IOResult(self._subset(hashes, ack.existing_hashes))   # caller re-offers the rest
+        if ack.exist_state != w.WRITE_EXIST_STATE_UNSPECIFIED or not ack.operation_id:
+            raise ValueError("Invalid WriteRemote admission")
+        operation_id = ack.operation_id                       # admitted: the pull starts now
+    elif kind == "result" and operation_id:
+        return self._write_verdict(hashes, event.result)
+    else:
+        raise ValueError("WriteRemote events arrived out of order")</code></pre>
+<p>The verdict function maps the store's final state to the batch result.</p>
+<div class="tbl"><table>
+<tr><th>Store state</th><th>Meaning</th><th>Client outcome</th></tr>
+<tr><td><code>COMMITTED</code>, <code>ALL_EXIST</code></td><td>Pages are in the store and registered.</td><td>Success for the whole batch.</td></tr>
+<tr><td><code>PARTIAL_EXIST</code></td><td>Some pages were already there. The others were not copied.</td><td>Success for the existing subset. <code>spill</code> offers the rest again, and stops when a round makes no progress.</td></tr>
+<tr><td><code>STORED_UNREGISTERED</code></td><td>The copy finished, but the registry does not know the hashes.</td><td>Failure. Future readers cannot find the pages, so the backup is not done.</td></tr>
+<tr><td><code>FAILED</code>, unknown</td><td>The operation may have expired while the native pull still runs.</td><td>Quarantine the source slots.</td></tr>
+</table></div>
+<p>If the stream breaks, the client separates two cases. A rejection before the ack, such as <code>RESOURCE_EXHAUSTED</code> when the store is full, means the store never touched the slots, so the batch is a clean failure. A break after the ack means the pull may be running. The client then asks <code>PollWriteRemote</code> one time with <code>wait_ms=0</code>. If that also fails, the slots are quarantined.</p>
+<pre><code>if operation_id:
+    try:
+        status = self._rpc(address, STORE_SERVICE, "PollWriteRemote", w.PollWriteRemoteResponse)(
+            w.PollWriteRemoteRequest(operation_id=operation_id, wait_ms=0), timeout=self.timeout_s)
+        return self._write_verdict(hashes, status)
+    except (grpc.RpcError, ValueError) as exc:
+        logger.warning("Raiden write recovery failed: %s", exc)
+# The peer might still be pulling. Preserve memory until process exit;
+# a gRPC cancellation is not a native DMA cancellation.
+return IOResult(quarantine=all_indices)</code></pre>
+<p>The request also sets <code>deadline_ms</code> to 80 percent of the RPC timeout. The store then stops its own work before the client's gRPC deadline, so the client usually sees a terminal result instead of a broken stream.</p>
+
+<h3 id="impl-fetch">5. Fetch: the store writes into slots HiCache owns</h3>
+<p>The recall RPC is a plain unary call. The client sends the hashes and the destination page ids, plus the prefill rank's own Raiden identity and endpoints, so the store can address the prefill host pool.</p>
+<pre><code>response = self._rpc(address, STORE_SERVICE, "Fetch", w.FetchResponse)(
+    w.FetchRequest(block_hashes=[hashes[i] for i in indices],
+                   host_block_ids=[pages[i] for i in indices],
+                   client_raiden_id=source_id,
+                   client_worker_endpoints=endpoints),
+    timeout=self.timeout_s)
+expected = {hashes[i] for i in indices}
+if response.error_message or response.failed_block_hashes or set(response.done_block_hashes) != expected:
+    raise ValueError("Incomplete Raiden Fetch result")
+done.update(indices)</code></pre>
+<p>Two details matter.</p>
+<ul>
+  <li><b>Owners are grouped.</b> <code>recall</code> runs <code>Lookup</code> first and groups the hits by the Raiden id of the store that holds them. One <code>Fetch</code> goes to each owner. With one replica this is one call per batch.</li>
+  <li><b>A partial answer is a failure.</b> The native <code>Fetch</code> returns after it has copied, so the client demands that the done set equals the request. Anything less raises, and the error path decides between a clean miss and a quarantine with the same status-code rule as the write path.</li>
+</ul>
+
+<h3 id="impl-lookup">6. Lookup and the hybrid pools</h3>
+<p>The controller asks for a hit count, not a hit list. <code>batch_exists</code> returns the length of the longest prefix the registry knows. A registry error is a miss, never an exception, so a registry outage degrades to recompute.</p>
+<pre><code>def _hit_count(self, name, keys):
+    state = self._state(name)
+    try:
+        return len(self.client.lookup(self._hashes(state, keys), state["source"]))
+    except (grpc.RpcError, RuntimeError) as exc:
+        logger.warning("Raiden storage lookup failed; treating as a miss: %s", exc)
+        return 0</code></pre>
+<p>For hybrid sliding-window models the <code>HybridCacheController</code> calls <code>batch_exists_v2</code>. The KV pool sets the candidate prefix lengths. Each extra pool then narrows them. A pool with the <code>TRAILING_PAGES</code> policy only needs its last window of pages, so the code probes each page on its own, because the registry's prefix lookup stops at the first gap and would hide a complete later window.</p>
+
+<h3 id="impl-quarantine">7. Quarantine in the host pool</h3>
+<p>The host pool change is small and permanent. A quarantined page leaves the free list and never returns, not on <code>free()</code>, not on <code>clear()</code> after <code>/flush_cache</code>. Only a process restart makes the page usable again, because only then is it certain that no remote DMA still targets it.</p>
+<pre><code>def quarantine(self, indices: torch.Tensor) -> None:
+    pages = set(self._to_page_ids(indices))
+    if any(p &lt; 0 or p &gt;= self.page_num for p in pages):
+        raise ValueError("Quarantined page is outside the host pool")
+    with self.lock:
+        self._quarantined_pages.update(pages)
+        self.free_pages = deque(p for p in self.free_pages if p not in pages)
+
+def free(self, indices: torch.Tensor) -> int:
+    page_ids = torch.unique(indices.cpu() // self.page_size).tolist()
+    with self.lock:
+        reusable = [p for p in page_ids if p not in self._quarantined_pages]
+        self.free_pages.extend(reusable)
+    return len(reusable) * self.page_size</code></pre>
+<p>In the live runs no page was quarantined. The counter exists for the two cases the tests force: a stream that breaks after admission and a <code>Fetch</code> that times out.</p>
+
+<h3 id="impl-hook">8. The argument hook</h3>
+<p>The base tree refuses any storage backend together with the raiden io backend, because the raiden host pool has no flat-page accessors. The bundle adds one predicate and uses it in the guard. The predicate reads the extra config and accepts only a <code>dynamic</code> backend from the <code>sglang_tpu.raiden_dram</code> package.</p>
+<pre><code>def _is_raiden_dram_storage(cfg) -> bool:
+    if cfg.hicache_storage_backend != "dynamic":
+        return False
+    raw = cfg.hicache_storage_backend_extra_config or ""
+    try:
+        extra = json.loads(raw) if raw and not raw.startswith("@") else {}
+    except ValueError:
+        return False
+    return str(extra.get("module_path", "")).startswith("sglang_tpu.raiden_dram")</code></pre>
+<p>A config given as a file (<code>@config.toml</code>) is not parsed here and stays rejected. This is the one change outside the TPU folder. The TPU plugin's resolution hook from PR #930 is the place it can move to.</p>
+
+<h3 id="impl-threads">9. Threads and locks, in one view</h3>
+<div class="tbl"><table>
+<tr><th>Thread</th><th>Calls into the backend</th><th>Holds</th><th>Can block on</th></tr>
+<tr><td>Scheduler</td><td><code>write_storage</code> (enqueue only), <code>get_stats</code></td><td>backend lock, briefly</td><td>nothing remote</td></tr>
+<tr><td>Backup thread</td><td><code>batch_set_v1</code> → <code>spill</code></td><td>backend lock for the whole batch</td><td>ResolveStore, WriteRemote stream, PollWriteRemote; each bounded by <code>rpc_timeout_s</code></td></tr>
+<tr><td>Prefetch thread</td><td><code>batch_exists</code> → <code>lookup</code></td><td>backend lock</td><td>Lookup, and the backup thread's in-flight batch</td></tr>
+<tr><td>Prefetch IO worker</td><td><code>batch_get_v1</code> → <code>recall</code></td><td>backend lock for the whole batch</td><td>Lookup, ResolveStore, Fetch</td></tr>
+<tr><td>Host pool callers</td><td><code>quarantine</code>, <code>free</code>, <code>clear</code></td><td>pool lock</td><td>nothing remote</td></tr>
+</table></div>
+<p>The pool lock is never taken while a remote call is open, and the backend lock is never taken inside the pool lock. That order is what keeps the five concurrency tests free of deadlocks. The cost is that one slow store stalls every lookup for up to one timeout. The fix is a lookup path that does not take the IO lock, which is a follow-up.</p>
+
+<h3 id="impl-tests">10. How the code is tested</h3>
+<p>The CPU tests run without TPUs and without tpu-sync. A <code>StoreFixture</code> in the test file implements the registry and store services in Python on a local gRPC server, and the test attaches a real <code>RaidenDramStorage</code> to a real <code>TpuRaidenHostKVCache</code> whose transfer object is replaced by a fake. Each test then drives the backend through the same calls the controller makes.</p>
+<ul>
+  <li><b>Correctness.</b> Spill, forget, recall into different slots; a new prefill instance recalls through the registry; owners are grouped and the destination order is kept; manifest and launcher produce a rank-specific store command.</li>
+  <li><b>Verdict rules.</b> Admission ack does not finish a backup; a lost stream recovers a committed write; partial-existing offers retry only the missing keys; <code>STORED_UNREGISTERED</code> is not success; an uncertain write retires its slots across reset; a failed <code>Fetch</code> never admits data.</li>
+  <li><b>Fail closed.</b> Wrong group never transfers; the namespace blocks incompatible hits; layout and dtype are part of the namespace; invalid or duplicate host indices are rejected before any RPC; an unexpected IO error quarantines; a bad lookup verdict is a miss before any transfer.</li>
+  <li><b>Hybrid.</b> SWA recall with non-contiguous restorable boundaries.</li>
+  <li><b>Concurrency, five tests.</b> Eight threads and a flusher for 10 s; a stalled <code>WriteRemote</code> holds a lookup for the timeout and not longer; a registry outage returns misses at once; <code>close()</code> during IO does not deadlock; KV and SWA pools from six threads at once.</li>
+</ul>
+<p>The on-device test in <code>test/manual/tpu/test_raiden_dram_spill_recall_ondevice.py</code> runs the same spill, forget and recall sequence against a real native store on one host and compares the bytes in HBM before and after. It passed in 3.2 s after fix 2 in the next section.</p>
+
+<h3 id="fixes">Fixes applied before the first spill</h3>
+<div class="finding gap"><b>1. The base tree rejects the flags.</b> <span class="path">python/sglang/srt/arg_groups/hicache_hook.py:238</span> raises "raiden io backend ... has no L3 storage path" for any storage backend. The guard now exempts a <code>dynamic</code> backend whose <code>module_path</code> starts with <code>sglang_tpu.raiden_dram</code>. This is a core file; the exemption can move into the TPU plugin's resolution hook (PR #930).</div>
+<div class="finding gap"><b>2. The installed registry does not send <code>kv_pool_group</code> and <code>evict_tier</code>.</b> The tpu_sync wheel (dev20261002) accepts the flags at the store node but <code>ResolveStore</code> returns only identity and addresses. The client rejected each store. It now accepts a store on identity alone when both fields are absent, with one warning. The real fix is a wheel that matches tpu-sync 73499f1.</div>
+<div class="finding gap"><b>3. The radix cache expects a <code>StorageMetrics</code> object.</b> <span class="path">unified_radix_cache.py:3496</span> sets <code>prefetch_stats</code> on what <code>get_stats()</code> returns. The bundle returned a dict and the scheduler thread stopped. <code>get_stats()</code> now returns a <code>StorageMetrics</code> subclass that also supports <code>["key"]</code> reads.</div>
+<div class="finding gap"><b>4. The HiCache hash extension could not build.</b> <code>get_storage_hash_str</code> loads <code>hicache_hash_cpp</code> with the torch JIT builder. The hosts had no <code>ninja</code> and no OpenSSL headers. The prefetch thread died on the first lookup. Fix: <code>pip install ninja</code>, <code>apt-get install libssl-dev</code>, venv <code>bin</code> on the engine PATH. This is an environment fix.</div>
+
+<!-- ============================ PART 3 ============================ -->
+<h2 id="plan"><span class="partno">Part 3</span>Benchmarking plan</h2>
+<p>The plan answers three questions. Does the feature work on hardware? How much faster is a recall than a recompute? Does it stay correct and responsive under concurrency, client aborts and partial outages?</p>
+
+<h3 id="rig">Rig and build</h3>
+<div class="tbl"><table>
+<tr><th>Item</th><th>Value</th></tr>
+<tr><td>Hosts</td><td>wyzhang-tpu7x-16, worker a = prefill (10.128.15.217), worker b = decode (10.128.0.90). 8 chips, 224 CPUs, 944 GiB RAM each. VPC 102 to 128 Gbit/s between them.</td></tr>
+<tr><td>Model</td><td>openai/gpt-oss-120b, MXFP4 weights, FP8 KV cache, page 64, TP8 + EP8 on each host. 18 full and 18 sliding layers, so each rank has a KV and an SWA pool.</td></tr>
+<tr><td>Build</td><td>sglang-torchtpu f2588cdf79 + bundle patch + four fixes, as an uncommitted worktree on both hosts. torch 2.11.0+cpu, torch_tpu 0.1.1+release.2026.9.22, tpu_sync_torch 0.0.1.dev20261002213151.</td></tr>
+<tr><td>Recipes</td><td>gpt-oss C 256k shape, context 280k, HBM pool 786k tokens, 4 request slots, chunk 8k. <code>spill_base</code> (no store), <code>spill_dram</code> (store, cache mode, ratio 2), <code>*_r05</code> (ratio 0.5), <code>spill_dram_bo</code> (store, buffer_only, ratio 1.2).</td></tr>
+<tr><td>Stores</td><td>Registry on b:50051. 16 host-store processes on b (8 ranks × KV and SWA), 16 GiB budget each, started from the prefill manifests.</td></tr>
+<tr><td>Prompts</td><td>Token-exact prompt sets from the earlier campaign (<code>~/pd_disagg/prompts/gpt-oss</code>). Requests are sent as <code>input_ids</code>. Every session carries a fresh salt, so turn 1 is always cold.</td></tr>
+</table></div>
+
+<h3 id="workloads">Workloads</h3>
+<div class="tbl"><table>
+<tr><th>ID</th><th>Workload</th><th>What it isolates</th><th>Conditions</th></tr>
+<tr><td>W0</td><td>Native round trip on one host: spill 2 pages, erase the prefill slots, recall into different slots, reload, compare values.</td><td>Real DMA through the real registry and store binaries, no engine.</td><td>pass / fail</td></tr>
+<tr><td>W1</td><td>Single request, two turns. Turn 1: prefix (128k or 256k) → 1,024 tokens. Turn 2: prefix + new (8k or 16k) → 1,024 tokens. Greedy.</td><td>The cost of one recall against one recompute and one local hit.</td><td><b>local</b>: nothing between turns. <b>recompute</b>: flush both engines, no store. <b>recall</b>: flush both engines, store on.</td></tr>
+<tr><td>W2</td><td>Agentic A: 8 sessions at the same time, 6 turns each, 128k private context, 4k tool tokens + 512 output tokens per turn, think 2 to 8 s. Host tier 0.5× HBM.</td><td>Cache churn: the 1M-token working set does not fit in HBM or in the host tier.</td><td>baseline (no store), store in <code>cache</code> mode, store in <code>buffer_only</code> mode</td></tr>
+<tr><td>W3</td><td>Agentic B: 12 sessions, 10 turns, 16k shared system prefix + 112k private context, 2k tool tokens + 256 output tokens, think 1 to 4 s.</td><td>A coding-agent fleet: a shared prefix that always hits, private contexts that always churn.</td><td>baseline, store in <code>buffer_only</code> mode</td></tr>
+<tr><td>W6</td><td>Capacity ladder: 4, 8, 12, 16 and 20 concurrent sessions, 128k context each, 4 turns, 4k tool tokens + 256 output tokens per turn, think 1 to 3 s. Caches flushed and stores restarted between points.</td><td>Throughput as a function of working set against the capacity that the decode-host DRAM adds.</td><td>baseline = HBM (786k tokens) + full local host tier (ratio 2, 1.57M tokens, cache mode); store pair = HBM + <code>buffer_only</code> staging + 16 stores × 28 GiB (about 3.1M tokens of sessions)</td></tr>
+<tr><td>W4</td><td>Stress: 4 concurrent recalls; client abort during a recall then re-issue; one store paused 90 s (longer than the 60 s RPC timeout); registry stopped and restarted. Health probes every 5 s.</td><td>Races, deadlocks and hangs under partial failure.</td><td>each phase bounded by a 30 min watchdog; HANG if it does not return</td></tr>
+<tr><td>W5</td><td>CPU concurrency tests: 8 threads + flusher for 10 s; stalled write; registry outage; close during IO; KV + SWA pools from 6 threads.</td><td>Lock order and bounded waits in the backend, with a protocol double.</td><td>pass / fail, 60 s watchdog</td></tr>
+</table></div>
+
+<h3 id="metrics">Metrics and pass criteria</h3>
+<ul>
+  <li><b>TTFT</b>: time to the first streamed token, measured by the client at the mini load balancer. <b>E2E</b>: time to the last token. <b>Decode tok/s</b>: (completion − 1) / (E2E − TTFT).</li>
+  <li><b>Cache source</b>: <code>meta_info.cached_tokens_details</code> (<code>device</code>, <code>host</code>, <code>storage</code>) in the response. A recall row is valid only when <code>storage</code> equals the prefix length.</li>
+  <li><b>Prefill counters</b> from <code>/metrics</code>: <code>backuped_tokens_total</code>, <code>storage_prefetch_hit_tokens_total</code>, <code>storage_prefetch_unfulfilled_tokens_total</code>, <code>prefetched_tokens_total</code>. A hit that is unfulfilled is a recompute, whatever the wall time says.</li>
+  <li><b>Agentic</b>: wall time for all turns, total output tok/s of the pair, later-turn TTFT p50 / p95 / max, session wall time p50, prefix tokens by tier.</li>
+  <li><b>Stress</b>: phase status (ok / error / HANG), health probe count, slow probes (&gt; 2 s), probe errors, quarantined pages.</li>
+  <li><b>Pass criteria</b>: W0 passes; every W1 recall row has <code>storage</code> = prefix; no W4 phase hangs; no health probe fails; the store-pair column beats recompute on TTFT and, under churn, on throughput.</li>
+</ul>
+
+<!-- ============================ PART 4 ============================ -->
+<h2 id="results"><span class="partno">Part 4</span>Results</h2>
+
+<h3 id="r-single">W1 · Single request, turn 2 after a flush</h3>
+<figure>
+<div class="chart">
+<svg id="c1" viewBox="0 0 760 300" role="img" aria-label="Grouped bar chart of turn-2 TTFT in seconds for four prefix and new-token combinations under three conditions: local hit, recompute, and recall from the decode-host store. Values: 128k+8k 0.91, 6.33, 3.54; 128k+16k 1.23, 6.88, 2.84; 256k+8k 1.28, 17.51, 5.15; 256k+16k 1.99, 18.35, 5.82."></svg>
+<div class="legend"><span style="--sw:var(--s1)">local hit (prefix still in HBM)</span><span style="--sw:var(--s2)">recompute (flushed, no store)</span><span style="--sw:var(--s3)">recall (flushed, decode-host store)</span></div>
+</div>
+<figcaption>Turn-2 TTFT in seconds, run <code>spill_base_1</code> (local, recompute) and <code>spill_dram_4</code> (recall). Lower is better. Hover a bar for the exact value.</figcaption>
+</figure>
+<div class="tbl"><table>
+<tr><th>Prefix</th><th>New</th><th class="num">Turn-1 cold TTFT</th><th class="num">Local</th><th class="num">Recompute</th><th class="num">Recall</th><th class="num">Recall vs recompute</th><th class="num">Decode tok/s</th></tr>
+<tr><td>128k</td><td>8k</td><td class="num">5.83 s</td><td class="num">0.91 s</td><td class="num">6.33 s</td><td class="num"><b>3.54 s</b></td><td class="num">1.8×</td><td class="num">193 to 203</td></tr>
+<tr><td>128k</td><td>16k</td><td class="num">5.83 s</td><td class="num">1.23 s</td><td class="num">6.88 s</td><td class="num"><b>2.84 s</b></td><td class="num">2.4×</td><td class="num">195 to 203</td></tr>
+<tr><td>256k</td><td>8k</td><td class="num">16.64 s</td><td class="num">1.28 s</td><td class="num">17.51 s</td><td class="num"><b>5.15 s</b></td><td class="num">3.4×</td><td class="num">185 to 187</td></tr>
+<tr><td>256k</td><td>16k</td><td class="num">16.64 s</td><td class="num">1.99 s</td><td class="num">18.35 s</td><td class="num"><b>5.82 s</b></td><td class="num">3.2×</td><td class="num">180 to 186</td></tr>
+</table></div>
+<p>Each recall row reported <code>storage</code> = prefix length and <code>device</code> = <code>host</code> = 0. Decode speed did not change. The recall cost grows with bytes moved; the recompute cost grows with attention work, so the gap widens with the prefix.</p>
+
+<h3 id="r-agentic">W2 and W3 · Agentic workloads</h3>
+<figure>
+<div class="chart">
+<svg id="c2" viewBox="0 0 760 260" role="img" aria-label="Grouped bar chart of the pair's total output throughput in tokens per second for agentic A and agentic B, baseline against the store pair in buffer_only mode. Agentic A: 81.7 baseline, 191.8 store. Agentic B: 43.7 baseline, 127.8 store."></svg>
+<div class="legend"><span style="--sw:var(--s2)">baseline (no store)</span><span style="--sw:var(--s3)">store pair, buffer_only host mode</span></div>
+</div>
+<figcaption>Aggregate output throughput in tokens per second over all turns. Higher is better. Same sessions, same prompts, same host-tier size in each pair.</figcaption>
+</figure>
+<div class="tbl"><table>
+<tr><th>Run</th><th class="num">Wall</th><th class="num">Output tok/s</th><th class="num">Later-turn TTFT p50 / p95</th><th class="num">Session wall p50</th><th>Prefix tokens by tier</th></tr>
+<tr><td>A · baseline (<code>agentic_base_r05</code>)</td><td class="num">300.7 s</td><td class="num">81.7</td><td class="num">40.2 / 46.6 s</td><td class="num">266 s</td><td>302k HBM</td></tr>
+<tr><td>A · store, cache mode (<code>agentic_dram_r05</code>)</td><td class="num">221.0 s</td><td class="num">111.2</td><td class="num">26.1 / 31.6 s</td><td class="num">197 s</td><td>2.36M HBM, 0 store (17.2M hits unfulfilled)</td></tr>
+<tr><td><b>A · store, buffer_only (<code>agenticA_dram_bo</code>)</b></td><td class="num"><b>128.2 s</b></td><td class="num"><b>191.8</b></td><td class="num"><b>5.1 / 18.8 s</b></td><td class="num"><b>106 s</b></td><td>1.88M HBM, <b>3.66M store</b></td></tr>
+<tr><td>B · baseline (<code>agenticB_base_r05</code>)</td><td class="num">703.5 s</td><td class="num">43.7</td><td class="num">65.5 / 71.5 s</td><td class="num">659 s</td><td>2.06M HBM (shared prefix only)</td></tr>
+<tr><td><b>B · store, buffer_only (<code>agenticB_dram_bo</code>)</b></td><td class="num"><b>240.4 s</b></td><td class="num"><b>127.8</b></td><td class="num"><b>16.2 / 31.9 s</b></td><td class="num"><b>218 s</b></td><td>2.94M HBM, <b>12.25M store</b></td></tr>
+</table></div>
+<div class="caution"><b>CAUTION:</b> Do not read the <code>cache</code>-mode row as a recall win. Its prefill counters show 17.2M tokens of storage hits and 17.2M unfulfilled. In <code>cache</code> host-memory mode a recall must land in free host slots, and the 393k-token host tier was full of write-through staging pages. The faster wall time came from a different HBM eviction order. In <code>buffer_only</code> mode the counters show 29.3M hits, 29.1M prefetched and 0 unfulfilled for A, and 127.3M hits, 127.2M prefetched and 0 unfulfilled for B.</div>
+<p>In B, baseline sessions only ever hit the 16k shared prefix and re-prefill 112k of private context on each turn (TTFT 59 to 71 s). With the store, every session from turn 3 on got its private context from host b's DRAM (12 of 12 per turn) at a p50 TTFT of 16 s.</p>
+
+<h3 id="r-capacity">W6 · Throughput against working set: what the added capacity buys</h3>
+<figure>
+<div class="chart">
+<svg id="c3" viewBox="0 0 760 260" role="img" aria-label="Grouped bar chart of the pair's total output throughput in tokens per second against the number of concurrent 128k sessions, baseline versus store pair. Baseline: 100.8, 121.0, 94.2, 45.6, 43.7 at 4, 8, 12, 16, 20 sessions. Store pair: 103.9, 112.8, 97.2, 94.4, 95.2."></svg>
+<div class="legend"><span style="--sw:var(--s2)">baseline: HBM + local host tier (2.36M tokens)</span><span style="--sw:var(--s3)">KV spill over to decode DRAM: + decode-host DRAM (buffer_only)</span></div>
+</div>
+<figcaption>Output throughput of the whole pair against concurrent sessions: all output tokens of all sessions in the run, divided by the wall time of the run. One request still decodes at 185 to 203 tok/s; the pair's rate is lower because each turn waits for its prefix first. The working set is sessions × 132k tokens. Local capacity (HBM + host tier) ends between 12 and 16 sessions. Higher is better.</figcaption>
+</figure>
+<figure>
+<div class="chart">
+<svg id="c4" viewBox="0 0 760 260" role="img" aria-label="Grouped bar chart of later-turn TTFT p50 in seconds against concurrent sessions, baseline versus store pair. Baseline: 1.5, 1.7, 22.7, 90.6, 114.1. Store pair: 1.4, 6.0, 19.9, 26.1, 33.2."></svg>
+<div class="legend"><span style="--sw:var(--s2)">baseline</span><span style="--sw:var(--s3)">KV spill over to decode DRAM</span></div>
+</div>
+<figcaption>Median TTFT of turns 2 to 4 against concurrent sessions. Lower is better. Above 12 sessions the baseline recomputes almost every context; the store pair recalls it.</figcaption>
+</figure>
+<div class="tbl"><table>
+<tr><th>Sessions</th><th class="num">Working set</th><th class="num">Baseline tok/s</th><th class="num">KV spill over to decode DRAM tok/s</th><th class="num">Throughput gain</th><th class="num">Baseline TTFT p50 / p95</th><th class="num">KV spill over to decode DRAM TTFT p50 / p95</th><th>Prefix tokens by tier (baseline → KV spill over to decode DRAM)</th></tr>
+<tr><td>4</td><td class="num">0.53M</td><td class="num">100.8</td><td class="num">103.9</td><td class="num">1.0×</td><td class="num">1.5 / 8.2 s</td><td class="num">1.4 / 8.2 s</td><td>1.62M HBM → 1.62M HBM</td></tr>
+<tr><td>8</td><td class="num">1.05M</td><td class="num">121.0</td><td class="num">112.8</td><td class="num">0.9×</td><td class="num">1.7 / 25.7 s</td><td class="num">6.0 / 24.9 s</td><td>0.13M HBM + 3.11M host → 1.87M HBM + 1.38M decode DRAM</td></tr>
+<tr><td>12</td><td class="num">1.58M</td><td class="num">94.2</td><td class="num">97.2</td><td class="num">1.0×</td><td class="num">22.7 / 37.7 s</td><td class="num">19.9 / 40.9 s</td><td>0.13M HBM + 3.95M host → 0.39M HBM + 4.47M decode DRAM</td></tr>
+<tr><td><b>16</b></td><td class="num">2.11M</td><td class="num">45.6</td><td class="num"><b>94.4</b></td><td class="num"><b>2.1×</b></td><td class="num">90.6 / 95.8 s</td><td class="num"><b>26.1 / 57.9 s</b></td><td>0.13M HBM + 0.65M host → 0.25M HBM + 6.24M decode DRAM</td></tr>
+<tr><td><b>20</b></td><td class="num">2.64M</td><td class="num">43.7</td><td class="num"><b>95.2</b></td><td class="num"><b>2.2×</b></td><td class="num">114.1 / 119.4 s</td><td class="num"><b>33.2 / 71.6 s</b></td><td>0.13M HBM + 0.38M host → 0.25M HBM + 7.86M decode DRAM</td></tr>
+</table></div>
+<p>Read the table in three bands. Up to 8 sessions the working set fits in HBM and the local host tier, and the two configurations are equal within noise. At 12 sessions the baseline still finds its contexts in the host tier (3.95M host hits) but its median turn latency has already risen to 23 s, because every turn reloads 128k tokens from host DRAM under contention; the store pair is at the same throughput with a slightly lower latency. At 16 and 20 sessions the working set no longer fits locally: the baseline's host hits fall to 0.65M and 0.38M, almost every turn recomputes, and throughput halves to 44 to 46 tok/s with a median turn latency of 91 to 114 s. The store pair keeps 94 to 95 tok/s and 26 to 33 s, with 6.2M and 7.9M prefix tokens served from the decode host and 0 unfulfilled prefetches (159.6M tokens of storage hits over the whole ladder).</p>
+<p>So the added capacity does not raise peak throughput; it removes the cliff. On this rig the local tiers hold about 12 to 14 concurrent 128k sessions. Each 28 GiB of decode-host DRAM per rank adds room for about 24 more. Past the local limit the store gives 2.1× to 2.2× throughput and 3.4× lower median turn latency, and the curve stays flat up to the store's own budget, which is append-only until restart (see Limits).</p>
+
+<h3 id="r-stress">W0, W4 and W5 · Correctness, races, deadlocks, hangs</h3>
+<div class="tbl"><table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td>W0 native round trip (real registry, store, DMA)</td><td><span class="pill ok">1 passed</span> Spill 2 pages, erase each prefill slot, recall into different slots, reload different TPU pages, all values agree.</td></tr>
+<tr><td>W5 CPU concurrency tests</td><td><span class="pill ok">5 passed</span> 751 spill and recall rounds from 8 threads with a flusher: 0 errors, 0 quarantines. A stalled write holds a lookup for the RPC timeout and not longer. A registry outage returns misses in less than 10 ms. <code>close()</code> during IO does not deadlock. KV and SWA pools from 6 threads at once.</td></tr>
+<tr><td>W4 · 4 concurrent recalls</td><td><span class="pill ok">ok</span> All 4 served from storage, TTFT 2.1 to 3.2 s.</td></tr>
+<tr><td>W4 · client abort during recall, re-issue</td><td><span class="pill ok">ok</span> The client dropped at 0.96 s, the engine finished the prefill, the re-issued request hit HBM in 0.19 s.</td></tr>
+<tr><td>W4 · one store paused 90 s</td><td><span class="pill ok">ok, no hang</span> The cold request during the pause waited 61 s for its first token: its lookup waited behind the stalled write on the backend lock for the 60 s RPC timeout. After the store continued, recall served 24,576 of 32,768 tokens; a fresh request took 1.1 s.</td></tr>
+<tr><td>W4 · registry stopped, then restarted</td><td><span class="pill ok">ok, no hang</span> Recall degraded to recompute in 1.3 s. After the restart, recalls still missed: the registry keeps its directory in memory and the stores do not register again.</td></tr>
+<tr><td>Health probes during W4</td><td><span class="pill ok">264 probes</span> 0 slow (&gt; 2 s), 0 errors.</td></tr>
+<tr><td>Existing Raiden host-pool and platform tests</td><td><span class="pill ok">47 passed</span> on the patched tree.</td></tr>
+</table></div>
+
+<h3 id="limits">Limits and risks</h3>
+<div class="finding risk"><b>A decode-host store is append-only until restart.</b> At tpu-sync 73499f1, <code>WriteRemote</code> allocates landing blocks locked (<span class="path">kv_cache_store_service.cc:697</span>), a committed write keeps them (<span class="path">:936</span>), and nothing calls <code>LogicalBlockManager::Unlock</code>. The host-store node has no sweep. After <code>budget / page bytes</code> pages (29.8k per rank at 16 GiB), each spill fails with <code>RESOURCE_EXHAUSTED ... Evictable: 0</code> and sessions fall back to recompute. Size the budget for the session population, or restart the stores.</div>
+<div class="finding risk"><b>One lock holds lookups behind a spill in progress.</b> <code>_io</code> and <code>batch_exists</code> share the backend lock, and <code>_io</code> holds it during the full gRPC call. A stalled store adds up to <code>rpc_timeout_s</code> (60 s here) to the TTFT of a request that needs a lookup. Seen live in W4. Lower the timeout, or take the lookup out from under the write lock.</div>
+<div class="finding risk"><b><code>cache</code> host-memory mode starves recalls under churn.</b> Use <code>buffer_only</code> with the store.</div>
+<div class="finding risk"><b>A registry restart loses the directory</b> until the stores restart.</div>
+<div class="finding risk"><b>write_through spills each page.</b> Every cached prefill page also goes to the decode host. The bundle does not port vLLM's low-watermark sweep. For long prefixes with few turns the cost is acceptable; for high-churn short traffic it is not.</div>
+<div class="finding risk"><b>Quarantine makes the prefill host pool smaller for the life of the process.</b> The only signal is <code>get_stats()["quarantined_pages"]</code>; it is not a metric.</div>
+<div class="finding risk"><b>Only prefill-generated KV.</b> Decode-generated tokens are never captured. A chat whose history contains the model's answers still re-prefills those answers.</div>
+
+<!-- ============================ PART 5 ============================ -->
+<h2 id="planc"><span class="partno">Part 5</span>Plan C: HiCache manages, Raiden only moves</h2>
+<p>A reviewer asked for a different division of labor: <em>HiCache manages the distributed KV cache across all engines, prefill and decode. Raiden is used only for KV transfer, D2H and H2D.</em> This part designs the feature in that shape. It names what exists in the tree today, what must be added, and what changes against the bundle in Parts 1 to 4 (Plan B).</p>
+
+<h3 id="c-rule">The rule, and what it removes</h3>
+<div class="tbl"><table>
+<tr><th>Job</th><th>Plan B (bundle)</th><th>Plan C (this part)</th></tr>
+<tr><td>Owner of the decode-host DRAM that holds spilled pages</td><td><code>kv_cache_host_store_node</code> processes, one per rank and pool, with their own allocator</td><td>The decode engine's HiCache host pool (<code>TpuRaidenHostKVCache</code>), its radix tree and its LRU</td></tr>
+<tr><td>Directory: which host has page hash H</td><td>tpu-sync global registry server</td><td>The decode engine's radix tree, asked over the existing P/D control channel</td></tr>
+<tr><td>Spill: how a page reaches the decode host</td><td><code>WriteRemote</code>: the store pulls from the prefill host pool (host to host DMA)</td><td>The existing P to D KV transfer. The decode engine then writes through to its host pool with its own D2H. Nothing new moves.</td></tr>
+<tr><td>Recall: how a page comes back</td><td><code>Fetch</code>: the store pushes into prefill host slots (host to host DMA)</td><td>The P to D transfer run in reverse: the decode engine registers its device pages, the prefill engine pulls them into its HBM with <code>start_read</code></td></tr>
+<tr><td>Raiden primitives used</td><td>d2h, h2d, P to D transfer, host to host WriteRemote and Fetch, registry, store allocator</td><td>d2h, h2d, device to device transfer. Nothing else.</td></tr>
+<tr><td>New processes</td><td>16 stores + 1 registry on the decode host</td><td>None</td></tr>
+</table></div>
+<p>The removal has a price. The decode engine's scheduler becomes part of the recall path, and the decode host's HBM and host pool are shared between decoding and lending. The trade-offs are listed at the end of this part.</p>
+
+<h3 id="c-exists">What already exists in the tree</h3>
+<ul>
+  <li><b>A decode-side prefix cache with host RAM.</b> With <code>--disaggregation-decode-enable-radix-cache</code> and <code>--enable-hierarchical-cache</code>, the decode engine keeps the KV of finished requests in its radix tree, in HBM and in its host pool. <code>DecodePrefixMatch</code> in <span class="path">disaggregation/decode_hicache_mixin.py</span> matches a new request against L1, L2 and even L3, and restores host pages to HBM before the pull. <span class="path">sglang_tpu/pd_decode_swa_hicache.py</span> adds the TPU specifics: only full-attention KV goes to RAM, a request that reuses pages of an unfinished restore waits for it.</li>
+  <li><b>A consumer-pull transfer with a producer lease.</b> <code>RaidenKVManager</code> in <span class="path">sglang_tpu/disaggregation/raiden/conn.py</span> runs the P to D transfer as a pull: the producer calls <code>register_read(req_id, uuid, block_ids)</code> and holds a lease on those pages until <code>poll_stats</code> reports the read settled; the consumer calls <code>start_read(req_id, uuid, endpoint, remote_block_ids, local_block_ids)</code>. Raiden stages the pages D2H on the producer, moves them over the network, and lands them H2D on the consumer. The sender and receiver halves are mixins on one class.</li>
+  <li><b>A control channel per rank.</b> ZMQ sockets carry typed messages between the two managers: <code>PULL_REQ</code>, <code>BLOCKS</code>, <code>CHUNK</code>, <code>ABORT</code> and the reshard family (<span class="path">serde.py</span>). A new message is one tag and one handler.</li>
+  <li><b>A prefill-side hook for a prefix that is not local.</b> <span class="path">managers/scheduler.py</span> computes the matched length from L1 and L2 and calls <code>prefetch_from_storage</code> for the rest. Plan C replaces this call with a peer fetch.</li>
+  <li><b>Inserting transferred pages into a radix tree.</b> The decode engine already does it for pages it pulled from the prefill. The prefill engine will do the same for pages it pulled from the decode.</li>
+</ul>
+<p>In the recipes used for Parts 3 and 4, the decode engine runs with no radix cache and no HiCache. Plan C starts by turning these on. That is a configuration change, not code.</p>
+
+<h3 id="c-flow">Data flow</h3>
+<figure>
+<svg viewBox="0 0 980 400" role="img" aria-label="Plan C data flow. Host a, prefill engine: HBM and HiCache host pool. Host b, decode engine: HBM and HiCache host pool. Spill: the existing prefill to decode pull lands in decode HBM, then the decode HiCache writes through to its host pool with D2H. Recall: the prefill asks the decode over the control channel, the decode restores host pages to HBM with H2D and registers a read, the prefill pulls them into its HBM, then prefills only the new tokens.">
+<defs><marker id="ar5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+<g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor" stroke="currentColor">
+  <rect x="20" y="20" width="440" height="360" rx="8" fill="none"/><text x="34" y="42" font-weight="600" stroke="none">Host a · prefill engine (TP8)</text>
+  <rect x="520" y="20" width="440" height="360" rx="8" fill="none"/><text x="534" y="42" font-weight="600" stroke="none">Host b · decode engine (TP8)</text>
+  <rect x="40" y="60" width="400" height="70" rx="6" fill="none"/><text x="52" y="82" stroke="none">Prefill HBM (L1)</text><text x="52" y="100" stroke="none" font-size="11">radix tree · pages pulled back from b are inserted here</text><text x="52" y="116" stroke="none" font-size="11">then only the new tokens are prefilled</text>
+  <rect x="40" y="150" width="400" height="60" rx="6" fill="none"/><text x="52" y="172" stroke="none">Prefill HiCache host pool (L2)</text><text x="52" y="190" stroke="none" font-size="11">unchanged: D2H / H2D for the prefill's own eviction</text>
+  <rect x="40" y="230" width="400" height="60" rx="6" fill="none"/><text x="52" y="252" stroke="none">RaidenKVManager (prefill role + new consumer role)</text><text x="52" y="270" stroke="none" font-size="11">PREFIX_REQ → · ← PREFIX_BLOCKS · start_read · PREFIX_RELEASE →</text>
+  <rect x="540" y="60" width="400" height="70" rx="6" fill="none"/><text x="552" y="82" stroke="none">Decode HBM (the decode's L1)</text><text x="552" y="100" stroke="none" font-size="11">radix tree keeps finished requests · restore target for H2D</text><text x="552" y="116" stroke="none" font-size="11">register_read pins pages while a pulls</text>
+  <rect x="540" y="150" width="400" height="60" rx="6" fill="none" stroke="var(--accent)"/><text x="552" y="172" stroke="none" fill="var(--accent-ink)">Decode HiCache host pool: the decode's L2, the prefill's L3</text><text x="552" y="190" stroke="none" font-size="11">write_through D2H after each pull · LRU eviction · sized by --hicache-ratio</text>
+  <rect x="540" y="230" width="400" height="60" rx="6" fill="none"/><text x="552" y="252" stroke="none">RaidenKVManager (decode role + new producer role)</text><text x="552" y="270" stroke="none" font-size="11">match in tree · lock · H2D restore · register_read · reply · unlock on release</text>
+  <line x1="440" y1="80" x2="540" y2="80" marker-end="url(#ar5)" stroke="var(--s2)"/><text x="452" y="72" stroke="none" font-size="11" fill="var(--s2)">spill = existing P→D pull</text>
+  <line x1="740" y1="130" x2="740" y2="150" marker-end="url(#ar5)" stroke="var(--s2)"/><text x="750" y="144" stroke="none" font-size="11" fill="var(--s2)">D2H</text>
+  <line x1="700" y1="150" x2="700" y2="130" marker-end="url(#ar5)" stroke="var(--s3)"/><text x="640" y="144" stroke="none" font-size="11" fill="var(--s3)">H2D restore</text>
+  <line x1="540" y1="100" x2="440" y2="100" marker-end="url(#ar5)" stroke="var(--s3)"/><text x="452" y="114" stroke="none" font-size="11" fill="var(--s3)">recall = reverse pull (start_read on a)</text>
+  <line x1="440" y1="260" x2="540" y2="260" marker-end="url(#ar5)" stroke-dasharray="4 3"/><line x1="540" y1="276" x2="440" y2="276" marker-end="url(#ar5)" stroke-dasharray="4 3"/><text x="452" y="298" stroke="none" font-size="11">control channel (ZMQ per rank)</text>
+  <text x="34" y="330" stroke="none" font-size="11">Raiden does three things only: D2H, H2D, device to device transfer.</text>
+  <text x="34" y="348" stroke="none" font-size="11">HiCache decides what is kept, where, and for how long, on both hosts.</text>
+  <text x="34" y="366" stroke="none" font-size="11">No store processes, no registry, no host to host DMA.</text>
+</g>
+</svg>
+<figcaption>Spill needs no new transfer: every prefilled request already lands in decode HBM, and the decode HiCache writes it through to its host pool. Recall is the P to D transfer with the roles swapped. Tier numbers are per engine: the decode host pool is L2 of the decode HiCache and, seen from the prefill, the L3 of this feature.</figcaption>
+</figure>
+
+<h3 id="c-seq">How the two HiCaches and Raiden interact</h3>
+<figure>
+<svg viewBox="0 0 980 660" role="img" aria-label="Sequence of Plan C across four lanes: prefill HiCache, prefill Raiden manager, decode Raiden manager, decode HiCache. Turn 1: the prefill computes the KV, the decode pulls it over Raiden, the decode HiCache inserts it in its radix tree and writes it through to its host pool; later the prefill evicts it. Turn 2: the prefill HiCache misses and sends PREFIX_REQ; the decode HiCache matches the hashes, locks the nodes and restores host pages to HBM with H2D; the decode Raiden manager registers a read and replies PREFIX_BLOCKS; the prefill Raiden manager pulls the pages into prefill HBM with start_read; the prefill HiCache inserts them and prefills only the new tokens; PREFIX_RELEASE unlocks the decode nodes. Solid orange arrows are Raiden byte moves; dashed arrows are control messages.">
+<defs><marker id="ar6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+<g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor" stroke="currentColor">
+  <g font-weight="600" stroke="none" text-anchor="middle">
+    <text x="120" y="22">Prefill HiCache</text><text x="120" y="38" font-weight="400" font-size="11">scheduler · radix tree · host pool</text>
+    <text x="370" y="22">Prefill Raiden</text><text x="370" y="38" font-weight="400" font-size="11">RaidenKVManager · KVCacheManager</text>
+    <text x="610" y="22">Decode Raiden</text><text x="610" y="38" font-weight="400" font-size="11">RaidenKVManager · KVCacheManager</text>
+    <text x="860" y="22">Decode HiCache</text><text x="860" y="38" font-weight="400" font-size="11">scheduler · radix tree · host pool</text>
+  </g>
+  <g stroke-dasharray="3 4" opacity=".5"><line x1="120" y1="50" x2="120" y2="640"/><line x1="370" y1="50" x2="370" y2="640"/><line x1="610" y1="50" x2="610" y2="640"/><line x1="860" y1="50" x2="860" y2="640"/></g>
+
+  <text x="20" y="72" stroke="none" font-weight="600" font-size="11" letter-spacing=".06em">TURN 1 · SPILL (nothing new moves)</text>
+  <rect x="30" y="82" width="180" height="30" rx="4" fill="var(--panel)"/><text x="120" y="101" stroke="none" text-anchor="middle" font-size="11">prefill 132k tokens → KV in HBM</text>
+  <line x1="610" y1="130" x2="370" y2="130" marker-end="url(#ar6)" stroke-dasharray="4 3"/><text x="490" y="124" stroke="none" text-anchor="middle" font-size="11">PULL_REQ (existing)</text>
+  <line x1="370" y1="152" x2="610" y2="152" marker-end="url(#ar6)" stroke-dasharray="4 3"/><text x="490" y="146" stroke="none" text-anchor="middle" font-size="11">BLOCKS · register_read leases the pages</text>
+  <line x1="370" y1="180" x2="610" y2="180" marker-end="url(#ar6)" stroke="var(--accent)" stroke-width="2"/><text x="490" y="174" stroke="none" text-anchor="middle" font-size="11" fill="var(--accent-ink)">start_read: D2H on a → network → H2D on b</text>
+  <line x1="610" y1="202" x2="860" y2="202" marker-end="url(#ar6)"/><text x="735" y="196" stroke="none" text-anchor="middle" font-size="11">pages inserted in the decode radix tree</text>
+  <rect x="740" y="214" width="230" height="30" rx="4" fill="none" stroke="var(--accent)"/><text x="855" y="233" stroke="none" text-anchor="middle" font-size="11" fill="var(--accent-ink)">write_through: D2H → decode host pool</text>
+  <rect x="740" y="252" width="230" height="30" rx="4" fill="var(--panel)"/><text x="855" y="271" stroke="none" text-anchor="middle" font-size="11">later: HBM evicted, page stays in host pool</text>
+  <rect x="30" y="252" width="180" height="30" rx="4" fill="var(--panel)"/><text x="120" y="271" stroke="none" text-anchor="middle" font-size="11">later: evicted from L1 and L2 under churn</text>
+
+  <line x1="20" y1="300" x2="960" y2="300" opacity=".4"/>
+  <text x="20" y="322" stroke="none" font-weight="600" font-size="11" letter-spacing=".06em">TURN 2 · RECALL (the pull, reversed)</text>
+  <rect x="30" y="332" width="180" height="42" rx="4" fill="var(--panel)"/><text x="120" y="349" stroke="none" text-anchor="middle" font-size="11">L1 + L2 match: 0 of 132k</text><text x="120" y="365" stroke="none" text-anchor="middle" font-size="11">prefetch_from_peer(hash chain)</text>
+  <line x1="120" y1="392" x2="370" y2="392" marker-end="url(#ar6)"/><text x="245" y="386" stroke="none" text-anchor="middle" font-size="11">page hashes, room</text>
+  <line x1="370" y1="392" x2="610" y2="392" marker-end="url(#ar6)" stroke-dasharray="4 3"/><text x="490" y="386" stroke="none" text-anchor="middle" font-size="11">PREFIX_REQ (new)</text>
+  <line x1="610" y1="392" x2="860" y2="392" marker-end="url(#ar6)"/><text x="735" y="386" stroke="none" text-anchor="middle" font-size="11">match hashes · lock nodes</text>
+  <rect x="740" y="406" width="230" height="30" rx="4" fill="none" stroke="var(--accent)"/><text x="855" y="425" stroke="none" text-anchor="middle" font-size="11" fill="var(--accent-ink)">H2D restore: host pool → decode HBM</text>
+  <line x1="860" y1="456" x2="610" y2="456" marker-end="url(#ar6)"/><text x="735" y="450" stroke="none" text-anchor="middle" font-size="11">device block ids · register_read leases them</text>
+  <line x1="610" y1="480" x2="370" y2="480" marker-end="url(#ar6)" stroke-dasharray="4 3"/><text x="490" y="474" stroke="none" text-anchor="middle" font-size="11">PREFIX_BLOCKS (new): hit length, block ids, endpoint</text>
+  <rect x="280" y="492" width="180" height="22" rx="4" fill="var(--panel)"/><text x="370" y="507" stroke="none" text-anchor="middle" font-size="11">allocate prefill HBM pages</text>
+  <line x1="610" y1="536" x2="370" y2="536" marker-end="url(#ar6)" stroke="var(--accent)" stroke-width="2"/><text x="490" y="530" stroke="none" text-anchor="middle" font-size="11" fill="var(--accent-ink)">start_read: D2H on b → network → H2D on a</text>
+  <line x1="370" y1="560" x2="120" y2="560" marker-end="url(#ar6)"/><text x="245" y="554" stroke="none" text-anchor="middle" font-size="11">read settled: insert pages in radix tree</text>
+  <rect x="30" y="572" width="180" height="30" rx="4" fill="var(--panel)"/><text x="120" y="591" stroke="none" text-anchor="middle" font-size="11">prefill only the 4k new tokens</text>
+  <line x1="370" y1="620" x2="610" y2="620" marker-end="url(#ar6)" stroke-dasharray="4 3"/><text x="490" y="614" stroke="none" text-anchor="middle" font-size="11">PREFIX_RELEASE (new)</text>
+  <line x1="610" y1="620" x2="860" y2="620" marker-end="url(#ar6)"/><text x="735" y="614" stroke="none" text-anchor="middle" font-size="11">unlock nodes</text>
+  <text x="20" y="652" stroke="none" font-size="11">Then the turn's new KV goes to the decode through the normal pull, as in turn 1.</text>
+</g>
+</svg>
+<div class="legend"><span style="--sw:var(--accent)">Raiden moves bytes: D2H, H2D, device to device transfer</span><span style="--sw:var(--muted)">dashed: control message on the P/D ZMQ channel</span><span style="--sw:var(--line)">plain: in-process call</span></div>
+<figcaption>How the two HiCache instances and the two Raiden managers interact. HiCache on each host decides what is kept and for how long; the Raiden managers only lease pages and move bytes. The spill in turn 1 is the normal P to D pull plus the decode HiCache's own write-through. The recall in turn 2 is the same pull with the roles swapped, started by the prefill HiCache instead of the decode prealloc queue.</figcaption>
+</figure>
+
+<h3 id="c-tiers">When a page is served from prefill DRAM and when from decode DRAM</h3>
+<p>Plan C has no write-time choice. Every page is written to both places at production: to prefill DRAM by the prefill HiCache's write-through, and to decode DRAM by the P to D transfer plus the decode HiCache's write-through. The choice happens at read time, nearest tier first.</p>
+<div class="tbl"><table>
+<tr><th>Where the prefix is found</th><th>Served from</th><th>When this happens</th><th>Cost at 128k</th></tr>
+<tr><td>L1, prefill HBM</td><td>no copy</td><td>the session came back before anything evicted it; small working set</td><td>0.9 s</td></tr>
+<tr><td>L2, prefill DRAM</td><td>local H2D</td><td>HBM evicted it but the host pool still holds it: up to about 12 to 14 concurrent 128k sessions at ratio 2 on this rig</td><td>1.2 to 2.0 s</td></tr>
+<tr><td>decode DRAM, through the decode HiCache</td><td>decode H2D restore, then the reverse pull into prefill HBM</td><td>both prefill tiers evicted it: a large working set, a long think time, or a prefill restart</td><td>expected above Plan B's 2.6 s; to be measured</td></tr>
+<tr><td>nowhere</td><td>recompute</td><td>the decode evicted it too, or the sliding-window pages are gone</td><td>5.8 s</td></tr>
+</table></div>
+<p>Two consequences follow. First, keep prefill L2 in <code>cache</code> mode at ratio 2. Its hits are two to three times cheaper than a remote recall, the DRAM is local and otherwise idle, and Plan C no longer needs the <code>buffer_only</code> trick, because the recall lands in HBM and needs no host landing slots. Second, size decode DRAM for the whole session population, not for the overflow. A page lives in both DRAMs at the same time, so the decode host pool must hold every prefix that may come back, at about 9 KiB per token per rank.</p>
+<h3 id="c-recall">Recall, one step at a time</h3>
+<ol class="flow">
+  <li><b>The prefill scheduler finds a gap.</b> For a new request, L1 and L2 match <code>matched_len</code> tokens. Today the scheduler calls <code>prefetch_from_storage</code> for the rest. In Plan C it calls <code>prefetch_from_peer</code> on the TPU <code>HiRadixCache</code> with the same arguments: the last local node, the unmatched tokens, the last hash and the salt.</li>
+  <li><b>The prefill asks the decode.</b> Each rank's <code>RaidenKVManager</code> sends <code>PREFIX_REQ</code> to its peer rank: a room id, the page hash chain of the unmatched tokens, and a deadline. One message per rank, because each rank holds its own KV shard.</li>
+  <li><b>The decode matches and pins.</b> The decode manager hands the hashes to the scheduler thread (the same queue that handles pull requests). The scheduler matches them in its radix tree, as <code>DecodePrefixMatch</code> does, and locks the nodes with <code>inc_lock_ref</code>. Pages that live only in the host pool are restored to HBM through the existing <code>_try_hicache_queue_load_back</code> path. Pages that are in neither tier end the hit at that point. The reply waits for the restore to land.</li>
+  <li><b>The decode registers and replies.</b> With the pages in HBM, the manager calls <code>register_read(req_id, uuid, device_block_ids)</code> and sends <code>PREFIX_BLOCKS</code> with the hit length, the block ids and its Raiden endpoint. The lease on the pages starts here and ends when the read settles, as in the forward direction.</li>
+  <li><b>The prefill pulls.</b> The prefill manager allocates device pages from its own allocator for the hit length and calls <code>start_read</code>. The pages go D2H on b, over the network, and H2D on a. The scheduler polls <code>poll_stats</code> as it does for the forward direction. On a miss or a failure, the request keeps <code>matched_len</code> and recomputes the rest, with no other change.</li>
+  <li><b>The prefill inserts and runs.</b> When the read settles, the prefill scheduler inserts the pulled pages into its radix tree under the request's tokens, re-matches, and schedules the request with the longer prefix. Only the new tokens are prefilled. The prefill sends <code>PREFIX_RELEASE</code>; the decode unlocks the nodes.</li>
+  <li><b>Spill of the new pages.</b> After the prefill, the request goes to the decode through the normal P to D pull. The decode's HiCache writes through to its host pool. The next turn finds the longer prefix on the decode side. The prefill's own HiCache host pool keeps its usual role and needs no storage backend.</li>
+</ol>
+
+<h3 id="c-gaps">What must be added</h3>
+<div class="tbl"><table>
+<tr><th>Piece</th><th>Where</th><th>Size</th><th>Notes</th></tr>
+<tr><td>Decode engine with radix cache and HiCache on, host pool sized for lending</td><td>recipe flags: <code>--disaggregation-decode-enable-radix-cache --enable-hierarchical-cache --hicache-io-backend raiden --hicache-ratio N --hicache-write-policy write_through</code></td><td>0 lines</td><td>The host pool becomes the lending memory. The ratio replaces the store budget.</td></tr>
+<tr><td>Three control messages: <code>PREFIX_REQ</code>, <code>PREFIX_BLOCKS</code>, <code>PREFIX_RELEASE</code></td><td><span class="path">sglang_tpu/disaggregation/raiden/serde.py</span></td><td>about 60 lines</td><td>Same framing as <code>PULL_REQ</code> and <code>BLOCKS</code>.</td></tr>
+<tr><td>Producer role on the decode manager: match, lock, restore, register, reply, unlock</td><td>new mixin in <span class="path">sglang_tpu/disaggregation/raiden/</span>, plus a scheduler hook on the decode side</td><td>about 400 lines</td><td>The match and restore run on the decode scheduler thread, like the pull-request handling today. The reply is sent when the restore event lands.</td></tr>
+<tr><td>Consumer role on the prefill manager: send request, allocate device pages, <code>start_read</code>, poll, release</td><td>new mixin, plus <code>HiRadixCache.prefetch_from_peer</code> in <span class="path">sglang_tpu/hiradix_cache.py</span></td><td>about 400 lines</td><td>Reuses the receiver's admission, deadline and failure code. Landing is HBM, not the host pool.</td></tr>
+<tr><td>Prefill scheduler: call the peer fetch where the storage prefetch is called today, and insert the pulled pages before scheduling</td><td>TPU resolution hook, or a small change in <span class="path">managers/scheduler.py</span></td><td>about 80 lines</td><td>The gate on the request is the same one <code>wait_complete</code> uses.</td></tr>
+<tr><td>Tests</td><td>CPU: protocol with a fake engine. TPU: round trip on one host with two engines. Live: the W1 to W6 ladder again.</td><td>about 600 lines</td><td>Plan B's harness and recipes are reusable.</td></tr>
+</table></div>
+<p>Total: about 1,500 lines, all inside the TPU folder except the scheduler hook. The bundle's <code>raiden_dram</code> package, the registry, the store launcher and the quarantine code are not needed in Plan C.</p>
+
+<h3 id="c-tradeoffs">Trade-offs against Plan B</h3>
+<div class="finding good"><b>No new processes and no second allocator.</b> One HiCache per host owns its memory. Eviction exists from day one, because the decode host pool has an LRU. Plan B's append-only store limit goes away.</div>
+<div class="finding good"><b>KV produced by decode is reusable too.</b> The decode tree holds the answer tokens' KV. The next turn's prefix includes the previous answer, so the recall covers it. Plan B only spills prefill-generated KV.</div>
+<div class="finding good"><b>Matches how HiCache is meant to be used.</b> The pattern is the one the reviewer asked for, which lowers the review cost upstream.</div>
+<div class="finding risk"><b>The decode scheduler is on the recall path.</b> Match, lock and restore run on the decode scheduler thread between decode steps. At 8 ranks and a 128k prefix that is 2,048 pages per rank to restore and register. The decode step cadence sets a floor on recall latency that Plan B's separate processes did not have. Mitigation: handle <code>PREFIX_REQ</code> on the listener thread with a tree lock, restore in the background, and reply from the event callback.</div>
+<div class="finding risk"><b>The decode HBM is shared.</b> A restore from the decode host pool needs free decode HBM pages before the prefill can pull. Under heavy decode load the restore waits. Raiden's producer reads device pages only; serving straight from the decode host pool would need a tpu-sync change, a host-source <code>register_read</code>, which would also remove one copy.</div>
+<div class="finding risk"><b>Two hops per recall instead of one.</b> Plan B: decode-host DRAM to prefill host DRAM. Plan C: decode host DRAM to decode HBM, then decode HBM to prefill HBM through two staging buffers. Expect a recall to cost more than Plan B's 2.6 s at 128k unless the pages are still in decode HBM.</div>
+<div class="finding risk"><b>One decode engine per prefill lookup.</b> With several decode engines, the prefill must ask the one that served the previous turn, or all of them. The router already pins a session to a decode engine in most deployments; the fetch should use the same key.</div>
+
+<h3 id="c-step1">Step 1 result: decode-side HiCache costs the prefill nothing</h3>
+<p>Run <code>planc_s1</code>, 2026-10-21 19:38 UTC. Same pair, same ladder shape as Part 4 (4 turns, 4k tool tokens, 256 output tokens, 128k context). The decode engine ran with its radix cache and HiCache on, ratio 2, write-through. The prefill ran the Part 4 baseline configuration with no reverse pull, so this measures only what the decode's write-through costs the pair.</p>
+<div class="tbl"><table>
+<tr><th>Sessions</th><th class="num">Baseline tok/s (Part 4)</th><th class="num">Decode HiCache on, tok/s</th><th class="num">Later-turn TTFT p50, baseline</th><th class="num">Later-turn TTFT p50, decode HiCache on</th><th class="num">Decode cached tokens after the point</th></tr>
+<tr><td>4</td><td class="num">100.8</td><td class="num">103.7</td><td class="num">1.5 s</td><td class="num">0.8 s</td><td class="num">1.62M</td></tr>
+<tr><td>12</td><td class="num">94.2</td><td class="num">94.3</td><td class="num">22.7 s</td><td class="num">21.9 s</td><td class="num">6.36M</td></tr>
+<tr><td>16</td><td class="num">45.6</td><td class="num">44.5</td><td class="num">90.6 s</td><td class="num">90.4 s</td><td class="num">8.81M</td></tr>
+</table></div>
+<p>The decode's write-through is invisible to the prefill: throughput and turn latency match the baseline within noise at every point, and the cliff at 16 sessions is the same cliff, because the prefill still recomputes. The decode's own cached-token counter rises across the ladder, so the finished prefixes are in its tree. That is the memory the reverse pull reads from in step 4.</p>
+<h3 id="c-results">Step 4 result: the reverse pull on hardware</h3>
+<p>Run <code>planc_3</code>, 2026-10-22 00:39 UTC, same pair and model as Part 4. Both engines ran the Plan C tree with <code>SGLANG_TPU_PEER_PREFIX=1</code>. The prefill kept the Part 4 baseline HiCache configuration, ratio 2 in <code>cache</code> mode, with no storage backend. The decode ran its radix cache and HiCache at ratio 2 with write-through. No store processes and no registry.</p>
+<p><b>Single request, turn 2 after a flush of the prefill only.</b> The decode keeps its cache, which is the situation the feature is for. The recompute and Plan B columns are the Part 4 numbers from the same pair.</p>
+<div class="tbl"><table>
+<tr><th>Prefix + new</th><th class="num">Prefix local</th><th class="num">Recompute</th><th class="num">Plan B, store-backed L3</th><th class="num">Plan C, decode HiCache pull</th><th class="num">Plan C vs recompute</th><th class="num">Plan C vs Plan B</th></tr>
+<tr><td>128k + 8k</td><td class="num">0.68 s</td><td class="num">6.33 s</td><td class="num">3.54 s</td><td class="num"><b>1.28 s</b></td><td class="num">4.9×</td><td class="num">2.8×</td></tr>
+<tr><td>128k + 16k</td><td class="num">1.23 s</td><td class="num">6.88 s</td><td class="num">2.84 s</td><td class="num"><b>1.81 s</b></td><td class="num">3.8×</td><td class="num">1.6×</td></tr>
+<tr><td>256k + 8k</td><td class="num">1.09 s</td><td class="num">17.51 s</td><td class="num">5.15 s</td><td class="num"><b>2.18 s</b></td><td class="num">8.0×</td><td class="num">2.4×</td></tr>
+<tr><td>256k + 16k</td><td class="num">1.94 s</td><td class="num">18.35 s</td><td class="num">5.82 s</td><td class="num"><b>3.01 s</b></td><td class="num">6.1×</td><td class="num">1.9×</td></tr>
+</table></div>
+<p>Each recall served the full prefix: <code>cached_tokens_details.device</code> equals the prefix length, and the prefill log shows 8 commits per request, one per rank, for 131,072 or 262,144 tokens each. The pull is faster than Plan B's store recall because the prefix was still in decode HBM, so the copy was one device-to-device hop with no host-side source, and it landed in prefill HBM instead of the prefill host pool, which saved the H2D load before the forward.</p>
+<p><b>Agentic A</b> (8 sessions, 6 turns, 128k) on the same pair: wall 111 s, 221 output tok/s, later-turn TTFT p50 0.9 s. This is not a Plan C result: with the prefill at ratio 2 the working set fits the local tiers, so the prefix tokens came from the prefill's own host tier and no pull happened. The Part 4 agentic baseline forced churn with ratio 0.5. The ladder below is the like-for-like comparison, because it uses the same prefill configuration as the Part 4 baseline.</p>
+<p><b>Ladder, final</b> (run <code>planc_7</code>, 01:52 to 02:09 UTC, same shape as Part 4 W6, prefill at the Part 4 baseline configuration, pull on). The 12 session point first stalled twice. The first stall was a rank divergence: a decode rank answered a different hit length than its peers, one prefill rank refused the pull locally, and the ranks then waited in different collectives. The second was a hold that locked a request's whole local prefix while it waited for a 4k tail from the decode, which pinned more than the prefill's HBM across a few held requests and starved its own scheduling. Both are fixed: every decision is now reduced across the ranks before any rank acts, the local prefix is re-validated at commit instead of locked, pulls below 8k tokens of gain are skipped, and reads in flight per rank stay under half a max-size request.</p>
+<div class="tbl"><table>
+<tr><th>Sessions</th><th class="num">Baseline tok/s</th><th class="num">Plan B tok/s</th><th class="num">Plan C tok/s</th><th class="num">Baseline TTFT p50</th><th class="num">Plan B TTFT p50</th><th class="num">Plan C TTFT p50</th><th>Plan C pulls</th></tr>
+<tr><td>4</td><td class="num">100.8</td><td class="num">103.9</td><td class="num">107.2</td><td class="num">1.5 s</td><td class="num">1.4 s</td><td class="num">0.9 s</td><td>0, all local</td></tr>
+<tr><td>8</td><td class="num">121.0</td><td class="num">112.8</td><td class="num">124.7</td><td class="num">1.7 s</td><td class="num">6.0 s</td><td class="num">1.0 s</td><td>0, all local</td></tr>
+<tr><td>12</td><td class="num">94.2</td><td class="num">97.2</td><td class="num">98.3</td><td class="num">22.7 s</td><td class="num">19.9 s</td><td class="num">19.7 s</td><td>0, local host tier</td></tr>
+<tr><td>16</td><td class="num">45.6</td><td class="num"><b>94.4</b></td><td class="num">44.5</td><td class="num">90.6 s</td><td class="num"><b>26.1 s</b></td><td class="num">90.5 s</td><td>0: 103 requests asked, 103 answered "short hit"</td></tr>
+<tr><td>20</td><td class="num">43.7</td><td class="num"><b>95.2</b></td><td class="num">43.3</td><td class="num">114.1 s</td><td class="num"><b>33.2 s</b></td><td class="num">114.0 s</td><td>0, same reason</td></tr>
+</table></div>
+<p><b>What the ladder says.</b> Up to 12 sessions Plan C equals the baseline, as it should: the prefill's own tiers hold the working set and the only remote gain per turn is the previous answer, 4k tokens, which is below the pull threshold. At 16 and 20 sessions, where Plan B's store kept the pair at 95 tok/s, Plan C falls to the baseline. The decode engine answered every request with a miss, because the prefix was no longer in decode HBM. The decode's host copy holds full-attention KV only, and gpt-oss is a sliding-window model: a prefix without its last window's SWA pages cannot be used by the prefill, so the serve path does not restore from the decode host pool for hybrid models. Decode HBM holds about five 128k contexts, which is why the single-turn recalls succeed and the 16-session ladder does not.</p>
+<p><b>Conclusion for Plan C on this model.</b> The reverse pull is correct and, when it hits, faster than Plan B: 1.3 to 3.0 s against 2.8 to 5.8 s. Its reach is decode HBM, not decode DRAM, until the decode offloads the sliding-window pages of its cached prefixes to its host pool as well. That change is in <code>pd_decode_swa_hicache.py</code> and the decode's host stack, not in this PR, and it is the next step. For a full-attention model the serve path already restores from the decode host pool and the ladder should hold, which is the first thing to measure once a dense recipe is on the rig.</p>
+<p><b>Races, aborts and hangs</b> (<code>spill_stress.py</code> with a prefill-only flush, run <code>planc_7</code>, 02:09 UTC; health probes on both engines every 5 s, 16 probes, 0 slow, 0 errors).</p>
+<div class="tbl"><table>
+<tr><th>Phase</th><th>Result</th></tr>
+<tr><td>4 concurrent recalls after a prefill-only flush</td><td>All 4 served from the decode, 32,768 prefix tokens each as device hits, TTFT 0.6 to 1.5 s.</td></tr>
+<tr><td>Client abort 0.5 s into a recall, then re-issue</td><td>No hang. The aborted request's pull still landed and was inserted, so the re-issued request hit 40,960 tokens locally with a 0.08 s TTFT.</td></tr>
+<tr><td>Both engines flushed, then a recall</td><td>Clean miss: the decode answered "short hit", the request recomputed in 1.3 s, no hang. A fresh session right after recalled normally in 0.5 s.</td></tr>
+</table></div>
+<p>48 commits over the three phases, one per rank for each of the 6 recalls. No quarantine or drain was needed: every read Raiden started also settled.</p>
+<p><b>Five defects found on hardware only.</b> A wrong import path in the decode hook. The decode built its radix key from a list, while the tree compares int64 arrays. The prefill's idle pool-invariant check counted the pages a pull had allocated but not yet handed to the tree as a leak and aborted the scheduler; those pages are now reported to the check as in flight. A rank-local refusal of a pull desynchronized the ranks' collectives. A lock on the local prefix during the pull starved the prefill. Each has a CPU test now; 13 in total.</p>
+<h3 id="c-plan">Order of work</h3>
+<ol class="flow">
+  <li><b>Configuration only.</b> Run the decode engine with its radix cache and HiCache on, ratio 2, and confirm with the capacity ladder that finished prefixes stay in the decode host pool across turns. This also measures the cost of decode-side write-through on decode throughput.</li>
+  <li><b>Protocol and producer role.</b> Messages, decode-side match and register, with a CPU test against a fake engine.</li>
+  <li><b>Consumer role and tree insert.</b> Prefill-side pull into HBM and radix insert, with the one-host TPU round trip test.</li>
+  <li><b>Scheduler hook and live run.</b> W1 single-turn first, then W2, W3 and the W6 ladder on the same rig, against the Plan B numbers in Part 4.</li>
+</ol>
+<p>Step 1 needs no code and can run on the pair now. Steps 2 to 4 are a second PR on the fork. Plan B's PR stays as it is for comparison until Plan C's numbers exist.</p>
+
+<h2 id="runbook">Procedure used here</h2>
+<div class="caution"><b>CAUTION:</b> Do not commit the patched checkout to sglang-torchtpu. Keep it as an uncommitted worktree. Put code changes and results in tpu-rl.</div>
+<ol>
+  <li>Make sure that no other user holds the TPU on either host: <code>bash ~/pd_disagg/scripts/tpu_free.sh</code>.</li>
+  <li>Use the patched checkout on both hosts: <code>~/sglang-spill</code>.</li>
+  <li>On the decode host b, start the registry: <code>~/pd_disagg/spill/spill_stores.sh registry-start</code>.</li>
+  <li>Start the pair from the patched tree: <code>~/pd_disagg/spill/pd_spill.sh start ~/pd_disagg/recipes/gpt-oss_C_spill_dram_bo.json &lt;run&gt;</code>.</li>
+  <li>When the prefill engine has written its manifests, start the stores on b: <code>~/pd_disagg/spill/spill_stores.sh stores-start &lt;run&gt; 17179869184</code>. Make sure that 16 store processes are registered: <code>spill_stores.sh status</code>.</li>
+  <li>Single turn: <code>spill_bench.py --prefix 131072 --new 8192 --scenario flush --label recall --spill-wait 120</code>. Agentic: <code>spill_agentic.py --sessions 8 --turns 6 --prefix 131072 --turn-new 4096 --turn-out 512</code>. Stress: <code>spill_stress.py</code>.</li>
+  <li>Restart the stores between workloads so the append-only budget does not fill.</li>
+</ol>
+<p>All scripts, recipes, raw results and <code>LIVE_VALIDATION.md</code> are in tpu-rl at <code>sglang_inference/patches/decode_dram_spill/</code> (commit 04ce99d).</p>
+
+<h2 id="sources">Sources</h2>
+<ul>
+  <li>tpu-rl <code>sglang_inference/patches/decode_dram_spill/</code>: README.md, COMPARISON.md, manifest.json, LIVE_VALIDATION.md, files/, live_test/.</li>
+  <li>sglang-torchtpu f2588cdf79: <code>managers/cache_controller.py</code>, <code>arg_groups/hicache_hook.py</code>, <code>mem_cache/unified_radix_cache.py</code>, <code>sglang_tpu/hiradix_cache.py</code>, <code>sglang_tpu/kv_pool_host.py</code>, <code>sglang_tpu/raiden_transfer.py</code>, <code>mem_cache/hicache_storage.py</code>, <code>arg_groups/fields/memory.py</code>; origin/main 1280d5e91b for the "is it in main" check.</li>
+  <li>tpu-sync 73499f1: <code>kv_cache/kv_cache_store_service.cc</code>, <code>kv_cache/logical_block_manager.cc</code>, <code>proto/kv_cache_store_service.proto</code>, <code>kv_cache/global_registry/global_registry.proto</code>. Installed wheel tpu_sync_torch 0.0.1.dev20261002213151.</li>
+  <li>GitHub search of sgl-project/sglang-torchtpu PRs and issues (2026-10-20); issues #1067, #1503, #1499.</li>
+  <li>Earlier walkthrough of the vllm-torchtpu offloading connector: <a href="https://claude.ai/artifact/BVtKyLZdSzjL8WFPxJEkK3">Raiden DRAM Offload Walkthrough</a>.</li>
+</ul>
+</main>
+</div>
+<div id="tip" class="tip" hidden></div>
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+  var tip=document.getElementById("tip");
+  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+  function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+  function bars(svgId,groups,series,unit,opts){
+    var svg=document.getElementById(svgId); if(!svg) return;
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    var W=parseFloat(svg.getAttribute("viewBox").split(" ")[2]), H=parseFloat(svg.getAttribute("viewBox").split(" ")[3]);
+    var m={t:16,r:12,b:38,l:46}, iw=W-m.l-m.r, ih=H-m.t-m.b;
+    var max=0; groups.forEach(function(g){g.v.forEach(function(x){if(x>max)max=x;});});
+    var top=Math.ceil(max/opts.step)*opts.step;
+    var y=function(v){return m.t+ih-(v/top)*ih;};
+    var fg=css("--fg")||"#222", muted=css("--muted")||"#666", grid=css("--grid")||"#ddd";
+    for(var t=0;t<=top;t+=opts.step){
+      svg.appendChild(el("line",{x1:m.l,x2:W-m.r,y1:y(t),y2:y(t),stroke:grid,"stroke-width":1}));
+      var lab=el("text",{x:m.l-8,y:y(t)+4,"text-anchor":"end","font-size":11,fill:muted,"font-family":"IBM Plex Mono, monospace"}); lab.textContent=t; svg.appendChild(lab);
+    }
+    svg.appendChild(el("line",{x1:m.l,x2:W-m.r,y1:y(0),y2:y(0),stroke:muted,"stroke-width":1}));
+    var gw=iw/groups.length, n=series.length, bw=Math.min(28,(gw*0.7-2*(n-1))/n);
+    groups.forEach(function(g,gi){
+      var x0=m.l+gi*gw+(gw-(n*bw+2*(n-1)))/2;
+      g.v.forEach(function(v,si){
+        var x=x0+si*(bw+2), h=Math.max(0,y(0)-y(v));
+        var r=el("path",{d:"M"+x+" "+y(0)+" v-"+Math.max(0,h-4)+" a4 4 0 0 1 4 -4 h"+(bw-8)+" a4 4 0 0 1 4 4 v"+Math.max(0,h-4)+" z",fill:series[si].color});
+        var title=el("title"); title.textContent=g.name+" · "+series[si].name+": "+v+" "+unit; r.appendChild(title);
+        r.addEventListener("mousemove",function(ev){tip.hidden=false;tip.textContent=g.name+" · "+series[si].name+": "+v+" "+unit;tip.style.left=(ev.clientX+12)+"px";tip.style.top=(ev.clientY+12)+"px";});
+        r.addEventListener("mouseleave",function(){tip.hidden=true;});
+        svg.appendChild(r);
+        var vl=el("text",{x:x+bw/2,y:y(v)-5,"text-anchor":"middle","font-size":10,fill:fg,"font-family":"IBM Plex Mono, monospace"}); vl.textContent=v; svg.appendChild(vl);
+      });
+      var gl=el("text",{x:m.l+gi*gw+gw/2,y:H-m.b+18,"text-anchor":"middle","font-size":12,fill:fg,"font-family":"IBM Plex Sans, sans-serif"}); gl.textContent=g.name; svg.appendChild(gl);
+    });
+    var ul=el("text",{x:m.l,y:H-4,"font-size":11,fill:muted,"font-family":"IBM Plex Sans, sans-serif"}); ul.textContent=opts.axis; svg.appendChild(ul);
+  }
+  function draw(){
+    var s1=css("--s1"),s2=css("--s2"),s3=css("--s3");
+    bars("c1",[{name:"128k + 8k",v:[0.91,6.33,3.54]},{name:"128k + 16k",v:[1.23,6.88,2.84]},{name:"256k + 8k",v:[1.28,17.51,5.15]},{name:"256k + 16k",v:[1.99,18.35,5.82]}],
+      [{name:"local hit",color:s1},{name:"recompute",color:s2},{name:"recall",color:s3}],"s",{step:5,axis:"turn-2 TTFT, seconds (lower is better)"});
+    bars("c2",[{name:"Agentic A · 8 sessions × 6 turns",v:[81.7,191.8]},{name:"Agentic B · 12 sessions × 10 turns",v:[43.7,127.8]}],
+      [{name:"baseline",color:s2},{name:"store, buffer_only",color:s3}],"tok/s",{step:50,axis:"aggregate output tokens per second (higher is better)"});
+    bars("c3",[{name:"4 sessions",v:[100.8,103.9]},{name:"8",v:[121.0,112.8]},{name:"12",v:[94.2,97.2]},{name:"16",v:[45.6,94.4]},{name:"20",v:[43.7,95.2]}],
+      [{name:"baseline",color:s2},{name:"store pair",color:s3}],"tok/s",{step:25,axis:"total output tokens per second of the pair against concurrent 128k sessions (higher is better)"});
+    bars("c4",[{name:"4 sessions",v:[1.5,1.4]},{name:"8",v:[1.7,6.0]},{name:"12",v:[22.7,19.9]},{name:"16",v:[90.6,26.1]},{name:"20",v:[114.1,33.2]}],
+      [{name:"baseline",color:s2},{name:"store pair",color:s3}],"s",{step:25,axis:"later-turn TTFT p50, seconds, against concurrent 128k sessions (lower is better)"});
+  }
+  draw();
+  if(window.matchMedia){window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",draw);}
+  new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+})();
+</script>
