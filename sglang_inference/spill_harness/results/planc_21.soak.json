@@ -1,0 +1,34 @@
+{
+ "args": {
+  "lb": "http://10.128.15.217:8080",
+  "prefill_url": "http://10.128.15.217:30000",
+  "decode_url": "http://10.128.0.90:30000",
+  "prompts": "/home/alisachen_google_com/pd_disagg/prompts/gpt-oss",
+  "tokenizer": "/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a",
+  "prefix": "32768",
+  "new": "8192",
+  "sessions": "4",
+  "phases": "soak",
+  "spill_wait": "5",
+  "pause_hold": "30",
+  "soak_min": "15.0",
+  "phase_timeout": "1500",
+  "max_new_tokens": "128",
+  "out": "results/planc_21.soak.json"
+ },
+ "phases": {
+  "soak": {
+   "status": "ok",
+   "seconds": 906.9,
+   "result": {
+    "rounds": 107,
+    "errors": 0
+   }
+  }
+ },
+ "health": {
+  "samples": 364,
+  "slow": [],
+  "errors": []
+ }
+}

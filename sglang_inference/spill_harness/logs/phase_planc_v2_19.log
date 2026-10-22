@@ -1,0 +1,66 @@
+2026-10-22 12:29:05 W1 recall P=131072 N=8192 (flush prefill only)
+"turn2": {"ttft_s": 1.2686553201638162 "cached_tokens_details": {"device": 131072, "host": 0} 
+peer_commits=24 peer_tokens=1064960 schedule_time_pulls=16
+2026-10-22 12:29:56 W1 recall P=262144 N=8192 (flush prefill only)
+"turn2": {"ttft_s": 2.1828758381307125 "cached_tokens_details": {"device": 262144, "host": 0} 
+peer_commits=48 peer_tokens=3178496 schedule_time_pulls=32
+2026-10-22 12:30:59 DRAM recall probe
+DRAM_RECALL {"run": "planc_19", "prefix": 131072, "evictors": 7, "turn1_ttft_s": 5.863135156221688, "turn2_ttft_s": 1.2904853676445782, "turn2_cached": {"device": 131072, "host": 0}, "turn2_wall_s": 3.27, "peer_stats_after": "peer_commits=56 peer_tokens=4227072 schedule_time_pulls=104"}
+  decode miss:      22 short hit
+  decode:       1 TP0 EP0] peer prefix served | room=1364
+  decode:       1 TP0 EP0] peer prefix served | room=6308
+  decode:       2 TP0 EP0] peer prefix served | room=7268
+  decode:       1 TP0 EP0] peer prefix served | room=7680
+  decode:       2 TP0 EP0] peer prefix served | room=8589
+http://10.128.15.217:30000 200 http://10.128.0.90:30000 200 
+2026-10-22 12:32:16 ladder sessions=16
+SUMMARY {"run": "planc_19", "label": "planc_n16", "sessions": 16, "turns": 4, "prefix": 131072, "shared": 0, "turn_new": 4096, "turn_out": 256, "wall_s": 899.3, "errors": 0, "ttft_turn0_p50": 36.36901947297156, "ttft_later_p50": 205.91661546891555, "ttft_later_p95": 580.2475471841171, "ttft_later_max": 580.407178377267, "ttft_per_turn_p50": {"0": 36.37, "1": 227.77, "2": 391.51, "3": 197.6}, "cached_tokens_by_tier": {"device": 6088448, "host": 401472, "storage": 0}, "prompt_tokens_total": 878787
+peer_commits=352 peer_tokens=44414464 schedule_time_pulls=592
+decode sglang:cached_tokens_total 7014208
+  decode miss:      96 short hit
+  decode miss:       3 restore unavailable
+  decode miss:       3 SWA window missing
+  decode:       1 TP0 EP0] peer prefix served | room=1186
+  decode:       1 TP0 EP0] peer prefix served | room=1189
+  decode:       1 TP0 EP0] peer prefix served | room=1364
+  decode:       1 TP0 EP0] peer prefix served | room=1442
+  decode:       1 TP0 EP0] peer prefix served | room=1774
+  decode:       1 TP0 EP0] peer prefix served | room=1978
+  decode:       1 TP0 EP0] peer prefix served | room=2280
+  decode:       1 TP0 EP0] peer prefix served | room=2285
+  decode:       1 TP0 EP0] peer prefix served | room=2956
+  decode:       1 TP0 EP0] peer prefix served | room=3323
+  decode:       1 TP0 EP0] peer prefix served | room=3632
+  decode:       1 TP0 EP0] peer prefix served | room=3726
+  decode:       1 TP0 EP0] peer prefix served | room=3805
+  decode:       1 TP0 EP0] peer prefix served | room=3861
+  decode:       1 TP0 EP0] peer prefix served | room=4099
+  decode:       1 TP0 EP0] peer prefix served | room=4200
+  decode:       1 TP0 EP0] peer prefix served | room=4321
+  decode:       1 TP0 EP0] peer prefix served | room=4636
+  decode:       1 TP0 EP0] peer prefix served | room=4662
+  decode:       1 TP0 EP0] peer prefix served | room=4715
+  decode:       1 TP0 EP0] peer prefix served | room=4813
+  decode:       1 TP0 EP0] peer prefix served | room=4849
+  decode:       1 TP0 EP0] peer prefix served | room=4898
+  decode:       1 TP0 EP0] peer prefix served | room=5332
+  decode:       1 TP0 EP0] peer prefix served | room=5396
+  decode:       1 TP0 EP0] peer prefix served | room=5415
+  decode:       1 TP0 EP0] peer prefix served | room=5990
+  decode:       1 TP0 EP0] peer prefix served | room=6308
+  decode:       1 TP0 EP0] peer prefix served | room=6392
+  decode:       1 TP0 EP0] peer prefix served | room=6496
+  decode:       2 TP0 EP0] peer prefix served | room=7268
+  decode:       1 TP0 EP0] peer prefix served | room=7680
+  decode:       1 TP0 EP0] peer prefix served | room=7708
+  decode:       1 TP0 EP0] peer prefix served | room=7828
+  decode:       1 TP0 EP0] peer prefix served | room=7857
+  decode:       1 TP0 EP0] peer prefix served | room=8334
+  decode:       1 TP0 EP0] peer prefix served | room=8359
+  decode:       1 TP0 EP0] peer prefix served | room=8364
+  decode:       1 TP0 EP0] peer prefix served | room=8587
+  decode:       2 TP0 EP0] peer prefix served | room=8589
+  decode:       1 TP0 EP0] peer prefix served | room=8753
+  decode:       1 TP0 EP0] peer prefix served | room=8884
+http://10.128.15.217:30000 200 http://10.128.0.90:30000 200 
+2026-10-22 12:47:28 ladder sessions=20

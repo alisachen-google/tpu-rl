@@ -1,0 +1,305 @@
+2026-10-22 13:37:40 FINAL start run=planc_21 ladder=16 20 12 soak=15m
+2026-10-22 13:37:40 W1 recall P=131072 N=8192 (flush prefill only)
+"turn2": {"ttft_s": 1.2988244970329106 "cached_tokens_details": {"device": 131072, "host": 0} 
+peer_commits=24 peer_tokens=1064960 schedule_time_pulls=16
+2026-10-22 13:38:31 W1 recall P=262144 N=8192 (flush prefill only)
+"turn2": {"ttft_s": 2.2042982508428395 "cached_tokens_details": {"device": 262144, "host": 0} 
+peer_commits=48 peer_tokens=3178496 schedule_time_pulls=32
+2026-10-22 13:39:35 DRAM recall probe
+DRAM_RECALL {"run": "planc_21", "prefix": 131072, "evictors": 7, "turn1_ttft_s": 5.8740526381880045, "turn2_ttft_s": 1.3202039753086865, "turn2_cached": {"device": 131072, "host": 0}, "turn2_wall_s": 3.43, "peer_stats_after": "peer_commits=56 peer_tokens=4227072 schedule_time_pulls=104"}
+  decode miss:      22 short hit
+  decode:       1 TP0 EP0] peer prefix served | room=2329
+  decode:       2 TP0 EP0] peer prefix served | room=2738
+  decode:       2 TP0 EP0] peer prefix served | room=6533
+  decode:       1 TP0 EP0] peer prefix served | room=7873
+  decode:       1 TP0 EP0] peer prefix served | room=9213
+http://10.128.15.217:30000 200 http://10.128.0.90:30000 200 
+2026-10-22 13:40:53 ladder sessions=16
+SUMMARY {"run": "planc_21", "label": "planc_n16", "sessions": 16, "turns": 4, "prefix": 131072, "shared": 0, "turn_new": 4096, "turn_out": 256, "wall_s": 147.2, "errors": 0, "ttft_turn0_p50": 36.37862994382158, "ttft_later_p50": 15.642523881047964, "ttft_later_p95": 54.323336612898856, "ttft_later_max": 58.89000819483772, "ttft_per_turn_p50": {"0": 36.38, "1": 37.96, "2": 15.48, "3": 9.93}, "cached_tokens_by_tier": {"device": 6088640, "host": 401472, "storage": 0}, "prompt_tokens_total": 8787936
+peer_commits=400 peer_tokens=50839040 schedule_time_pulls=592
+decode sglang:cached_tokens_total 7014400
+  decode miss:      82 short hit
+  decode miss:       1 SWA window missing
+  decode:       1 TP0 EP0] peer prefix served | room=1199
+  decode:       1 TP0 EP0] peer prefix served | room=1350
+  decode:       1 TP0 EP0] peer prefix served | room=1391
+  decode:       1 TP0 EP0] peer prefix served | room=1493
+  decode:       1 TP0 EP0] peer prefix served | room=1553
+  decode:       1 TP0 EP0] peer prefix served | room=1753
+  decode:       1 TP0 EP0] peer prefix served | room=2329
+  decode:       2 TP0 EP0] peer prefix served | room=2738
+  decode:       1 TP0 EP0] peer prefix served | room=3020
+  decode:       1 TP0 EP0] peer prefix served | room=3269
+  decode:       1 TP0 EP0] peer prefix served | room=3298
+  decode:       1 TP0 EP0] peer prefix served | room=3410
+  decode:       1 TP0 EP0] peer prefix served | room=3438
+  decode:       1 TP0 EP0] peer prefix served | room=3533
+  decode:       1 TP0 EP0] peer prefix served | room=3609
+  decode:       1 TP0 EP0] peer prefix served | room=3648
+  decode:       1 TP0 EP0] peer prefix served | room=3742
+  decode:       1 TP0 EP0] peer prefix served | room=3782
+  decode:       1 TP0 EP0] peer prefix served | room=3819
+  decode:       1 TP0 EP0] peer prefix served | room=4086
+  decode:       1 TP0 EP0] peer prefix served | room=4114
+  decode:       1 TP0 EP0] peer prefix served | room=4135
+  decode:       1 TP0 EP0] peer prefix served | room=4856
+  decode:       1 TP0 EP0] peer prefix served | room=4862
+  decode:       1 TP0 EP0] peer prefix served | room=5403
+  decode:       1 TP0 EP0] peer prefix served | room=5580
+  decode:       1 TP0 EP0] peer prefix served | room=5643
+  decode:       1 TP0 EP0] peer prefix served | room=5709
+  decode:       1 TP0 EP0] peer prefix served | room=5791
+  decode:       1 TP0 EP0] peer prefix served | room=6230
+  decode:       1 TP0 EP0] peer prefix served | room=6355
+  decode:       1 TP0 EP0] peer prefix served | room=6365
+  decode:       2 TP0 EP0] peer prefix served | room=6533
+  decode:       1 TP0 EP0] peer prefix served | room=6971
+  decode:       1 TP0 EP0] peer prefix served | room=7122
+  decode:       1 TP0 EP0] peer prefix served | room=7173
+  decode:       1 TP0 EP0] peer prefix served | room=7454
+  decode:       1 TP0 EP0] peer prefix served | room=7716
+  decode:       1 TP0 EP0] peer prefix served | room=7785
+  decode:       1 TP0 EP0] peer prefix served | room=7873
+  decode:       1 TP0 EP0] peer prefix served | room=7959
+  decode:       1 TP0 EP0] peer prefix served | room=8086
+  decode:       1 TP0 EP0] peer prefix served | room=8209
+  decode:       1 TP0 EP0] peer prefix served | room=8217
+  decode:       1 TP0 EP0] peer prefix served | room=8929
+  decode:       1 TP0 EP0] peer prefix served | room=9126
+  decode:       1 TP0 EP0] peer prefix served | room=9176
+  decode:       1 TP0 EP0] peer prefix served | room=9213
+http://10.128.15.217:30000 200 http://10.128.0.90:30000 200 
+2026-10-22 13:43:33 ladder sessions=20
+SUMMARY {"run": "planc_21", "label": "planc_n20", "sessions": 20, "turns": 4, "prefix": 131072, "shared": 0, "turn_new": 4096, "turn_out": 256, "wall_s": 181.5, "errors": 0, "ttft_turn0_p50": 43.85547453723848, "ttft_later_p50": 19.732913564890623, "ttft_later_p95": 69.21543124411255, "ttft_later_max": 76.20140948006883, "ttft_per_turn_p50": {"0": 43.86, "1": 46.23, "2": 19.73, "3": 15.62}, "cached_tokens_by_tier": {"device": 7850432, "host": 262144, "storage": 0}, "prompt_tokens_total": 1098495
+Timeout, server 10.128.15.217 not responding.
+peer_commits=585 peer_tokens=75323968 schedule_time_pulls=952
+decode sglang:cached_tokens_total 15126976
+  decode miss:     157 short hit
+  decode miss:       2 SWA window missing
+  decode:       1 TP0 EP0] peer prefix served | room=1071
+  decode:       1 TP0 EP0] peer prefix served | room=1199
+  decode:       1 TP0 EP0] peer prefix served | room=1303
+  decode:       1 TP0 EP0] peer prefix served | room=1350
+  decode:       1 TP0 EP0] peer prefix served | room=1391
+  decode:       1 TP0 EP0] peer prefix served | room=1489
+  decode:       1 TP0 EP0] peer prefix served | room=1493
+  decode:       1 TP0 EP0] peer prefix served | room=1553
+  decode:       1 TP0 EP0] peer prefix served | room=1555
+  decode:       1 TP0 EP0] peer prefix served | room=1578
+  decode:       1 TP0 EP0] peer prefix served | room=1674
+  decode:       1 TP0 EP0] peer prefix served | room=1753
+  decode:       1 TP0 EP0] peer prefix served | room=1836
+  decode:       1 TP0 EP0] peer prefix served | room=1844
+  decode:       1 TP0 EP0] peer prefix served | room=1971
+  decode:       1 TP0 EP0] peer prefix served | room=2077
+  decode:       1 TP0 EP0] peer prefix served | room=2151
+  decode:       1 TP0 EP0] peer prefix served | room=2187
+  decode:       1 TP0 EP0] peer prefix served | room=2312
+  decode:       1 TP0 EP0] peer prefix served | room=2329
+  decode:       1 TP0 EP0] peer prefix served | room=2438
+  decode:       1 TP0 EP0] peer prefix served | room=2568
+  decode:       1 TP0 EP0] peer prefix served | room=2597
+  decode:       2 TP0 EP0] peer prefix served | room=2738
+  decode:       1 TP0 EP0] peer prefix served | room=2812
+  decode:       1 TP0 EP0] peer prefix served | room=3020
+  decode:       1 TP0 EP0] peer prefix served | room=3039
+  decode:       1 TP0 EP0] peer prefix served | room=3204
+  decode:       1 TP0 EP0] peer prefix served | room=3254
+  decode:       1 TP0 EP0] peer prefix served | room=3269
+  decode:       1 TP0 EP0] peer prefix served | room=3298
+  decode:       1 TP0 EP0] peer prefix served | room=3357
+  decode:       1 TP0 EP0] peer prefix served | room=3410
+  decode:       1 TP0 EP0] peer prefix served | room=3432
+  decode:       1 TP0 EP0] peer prefix served | room=3438
+  decode:       1 TP0 EP0] peer prefix served | room=3533
+  decode:       1 TP0 EP0] peer prefix served | room=3580
+  decode:       1 TP0 EP0] peer prefix served | room=3609
+  decode:       1 TP0 EP0] peer prefix served | room=3648
+  decode:       1 TP0 EP0] peer prefix served | room=3704
+  decode:       2 TP0 EP0] peer prefix served | room=3728
+  decode:       1 TP0 EP0] peer prefix served | room=3742
+  decode:       1 TP0 EP0] peer prefix served | room=3782
+  decode:       1 TP0 EP0] peer prefix served | room=3819
+  decode:       1 TP0 EP0] peer prefix served | room=4086
+  decode:       1 TP0 EP0] peer prefix served | room=4114
+  decode:       1 TP0 EP0] peer prefix served | room=4135
+  decode:       1 TP0 EP0] peer prefix served | room=4330
+  decode:       1 TP0 EP0] peer prefix served | room=4567
+  decode:       1 TP0 EP0] peer prefix served | room=4571
+  decode:       1 TP0 EP0] peer prefix served | room=4802
+  decode:       1 TP0 EP0] peer prefix served | room=4841
+  decode:       1 TP0 EP0] peer prefix served | room=4856
+  decode:       1 TP0 EP0] peer prefix served | room=4862
+  decode:       1 TP0 EP0] peer prefix served | room=5034
+  decode:       1 TP0 EP0] peer prefix served | room=5086
+  decode:       2 TP0 EP0] peer prefix served | room=5403
+  decode:       1 TP0 EP0] peer prefix served | room=5580
+  decode:       1 TP0 EP0] peer prefix served | room=5643
+  decode:       1 TP0 EP0] peer prefix served | room=5650
+  decode:       1 TP0 EP0] peer prefix served | room=5709
+  decode:       1 TP0 EP0] peer prefix served | room=5791
+  decode:       1 TP0 EP0] peer prefix served | room=6230
+  decode:       1 TP0 EP0] peer prefix served | room=6344
+  decode:       1 TP0 EP0] peer prefix served | room=6355
+  decode:       1 TP0 EP0] peer prefix served | room=6365
+  decode:       1 TP0 EP0] peer prefix served | room=6394
+  decode:       1 TP0 EP0] peer prefix served | room=6405
+  decode:       1 TP0 EP0] peer prefix served | room=6437
+  decode:       1 TP0 EP0] peer prefix served | room=6486
+  decode:       2 TP0 EP0] peer prefix served | room=6533
+  decode:       1 TP0 EP0] peer prefix served | room=6677
+  decode:       1 TP0 EP0] peer prefix served | room=6953
+  decode:       1 TP0 EP0] peer prefix served | room=6971
+  decode:       1 TP0 EP0] peer prefix served | room=7122
+  decode:       1 TP0 EP0] peer prefix served | room=7173
+  decode:       1 TP0 EP0] peer prefix served | room=7177
+  decode:       1 TP0 EP0] peer prefix served | room=7213
+  decode:       1 TP0 EP0] peer prefix served | room=7449
+  decode:       1 TP0 EP0] peer prefix served | room=7454
+  decode:       1 TP0 EP0] peer prefix served | room=7492
+  decode:       1 TP0 EP0] peer prefix served | room=7515
+  decode:       1 TP0 EP0] peer prefix served | room=7614
+  decode:       1 TP0 EP0] peer prefix served | room=7716
+  decode:       1 TP0 EP0] peer prefix served | room=7785
+  decode:       1 TP0 EP0] peer prefix served | room=7813
+  decode:       1 TP0 EP0] peer prefix served | room=7873
+  decode:       1 TP0 EP0] peer prefix served | room=7959
+  decode:       1 TP0 EP0] peer prefix served | room=8016
+  decode:       1 TP0 EP0] peer prefix served | room=8058
+  decode:       1 TP0 EP0] peer prefix served | room=8086
+  decode:       1 TP0 EP0] peer prefix served | room=8209
+  decode:       1 TP0 EP0] peer prefix served | room=8217
+  decode:       1 TP0 EP0] peer prefix served | room=8527
+  decode:       1 TP0 EP0] peer prefix served | room=8819
+  decode:       1 TP0 EP0] peer prefix served | room=8929
+  decode:       1 TP0 EP0] peer prefix served | room=8987
+  decode:       1 TP0 EP0] peer prefix served | room=9002
+  decode:       1 TP0 EP0] peer prefix served | room=9126
+  decode:       1 TP0 EP0] peer prefix served | room=9176
+  decode:       1 TP0 EP0] peer prefix served | room=9197
+  decode:       1 TP0 EP0] peer prefix served | room=9213
+http://10.128.15.217:30000 200 http://10.128.0.90:30000 200 
+2026-10-22 13:54:47 ladder sessions=12
+SUMMARY {"run": "planc_21", "label": "planc_n12", "sessions": 12, "turns": 4, "prefix": 131072, "shared": 0, "turn_new": 4096, "turn_out": 256, "wall_s": 129.9, "errors": 0, "ttft_turn0_p50": 28.632546856068075, "ttft_later_p50": 21.47863421170041, "ttft_later_p95": 37.39931717701256, "ttft_later_max": 41.31020746799186, "ttft_per_turn_p50": {"0": 28.63, "1": 28.11, "2": 21.73, "3": 18.3}, "cached_tokens_by_tier": {"device": 1027392, "host": 3840192, "storage": 0}, "prompt_tokens_total": 6590964
+peer_commits=848 peer_tokens=111512576 schedule_time_pulls=1328
+decode sglang:cached_tokens_total 19994560
+  decode miss:     210 short hit
+  decode miss:       2 SWA window missing
+  decode:       1 TP0 EP0] peer prefix served | room=1071
+  decode:       1 TP0 EP0] peer prefix served | room=1199
+  decode:       1 TP0 EP0] peer prefix served | room=1303
+  decode:       1 TP0 EP0] peer prefix served | room=1350
+  decode:       1 TP0 EP0] peer prefix served | room=1391
+  decode:       1 TP0 EP0] peer prefix served | room=1489
+  decode:       1 TP0 EP0] peer prefix served | room=1493
+  decode:       1 TP0 EP0] peer prefix served | room=1553
+  decode:       1 TP0 EP0] peer prefix served | room=1555
+  decode:       1 TP0 EP0] peer prefix served | room=1578
+  decode:       1 TP0 EP0] peer prefix served | room=1674
+  decode:       1 TP0 EP0] peer prefix served | room=1753
+  decode:       1 TP0 EP0] peer prefix served | room=1836
+  decode:       1 TP0 EP0] peer prefix served | room=1844
+  decode:       1 TP0 EP0] peer prefix served | room=1971
+  decode:       1 TP0 EP0] peer prefix served | room=2077
+  decode:       1 TP0 EP0] peer prefix served | room=2151
+  decode:       1 TP0 EP0] peer prefix served | room=2187
+  decode:       1 TP0 EP0] peer prefix served | room=2312
+  decode:       1 TP0 EP0] peer prefix served | room=2329
+  decode:       1 TP0 EP0] peer prefix served | room=2438
+  decode:       1 TP0 EP0] peer prefix served | room=2568
+  decode:       1 TP0 EP0] peer prefix served | room=2597
+  decode:       2 TP0 EP0] peer prefix served | room=2738
+  decode:       1 TP0 EP0] peer prefix served | room=2812
+  decode:       1 TP0 EP0] peer prefix served | room=3020
+  decode:       1 TP0 EP0] peer prefix served | room=3039
+  decode:       1 TP0 EP0] peer prefix served | room=3204
+  decode:       1 TP0 EP0] peer prefix served | room=3254
+  decode:       1 TP0 EP0] peer prefix served | room=3269
+  decode:       1 TP0 EP0] peer prefix served | room=3298
+  decode:       1 TP0 EP0] peer prefix served | room=3357
+  decode:       1 TP0 EP0] peer prefix served | room=3410
+  decode:       1 TP0 EP0] peer prefix served | room=3432
+  decode:       1 TP0 EP0] peer prefix served | room=3438
+  decode:       1 TP0 EP0] peer prefix served | room=3533
+  decode:       1 TP0 EP0] peer prefix served | room=3580
+  decode:       1 TP0 EP0] peer prefix served | room=3609
+  decode:       1 TP0 EP0] peer prefix served | room=3648
+  decode:       1 TP0 EP0] peer prefix served | room=3704
+  decode:       2 TP0 EP0] peer prefix served | room=3728
+  decode:       1 TP0 EP0] peer prefix served | room=3742
+  decode:       1 TP0 EP0] peer prefix served | room=3782
+  decode:       1 TP0 EP0] peer prefix served | room=3819
+  decode:       1 TP0 EP0] peer prefix served | room=4086
+  decode:       1 TP0 EP0] peer prefix served | room=4114
+  decode:       1 TP0 EP0] peer prefix served | room=4135
+  decode:       1 TP0 EP0] peer prefix served | room=4330
+  decode:       1 TP0 EP0] peer prefix served | room=4567
+  decode:       1 TP0 EP0] peer prefix served | room=4571
+  decode:       1 TP0 EP0] peer prefix served | room=4802
+  decode:       1 TP0 EP0] peer prefix served | room=4841
+  decode:       1 TP0 EP0] peer prefix served | room=4856
+  decode:       1 TP0 EP0] peer prefix served | room=4862
+  decode:       1 TP0 EP0] peer prefix served | room=5034
+  decode:       1 TP0 EP0] peer prefix served | room=5086
+  decode:       2 TP0 EP0] peer prefix served | room=5403
+  decode:       1 TP0 EP0] peer prefix served | room=5580
+  decode:       1 TP0 EP0] peer prefix served | room=5643
+  decode:       1 TP0 EP0] peer prefix served | room=5650
+  decode:       1 TP0 EP0] peer prefix served | room=5709
+  decode:       1 TP0 EP0] peer prefix served | room=5791
+  decode:       1 TP0 EP0] peer prefix served | room=6230
+  decode:       1 TP0 EP0] peer prefix served | room=6344
+  decode:       1 TP0 EP0] peer prefix served | room=6355
+  decode:       1 TP0 EP0] peer prefix served | room=6365
+  decode:       1 TP0 EP0] peer prefix served | room=6394
+  decode:       1 TP0 EP0] peer prefix served | room=6405
+  decode:       1 TP0 EP0] peer prefix served | room=6437
+  decode:       1 TP0 EP0] peer prefix served | room=6486
+  decode:       2 TP0 EP0] peer prefix served | room=6533
+  decode:       1 TP0 EP0] peer prefix served | room=6677
+  decode:       1 TP0 EP0] peer prefix served | room=6953
+  decode:       1 TP0 EP0] peer prefix served | room=6971
+  decode:       1 TP0 EP0] peer prefix served | room=7122
+  decode:       1 TP0 EP0] peer prefix served | room=7173
+  decode:       1 TP0 EP0] peer prefix served | room=7177
+  decode:       1 TP0 EP0] peer prefix served | room=7213
+  decode:       1 TP0 EP0] peer prefix served | room=7449
+  decode:       1 TP0 EP0] peer prefix served | room=7454
+  decode:       1 TP0 EP0] peer prefix served | room=7492
+  decode:       1 TP0 EP0] peer prefix served | room=7515
+  decode:       1 TP0 EP0] peer prefix served | room=7614
+  decode:       1 TP0 EP0] peer prefix served | room=7716
+  decode:       1 TP0 EP0] peer prefix served | room=7785
+  decode:       1 TP0 EP0] peer prefix served | room=7813
+  decode:       1 TP0 EP0] peer prefix served | room=7873
+  decode:       1 TP0 EP0] peer prefix served | room=7959
+  decode:       1 TP0 EP0] peer prefix served | room=8016
+  decode:       1 TP0 EP0] peer prefix served | room=8058
+  decode:       1 TP0 EP0] peer prefix served | room=8086
+  decode:       1 TP0 EP0] peer prefix served | room=8209
+  decode:       1 TP0 EP0] peer prefix served | room=8217
+  decode:       1 TP0 EP0] peer prefix served | room=8527
+  decode:       1 TP0 EP0] peer prefix served | room=8819
+  decode:       1 TP0 EP0] peer prefix served | room=8929
+  decode:       1 TP0 EP0] peer prefix served | room=8987
+  decode:       1 TP0 EP0] peer prefix served | room=9002
+  decode:       1 TP0 EP0] peer prefix served | room=9126
+  decode:       1 TP0 EP0] peer prefix served | room=9176
+  decode:       1 TP0 EP0] peer prefix served | room=9197
+  decode:       1 TP0 EP0] peer prefix served | room=9213
+http://10.128.15.217:30000 200 http://10.128.0.90:30000 200 
+2026-10-22 13:57:10 hardening
+{"phase": "concurrent", "status": "ok", "seconds": 13.0}
+{"phase": "abort", "status": "ok", "seconds": 10.6}
+{"phase": "prefill_flush", "status": "error", "seconds": 67.0}
+{"phase": "decode_pause", "status": "error", "seconds": 67.2}
+{"phase": "decode_flush", "status": "error", "seconds": 67.1}
+{"phase": "offer_race", "status": "error", "seconds": 62.1}
+{"health_samples": 116, "slow_probes": 0, "probe_errors": 0}
+Timeout, server 10.128.15.217 not responding.
+peer_commits=616 peer_tokens=79548928 schedule_time_pulls=984
+http://10.128.15.217:30000 200 http://10.128.0.90:30000 200 
+2026-10-22 14:10:04 PLANC V2 DONE
+2026-10-22 14:10:04 soak 15 min
+{"phase": "soak", "status": "ok", "seconds": 906.9}
+{"health_samples": 364, "slow_probes": 0, "probe_errors": 0}

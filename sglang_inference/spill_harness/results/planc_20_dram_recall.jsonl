@@ -1,0 +1,1 @@
+{"run": "planc_20", "prefix": 131072, "evictors": 7, "turn1_ttft_s": 5.848919625859708, "turn2_ttft_s": 1.2876604031771421, "turn2_cached": {"device": 131072, "host": 0}, "turn2_wall_s": 3.3, "peer_stats_after": "peer_commits=56 peer_tokens=4227072 schedule_time_pulls=104"}

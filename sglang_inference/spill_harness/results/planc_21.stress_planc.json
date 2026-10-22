@@ -1,0 +1,187 @@
+{
+ "args": {
+  "lb": "http://10.128.15.217:8080",
+  "prefill_url": "http://10.128.15.217:30000",
+  "decode_url": "http://10.128.0.90:30000",
+  "prompts": "/home/alisachen_google_com/pd_disagg/prompts/gpt-oss",
+  "tokenizer": "/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a",
+  "prefix": "32768",
+  "new": "8192",
+  "sessions": "4",
+  "phases": "concurrent,abort,prefill_flush,decode_pause,decode_flush,offer_race",
+  "spill_wait": "5",
+  "pause_hold": "30",
+  "soak_min": "10",
+  "phase_timeout": "1500",
+  "max_new_tokens": "128",
+  "out": "/home/alisachen_google_com/pd_disagg/spill/results/planc_21.stress_planc.json"
+ },
+ "phases": {
+  "concurrent": {
+   "status": "ok",
+   "seconds": 13.0,
+   "result": {
+    "turn1": [
+     {
+      "ttft_s": 4.078199967276305,
+      "e2e_s": 5.087471785955131,
+      "cached_tokens": 0,
+      "cached_tokens_details": null,
+      "completion_tokens": 128,
+      "finish_reason": {
+       "type": "length",
+       "length": 128
+      }
+     },
+     {
+      "ttft_s": 1.2859576856717467,
+      "e2e_s": 2.4835819550789893,
+      "cached_tokens": 0,
+      "cached_tokens_details": null,
+      "completion_tokens": 128,
+      "finish_reason": {
+       "type": "length",
+       "length": 128
+      }
+     },
+     {
+      "ttft_s": 2.2208334738388658,
+      "e2e_s": 3.347515102941543,
+      "cached_tokens": 0,
+      "cached_tokens_details": null,
+      "completion_tokens": 128,
+      "finish_reason": {
+       "type": "length",
+       "length": 128
+      }
+     },
+     {
+      "ttft_s": 3.1604759618639946,
+      "e2e_s": 4.2705687447451055,
+      "cached_tokens": 0,
+      "cached_tokens_details": null,
+      "completion_tokens": 128,
+      "finish_reason": {
+       "type": "length",
+       "length": 128
+      }
+     }
+    ],
+    "turn2": [
+     {
+      "ttft_s": 1.2213897686451674,
+      "e2e_s": 2.3817449109628797,
+      "cached_tokens": 32768,
+      "cached_tokens_details": {
+       "device": 32768,
+       "host": 0
+      },
+      "completion_tokens": 128,
+      "finish_reason": {
+       "type": "length",
+       "length": 128
+      }
+     },
+     {
+      "ttft_s": 1.5402941759675741,
+      "e2e_s": 2.684084596578032,
+      "cached_tokens": 32768,
+      "cached_tokens_details": {
+       "device": 32768,
+       "host": 0
+      },
+      "completion_tokens": 128,
+      "finish_reason": {
+       "type": "length",
+       "length": 128
+      }
+     },
+     {
+      "ttft_s": 1.84668251266703,
+      "e2e_s": 2.9344354667700827,
+      "cached_tokens": 32768,
+      "cached_tokens_details": {
+       "device": 32768,
+       "host": 0
+      },
+      "completion_tokens": 128,
+      "finish_reason": {
+       "type": "length",
+       "length": 128
+      }
+     },
+     {
+      "ttft_s": 1.564172470010817,
+      "e2e_s": 2.7017805809155107,
+      "cached_tokens": 32768,
+      "cached_tokens_details": {
+       "device": 32768,
+       "host": 0
+      },
+      "completion_tokens": 128,
+      "finish_reason": {
+       "type": "length",
+       "length": 128
+      }
+     }
+    ]
+   }
+  },
+  "abort": {
+   "status": "ok",
+   "seconds": 10.6,
+   "result": {
+    "turn1": {
+     "ttft_s": 1.0485599949024618,
+     "e2e_s": 2.0581274959258735,
+     "cached_tokens": 0,
+     "cached_tokens_details": null,
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    },
+    "reissued": {
+     "ttft_s": 0.08209414593875408,
+     "e2e_s": 1.0563021870329976,
+     "cached_tokens": 40960,
+     "cached_tokens_details": {
+      "device": 40960,
+      "host": 0
+     },
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    }
+   }
+  },
+  "prefill_flush": {
+   "status": "error",
+   "seconds": 67.0,
+   "result": "HTTPError('400 Client Error: Bad Request for url: http://10.128.15.217:30000/flush_cache?timeout=60')"
+  },
+  "decode_pause": {
+   "status": "error",
+   "seconds": 67.2,
+   "result": "HTTPError('400 Client Error: Bad Request for url: http://10.128.15.217:30000/flush_cache?timeout=60')"
+  },
+  "decode_flush": {
+   "status": "error",
+   "seconds": 67.1,
+   "result": "HTTPError('400 Client Error: Bad Request for url: http://10.128.15.217:30000/flush_cache?timeout=60')"
+  },
+  "offer_race": {
+   "status": "error",
+   "seconds": 62.1,
+   "result": "HTTPError('400 Client Error: Bad Request for url: http://10.128.15.217:30000/flush_cache?timeout=60')"
+  }
+ },
+ "health": {
+  "samples": 116,
+  "slow": [],
+  "errors": []
+ }
+}

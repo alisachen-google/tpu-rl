@@ -1,0 +1,54 @@
+[TPU/PD] Spill prefill KV to decode DRAM through the decode's HiCache and pull an evicted prefix back over Raiden
+
+A 1P/1D pair whose decode runs HiCache already holds every prefix the
+prefill ever computed: the KV lands in decode HBM with the transfer and
+HiCache writes it through to decode DRAM. This change lets the prefill
+use that copy. When a request's prefix has left the prefill's own tiers,
+the prefill asks the decode and pulls the pages back over Raiden
+(tpu-sync), then computes only the new tokens. HiCache stays the owner
+of every tier; Raiden only moves bytes.
+
+Mechanism (sglang_tpu only; no core changes):
+- serde: PrefixReq / PrefixBlocks / PrefixRelease / PrefixOffer messages
+  on the existing per-rank ZMQ control channel, each ask carrying a
+  sequence number its reply and release must match.
+- raiden/peer_prefix.py: PeerPrefixMixin on RaidenKVManager. The decode
+  serves a pull from the prefix it holds for that room: for a room it has
+  pre-allocated, from the decode request's own prefix match after the
+  decode's HiCache restore lands (no second restore, no extra HBM);
+  otherwise from the tree, restoring from DRAM when needed. The serve path
+  is lockstep: each tick the ranks all-gather the (room, seq) asks in
+  their inboxes and serve only what every rank holds, because the cache
+  calls behind a serve all-reduce. Leases bound every registration.
+- pd_peer_prefix.py: scheduler hooks. A popped request is held back from
+  the waiting queue until that queue has room (depth 1), and the pull is
+  decided at that moment, when the prefill's local match is final; a
+  pulled prefix is pinned until the scheduler takes the request. Landing
+  pages are allocated the way every extend allocation is, evicting cache
+  for the shortfall first. Decisions are reduced across the attention-TP
+  ranks; in-flight pages are reported to the invariant checker; a gate
+  pull waits at most 20 s before the request recomputes. Finished decode
+  requests are offered to the prefill speculatively.
+- pd_decode_swa_hicache.py: SGLANG_TPU_DECODE_SWA_HOST=1 keeps the SWA
+  window pages in the decode host pool so a restored prefix is usable by
+  the prefill; the decode's own restore skips a tombstoned window instead
+  of asserting.
+
+Results (gpt-oss-120b, 1P/1D, 131k prefix, 4 turns of 4k new tokens):
+- single-turn recall after a prefill flush: 1.27 s (128k), 2.2 s (256k),
+  against 6.3 s / 17.5 s to recompute; a prefix evicted from decode HBM
+  is restored from decode DRAM and served in 1.29 s.
+- 16 concurrent sessions: 145 s against 369 s baseline (113 against
+  44.5 output tok/s), later-turn first token p50 14.7 s against 90 s;
+  44 of 48 later turns pulled, reads 0.5 to 1.1 s each.
+- 12 sessions, where the prefill's host tier still holds the prefixes:
+  unchanged.
+
+Hardening: 31 CPU tests (hooks, lockstep, budget, mismatch, sequence
+numbers, livelock, release ordering); live: concurrent recalls, client
+abort, prefill flush mid-pull, decode pause 37 s, double flush, offer
+race, timed soak, health probes.
+
+Flags: SGLANG_TPU_PEER_PREFIX=1 (off by default),
+SGLANG_TPU_PEER_PREFIX_MIN_TOKENS, _TIMEOUT_S, _GATE_TIMEOUT_S, _JIT,
+_JIT_DEPTH, _OFFER, _OFFER_HEADROOM, SGLANG_TPU_DECODE_SWA_HOST.
