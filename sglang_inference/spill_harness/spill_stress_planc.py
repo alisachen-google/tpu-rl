@@ -122,27 +122,6 @@ def main():
                 return {"after_abort": summarize(b)}
             run_phase("abort_compute", phase)
 
-        if "abort" in phases:
-            # Abort 0.5 s into a recall: with a fast pull this lands while
-            # the prefill-to-decode transfer is in flight. Raiden keeps the
-            # prefill's inflight entry until its own timeout, which blocks a
-            # deferred flush; run this phase last.
-            def phase():
-                t1, t2 = session_ids(99)
-                a = gen(t1)
-                time.sleep(args.spill_wait)
-                flush([args.prefill_url], 600)
-                body = {"input_ids": t2, "sampling_params": {"temperature": 0, "max_new_tokens": args.max_new_tokens, "ignore_eos": True}, "stream": True}
-                try:
-                    with requests.post(args.lb.rstrip("/") + "/generate", json=body, stream=True, timeout=(10, 0.5)) as r:
-                        for _ in r.iter_lines():
-                            break
-                except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
-                    pass  # the client dropped the stream on purpose
-                time.sleep(2)
-                b = gen(t2)
-                return {"turn1": summarize(a), "reissued": summarize(b)}
-            run_phase("abort", phase)
 
         if "prefill_flush" in phases:
             def phase():
@@ -221,6 +200,28 @@ def main():
                 b = gen(t2)  # right away: the offer may still be landing
                 return {"turn1": summarize(a), "turn2_immediate": summarize(b)}
             run_phase("offer_race", phase)
+
+        if "abort" in phases:
+            # Abort 0.5 s into a recall: with a fast pull this lands while
+            # the prefill-to-decode transfer is in flight. Raiden keeps the
+            # prefill's inflight entry until its own timeout, which blocks a
+            # deferred flush; run this phase last.
+            def phase():
+                t1, t2 = session_ids(99)
+                a = gen(t1)
+                time.sleep(args.spill_wait)
+                flush([args.prefill_url], 600)
+                body = {"input_ids": t2, "sampling_params": {"temperature": 0, "max_new_tokens": args.max_new_tokens, "ignore_eos": True}, "stream": True}
+                try:
+                    with requests.post(args.lb.rstrip("/") + "/generate", json=body, stream=True, timeout=(10, 0.5)) as r:
+                        for _ in r.iter_lines():
+                            break
+                except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
+                    pass  # the client dropped the stream on purpose
+                time.sleep(2)
+                b = gen(t2)
+                return {"turn1": summarize(a), "reissued": summarize(b)}
+            run_phase("abort", phase)
 
         if "soak" in phases:
             def phase():

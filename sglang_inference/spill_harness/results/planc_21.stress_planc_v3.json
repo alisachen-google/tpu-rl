@@ -1,0 +1,188 @@
+{
+ "args": {
+  "lb": "http://10.128.15.217:8080",
+  "prefill_url": "http://10.128.15.217:30000",
+  "decode_url": "http://10.128.0.90:30000",
+  "prompts": "/home/alisachen_google_com/pd_disagg/prompts/gpt-oss",
+  "tokenizer": "/mnt/data/tt/hf-cache/hub/models--openai--gpt-oss-120b/snapshots/b5c939de8f754692c1647ca79fbf85e8c1e70f8a",
+  "prefix": "32768",
+  "new": "8192",
+  "sessions": "4",
+  "phases": "prefill_flush,decode_pause,decode_flush,offer_race",
+  "spill_wait": "5",
+  "pause_hold": "30",
+  "soak_min": "10",
+  "phase_timeout": "1500",
+  "max_new_tokens": "128",
+  "out": "results/planc_21.stress_planc_v3.json"
+ },
+ "phases": {
+  "prefill_flush": {
+   "status": "ok",
+   "seconds": 10.9,
+   "result": {
+    "turn1": {
+     "ttft_s": 1.1934659131802619,
+     "e2e_s": 2.1945965150371194,
+     "cached_tokens": 0,
+     "cached_tokens_details": null,
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    },
+    "turn2_flushed_midpull": {
+     "ttft_s": 0.541561596095562,
+     "e2e_s": 1.5419611199758947,
+     "cached_tokens": 32768,
+     "cached_tokens_details": {
+      "device": 32768,
+      "host": 0
+     },
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    },
+    "fresh_after": {
+     "ttft_s": 1.1941092596389353,
+     "e2e_s": 2.196452816016972,
+     "cached_tokens": 0,
+     "cached_tokens_details": null,
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    }
+   }
+  },
+  "decode_pause": {
+   "status": "ok",
+   "seconds": 45.8,
+   "result": {
+    "paused_pid": 1788718,
+    "paused_s": 38.4,
+    "turn2_during_pause": {
+     "ttft_s": 30.24733474291861,
+     "e2e_s": 31.238558251876384,
+     "cached_tokens": 32768,
+     "cached_tokens_details": {
+      "device": 32768,
+      "host": 0
+     },
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    },
+    "recall_after_resume": {
+     "ttft_s": 1.3311250740662217,
+     "e2e_s": 2.3751780637539923,
+     "cached_tokens": 40832,
+     "cached_tokens_details": {
+      "device": 40832,
+      "host": 0
+     },
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    }
+   }
+  },
+  "decode_flush": {
+   "status": "ok",
+   "seconds": 18.0,
+   "result": {
+    "turn1": {
+     "ttft_s": 1.0550585561431944,
+     "e2e_s": 2.065709455870092,
+     "cached_tokens": 0,
+     "cached_tokens_details": null,
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    },
+    "turn2_after_both_flushed": {
+     "ttft_s": 1.340947404038161,
+     "e2e_s": 2.380035563837737,
+     "cached_tokens": 0,
+     "cached_tokens_details": null,
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    },
+    "turn1_next": {
+     "ttft_s": 1.046224296092987,
+     "e2e_s": 2.0259722331538796,
+     "cached_tokens": 0,
+     "cached_tokens_details": null,
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    },
+    "turn2_recall": {
+     "ttft_s": 0.5379769401624799,
+     "e2e_s": 1.499839534983039,
+     "cached_tokens": 32768,
+     "cached_tokens_details": {
+      "device": 32768,
+      "host": 0
+     },
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    }
+   }
+  },
+  "offer_race": {
+   "status": "ok",
+   "seconds": 3.6,
+   "result": {
+    "turn1": {
+     "ttft_s": 1.0592670598998666,
+     "e2e_s": 2.071328259073198,
+     "cached_tokens": 0,
+     "cached_tokens_details": null,
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    },
+    "turn2_immediate": {
+     "ttft_s": 0.5346191599965096,
+     "e2e_s": 1.5531367911025882,
+     "cached_tokens": 32768,
+     "cached_tokens_details": {
+      "device": 32768,
+      "host": 0
+     },
+     "completion_tokens": 128,
+     "finish_reason": {
+      "type": "length",
+      "length": 128
+     }
+    }
+   }
+  }
+ },
+ "health": {
+  "samples": 32,
+  "slow": [],
+  "errors": []
+ }
+}
