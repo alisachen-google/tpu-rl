@@ -1,0 +1,3278 @@
+From 9e3cd9ed1e47a029d5d6c21cc32729719a837825 Mon Sep 17 00:00:00 2001
+From: alisachen-google <280552753+alisachen-google@users.noreply.github.com>
+Date: Thu, 22 Oct 2026 02:02:10 +0000
+Subject: [PATCH] [TPU/PD] Spill prefill KV to decode DRAM through the decode's
+ HiCache and pull an evicted prefix back over Raiden
+
+A 1P/1D pair whose decode runs HiCache already holds every prefix the
+prefill ever computed: the KV lands in decode HBM with the transfer and
+HiCache writes it through to decode DRAM. This change lets the prefill
+use that copy. When a request's prefix has left the prefill's own tiers,
+the prefill asks the decode and pulls the pages back over Raiden
+(tpu-sync), then computes only the new tokens. HiCache stays the owner
+of every tier; Raiden only moves bytes.
+
+Mechanism (sglang_tpu only; no core changes):
+- serde: PrefixReq / PrefixBlocks / PrefixRelease / PrefixOffer messages
+  on the existing per-rank ZMQ control channel, each ask carrying a
+  sequence number its reply and release must match.
+- raiden/peer_prefix.py: PeerPrefixMixin on RaidenKVManager. The decode
+  serves a pull from the prefix it holds for that room: for a room it has
+  pre-allocated, from the decode request's own prefix match after the
+  decode's HiCache restore lands (no second restore, no extra HBM);
+  otherwise from the tree, restoring from DRAM when needed. The serve path
+  is lockstep: each tick the ranks all-gather the (room, seq) asks in
+  their inboxes and serve only what every rank holds, because the cache
+  calls behind a serve all-reduce. Leases bound every registration.
+- pd_peer_prefix.py: scheduler hooks. A popped request is held back from
+  the waiting queue until that queue has room (depth 1), and the pull is
+  decided at that moment, when the prefill's local match is final; a
+  pulled prefix is pinned until the scheduler takes the request. Landing
+  pages are allocated the way every extend allocation is, evicting cache
+  for the shortfall first. Decisions are reduced across the attention-TP
+  ranks; in-flight pages are reported to the invariant checker; a gate
+  pull waits at most 20 s before the request recomputes. Finished decode
+  requests are offered to the prefill speculatively.
+- pd_decode_swa_hicache.py: SGLANG_TPU_DECODE_SWA_HOST=1 keeps the SWA
+  window pages in the decode host pool so a restored prefix is usable by
+  the prefill; the decode's own restore skips a tombstoned window instead
+  of asserting.
+
+Results (gpt-oss-120b, 1P/1D, 131k prefix, 4 turns of 4k new tokens):
+- single-turn recall after a prefill flush: 1.27 s (128k), 2.2 s (256k),
+  against 6.3 s / 17.5 s to recompute; a prefix evicted from decode HBM
+  is restored from decode DRAM and served in 1.29 s.
+- 16 concurrent sessions: 145 s against 369 s baseline (113 against
+  44.5 output tok/s), later-turn first token p50 14.7 s against 90 s;
+  44 of 48 later turns pulled, reads 0.5 to 1.1 s each.
+- 12 sessions, where the prefill's host tier still holds the prefixes:
+  unchanged.
+
+Hardening: 31 CPU tests (hooks, lockstep, budget, mismatch, sequence
+numbers, livelock, release ordering); live: concurrent recalls, client
+abort, prefill flush mid-pull, decode pause 37 s, double flush, offer
+race, timed soak, health probes.
+
+Flags: SGLANG_TPU_PEER_PREFIX=1 (off by default),
+SGLANG_TPU_PEER_PREFIX_MIN_TOKENS, _TIMEOUT_S, _GATE_TIMEOUT_S, _JIT,
+_JIT_DEPTH, _OFFER, _OFFER_HEADROOM, SGLANG_TPU_DECODE_SWA_HOST.
+---
+ sglang_tpu/disaggregation/raiden/conn.py      |   14 +-
+ .../disaggregation/raiden/peer_prefix.py      |  891 ++++++++++++++
+ sglang_tpu/disaggregation/raiden/serde.py     |   76 ++
+ sglang_tpu/patches.py                         |   10 +
+ sglang_tpu/pd_decode_swa_hicache.py           |   73 +-
+ sglang_tpu/pd_peer_prefix.py                  |  965 +++++++++++++++
+ .../hardware_backend/tpu/test_peer_prefix.py  | 1044 +++++++++++++++++
+ 7 files changed, 3066 insertions(+), 7 deletions(-)
+ create mode 100644 sglang_tpu/disaggregation/raiden/peer_prefix.py
+ create mode 100644 sglang_tpu/pd_peer_prefix.py
+ create mode 100644 test/registered/unit/hardware_backend/tpu/test_peer_prefix.py
+
+diff --git a/sglang_tpu/disaggregation/raiden/conn.py b/sglang_tpu/disaggregation/raiden/conn.py
+index aa4875e322..2709ee21a1 100644
+--- a/sglang_tpu/disaggregation/raiden/conn.py
++++ b/sglang_tpu/disaggregation/raiden/conn.py
+@@ -71,6 +71,7 @@ from sglang_tpu.disaggregation.raiden.host_pool import (
+     slot_host_bytes,
+     slots_within_budget,
+ )
++from sglang_tpu.disaggregation.raiden.peer_prefix import PeerPrefixMixin
+ from sglang_tpu.disaggregation.raiden.receiver import (
+     RaidenKVReceiver,
+     RaidenReceiverMixin,
+@@ -116,20 +117,22 @@ def _describe_failure(
+     """Why raiden failed ``transfer``, in raiden's field names, leaving out the
+     fields it did not report."""
+     parts = [f"Raiden {side} failed: req_id={transfer.req_id}"]
+-    if transfer.code is not None:
++    # Older tpu-sync wheels report settled transfers without a status code.
++    if getattr(transfer, "code", None) is not None:
+         parts.append(f"code={transfer.code}")
+-    if transfer.phase is not None:
++    if getattr(transfer, "phase", None) is not None:
+         parts.append(f"phase={transfer.phase}")
+-    if transfer.peer is not None:
++    if getattr(transfer, "peer", None) is not None:
+         parts.append(f"peer={transfer.peer}")
+-    if transfer.elapsed_ns is not None:
++    if getattr(transfer, "elapsed_ns", None) is not None:
+         parts.append(f"elapsed_ms={transfer.elapsed_ns / 1e6:.1f}")
+-    if transfer.reason is not None:
++    if getattr(transfer, "reason", None) is not None:
+         parts.append(f"reason={transfer.reason}")
+     return " ".join(parts)
+ 
+ 
+ class RaidenKVManager(
++    PeerPrefixMixin,
+     RaidenSenderMixin,
+     RaidenReceiverMixin,
+     CommonKVManager,
+@@ -173,6 +176,7 @@ class RaidenKVManager(
+             ReshardChunkReady.TAG: self._on_reshard_chunk_ready,
+             RoomFailed.TAG: self._on_room_failed,
+         }
++        self._peer_init()
+ 
+         self._engine: Optional[Any] = None  # raiden KVCacheManager
+         self._swa_engine: Optional[Any] = None
+diff --git a/sglang_tpu/disaggregation/raiden/peer_prefix.py b/sglang_tpu/disaggregation/raiden/peer_prefix.py
+new file mode 100644
+index 0000000000..5636a848d8
+--- /dev/null
++++ b/sglang_tpu/disaggregation/raiden/peer_prefix.py
+@@ -0,0 +1,891 @@
++# SPDX-License-Identifier: Apache-2.0
++"""Reverse prefix pull: a prefill rank reads an evicted prefix back from its
++decode peer's HiCache.
++
++The decode engine keeps finished requests in its radix tree, in HBM and in its
++host pool. A prefill rank that misses a prefix in its own tiers sends the
++tokens to the matching decode rank. The decode matches them in its tree, locks
++the nodes, restores host pages to HBM when it has to, registers the device
++pages for a Raiden read and replies with the block ids. The prefill pulls the
++pages into its own HBM with the same consumer-pull transfer the P/D path uses,
++inserts them into its radix tree and prefills only the rest.
++
++Raiden does three things here: H2D on the decode for the restore, then D2H,
++network and H2D for the pull. HiCache on each side decides what is kept and
++for how long. Nothing lands in the prefill host pool.
++
++Threads: the ZMQ listener only enqueues. Every tree operation runs on the
++scheduler thread, through ``peer_prefix_serve`` on the decode and the
++``peer_fetch_*`` methods on the prefill.
++"""
++
++from __future__ import annotations
++
++import logging
++import threading
++import time
++from array import array
++from collections import deque
++from dataclasses import dataclass, field
++from types import SimpleNamespace
++from typing import Any, Dict, List, Optional, Sequence
++
++import torch
++
++from sglang.srt.mem_cache.base_prefix_cache import InitLoadBackParams, MatchPrefixParams
++from sglang.srt.mem_cache.common import kv_to_page_indices
++from sglang.srt.mem_cache.radix_cache import RadixKey
++from sglang_tpu.disaggregation.raiden.common import _tcp_endpoint
++from sglang_tpu.disaggregation.raiden.serde import (
++    PrefixBlocks,
++    PrefixOffer,
++    PrefixRelease,
++    PrefixReq,
++)
++
++logger = logging.getLogger("sglang_tpu.disaggregation.raiden.peer_prefix")
++
++# Raiden ids of a reverse pull. The room's own P/D transfer uses uuid == room on
++# the same engines, so the reverse pull takes a disjoint range.
++PEER_UUID_BASE = 1 << 40
++
++STAGE_SENT = 0  # PrefixReq sent, no answer yet
++STAGE_REPLIED = 1  # PrefixBlocks received (hit_len may be 0)
++STAGE_READING = 2  # start_read issued on this rank
++STAGE_DONE = 3  # every read of this rank settled
++STAGE_FAILED = 9
++
++
++def peer_req_id(room: int) -> str:
++    return f"peer:{room}"
++
++
++def peer_swa_req_id(room: int) -> str:
++    return f"peerswa:{room}"
++
++
++def peer_uuid(room: int) -> int:
++    return PEER_UUID_BASE + room
++
++
++def page_floor(n: int, page_size: int) -> int:
++    return (n // page_size) * page_size
++
++
++@dataclass
++class PeerFetch:
++    """Prefill-side state of one reverse pull."""
++
++    room: int
++    matched_len: int
++    num_tokens: int
++    sent_at: float
++    stage: int = STAGE_SENT
++    hit_len: int = 0
++    uuid: int = 0
++    blocks: List[int] = field(default_factory=list)
++    endpoint: str = ""
++    swa_blocks: List[int] = field(default_factory=list)
++    swa_endpoint: str = ""
++    error: str = ""
++    seq: int = 0
++    req_ids: tuple = ()
++    # Set by the scheduler hook: the device slots the pull lands in.
++    new_indices: Optional[torch.Tensor] = None
++    lock_node: Any = None
++    lock_params: Any = None
++    prefix_indices: Optional[torch.Tensor] = None
++
++
++@dataclass
++class PeerServe:
++    """Decode-side state of one reverse pull it serves."""
++
++    req: PrefixReq
++    received_at: float
++    hit_len: int = 0
++    node_id: Any = None
++    lock_params: Any = None
++    restore_node_id: Any = None
++    restore_lock_params: Any = None
++    consumer_index: int = -1
++    device_indices: Optional[torch.Tensor] = None
++    key: Any = None
++    replied: bool = False
++    # The decode's own DecodeRequest for the room, when the pull rides on the
++    # prefix the decode matched, locked and restores for that request.
++    piggyback: Any = None
++    seq: int = 0
++
++
++@dataclass
++class ProducerContext:
++    """What the decode scheduler hands to ``peer_prefix_serve``."""
++
++    tree_cache: Any
++    allocator: Any
++    page_size: int
++    hybrid: bool = False
++    sliding_window_size: Optional[int] = None
++    restore_allowed: bool = True
++    min_hit_tokens: int = 64
++    lease_timeout_s: float = 180.0
++    is_eagle: bool = False
++    # room -> the decode's DecodeRequest in its prealloc or transfer queue, or
++    # None. A pull for a room the decode has pre-allocated is served from the
++    # prefix the decode holds for that request instead of a second restore.
++    lookup_room: Any = None
++    # all-gather over the attention-TP ranks: gather(obj) -> [obj per rank].
++    # The serve path calls cache methods that run collectives, so every rank
++    # must serve the same rooms in the same tick. None on a single rank.
++    gather: Any = None
++
++
++class PeerPrefixMixin:
++    """Mixed into ``RaidenKVManager``; both roles share the state and the
++    message handlers, each role uses its own methods."""
++
++    def _peer_init(self) -> None:
++        self._peer_lock = threading.Lock()
++        self._peer_inbox: deque = deque()
++        self._peer_release_inbox: deque = deque()
++        self._peer_inbox_at: Dict[int, float] = {}  # room -> arrival, decode side
++        self._peer_seq = 0  # prefill side: sequence of the asks sent
++        self._peer_serving: Dict[int, PeerServe] = {}
++        self._peer_fetches: Dict[int, PeerFetch] = {}
++        self._peer_decode_endpoint: Optional[str] = None
++        self._peer_prefill_endpoint: Optional[str] = None
++        self._peer_offers: deque = deque()
++        self._message_handlers.update(
++            {
++                PrefixReq.TAG: self._on_prefix_req,
++                PrefixBlocks.TAG: self._on_prefix_blocks,
++                PrefixRelease.TAG: self._on_prefix_release,
++                PrefixOffer.TAG: self._on_prefix_offer,
++            }
++        )
++
++    # ------------------------------------------------------------------ #
++    # Listener thread: enqueue only.
++    # ------------------------------------------------------------------ #
++    def _on_prefix_req(self, msg: List[bytes]) -> None:
++        req = PrefixReq.from_frames(msg)
++        with self._peer_lock:
++            # A newer ask for the same room supersedes an older one still
++            # waiting here; answering both would let ranks answer different
++            # asks and the prefill would see mismatched hits.
++            stale = [
++                r for r in self._peer_inbox if r.room == req.room and r.seq < req.seq
++            ]
++            for r in stale:
++                self._peer_inbox.remove(r)
++                self._peer_inbox_at.pop((r.room, r.seq), None)
++            self._peer_inbox.append(req)
++            self._peer_inbox_at[(req.room, req.seq)] = time.monotonic()
++
++    def _on_prefix_blocks(self, msg: List[bytes]) -> None:
++        reply = PrefixBlocks.from_frames(msg)
++        with self._peer_lock:
++            fetch = self._peer_fetches.get(reply.room)
++            if fetch is None or fetch.stage != STAGE_SENT:
++                return
++            if reply.seq and reply.seq != fetch.seq:
++                return  # answer to an earlier ask for this room
++            if reply.error:
++                fetch.error = reply.error
++                fetch.stage = STAGE_FAILED
++                return
++            fetch.hit_len = reply.hit_len
++            fetch.uuid = reply.uuid
++            fetch.blocks = list(reply.blocks)
++            fetch.endpoint = reply.endpoint
++            fetch.swa_blocks = list(reply.swa_blocks)
++            fetch.swa_endpoint = reply.swa_endpoint
++            fetch.stage = STAGE_REPLIED
++
++    def _on_prefix_release(self, msg: List[bytes]) -> None:
++        release = PrefixRelease.from_frames(msg)
++        with self._peer_lock:
++            self._peer_release_inbox.append((release.room, release.seq))
++
++    def _on_prefix_offer(self, msg: List[bytes]) -> None:
++        offer = PrefixOffer.from_frames(msg)
++        with self._peer_lock:
++            self._peer_offers.append(offer)
++            while len(self._peer_offers) > 64:
++                self._peer_offers.popleft()
++
++    def register_decode_request(
++        self, room, local_blocks, local_swa_blocks, aux_index, bootstrap_infos, **kwargs
++    ):
++        # The prefill rank this decode rank pulls from is the rank that takes
++        # its prefix offers.
++        try:
++            info = bootstrap_infos[0] if bootstrap_infos else None
++            if info is not None:
++                self._peer_prefill_endpoint = _tcp_endpoint(
++                    ip=info["rank_ip"], port=info["rank_port"]
++                )
++        except Exception:  # noqa: BLE001
++            pass
++        return super().register_decode_request(
++            room, local_blocks, local_swa_blocks, aux_index, bootstrap_infos, **kwargs
++        )
++
++    def peer_offer(
++        self, room: int, token_ids: Sequence[int], extra_key, cache_salt
++    ) -> bool:
++        """Decode role: offer a finished request's prefix to the prefill peer."""
++        endpoint = self._peer_prefill_endpoint
++        if endpoint is None or not token_ids:
++            return False
++        payload = PrefixOffer(
++            room=room,
++            token_ids=[int(t) for t in token_ids],
++            extra_key=extra_key,
++            cache_salt=cache_salt,
++        ).to_frames()
++        try:
++            self._send_multipart_locked(endpoint, payload)
++        except Exception as exc:  # noqa: BLE001
++            logger.warning("peer prefix offer for room %s failed: %s", room, exc)
++            return False
++        return True
++
++    def peer_take_offer(self, room: Optional[int] = None) -> Optional[PrefixOffer]:
++        """Prefill role: pop the oldest offer, or the offer for ``room``."""
++        with self._peer_lock:
++            if room is None:
++                return self._peer_offers.popleft() if self._peer_offers else None
++            for i, offer in enumerate(self._peer_offers):
++                if offer.room == room:
++                    del self._peer_offers[i]
++                    return offer
++            return None
++
++    def peer_peek_offer_room(self) -> int:
++        with self._peer_lock:
++            return self._peer_offers[0].room if self._peer_offers else -1
++
++    def _on_pull_req(self, msg: List[bytes]) -> None:
++        # The decode rank that pulls from this prefill rank is the rank that
++        # serves its reverse pulls. Remember its control endpoint.
++        try:
++            from sglang_tpu.disaggregation.raiden.serde import PullReq
++
++            req = PullReq.from_frames(msg)
++            self._peer_decode_endpoint = _tcp_endpoint(
++                ip=req.decode_ip, port=req.decode_port
++            )
++        except Exception:  # noqa: BLE001 - the real handler reports it
++            pass
++        super()._on_pull_req(msg)
++
++    # ------------------------------------------------------------------ #
++    # Prefill role (consumer). Scheduler thread.
++    # ------------------------------------------------------------------ #
++    def peer_known(self) -> bool:
++        return self._peer_decode_endpoint is not None
++
++    def peer_fetch_begin(
++        self,
++        room: int,
++        token_ids: Sequence[int],
++        matched_len: int,
++        extra_key: Optional[str],
++        cache_salt: Optional[str],
++    ) -> bool:
++        endpoint = self._peer_decode_endpoint
++        if endpoint is None:
++            return False
++        with self._peer_lock:
++            self._peer_seq += 1
++            seq = self._peer_seq
++        payload = PrefixReq(
++            room=room,
++            prefill_ip=self.local_ip,
++            prefill_port=self.rank_port,
++            token_ids=[int(t) for t in token_ids],
++            matched_len=matched_len,
++            extra_key=extra_key,
++            cache_salt=cache_salt,
++            seq=seq,
++        ).to_frames()
++        fetch = PeerFetch(
++            room=room,
++            matched_len=matched_len,
++            num_tokens=len(token_ids),
++            sent_at=time.monotonic(),
++            seq=seq,
++        )
++        with self._peer_lock:
++            self._peer_fetches[room] = fetch
++        try:
++            self._send_multipart_locked(endpoint, payload)
++        except Exception as exc:  # noqa: BLE001
++            logger.warning("peer prefix request for room %s failed: %s", room, exc)
++            with self._peer_lock:
++                self._peer_fetches.pop(room, None)
++            return False
++        return True
++
++    def peer_fetch(self, room: int) -> Optional[PeerFetch]:
++        with self._peer_lock:
++            return self._peer_fetches.get(room)
++
++    def peer_inflight_pages(self) -> int:
++        """Pages of this rank's reverse reads that Raiden has not settled."""
++        with self._peer_lock:
++            return sum(
++                len(f.blocks)
++                for f in self._peer_fetches.values()
++                if f.stage == STAGE_READING
++            )
++
++    def peer_read_budget_pages(self) -> int:
++        """Reverse reads in flight on this rank stay within one max-size
++        request's pages, so they never starve the P/D transfers that share the
++        same host staging. One pull may exceed it when nothing else is in flight."""
++        max_blocks = int(getattr(self, "_full_engine_max_blocks", 0) or 0)
++        if max_blocks <= 0:
++            return 1 << 30
++        return max(1, max_blocks)
++
++    def peer_fetch_start_read(
++        self, room: int, local_blocks: List[int], local_swa_blocks: List[int]
++    ) -> bool:
++        fetch = self.peer_fetch(room)
++        if fetch is None or fetch.stage != STAGE_REPLIED:
++            return False
++        if len(local_blocks) != len(fetch.blocks) or len(local_swa_blocks) != len(
++            fetch.swa_blocks
++        ):
++            fetch.error = "local and remote block counts differ"
++            fetch.stage = STAGE_FAILED
++            return False
++        req_ids = [peer_req_id(room)]
++        try:
++            engine = self._ensure_engine()
++            engine.start_read(
++                peer_req_id(room),
++                fetch.uuid,
++                fetch.endpoint,
++                list(fetch.blocks),
++                list(local_blocks),
++                self._transfer_parallelism,
++            )
++            if fetch.swa_blocks:
++                if self._swa_engine is None:
++                    raise RuntimeError(
++                        "peer sent SWA blocks but this rank has no SWA engine"
++                    )
++                self._swa_engine.start_read(
++                    peer_swa_req_id(room),
++                    fetch.uuid,
++                    fetch.swa_endpoint,
++                    list(fetch.swa_blocks),
++                    list(local_swa_blocks),
++                    self._transfer_parallelism,
++                )
++                req_ids.append(peer_swa_req_id(room))
++        except Exception as exc:  # noqa: BLE001
++            logger.warning("peer prefix start_read for room %s raised: %s", room, exc)
++            fetch.error = f"start_read: {exc}"
++            fetch.req_ids = tuple(req_ids[:0])
++            fetch.stage = STAGE_FAILED
++            return False
++        fetch.req_ids = tuple(req_ids)
++        fetch.stage = STAGE_READING
++        logger.info(
++            "peer prefix read started | room=%s pages=%d swa_pages=%d waited=%.1fs",
++            room,
++            len(local_blocks),
++            len(local_swa_blocks),
++            time.monotonic() - fetch.sent_at,
++        )
++        return True
++
++    def peer_fetch_poll(self, room: int, timeout_s: float) -> int:
++        """Advance the fetch from what Raiden reported; returns the stage."""
++        fetch = self.peer_fetch(room)
++        if fetch is None:
++            return STAGE_FAILED
++        if fetch.stage == STAGE_READING:
++            self._drain_engine()
++            with self._state_lock:
++                done = all(rid in self._completed_recv for rid in fetch.req_ids)
++                failed = any(rid in self._failed for rid in fetch.req_ids)
++            if failed:
++                fetch.error = fetch.error or "raiden read failed"
++                fetch.stage = STAGE_FAILED
++                logger.warning(
++                    "peer prefix read failed | room=%s after %.1fs",
++                    room,
++                    time.monotonic() - fetch.sent_at,
++                )
++            elif done:
++                fetch.stage = STAGE_DONE
++                logger.info(
++                    "peer prefix read done | room=%s after %.1fs",
++                    room,
++                    time.monotonic() - fetch.sent_at,
++                )
++        if fetch.stage in (STAGE_SENT, STAGE_REPLIED) and (
++            time.monotonic() - fetch.sent_at > timeout_s
++        ):
++            fetch.error = fetch.error or "timed out waiting for the decode"
++            fetch.stage = STAGE_FAILED
++        return fetch.stage
++
++    def peer_fetch_reads_settled(self, room: int) -> bool:
++        """True when no read of this fetch is still in flight on this rank."""
++        fetch = self.peer_fetch(room)
++        if fetch is None or not fetch.req_ids:
++            return True
++        self._drain_engine()
++        with self._state_lock:
++            return all(
++                rid in self._completed_recv or rid in self._failed
++                for rid in fetch.req_ids
++            )
++
++    def peer_fetch_end(self, room: int, notify: bool = True) -> None:
++        with self._peer_lock:
++            fetch = self._peer_fetches.pop(room, None)
++        if fetch is None:
++            return
++        with self._state_lock:
++            for rid in fetch.req_ids:
++                self._completed_recv.discard(rid)
++                self._failed.discard(rid)
++                self._native_failed.discard(rid)
++        endpoint = self._peer_decode_endpoint
++        if notify and endpoint is not None:
++            try:
++                self._send_multipart_locked(
++                    endpoint, PrefixRelease(room=room, seq=fetch.seq).to_frames()
++                )
++            except Exception as exc:  # noqa: BLE001
++                logger.warning("peer prefix release for room %s failed: %s", room, exc)
++
++    # ------------------------------------------------------------------ #
++    # Decode role (producer). Scheduler thread.
++    # ------------------------------------------------------------------ #
++    def peer_prefix_serve(self, ctx: ProducerContext) -> None:
++        with self._peer_lock:
++            inbox = list(self._peer_inbox)
++            self._peer_inbox.clear()
++            releases = list(self._peer_release_inbox)
++            self._peer_release_inbox.clear()
++        if ctx.gather is not None:
++            inbox, releases = self._peer_agree(ctx, inbox, releases)
++        if not inbox and not releases and not self._peer_serving:
++            return
++        # Releases first: a release for an earlier ask of a room must not
++        # end the serve of a newer ask handled in this same tick.
++        for room, seq in releases:
++            self._peer_lease_release(ctx, room, seq=seq)
++        for req in inbox:
++            try:
++                self._peer_serve_new(ctx, req)
++            except Exception as exc:  # noqa: BLE001
++                logger.exception("peer prefix serve failed for room %s", req.room)
++                self._peer_reply_miss(req, f"serve: {exc}")
++                self._peer_lease_release(ctx, req.room)
++        for room, serve in list(self._peer_serving.items()):
++            if not serve.replied:
++                try:
++                    self._peer_serve_advance(ctx, room, serve)
++                except Exception as exc:  # noqa: BLE001
++                    logger.exception("peer prefix register failed for room %s", room)
++                    self._peer_reply_miss(serve.req, f"register: {exc}")
++                    self._peer_lease_release(ctx, room)
++        if not self._peer_serving:
++            return
++        self._drain_engine()
++        now = time.monotonic()
++        with self._state_lock:
++            done = set(self._completed_send)
++            failed = set(self._failed)
++        for room, serve in list(self._peer_serving.items()):
++            if not serve.replied:
++                continue
++            rid = peer_req_id(room)
++            settled = rid in done or rid in failed
++            if settled or now - serve.received_at > ctx.lease_timeout_s:
++                self._peer_lease_release(ctx, room)
++
++    def _peer_agree(self, ctx: ProducerContext, inbox, releases):
++        """Keep, for this tick, only the rooms every rank has received; the
++        rest wait in the inbox. Messages reach the ranks' listeners at
++        different moments, and the cache calls behind a serve all-reduce, so
++        a rank serving alone would hang the others. A room that never shows
++        up on every rank within the lease timeout is answered with a miss."""
++        local = (
++            tuple(sorted((r.room, r.seq) for r in inbox)),
++            tuple(sorted(set(releases))),
++        )
++        views = ctx.gather(local)
++        asks = set(local[0]).intersection(*(set(v[0]) for v in views))
++        rels = set(local[1]).intersection(*(set(v[1]) for v in views))
++        now = time.monotonic()
++        keep, take = [], []
++        for req in inbox:
++            key = (req.room, req.seq)
++            if key in asks:
++                take.append(req)
++            elif now - self._peer_inbox_at.get(key, now) > ctx.lease_timeout_s:
++                self._peer_reply_miss(req, "inbox timeout")
++            else:
++                keep.append(req)
++        keep_rel = [r for r in releases if r not in rels]
++        with self._peer_lock:
++            self._peer_inbox.extendleft(reversed(keep))
++            self._peer_release_inbox.extendleft(reversed(keep_rel))
++        for req in take:
++            self._peer_inbox_at.pop((req.room, req.seq), None)
++        take.sort(key=lambda r: (r.room, r.seq))
++        return take, sorted(rels)
++
++    def _peer_key(self, ctx: ProducerContext, req: PrefixReq):
++        # Tree keys are int64 arrays, as the tokenizer manager builds them.
++        return RadixKey(
++            array("q", req.token_ids),
++            req.extra_key,
++            is_bigram=ctx.is_eagle,
++            cache_salt=req.cache_salt,
++        )
++
++    def _peer_match(self, ctx: ProducerContext, req: PrefixReq):
++        return ctx.tree_cache.match_prefix(
++            MatchPrefixParams(key=self._peer_key(ctx, req))
++        )
++
++    def _peer_window_missing(self, ctx: ProducerContext, serve: PeerServe) -> bool:
++        """For a sliding-window model: is any SWA KV of the last window of the
++        served prefix missing from the tree? The prefill cannot use the prefix
++        without that window."""
++        if not ctx.hybrid or ctx.sliding_window_size is None:
++            return False
++        core = getattr(ctx.tree_cache, "tree_core", None)
++        query = getattr(core, "swa_tombstone_ranges", None)
++        if query is None or serve.key is None:
++            return True
++        window_start = page_floor(
++            max(0, serve.hit_len - ctx.sliding_window_size), ctx.page_size
++        )
++        try:
++            missing = query(serve.key, window_start, serve.hit_len)
++        except Exception as exc:  # noqa: BLE001
++            logger.warning("peer prefix: SWA tombstone query failed: %s", exc)
++            return True
++        return bool(missing)
++
++    def _peer_serve_new(self, ctx: ProducerContext, req: PrefixReq) -> None:
++        room = req.room
++        if room in self._peer_serving:
++            self._peer_lease_release(ctx, room)
++        tree = ctx.tree_cache
++        if self._peer_serve_from_request(ctx, req):
++            return
++        result = self._peer_match(ctx, req)
++        device_len = page_floor(len(result.device_indices), ctx.page_size)
++        host_len = result.host_hit_length if ctx.restore_allowed else 0
++        limit = page_floor(len(req.token_ids), ctx.page_size)
++        hit = min(page_floor(device_len + host_len, ctx.page_size), limit)
++        if hit < req.matched_len + ctx.min_hit_tokens:
++            logger.info(
++                "peer prefix tree-path short | room=%s device=%d host=%d limit=%d",
++                room,
++                device_len,
++                host_len,
++                limit,
++            )
++            self._peer_reply_miss(req)
++            return
++        serve = PeerServe(req=req, received_at=time.monotonic(), hit_len=hit)
++        serve.seq = req.seq
++        serve.key = self._peer_key(ctx, req)
++        serve.node_id = result.last_device_node
++        serve.lock_params = tree.inc_lock_ref(result.last_device_node).to_dec_params()
++        self._peer_serving[room] = serve
++        if hit > device_len:
++            restored = self._peer_start_restore(ctx, serve, result, hit)
++            if not restored:
++                # Serve what is in HBM, or nothing.
++                hit = device_len
++                if hit < req.matched_len + ctx.min_hit_tokens:
++                    self._peer_reply_miss(req, "restore unavailable")
++                    self._peer_lease_release(ctx, room)
++                    return
++                serve.hit_len = hit
++                serve.device_indices = result.device_indices[:hit]
++        else:
++            serve.device_indices = result.device_indices[:hit]
++        self._peer_serve_advance(ctx, room, serve)
++
++    def _peer_serve_from_request(self, ctx: ProducerContext, req: PrefixReq) -> bool:
++        """Serve a room the decode has pre-allocated from the prefix it matched
++        for that request (L1 in HBM, L2 restored by the decode's own HiCache
++        path). No second restore, no second load-back slot: the pull waits for
++        the request's restore and reads the same pages. Returns False when the
++        room is unknown here, so the caller falls back to the tree."""
++        if ctx.lookup_room is None:
++            return False
++        dr = ctx.lookup_room(req.room)
++        pm = getattr(dr, "prefix_match", None) if dr is not None else None
++        if pm is None:
++            logger.info(
++                "peer prefix request-path unavailable | room=%s reason=%s",
++                req.room,
++                "room not queued" if dr is None else "no prefix match",
++            )
++            return False
++        l1 = page_floor(int(pm.l1_prefix_len), ctx.page_size)
++        limit = page_floor(len(req.token_ids), ctx.page_size)
++        total = page_floor(
++            min(int(pm.l1_prefix_len) + int(pm.l2_host_hit_length), limit),
++            ctx.page_size,
++        )
++        # The host part is usable only when the restore brings the window too.
++        hit = total if ctx.restore_allowed else min(l1, limit)
++        if hit < req.matched_len + ctx.min_hit_tokens:
++            logger.info(
++                "peer prefix request-path short | room=%s l1=%d l2=%d limit=%d",
++                req.room,
++                int(pm.l1_prefix_len),
++                int(pm.l2_host_hit_length),
++                limit,
++            )
++            self._peer_reply_miss(req)
++            return True
++        tree = ctx.tree_cache
++        serve = PeerServe(req=req, received_at=time.monotonic(), hit_len=hit)
++        serve.seq = req.seq
++        serve.key = self._peer_key(ctx, req)
++        serve.piggyback = dr
++        serve.node_id = pm.last_device_node
++        serve.lock_params = tree.inc_lock_ref(pm.last_device_node).to_dec_params()
++        self._peer_serving[req.room] = serve
++        self._peer_serve_advance(ctx, req.room, serve)
++        return True
++
++    def _peer_piggyback_ready(self, ctx: ProducerContext, serve: PeerServe) -> bool:
++        """Fill ``serve.device_indices`` from the decode request's prefix once
++        its restore has landed. False means wait, or the serve was ended."""
++        dr = serve.piggyback
++        req = serve.req
++        if ctx.lookup_room(req.room) is not dr:
++            self._peer_reply_miss(req, "room gone")
++            self._peer_lease_release(ctx, req.room)
++            return False
++        pm = dr.prefix_match
++        tree = ctx.tree_cache
++        l1 = page_floor(int(pm.l1_prefix_len), ctx.page_size)
++        if serve.hit_len <= l1 or not pm.needs_local_restore:
++            serve.device_indices = pm.prefix_indices[: serve.hit_len]
++            return True
++        status = getattr(dr, "hicache_restore_status", None)
++        status = getattr(status, "value", status)
++        if status == "failed":
++            if l1 >= req.matched_len + ctx.min_hit_tokens:
++                serve.hit_len = l1
++                serve.device_indices = pm.prefix_indices[:l1]
++                return True
++            self._peer_reply_miss(req, "restore failed")
++            self._peer_lease_release(ctx, req.room)
++            return False
++        restored = getattr(dr, "hicache_restored_kv_indices", None)
++        # READY is set by the decode's own restore state machine, in lockstep;
++        # polling the DMA event here would be a collective outside lockstep.
++        if restored is None or status != "ready":
++            return False
++        node = getattr(dr, "hicache_restored_node", None)
++        if node is None:
++            node = getattr(dr.req, "last_node", None)
++        if node is not None and serve.restore_node_id is None:
++            serve.restore_node_id = node
++            serve.restore_lock_params = tree.inc_lock_ref(node).to_dec_params()
++        device = pm.prefix_indices
++        serve.device_indices = torch.cat([device, restored.to(device.device)])[
++            : serve.hit_len
++        ]
++        return True
++
++    def _peer_start_restore(self, ctx, serve, result, hit: int) -> bool:
++        tree = ctx.tree_cache
++        if not tree.has_free_load_back_slot():
++            return False
++        fake_req = SimpleNamespace(
++            rid=peer_req_id(serve.req.room),
++            last_node=result.last_device_node,
++            # The restore brings the SWA pages of the host part back too.
++            swa_host_hit_length=int(getattr(result, "swa_host_hit_length", 0) or 0),
++            mamba_host_hit_length=0,
++            kv=SimpleNamespace(mamba_pool_idx=None),
++        )
++        out = tree.init_load_back(
++            InitLoadBackParams(
++                best_match_node=result.best_match_node,
++                host_hit_length=result.host_hit_length,
++                req=fake_req,
++            )
++        )
++        if out is None:
++            return False
++        new_indices, restored_node = out
++        if len(new_indices) == 0:
++            return False
++        serve.restore_node_id = restored_node
++        serve.restore_lock_params = tree.inc_lock_ref(restored_node).to_dec_params()
++        serve.consumer_index = tree.ready_to_load_host_cache()
++        serve.device_indices = torch.cat(
++            [result.device_indices, new_indices.to(result.device_indices.device)]
++        )[:hit]
++        return True
++
++    def _peer_serve_advance(
++        self, ctx: ProducerContext, room: int, serve: PeerServe
++    ) -> None:
++        if serve.replied:
++            return
++        tree = ctx.tree_cache
++        if serve.piggyback is not None and serve.device_indices is None:
++            if not self._peer_piggyback_ready(ctx, serve):
++                return
++        if serve.consumer_index >= 0 and not tree.is_load_back_event_done(
++            serve.consumer_index
++        ):
++            return
++        req = serve.req
++        indices = serve.device_indices
++        if indices is None or len(indices) < serve.hit_len:
++            self._peer_reply_miss(req, "device indices short")
++            self._peer_lease_release(ctx, room)
++            return
++        indices = indices[: serve.hit_len]
++        # The prefill holds [0, matched_len) already; it pulls the rest.
++        pulled = indices[req.matched_len :]
++        blocks = [int(b) for b in kv_to_page_indices(pulled, ctx.page_size)]
++        swa_blocks: List[int] = []
++        if ctx.hybrid:
++            if self._swa_engine is None or ctx.sliding_window_size is None:
++                self._peer_reply_miss(req, "no SWA engine")
++                self._peer_lease_release(ctx, room)
++                return
++            if self._peer_window_missing(ctx, serve):
++                self._peer_reply_miss(req, "SWA window missing")
++                self._peer_lease_release(ctx, room)
++                return
++            window_start = page_floor(
++                max(0, serve.hit_len - ctx.sliding_window_size), ctx.page_size
++            )
++            swa_idx = ctx.allocator.translate_loc_from_full_to_swa(
++                indices[window_start:]
++            )
++            if swa_idx.numel() == 0 or bool((swa_idx < 0).any()):
++                self._peer_reply_miss(req, "SWA window not resident")
++                self._peer_lease_release(ctx, room)
++                return
++            swa_blocks = [int(b) for b in kv_to_page_indices(swa_idx, ctx.page_size)]
++        uuid = peer_uuid(room)
++        engine = self._ensure_engine()
++        accepted = bool(engine.register_read(peer_req_id(room), uuid, blocks))
++        if not accepted:
++            self._peer_reply_miss(req, "register_read refused")
++            self._peer_lease_release(ctx, room)
++            return
++        if swa_blocks:
++            self._swa_engine.register_read(peer_swa_req_id(room), uuid, swa_blocks)
++        serve.replied = True
++        serve.received_at = time.monotonic()
++        payload = PrefixBlocks(
++            room=room,
++            hit_len=serve.hit_len,
++            uuid=uuid,
++            blocks=blocks,
++            endpoint=self.raiden_endpoint or "",
++            swa_blocks=swa_blocks,
++            swa_endpoint=self.swa_raiden_endpoint or "",
++            seq=serve.seq,
++        ).to_frames()
++        self._send_multipart_locked(
++            _tcp_endpoint(ip=req.prefill_ip, port=req.prefill_port), payload
++        )
++        logger.info(
++            "peer prefix served | room=%s hit=%d pages=%d swa_pages=%d",
++            room,
++            serve.hit_len,
++            len(blocks),
++            len(swa_blocks),
++        )
++
++    def _peer_reply_miss(self, req: PrefixReq, error: str = "") -> None:
++        logger.info(
++            "peer prefix miss | room=%s matched=%d reason=%s",
++            req.room,
++            req.matched_len,
++            error or "short hit",
++        )
++        payload = PrefixBlocks(
++            room=req.room,
++            hit_len=0,
++            uuid=0,
++            blocks=[],
++            endpoint="",
++            error=error,
++            seq=req.seq,
++        ).to_frames()
++        try:
++            self._send_multipart_locked(
++                _tcp_endpoint(ip=req.prefill_ip, port=req.prefill_port), payload
++            )
++        except Exception as exc:  # noqa: BLE001
++            logger.warning(
++                "peer prefix miss reply for room %s failed: %s", req.room, exc
++            )
++
++    def _peer_lease_release(
++        self, ctx: ProducerContext, room: int, seq: Optional[int] = None
++    ) -> None:
++        serve = self._peer_serving.get(room)
++        if serve is None:
++            return
++        if seq and serve.seq and seq != serve.seq:
++            logger.info(
++                "peer prefix stale release ignored | room=%s seq=%d serving=%d",
++                room,
++                seq,
++                serve.seq,
++            )
++            return
++        self._peer_serving.pop(room, None)
++        logger.info(
++            "peer prefix lease released | room=%s hit=%d age=%.1fs",
++            room,
++            serve.hit_len,
++            time.monotonic() - serve.received_at,
++        )
++        tree = ctx.tree_cache
++        if serve.restore_node_id is not None and serve.restore_lock_params is not None:
++            tree.dec_lock_ref(serve.restore_node_id, serve.restore_lock_params)
++        if serve.node_id is not None and serve.lock_params is not None:
++            tree.dec_lock_ref(serve.node_id, serve.lock_params)
++        with self._state_lock:
++            for rid in (peer_req_id(room), peer_swa_req_id(room)):
++                self._completed_send.discard(rid)
++                self._send_done_at.pop(rid, None)
++                self._failed.discard(rid)
++                self._native_failed.discard(rid)
++
++    # ------------------------------------------------------------------ #
++    # Introspection, for tests and metrics.
++    # ------------------------------------------------------------------ #
++    def peer_stats(self) -> dict:
++        with self._peer_lock:
++            return {
++                "serving": len(self._peer_serving),
++                "fetching": len(self._peer_fetches),
++                "inbox": len(self._peer_inbox),
++                "decode_endpoint": self._peer_decode_endpoint,
++            }
+diff --git a/sglang_tpu/disaggregation/raiden/serde.py b/sglang_tpu/disaggregation/raiden/serde.py
+index 90cff41427..df7fe076ff 100644
+--- a/sglang_tpu/disaggregation/raiden/serde.py
++++ b/sglang_tpu/disaggregation/raiden/serde.py
+@@ -44,6 +44,14 @@ class MessageTag(bytes, enum.Enum):
+     )
+ 
+     ROOM_FAILED = b"RAIDEN_ROOM_FAILED"  # prefill -> decode: room already failed
++    # Reverse prefix pull (prefill reads an evicted prefix back from the decode
++    # engine's HiCache; see peer_prefix.py).
++    PREFIX_REQ = b"RAIDEN_PREFIX_REQ"  # prefill -> decode: match, pin, register
++    PREFIX_BLOCKS = b"RAIDEN_PREFIX_BLOCKS"  # decode -> prefill: hit + block ids
++    PREFIX_RELEASE = b"RAIDEN_PREFIX_RELEASE"  # prefill -> decode: unpin
++    PREFIX_OFFER = (
++        b"RAIDEN_PREFIX_OFFER"  # decode -> prefill: a finished prefix to prefetch
++    )
+ 
+     # CommonKVReceiver owns this backend-independent positional message.
+     ABORT = b"ABORT"  # decode -> prefill: room, decode ip, decode port
+@@ -191,6 +199,74 @@ class ReshardChunkReady(WireMessage):
+         require_non_negative(self.uuid, "uuid")
+ 
+ 
++class PrefixReq(WireMessage):
++    """Ask a decode rank to serve a prefix from its HiCache for a reverse pull."""
++
++    TAG: ClassVar[bytes] = MessageTag.PREFIX_REQ
++    room: int
++    prefill_ip: str
++    prefill_port: int
++    token_ids: list[int]
++    # Tokens the prefill already holds locally; the decode only answers with
++    # a hit longer than this.
++    matched_len: int
++    extra_key: str | None = None
++    cache_salt: str | None = None
++    # Monotonic per prefill rank; replies and releases carry it back so a
++    # late message for an earlier ask of the same room is ignored.
++    seq: int = 0
++
++    def __post_init__(self) -> None:
++        require_non_negative(self.room, "room")
++        require_non_negative(self.matched_len, "matched_len")
++        _require_port(self.prefill_port)
++
++
++class PrefixBlocks(WireMessage):
++    """Answer a PrefixReq: the usable hit and the registered device blocks."""
++
++    TAG: ClassVar[bytes] = MessageTag.PREFIX_BLOCKS
++    room: int
++    hit_len: int
++    uuid: int
++    blocks: list[int]
++    endpoint: str
++    swa_blocks: list[int] = msgspec.field(default_factory=list)
++    swa_endpoint: str = ""
++    error: str = ""
++    seq: int = 0
++
++    def __post_init__(self) -> None:
++        require_non_negative(self.room, "room")
++        require_non_negative(self.hit_len, "hit_len")
++        require_non_negative(self.uuid, "uuid")
++
++
++class PrefixRelease(WireMessage):
++    """Tell the decode rank the reverse pull of a room is over: unpin."""
++
++    TAG: ClassVar[bytes] = MessageTag.PREFIX_RELEASE
++    room: int
++    seq: int = 0
++
++    def __post_init__(self) -> None:
++        require_non_negative(self.room, "room")
++
++
++class PrefixOffer(WireMessage):
++    """Tell the prefill a request finished here and its prefix can be pulled
++    back ahead of the session's next turn."""
++
++    TAG: ClassVar[bytes] = MessageTag.PREFIX_OFFER
++    room: int
++    token_ids: list[int]
++    extra_key: str | None = None
++    cache_salt: str | None = None
++
++    def __post_init__(self) -> None:
++        require_non_negative(self.room, "room")
++
++
+ class RoomFailed(WireMessage):
+     """Tell a decode rank that the prefill rank has already failed a room.
+ 
+diff --git a/sglang_tpu/patches.py b/sglang_tpu/patches.py
+index c55f93bf74..d8a0392c90 100644
+--- a/sglang_tpu/patches.py
++++ b/sglang_tpu/patches.py
+@@ -900,6 +900,15 @@ def _patch_pd_decode_async_prefill_info() -> None:
+     pd_decode_async_prefill_info.install()
+ 
+ 
++def _patch_pd_peer_prefix() -> None:
++    """Let a prefill rank pull an evicted prefix back from its decode peer's
++    HiCache over Raiden (SGLANG_TPU_PEER_PREFIX=1). See ``pd_peer_prefix``.
++    """
++    from sglang_tpu import pd_peer_prefix
++
++    pd_peer_prefix.install()
++
++
+ def _patch_host_heap_trim() -> None:
+     """Return freed host heap pages once the scheduler is warmed up.
+ 
+@@ -976,6 +985,7 @@ def apply_tpu_patches() -> None:
+     _patch_raiden_is_load_back_event_done()
+     _patch_prefill_transfer_finish_from_raiden()
+     _patch_pd_decode_swa_hicache()
++    _patch_pd_peer_prefix()
+     _patch_hicache_write_back_copy_ahead()
+     _patch_pd_decode_async_prefill_info()
+     _patch_host_heap_trim()
+diff --git a/sglang_tpu/pd_decode_swa_hicache.py b/sglang_tpu/pd_decode_swa_hicache.py
+index fd4d546db7..b96585c41b 100644
+--- a/sglang_tpu/pd_decode_swa_hicache.py
++++ b/sglang_tpu/pd_decode_swa_hicache.py
+@@ -25,6 +25,7 @@ import contextlib
+ import dataclasses
+ import functools
+ import logging
++import os
+ import weakref
+ from typing import Any, Callable, Iterator, Optional
+ 
+@@ -214,8 +215,11 @@ def _build_kv_cache(
+         hicache_draft_plan=hicache_draft_plan,
+     )
+     logger.info(
+-        "PD decode SWA HiCache: the host pool holds full-attention KV only, "
+-        "the SWA window of every request comes from prefill."
++        "PD decode SWA HiCache: the SWA window of every request comes from "
++        "prefill; the host pool holds %s.",
++        "full-attention and SWA KV (SGLANG_TPU_DECODE_SWA_HOST=1)"
++        if decode_swa_host_enabled()
++        else "full-attention KV only",
+     )
+     # Upstream rejects decode SWA radix + HiCache before it builds the tree.
+     # _create_tree_cache turns HiCache back on for this build.
+@@ -339,6 +343,40 @@ def _build_full_only_host_stack(
+     )
+ 
+ 
++def decode_swa_host_enabled() -> bool:
++    """Keep the sliding-window pages of cached prefixes in the decode host pool.
++
++    The decode itself never reads them (its own requests get the window from
++    prefill), but a prefill that pulls a prefix back from this decode needs
++    the last window with it. See ``pd_peer_prefix``.
++    """
++    return os.environ.get("SGLANG_TPU_DECODE_SWA_HOST", "0") == "1"
++
++
++class _FullAndSwaDecodeStrategy(hybrid_pool_assembler.StackStrategy):
++    """Host stack of a decode cache that keeps full and SWA KV in RAM.
++
++    Same stack as upstream's ``_SwaStrategy`` (the prefill's), registered as a
++    full-only decode cache so the decode's own match, prealloc and restore
++    rules stay as they are. Only the peer prefix serve path reads the SWA
++    host pages, through a restore.
++    """
++
++    def matches(self, kvcache: Any, components: set[ComponentType]) -> bool:
++        return decode_swa_host_enabled() and _FULL_ONLY_SWA_STRATEGY.matches(
++            kvcache, components
++        )
++
++    def build(self, *, cache: UnifiedRadixCache, **kwargs):
++        result = hybrid_pool_assembler._SwaStrategy().build(cache=cache, **kwargs)
++        _full_only_host_caches.add(cache)
++        _restore_gated_caches.add(cache)
++        _load_device_pages[result.cache_controller] = {}
++        return dataclasses.replace(
++            result, pools_desc="Full + SWA in RAM (SWA window from prefill)"
++        )
++
++
+ class _FullOnlySwaStrategy(hybrid_pool_assembler.StackStrategy):
+     """Host stack of a full-only decode cache: full-attention KV only.
+ 
+@@ -396,6 +434,32 @@ _FULL_ONLY_SWA_STRATEGY = _FullOnlySwaStrategy()
+ # ---------------------------------------------------------------------------
+ 
+ 
++def _swa_build_hicache_transfers(
++    upstream: Callable, component: SWAComponent, node: Any, phase: Any, **kwargs
++):
++    """Wraps ``SWAComponent.build_hicache_transfers`` on a decode cache that
++    keeps SWA pages in RAM. Upstream's load-back walk assumes the SWA
++    validator kept every node within the window resident; the decode's
++    validator does not (the window comes from prefill), so a tombstoned
++    window is possible. Skip the SWA restore then: the decode does not read
++    it, and the peer serve path rejects a prefix whose window is missing."""
++    if (
++        uses_full_only_host_cache(component.cache)
++        and str(getattr(phase, "value", phase)) == "load_back"
++    ):
++        ct = component.component_type
++        n_swa, cur = 0, node
++        root = component.tree_core.root_node
++        window = component.sliding_window_size or 0
++        while cur is not root and n_swa < window:
++            cd = cur.component_data[ct]
++            if cd.value is None and cd.host_value is None:
++                return None
++            n_swa += len(cd.value) if cd.value is not None else len(cd.host_value)
++            cur = cur.parent
++    return upstream(component, node, phase, **kwargs)
++
++
+ def _create_swa_match_validator(
+     upstream: Callable, component: SWAComponent, match_device_only: bool = False
+ ) -> Callable:
+@@ -658,6 +722,9 @@ def _patch_targets() -> tuple[tuple[Any, str, Callable], ...]:
+         # Decode never reads SWA KV from its cache, so missing SWA KV must not
+         # end a match of full-attention KV.
+         (SWAComponent, "create_match_validator", _create_swa_match_validator),
++        # With SWA pages in RAM, a load-back may meet a tombstoned window on
++        # the decode; skip the SWA part instead of asserting.
++        (SWAComponent, "build_hicache_transfers", _swa_build_hicache_transfers),
+         # Stop decode cache hits where the SWA window starts, so prefill always
+         # sends the window.
+         (DecodePreallocQueue, "_match_prefix_and_lock", _match_prefix_and_lock),
+@@ -707,3 +774,5 @@ def install() -> None:
+         _wrap(owner, name, impl)
+     # Builds a RAM pool for full-attention KV only, with no SWA pool.
+     hybrid_pool_assembler.register_stack_strategy(_FULL_ONLY_SWA_STRATEGY)
++    # Registered after, so it is asked first; it defers unless its flag is set.
++    hybrid_pool_assembler.register_stack_strategy(_FullAndSwaDecodeStrategy())
+diff --git a/sglang_tpu/pd_peer_prefix.py b/sglang_tpu/pd_peer_prefix.py
+new file mode 100644
+index 0000000000..62ebdae05d
+--- /dev/null
++++ b/sglang_tpu/pd_peer_prefix.py
+@@ -0,0 +1,965 @@
++# SPDX-License-Identifier: Apache-2.0
++"""Scheduler side of the reverse prefix pull (see
++``disaggregation/raiden/peer_prefix.py``).
++
++Decode engine: after each ``process_decode_queue`` the manager serves the
++prefix requests of its prefill peers from the decode radix tree.
++
++Prefill engine: a request whose prefix is not in the prefill's own tiers asks
++the decode peer when it enters the queue. ``pop_bootstrapped`` holds the
++request until the pull lands, inserts the pulled pages into the radix tree and
++only then lets the request be scheduled, so it prefills the remaining tokens.
++
++All decisions that change what a request does are taken from values reduced
++across the attention-TP ranks, so every rank inserts the same key and
++schedules the same request in the same step.
++
++Enable with ``SGLANG_TPU_PEER_PREFIX=1`` on both engines. The decode engine
++needs ``--disaggregation-decode-enable-radix-cache --enable-hierarchical-cache``.
++"""
++
++from __future__ import annotations
++
++import functools
++import logging
++import os
++from dataclasses import dataclass
++from types import SimpleNamespace
++from typing import Any, Callable, List, Optional
++
++import torch
++import torch.distributed as dist
++
++from sglang.srt.disaggregation.utils import DisaggregationMode
++from sglang.srt.managers.schedule_policy import _match_prefix_result
++from sglang.srt.mem_cache.allocation import evict_from_tree_cache
++from sglang.srt.mem_cache.base_prefix_cache import InsertParams
++from sglang.srt.mem_cache.common import kv_to_page_indices
++from sglang.srt.mem_cache.radix_cache import RadixKey
++from sglang.srt.mem_cache.unified_cache.component_type import ComponentType
++from sglang.srt.runtime_context import get_disagg
++from sglang_tpu.disaggregation.raiden.peer_prefix import (
++    STAGE_DONE,
++    STAGE_FAILED,
++    STAGE_REPLIED,
++    ProducerContext,
++    page_floor,
++)
++
++logger = logging.getLogger("sglang_tpu.pd_peer_prefix")
++
++ENV_ENABLE = "SGLANG_TPU_PEER_PREFIX"
++ENV_TIMEOUT = "SGLANG_TPU_PEER_PREFIX_TIMEOUT_S"
++ENV_MIN_TOKENS = "SGLANG_TPU_PEER_PREFIX_MIN_TOKENS"
++ENV_OFFER = "SGLANG_TPU_PEER_PREFIX_OFFER"
++ENV_OFFER_HEADROOM = "SGLANG_TPU_PEER_PREFIX_OFFER_HEADROOM"
++
++
++def offers_enabled() -> bool:
++    return os.environ.get(ENV_OFFER, "1") == "1"
++
++
++def _offer_headroom() -> float:
++    """Fraction of the prefill pool that must stay free after a speculative pull."""
++    return float(os.environ.get(ENV_OFFER_HEADROOM, "0.5"))
++
++
++def enabled() -> bool:
++    return os.environ.get(ENV_ENABLE, "0") == "1"
++
++
++def _timeout_s() -> float:
++    return float(os.environ.get(ENV_TIMEOUT, "120"))
++
++
++ENV_GATE_TIMEOUT = "SGLANG_TPU_PEER_PREFIX_GATE_TIMEOUT_S"
++
++
++def _gate_timeout_s() -> float:
++    """A pull decided at the gate holds the prefill's next slot; recompute
++    is a few seconds away, so it waits only briefly for the decode."""
++    return float(os.environ.get(ENV_GATE_TIMEOUT, "20"))
++
++
++ENV_JIT = "SGLANG_TPU_PEER_PREFIX_JIT"
++ENV_JIT_DEPTH = "SGLANG_TPU_PEER_PREFIX_JIT_DEPTH"
++
++
++def jit_enabled() -> bool:
++    return os.environ.get(ENV_JIT, "1") == "1"
++
++
++def _jit_depth() -> int:
++    return max(1, int(os.environ.get(ENV_JIT_DEPTH, "1")))
++
++
++def _min_tokens(page_size: int) -> int:
++    return max(page_size, int(os.environ.get(ENV_MIN_TOKENS, "8192")))
++
++
++def _all_reduce(values: List[int], group, op) -> List[int]:
++    if not values:
++        return values
++    t = torch.tensor(values, dtype=torch.int64)
++    if group is not None and dist.is_initialized() and dist.get_world_size(group) > 1:
++        dist.all_reduce(t, op=op, group=group)
++    return t.tolist()
++
++
++# --------------------------------------------------------------------------- #
++# Decode engine
++# --------------------------------------------------------------------------- #
++def _producer_context(scheduler) -> Optional[ProducerContext]:
++    ctx = getattr(scheduler, "_peer_prefix_ctx", None)
++    if ctx is not None:
++        return ctx
++    tree = scheduler.tree_cache
++    allocator = scheduler.token_to_kv_pool_allocator
++    hybrid = bool(getattr(tree, "is_swa_enabled", False))
++    page_size = allocator.page_size
++    ctx = ProducerContext(
++        tree_cache=tree,
++        allocator=allocator,
++        page_size=page_size,
++        hybrid=hybrid,
++        sliding_window_size=getattr(scheduler, "sliding_window_size", None),
++        # The decode's host copy of a hybrid model holds full-attention KV
++        # only unless SGLANG_TPU_DECODE_SWA_HOST=1 keeps the window pages too;
++        # a restored prefix without them is useless to the prefill.
++        restore_allowed=bool(scheduler.enable_decode_hicache)
++        and (not hybrid or os.environ.get("SGLANG_TPU_DECODE_SWA_HOST", "0") == "1"),
++        min_hit_tokens=_min_tokens(page_size),
++        lease_timeout_s=max(
++            _timeout_s() + 60.0,
++            float(os.environ.get("SGLANG_RAIDEN_TIMEOUT_S", "600")) + 60.0,
++        ),
++        is_eagle=bool(getattr(getattr(tree, "tree_core", None), "is_eagle", False)),
++        lookup_room=_room_lookup(scheduler),
++        gather=_make_gather(getattr(scheduler, "attn_tp_cpu_group", None)),
++    )
++    scheduler._peer_prefix_ctx = ctx
++    return ctx
++
++
++def _make_gather(group):
++    """all_gather_object over the attention-TP CPU group, or None alone."""
++    if group is None or not dist.is_initialized() or dist.get_world_size(group) <= 1:
++        return None
++    world = dist.get_world_size(group)
++
++    def gather(obj):
++        out = [None] * world
++        dist.all_gather_object(out, obj, group=group)
++        return out
++
++    return gather
++
++
++def _room_lookup(scheduler):
++    """The decode's DecodeRequest for a room while it is pre-allocated or in
++    transfer; None once it runs or when it is unknown."""
++
++    def lookup(room):
++        for name in ("disagg_decode_prealloc_queue", "disagg_decode_transfer_queue"):
++            queue = getattr(scheduler, name, None)
++            for dr in getattr(queue, "queue", None) or ():
++                if getattr(getattr(dr, "req", None), "bootstrap_room", None) == room:
++                    return dr
++        return None
++
++    return lookup
++
++
++_OFFER_MANAGERS: dict = {}  # id(tree_cache) -> kv manager, decode side
++
++
++def _checkpoint(upstream: Callable, cache, req, *args, **kwargs):
++    """Wraps ``UnifiedRadixCache.checkpoint``: a finished request on a decode
++    that serves pulls is offered to the prefill peer."""
++    out = upstream(cache, req, *args, **kwargs)
++    manager = _OFFER_MANAGERS.get(id(cache))
++    if manager is None or not offers_enabled():
++        return out
++    try:
++        finished = getattr(req, "finished", None)
++        if callable(finished) and not finished():
++            return out
++        room = getattr(req, "bootstrap_room", None)
++        if room is None or getattr(req, "is_retracted", False):
++            return out
++        page_size = getattr(cache, "page_size", 1)
++        tokens = list(req.origin_input_ids) + list(getattr(req, "output_ids", []) or [])
++        n = page_floor(len(tokens), page_size)
++        if n >= _min_tokens(page_size):
++            manager.peer_offer(room, tokens[:n], req.extra_key, req.cache_salt)
++    except Exception:  # noqa: BLE001
++        logger.exception("peer prefix: offer failed for %s", getattr(req, "rid", "?"))
++    return out
++
++
++def _process_decode_queue(upstream: Callable, scheduler) -> None:
++    upstream(scheduler)
++    queue = getattr(scheduler, "disagg_decode_prealloc_queue", None)
++    manager = getattr(queue, "kv_manager", None)
++    serve = getattr(manager, "peer_prefix_serve", None)
++    if serve is None:
++        return
++    if not get_disagg().disaggregation_decode_enable_radix_cache:
++        return
++    ctx = _producer_context(scheduler)
++    if ctx is not None:
++        _OFFER_MANAGERS.setdefault(id(scheduler.tree_cache), manager)
++        serve(ctx)
++
++
++# --------------------------------------------------------------------------- #
++# Prefill engine
++# --------------------------------------------------------------------------- #
++# Pages a pull has allocated but not yet handed to the radix tree. The idle
++# pool invariant counts only tree and request pages, so these are reported as
++# "uncached" through the wrapped invariant checks below.
++_INFLIGHT: dict = {}
++
++
++def _inflight_tokens() -> int:
++    return sum(
++        len(f.new_indices) for f in _INFLIGHT.values() if f.new_indices is not None
++    )
++
++
++def _check_full_pool(upstream: Callable, checker, ps, uncached: int = 0):
++    return upstream(checker, ps, uncached=uncached + _inflight_tokens())
++
++
++def _check_swa_pool(upstream: Callable, checker, ps, uncached: int = 0):
++    return upstream(checker, ps, uncached=uncached + _inflight_tokens())
++
++
++@dataclass
++class _Fetch:
++    room: int
++    matched_len: int
++    want_len: int
++    hit_len: int = 0
++    new_indices: Optional[torch.Tensor] = None
++    lock_node: Any = None
++    lock_params: Any = None
++    prefix_indices: Optional[torch.Tensor] = None
++    reading: bool = False
++    remote_blocks: List[int] = None
++    local_blocks: List[int] = None
++    remote_swa_blocks: List[int] = None
++    local_swa_blocks: List[int] = None
++    timeout: float = 0.0
++
++
++def _add_request_to_queue(
++    upstream: Callable, scheduler, req, is_retracted: bool = False
++):
++    upstream(scheduler, req, is_retracted)
++    try:
++        _maybe_begin_fetch(scheduler, req, is_retracted)
++    except Exception:  # noqa: BLE001
++        logger.exception("peer prefix: begin failed for %s", getattr(req, "rid", "?"))
++
++
++def _maybe_begin_fetch(
++    scheduler, req, is_retracted: bool, *, at_pop: bool = False
++) -> None:
++    """Decide a pull for ``req``: at arrival, and again when it leaves the
++    bootstrap queue. The wait there is long when the decode is full, and the
++    prefill's own tiers can lose the prefix meanwhile; the decode keeps it."""
++    if scheduler.disaggregation_mode != DisaggregationMode.PREFILL or is_retracted:
++        return
++    if getattr(req, "bootstrap_room", None) is None or req.finished():
++        return
++    queue = scheduler.disagg_prefill_bootstrap_queue
++    manager = getattr(queue, "kv_manager", None)
++    if manager is None or not hasattr(manager, "peer_fetch_begin"):
++        return
++    tree = scheduler.tree_cache
++    allocator = scheduler.token_to_kv_pool_allocator
++    page_size = allocator.page_size
++    tokens = req.origin_input_ids
++    result = _match_prefix_result(tree, req, tokens)
++    matched = page_floor(len(result.device_indices), page_size)
++    want = page_floor(req._compute_max_prefix_len(len(tokens)), page_size)
++    # Every rank must take the same decision. The local match is in lockstep
++    # already; whether the decode peer is known is not, until the first pull.
++    local_ok = int(
++        result.host_hit_length == 0
++        and want - matched >= _min_tokens(page_size)
++        and manager.peer_known()
++    )
++    ok = _all_reduce([local_ok], scheduler.attn_tp_cpu_group, dist.ReduceOp.MIN)[0]
++    if not ok:
++        return
++    if not manager.peer_fetch_begin(
++        req.bootstrap_room, tokens[:want], matched, req.extra_key, req.cache_salt
++    ):
++        # The send failed on this rank only; the hold below reduces stages, so
++        # a missing fetch surfaces as a failure on every rank.
++        pass
++    fetch = _Fetch(room=req.bootstrap_room, matched_len=matched, want_len=want)
++    fetch.timeout = _gate_timeout_s() if at_pop else _timeout_s()
++    if at_pop:
++        logger.info(
++            "peer prefix pull at schedule time | room=%s matched=%d want=%d",
++            req.bootstrap_room,
++            matched,
++            want,
++        )
++    # Snapshot of the local prefix. It is not locked while the pull is in
++    # flight: a lock would pin a whole context per held request and starve
++    # the prefill's own scheduling. The commit re-matches and gives up if the
++    # prefix moved.
++    fetch.prefix_indices = result.device_indices[:matched].cpu().to(torch.int64)
++    req._peer_fetch = fetch
++
++
++def _pop_bootstrapped(upstream: Callable, queue, *args, **kwargs):
++    out = upstream(queue, *args, **kwargs)
++    if isinstance(out, tuple):
++        reqs, failed = out
++    else:
++        reqs, failed = out, None
++    held = queue.__dict__.setdefault("_peer_held", [])
++    deferred = queue.__dict__.setdefault("_peer_deferred", [])
++    passthrough = []
++    for req in reqs:
++        if getattr(req, "_peer_fetch", None) is not None:
++            held.append(req)
++        elif getattr(req, "_peer_offer", False):
++            passthrough.append(req)
++        elif jit_enabled():
++            # Just in time: a popped request would wait in the waiting queue
++            # behind the requests computing ahead of it, long enough for the
++            # prefill's tiers to evict its prefix. It is released, and the
++            # pull decided, only when the waiting queue has room for it.
++            deferred.append(req)
++        else:
++            _decide_at_pop(queue, req)
++            (
++                held if getattr(req, "_peer_fetch", None) is not None else passthrough
++            ).append(req)
++    # Speculative pulls from decode offers ride the same hold logic as
++    # requests; they are never handed to the scheduler.
++    _admit_offer(queue, held)
++    # _advance_held reduces every decision across ranks and must not raise;
++    # an escaping error here would desynchronize the ranks' collectives.
++    for req in _advance_held(queue, held):
++        if getattr(req, "_peer_offer", False):
++            continue
++        abort = getattr(req, "_peer_abort_req", None)
++        if abort is not None and _UPSTREAM_ABORT is not None:
++            # Hand it to the scheduler's own abort path, which expects the
++            # request in the waiting queue.
++            req._peer_abort_req = None
++            queue.scheduler.waiting_queue.append(req)
++            try:
++                _UPSTREAM_ABORT(queue.scheduler, abort)
++            except Exception:  # noqa: BLE001
++                logger.exception("peer prefix: abort of %s failed", req.rid)
++            continue
++        # A request whose arrival-time fetch just settled, as a commit or a
++        # miss, still goes through the gate: it waits for room like any other
++        # and the pull is decided again when it is released.
++        (deferred if jit_enabled() else passthrough).append(req)
++    # The waiting queue and the held list are lockstep state, so every rank
++    # releases the same deferred requests in the same tick.
++    room = (
++        _jit_depth()
++        - len(getattr(queue.scheduler, "waiting_queue", ()) or ())
++        - len(held)
++    )
++    while deferred and room > 0:
++        req = deferred.pop(0)
++        # One decision per request at the gate. A request whose gate pull
++        # settled comes back through the deferred list and must then run,
++        # or a prompt the decode does not hold would be asked for forever.
++        if not getattr(req, "_peer_decided", False):
++            req._peer_decided = True
++            _decide_at_pop(queue, req)
++        (held if getattr(req, "_peer_fetch", None) is not None else passthrough).append(
++            req
++        )
++        room -= 1
++    _release_scheduled_locks(queue, held, deferred)
++    return passthrough if failed is None else (passthrough, failed)
++
++
++def _lock_until_scheduled(queue, req, hit: int) -> None:
++    """Pin a prefix the pull just inserted until the scheduler takes the
++    request from the waiting queue: the chunked prefill running ahead of it
++    allocates as it goes and could evict the fresh pages first."""
++    tree = queue.scheduler.tree_cache
++    try:
++        res = _match_prefix_result(tree, req, req.origin_input_ids[:hit])
++        node = res.last_device_node
++        req._peer_lock = (node, tree.inc_lock_ref(node).to_dec_params())
++        queue.__dict__.setdefault("_peer_locked", []).append(req)
++    except Exception:  # noqa: BLE001
++        logger.exception("peer prefix: lock after commit failed for %s", req.rid)
++
++
++def _release_scheduled_locks(queue, held, deferred) -> None:
++    locked = queue.__dict__.get("_peer_locked")
++    if not locked:
++        return
++    waiting = getattr(queue.scheduler, "waiting_queue", ()) or ()
++    tree = queue.scheduler.tree_cache
++    for req in list(locked):
++        if req in waiting or req in held or req in deferred:
++            continue
++        lock = getattr(req, "_peer_lock", None)
++        req._peer_lock = None
++        locked.remove(req)
++        if lock is None:
++            continue
++        try:
++            tree.dec_lock_ref(*lock)
++        except Exception:  # noqa: BLE001
++            logger.exception("peer prefix: unlock failed for %s", req.rid)
++
++
++def _decide_at_pop(queue, req) -> None:
++    """The popped list is all-reduced upstream, so this per-request decision
++    runs in lockstep on every rank."""
++    try:
++        _maybe_begin_fetch(queue.scheduler, req, False, at_pop=True)
++    except Exception:  # noqa: BLE001
++        logger.exception(
++            "peer prefix: schedule-time begin failed for %s", getattr(req, "rid", "?")
++        )
++
++
++def _admit_offer(queue, held: List[Any]) -> None:
++    """Admit at most one decode offer per iteration, the same one on every rank.
++
++    Rank 0 names the oldest offer it holds; the others answer whether they
++    hold it too. Only when every rank has it does each rank start the pull,
++    so the held list stays identical across ranks."""
++    if not offers_enabled():
++        return
++    scheduler = queue.scheduler
++    manager = queue.kv_manager
++    group = scheduler.attn_tp_cpu_group
++    if any(getattr(r, "_peer_offer", False) for r in held):
++        return  # one speculative pull at a time
++    try:
++        rank = (
++            dist.get_rank(group) if group is not None and dist.is_initialized() else 0
++        )
++        world = (
++            dist.get_world_size(group)
++            if group is not None and dist.is_initialized()
++            else 1
++        )
++    except Exception:  # noqa: BLE001
++        rank, world = 0, 1
++    if world > 1:
++        room_t = torch.tensor(
++            [manager.peer_peek_offer_room() if rank == 0 else -1], dtype=torch.int64
++        )
++        dist.broadcast(
++            room_t,
++            src=dist.get_global_rank(group, 0)
++            if hasattr(dist, "get_global_rank")
++            else 0,
++            group=group,
++        )
++        room = int(room_t[0])
++        if room < 0:
++            return
++        have = _all_reduce([int(_has_offer(manager, room))], group, dist.ReduceOp.MIN)[
++            0
++        ]
++        if not have:
++            return
++        offer = manager.peer_take_offer(room)
++    else:
++        offer = manager.peer_take_offer()
++    if offer is None:
++        return
++    try:
++        _begin_offer_fetch(queue, held, offer)
++    except Exception:  # noqa: BLE001
++        logger.exception("peer prefix: offer admission failed for room %s", offer.room)
++
++
++def _has_offer(manager, room: int) -> bool:
++    with manager._peer_lock:
++        return any(o.room == room for o in manager._peer_offers)
++
++
++def _begin_offer_fetch(queue, held: List[Any], offer) -> None:
++    scheduler = queue.scheduler
++    manager = queue.kv_manager
++    tree = scheduler.tree_cache
++    allocator = scheduler.token_to_kv_pool_allocator
++    page_size = allocator.page_size
++    from array import array
++
++    tokens = array("q", offer.token_ids)
++    req = SimpleNamespace(
++        rid=f"offer:{offer.room}",
++        bootstrap_room=offer.room,
++        origin_input_ids=tokens,
++        extra_key=offer.extra_key,
++        cache_salt=offer.cache_salt,
++        _peer_fetch=None,
++        _peer_offer=True,
++        finished=lambda: False,
++    )
++    result = _match_prefix_result(tree, req, tokens)
++    matched = page_floor(len(result.device_indices), page_size)
++    want = page_floor(len(tokens), page_size)
++    gap = want - matched
++    # Only pull when the pages fit with headroom to spare; the pulled pages
++    # are evictable the moment they are inserted, so this is a hint, not a lock.
++    free = allocator.available_size()
++    total = getattr(allocator, "size", None) or free
++    ok = (
++        result.host_hit_length == 0
++        and gap >= _min_tokens(page_size)
++        and free - gap >= _offer_headroom() * total
++        and manager.peer_known()
++    )
++    ok = _all_reduce([int(ok)], scheduler.attn_tp_cpu_group, dist.ReduceOp.MIN)[0]
++    if not ok:
++        return
++    manager.peer_fetch_begin(
++        offer.room, tokens[:want], matched, offer.extra_key, offer.cache_salt
++    )
++    fetch = _Fetch(room=offer.room, matched_len=matched, want_len=want)
++    fetch.prefix_indices = result.device_indices[:matched].cpu().to(torch.int64)
++    req._peer_fetch = fetch
++    held.append(req)
++    logger.info(
++        "peer prefix offer accepted | room=%s matched=%d want=%d",
++        offer.room,
++        matched,
++        want,
++    )
++
++
++def _advance_held(queue, held: List[Any]) -> List[Any]:
++    """Advance every held request one step. Each step's decision is taken
++    from values reduced over the attention-TP ranks, so the ranks hold, pull,
++    insert and release the same requests in the same scheduler iteration. A
++    rank-local problem only marks that rank's fetch failed; the next
++    iteration's MAX reduce then makes every rank abandon the pull."""
++    if not held:
++        _reap_draining(queue)
++        return []
++    scheduler = queue.scheduler
++    manager = queue.kv_manager
++    group = scheduler.attn_tp_cpu_group
++    timeout = _timeout_s()
++    # Aborted while the pull was in flight (flagged in lockstep by the
++    # abort handler): give the pull up and hand the request back.
++    aborted = [r for r in held if getattr(r, "_peer_abort_req", None) is not None]
++    for req in aborted:
++        _abandon(queue, req)
++        held.remove(req)
++    if not held:
++        _reap_draining(queue)
++        return aborted
++    stages, hits = [], []
++    for req in held:
++        fetch = req._peer_fetch
++        stage = manager.peer_fetch_poll(
++            fetch.room, getattr(fetch, "timeout", 0.0) or timeout
++        )
++        peer = manager.peer_fetch(fetch.room)
++        stages.append(stage)
++        hits.append(peer.hit_len if peer is not None else 0)
++    min_stage = _all_reduce(stages, group, dist.ReduceOp.MIN)
++    max_stage = _all_reduce(stages, group, dist.ReduceOp.MAX)
++    min_hit = _all_reduce(hits, group, dist.ReduceOp.MIN)
++    released = []
++    # Replied on every rank: prepare the pull locally, then agree on it.
++    # Every rank sees the same in-flight set, so the budget gate is consistent.
++    # A pull larger than the budget is still admitted when nothing is in
++    # flight, or it would wait forever; the budget bounds the overlap, not
++    # the size of one pull.
++    inflight = manager.peer_inflight_pages()
++    budget = manager.peer_read_budget_pages() - inflight
++    page_size = scheduler.token_to_kv_pool_allocator.page_size
++    prepare_idx = []
++    for i in range(len(held)):
++        if not (min_stage[i] == STAGE_REPLIED and max_stage[i] == STAGE_REPLIED):
++            continue
++        need = max(0, min_hit[i] - held[i]._peer_fetch.matched_len) // page_size
++        if need > budget and (inflight > 0 or prepare_idx):
++            continue  # wait for in-flight reads to settle
++        budget -= need
++        prepare_idx.append(i)
++    if prepare_idx:
++        ready = []
++        for i in prepare_idx:
++            try:
++                ready.append(int(_prepare_read(queue, held[i], min_hit[i])))
++            except Exception:  # noqa: BLE001
++                logger.exception("peer prefix: prepare failed for %s", held[i].rid)
++                ready.append(0)
++        agreed = _all_reduce(ready, group, dist.ReduceOp.MIN)
++        for i, ok in zip(prepare_idx, agreed):
++            req = held[i]
++            if ok:
++                try:
++                    if not _issue_read(queue, req):
++                        _mark_failed(manager, req, "start_read refused")
++                except Exception:  # noqa: BLE001
++                    logger.exception("peer prefix: start_read failed for %s", req.rid)
++                    _mark_failed(manager, req, "start_read raised")
++            else:
++                _abandon(queue, req)
++                released.append(req)
++    for i, req in enumerate(list(held)):
++        if req in released:
++            continue
++        if max_stage[i] == STAGE_FAILED:
++            _abandon(queue, req)
++            released.append(req)
++        elif min_stage[i] == STAGE_DONE:
++            try:
++                _commit(queue, req)
++            except Exception:  # noqa: BLE001
++                logger.exception(
++                    "peer prefix: commit failed for %s; releasing", req.rid
++                )
++                _abandon(queue, req)
++            released.append(req)
++        # STAGE_SENT / STAGE_READING on some rank: wait.
++    for req in released:
++        held.remove(req)
++    _reap_draining(queue)
++    return aborted + released
++
++
++def _mark_failed(manager, req, reason: str) -> None:
++    fetch = getattr(req, "_peer_fetch", None)
++    peer = manager.peer_fetch(fetch.room) if fetch is not None else None
++    if peer is not None:
++        peer.error = peer.error or reason
++        peer.stage = STAGE_FAILED
++
++
++def _prepare_read(queue, req, hit: int) -> bool:
++    """Allocate this rank's landing pages for a pull of ``hit`` tokens and
++    check them against the decode's reply. Rank-local; the caller reduces
++    the result before any read starts."""
++    scheduler = queue.scheduler
++    manager = queue.kv_manager
++    allocator = scheduler.token_to_kv_pool_allocator
++    page_size = allocator.page_size
++    fetch = req._peer_fetch
++    hit = min(page_floor(hit, page_size), fetch.want_len)
++    hybrid = bool(getattr(scheduler.tree_cache, "is_swa_enabled", False))
++    window = getattr(scheduler, "sliding_window_size", None)
++
++    def refuse(reason: str) -> bool:
++        # A plain miss (hit 0) is routine; log the real refusals.
++        (logger.debug if hit == 0 else logger.info)(
++            "peer prefix prepare refused | room=%s reason=%s hit=%d matched=%d",
++            fetch.room,
++            reason,
++            hit,
++            fetch.matched_len,
++        )
++        return False
++
++    if hybrid and (
++        window is None
++        or hit - fetch.matched_len < page_floor(window, page_size) + page_size
++    ):
++        return refuse("window short")
++    if hit <= fetch.matched_len:
++        return refuse("no gain")
++    peer = manager.peer_fetch(fetch.room)
++    if peer is None:
++        return refuse("no reply")
++    n_new = hit - fetch.matched_len
++    if len(peer.blocks) != n_new // page_size:
++        return refuse("block count mismatch")
++    last_loc = int(fetch.prefix_indices[-1]) if fetch.matched_len > 0 else -1
++    # The landing pages come from the same pool the chunked prefill fills;
++    # evict cache pages for the shortfall first, as every extend allocation
++    # does. Lockstep: every rank prepares the same pulls in the same tick.
++    tree = scheduler.tree_cache
++    if hasattr(tree, "token_to_kv_pool_allocator"):
++        try:
++            evict_from_tree_cache(tree, n_new + page_size)
++        except Exception:  # noqa: BLE001
++            logger.exception("peer prefix: evict before pull failed")
++    new_indices = allocator.alloc_extend(
++        torch.tensor([fetch.matched_len], dtype=torch.int64),
++        torch.tensor([fetch.matched_len], dtype=torch.int64),
++        torch.tensor([hit], dtype=torch.int64),
++        torch.tensor([hit], dtype=torch.int64),
++        torch.tensor([last_loc], dtype=torch.int64),
++        n_new,
++    )
++    if new_indices is None:
++        return refuse("alloc failed")
++    new_indices = new_indices.cpu().to(torch.int64)
++    fetch.hit_len = hit
++    fetch.new_indices = new_indices
++    _INFLIGHT[id(fetch)] = fetch
++    local_blocks = [int(b) for b in kv_to_page_indices(new_indices, page_size)]
++    swa_blocks: List[int] = []
++    if hybrid:
++        window_start = page_floor(max(0, hit - window), page_size)
++        swa_idx = allocator.translate_loc_from_full_to_swa(
++            new_indices[window_start - fetch.matched_len :]
++        )
++        swa_blocks = [int(b) for b in kv_to_page_indices(swa_idx, page_size)]
++    # Every rank must pull the same token range, so the decode ranks must have
++    # answered with the same hit. A rank whose decode found more or fewer pages
++    # than the agreed hit makes every rank give up on this pull.
++    remote_blocks = list(peer.blocks)
++    remote_swa = list(peer.swa_blocks)
++    if len(remote_blocks) != len(local_blocks) or len(remote_swa) != len(swa_blocks):
++        _release_pages(allocator, fetch)
++        return refuse("rank block mismatch")
++    fetch.remote_blocks = remote_blocks
++    fetch.local_blocks = local_blocks
++    fetch.remote_swa_blocks = remote_swa
++    fetch.local_swa_blocks = swa_blocks
++    return True
++
++
++def _issue_read(queue, req) -> bool:
++    manager = queue.kv_manager
++    fetch = req._peer_fetch
++    peer = manager.peer_fetch(fetch.room)
++    if peer is None:
++        return False
++    peer.blocks = list(fetch.remote_blocks)
++    peer.swa_blocks = list(fetch.remote_swa_blocks)
++    if not manager.peer_fetch_start_read(
++        fetch.room, fetch.local_blocks, fetch.local_swa_blocks
++    ):
++        return False
++    fetch.reading = True
++    return True
++
++
++def _release_pages(allocator, fetch) -> None:
++    """Return a fetch's pages to the allocator and drop them from the in-flight set."""
++    _INFLIGHT.pop(id(fetch), None)
++    if fetch.new_indices is not None:
++        allocator.free(fetch.new_indices)
++        fetch.new_indices = None
++
++
++def _commit(queue, req) -> None:
++    """Every rank's read settled: hand the pulled pages to the radix tree."""
++    scheduler = queue.scheduler
++    manager = queue.kv_manager
++    tree = scheduler.tree_cache
++    allocator = scheduler.token_to_kv_pool_allocator
++    page_size = allocator.page_size
++    fetch = req._peer_fetch
++    hit = fetch.hit_len
++    tokens = req.origin_input_ids[:hit]
++    if fetch.matched_len > 0:
++        # The local prefix was not locked during the pull. It must still be
++        # the same device pages, or the pulled tail has nothing to attach to.
++        again = _match_prefix_result(
++            tree, req, req.origin_input_ids[: fetch.matched_len]
++        )
++        current = again.device_indices[: fetch.matched_len].cpu().to(torch.int64)
++        if len(current) != fetch.matched_len or not torch.equal(
++            current, fetch.prefix_indices
++        ):
++            logger.info(
++                "peer prefix dropped | rid=%s local prefix moved (%d -> %d tokens)",
++                req.rid,
++                fetch.matched_len,
++                len(current),
++            )
++            _abandon(queue, req)
++            return
++    values = torch.cat([fetch.prefix_indices, fetch.new_indices])
++    params = InsertParams(
++        key=RadixKey(
++            tokens,
++            req.extra_key,
++            is_bigram=bool(
++                getattr(getattr(tree, "tree_core", None), "is_eagle", False)
++            ),
++            cache_salt=req.cache_salt,
++        ),
++        value=values,
++        prev_prefix_len=fetch.matched_len,
++        inserted_len=fetch.matched_len,
++    )
++    hybrid = bool(getattr(tree, "is_swa_enabled", False))
++    if hybrid:
++        window = scheduler.sliding_window_size
++        window_start = page_floor(max(0, hit - window), page_size)
++        if window_start > fetch.matched_len:
++            allocator.free_swa_segment(
++                fetch.new_indices[: window_start - fetch.matched_len],
++                start_pos=fetch.matched_len,
++            )
++        params.set_evicted_seqlen(ComponentType.SWA, window_start)
++    result = tree.insert(params)
++    declined = bool(getattr(result, "rotation_tail_declined", False))
++    if declined:
++        _release_pages(allocator, fetch)
++    else:
++        _INFLIGHT.pop(id(fetch), None)  # the tree owns the pages now
++    _unlock(tree, fetch)
++    manager.peer_fetch_end(fetch.room)
++    req._peer_fetch = None
++    if not declined and jit_enabled():
++        _lock_until_scheduled(queue, req, hit)
++    logger.info(
++        "peer prefix committed | rid=%s room=%s matched=%d hit=%d declined=%s",
++        req.rid,
++        fetch.room,
++        fetch.matched_len,
++        hit,
++        declined,
++    )
++
++
++def _unlock(tree, fetch) -> None:
++    if fetch.lock_node is not None and fetch.lock_params is not None:
++        tree.dec_lock_ref(fetch.lock_node, fetch.lock_params)
++        fetch.lock_node = None
++        fetch.lock_params = None
++
++
++def _abandon(queue, req, free_pages: bool = True) -> None:
++    """Give up on the pull; the request prefills what it misses."""
++    try:
++        _abandon_impl(queue, req, free_pages)
++    except Exception:  # noqa: BLE001
++        logger.exception("peer prefix: abandon failed for %s", getattr(req, "rid", "?"))
++        req._peer_fetch = None
++
++
++def _abandon_impl(queue, req, free_pages: bool) -> None:
++    scheduler = queue.scheduler
++    manager = queue.kv_manager
++    fetch = getattr(req, "_peer_fetch", None)
++    if fetch is None:
++        return
++    _unlock(scheduler.tree_cache, fetch)
++    if fetch.new_indices is not None:
++        if fetch.reading and not manager.peer_fetch_reads_settled(fetch.room):
++            # A read may still land in these pages. Keep them out of the
++            # allocator until Raiden settles it.
++            queue.__dict__.setdefault("_peer_draining", []).append(fetch)
++            manager.peer_fetch_end(fetch.room, notify=True)
++            req._peer_fetch = None
++            return
++        if free_pages:
++            _release_pages(scheduler.token_to_kv_pool_allocator, fetch)
++    manager.peer_fetch_end(fetch.room, notify=True)
++    req._peer_fetch = None
++
++
++def _reap_draining(queue) -> None:
++    draining = queue.__dict__.get("_peer_draining")
++    if not draining:
++        return
++    manager = queue.kv_manager
++    allocator = queue.scheduler.token_to_kv_pool_allocator
++    keep = []
++    for fetch in draining:
++        # peer_fetch_end already dropped the fetch; settle by req id.
++        settled = manager.peer_fetch_reads_settled(fetch.room)
++        if settled:
++            _release_pages(allocator, fetch)
++        else:
++            keep.append(fetch)
++    queue._peer_draining = keep
++
++
++# --------------------------------------------------------------------------- #
++# Installation
++# --------------------------------------------------------------------------- #
++_UPSTREAM_ABORT: Optional[Callable] = None
++
++
++def _abort_request(upstream: Callable, scheduler, recv_req):
++    """Wraps ``Scheduler.abort_request`` on the prefill. Requests the gate
++    holds outside the waiting queue must still be reachable by an abort, or
++    an aborted request is computed later and its transfer waits for a
++    decode that gave the room up."""
++    queue = getattr(scheduler, "disagg_prefill_bootstrap_queue", None)
++    state = getattr(queue, "__dict__", None) if queue is not None else None
++    if state is None or scheduler.disaggregation_mode != DisaggregationMode.PREFILL:
++        return upstream(scheduler, recv_req)
++
++    def matches(req) -> bool:
++        return bool(getattr(recv_req, "abort_all", False)) or req.rid.startswith(
++            recv_req.rid
++        )
++
++    # A pull in flight: flag it; the next tick abandons the pull and hands
++    # the request to this same handler through the waiting queue.
++    for req in state.get("_peer_held") or []:
++        if not getattr(req, "_peer_offer", False) and matches(req):
++            req._peer_abort_req = recv_req
++    # Deferred requests: let upstream find them in the waiting queue, then
++    # put the survivors back, in order.
++    deferred = state.get("_peer_deferred") or []
++    exposed = list(deferred)
++    scheduler.waiting_queue.extend(exposed)
++    try:
++        return upstream(scheduler, recv_req)
++    finally:
++        survivors = [r for r in deferred if r in scheduler.waiting_queue]
++        scheduler.waiting_queue = [
++            r for r in scheduler.waiting_queue if r not in exposed
++        ]
++        deferred[:] = survivors
++
++
++def _wrap(owner: Any, name: str, impl: Callable) -> None:
++    upstream = getattr(owner, name)
++    if getattr(upstream, "_peer_prefix_wrapped", False):
++        return
++
++    @functools.wraps(upstream)
++    def wrapper(*args, **kwargs):
++        return impl(upstream, *args, **kwargs)
++
++    wrapper._peer_prefix_wrapped = True
++    setattr(owner, name, wrapper)
++
++
++def install() -> None:
++    if not enabled():
++        return
++    from sglang.srt.disaggregation import decode as decode_mod
++    from sglang.srt.disaggregation import prefill as prefill_mod
++    from sglang.srt.managers.scheduler import Scheduler
++    from sglang.srt.managers.scheduler_components.invariant_checker import (
++        SchedulerInvariantChecker,
++    )
++
++    _wrap(
++        decode_mod.SchedulerDisaggregationDecodeMixin,
++        "process_decode_queue",
++        _process_decode_queue,
++    )
++    _wrap(prefill_mod.PrefillBootstrapQueue, "pop_bootstrapped", _pop_bootstrapped)
++    _wrap(Scheduler, "_add_request_to_queue", _add_request_to_queue)
++    global _UPSTREAM_ABORT
++    if not getattr(Scheduler.abort_request, "_peer_prefix_wrapped", False):
++        _UPSTREAM_ABORT = Scheduler.abort_request
++    _wrap(Scheduler, "abort_request", _abort_request)
++
++    from sglang.srt.mem_cache.unified_radix_cache import UnifiedRadixCache
++
++    _wrap(UnifiedRadixCache, "checkpoint", _checkpoint)
++    _wrap(SchedulerInvariantChecker, "_check_full_pool", _check_full_pool)
++    _wrap(SchedulerInvariantChecker, "_check_swa_pool", _check_swa_pool)
++    logger.info("peer prefix pull installed (timeout %.0fs)", _timeout_s())
+diff --git a/test/registered/unit/hardware_backend/tpu/test_peer_prefix.py b/test/registered/unit/hardware_backend/tpu/test_peer_prefix.py
+new file mode 100644
+index 0000000000..e6142926b0
+--- /dev/null
++++ b/test/registered/unit/hardware_backend/tpu/test_peer_prefix.py
+@@ -0,0 +1,1044 @@
++"""CPU tests for the reverse prefix pull (Plan C): the manager mixin's producer
++and consumer state machines with fake engines and a fake radix tree, and the
++prefill scheduler hook that holds, pulls, inserts and releases a request."""
++
++from __future__ import annotations
++
++import threading
++from types import SimpleNamespace
++
++import torch
++
++from sglang.srt.disaggregation.utils import DisaggregationMode
++from sglang.test.ci.ci_register import register_cpu_ci
++from sglang_tpu import pd_peer_prefix as hook
++from sglang_tpu.disaggregation.raiden import peer_prefix as pp
++from sglang_tpu.disaggregation.raiden.serde import (
++    PrefixBlocks,
++    PrefixRelease,
++)
++
++register_cpu_ci(est_time=10, suite="base-a-test-cpu")
++
++PAGE = 4
++
++
++class FakeEngine:
++    def __init__(self):
++        self.registered = []
++        self.reads = []
++        self.fail_start = False
++
++    def register_read(self, req_id, uuid, blocks):
++        self.registered.append((req_id, uuid, list(blocks)))
++        return bool(blocks)
++
++    def start_read(self, req_id, uuid, endpoint, remote, local, parallelism=1):
++        if self.fail_start:
++            raise RuntimeError("no staging")
++        assert len(remote) == len(local)
++        self.reads.append((req_id, uuid, endpoint, list(remote), list(local)))
++
++
++class FakeLock:
++    def __init__(self, node):
++        self.node = node
++
++    def to_dec_params(self):
++        return ("dec", self.node)
++
++
++class FakeTree:
++    """Holds one prefix as device-resident tokens plus an optional host tail."""
++
++    def __init__(self, device_tokens, host_tokens=0, page=PAGE):
++        self.device_tokens = device_tokens
++        self.host_tokens = host_tokens
++        self.page = page
++        self.locks = []
++        self.unlocks = []
++        self.inserts = []
++        self.load_back_slot = True
++        self.event_done = True
++        self.is_swa_enabled = False
++        self.swa_missing = []
++        self.tree_core = SimpleNamespace(
++            is_eagle=False,
++            swa_tombstone_ranges=lambda key, start, end: list(self.swa_missing),
++        )
++
++    def swa_reprefill_tail_tokens(self):
++        return 0
++
++    def match_prefix(self, params):
++        n = min(len(params.key.token_ids), self.device_tokens)
++        n = (n // self.page) * self.page
++        host = min(self.host_tokens, len(params.key.token_ids) - n)
++        host = (host // self.page) * self.page
++        return SimpleNamespace(
++            device_indices=torch.arange(1000, 1000 + n, dtype=torch.int64),
++            host_hit_length=host,
++            last_device_node=("dev", n),
++            best_match_node=("host", n + host),
++            swa_branching_seqlen=None,
++        )
++
++    def inc_lock_ref(self, node):
++        self.locks.append(node)
++        return FakeLock(node)
++
++    def dec_lock_ref(self, node, params):
++        self.unlocks.append((node, params))
++
++    def has_free_load_back_slot(self):
++        return self.load_back_slot
++
++    def init_load_back(self, params):
++        n = params.host_hit_length
++        return torch.arange(5000, 5000 + n, dtype=torch.int64), ("restored", n)
++
++    def ready_to_load_host_cache(self):
++        return 7
++
++    def is_load_back_event_done(self, idx):
++        return self.event_done
++
++    def insert(self, params):
++        self.inserts.append(params)
++        return SimpleNamespace(
++            prefix_len=len(params.key.token_ids), rotation_tail_declined=False
++        )
++
++
++class StubManager(pp.PeerPrefixMixin):
++    """Just enough of RaidenKVManager for the mixin."""
++
++    def __init__(self, name):
++        self.name = name
++        self._message_handlers = {}
++        self._state_lock = threading.Lock()
++        self._completed_recv = set()
++        self._completed_send = set()
++        self._send_done_at = {}
++        self._failed = set()
++        self._native_failed = set()
++        self.local_ip = "10.0.0.1"
++        self.rank_port = 31000
++        self.raiden_endpoint = f"{name}-raiden"
++        self.swa_raiden_endpoint = ""
++        self._transfer_parallelism = 1
++        self.engine = FakeEngine()
++        self._swa_engine = None
++        self.sent = []
++        self.peer = None
++        self.drained = 0
++        self._peer_init()
++
++    def _ensure_engine(self):
++        return self.engine
++
++    def _send_multipart_locked(self, endpoint, parts, is_ipv6=False):
++        self.sent.append((endpoint, parts))
++        if self.peer is not None:
++            self.peer._message_handlers[bytes(parts[0])](parts)
++
++    def _drain_engine(self):
++        self.drained += 1
++
++    def _on_pull_req(self, msg):  # the real one lives in the sender mixin
++        pass
++
++
++def pair():
++    prefill, decode = StubManager("prefill"), StubManager("decode")
++    prefill.peer, decode.peer = decode, prefill
++    prefill._peer_decode_endpoint = "tcp://10.0.0.2:31000"
++    return prefill, decode
++
++
++def ctx(tree, **kw):
++    kwargs = dict(tree_cache=tree, allocator=None, page_size=PAGE, min_hit_tokens=PAGE)
++    kwargs.update(kw)
++    return pp.ProducerContext(**kwargs)
++
++
++def test_serve_registers_locks_and_releases_on_notice():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    tokens = list(range(20))
++    assert prefill.peer_fetch_begin(5, tokens, 0, None, None)
++    decode.peer_prefix_serve(ctx(tree))
++    fetch = prefill.peer_fetch(5)
++    assert fetch.stage == pp.STAGE_REPLIED and fetch.hit_len == 16
++    assert fetch.blocks == [250, 251, 252, 253] and fetch.uuid == pp.peer_uuid(5)
++    assert decode.engine.registered == [
++        ("peer:5", pp.peer_uuid(5), [250, 251, 252, 253])
++    ]
++    assert tree.locks == [("dev", 16)] and tree.unlocks == []
++    assert prefill.peer_fetch_start_read(5, [10, 11, 12, 13], [])
++    assert prefill.engine.reads[0][2] == "decode-raiden"
++    assert prefill.peer_fetch_poll(5, 10) == pp.STAGE_READING
++    prefill._completed_recv.add("peer:5")
++    assert prefill.peer_fetch_poll(5, 10) == pp.STAGE_DONE
++    prefill.peer_fetch_end(5)
++    assert "peer:5" not in prefill._completed_recv
++    decode.peer_prefix_serve(ctx(tree))
++    assert tree.unlocks == [(("dev", 16), ("dec", ("dev", 16)))]
++    assert decode.peer_stats()["serving"] == 0
++
++
++def test_short_hit_is_a_miss_without_locks():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=4)
++    prefill.peer_fetch_begin(1, list(range(20)), 4, None, None)
++    decode.peer_prefix_serve(ctx(tree))
++    assert prefill.peer_fetch(1).stage == pp.STAGE_REPLIED
++    assert prefill.peer_fetch(1).hit_len == 0
++    assert tree.locks == [] and decode.engine.registered == []
++
++
++def test_host_part_is_restored_before_register():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=8, host_tokens=8)
++    tree.event_done = False
++    prefill.peer_fetch_begin(2, list(range(20)), 0, None, None)
++    decode.peer_prefix_serve(ctx(tree))
++    assert prefill.peer_fetch(2).stage == pp.STAGE_SENT  # waiting for the H2D
++    assert tree.locks == [("dev", 8), ("restored", 8)]
++    tree.event_done = True
++    decode.peer_prefix_serve(ctx(tree))
++    fetch = prefill.peer_fetch(2)
++    assert fetch.hit_len == 16
++    assert fetch.blocks == [250, 251, 1250, 1251]
++
++
++def test_hybrid_serves_hbm_only_and_window_pages():
++    prefill, decode = pair()
++    swa = FakeEngine()
++    decode._swa_engine = swa
++    decode.swa_raiden_endpoint = "decode-swa"
++    tree = FakeTree(device_tokens=16, host_tokens=8)
++    mapping = {i: 9000 + i for i in range(1000, 1016)}
++    allocator = SimpleNamespace(
++        translate_loc_from_full_to_swa=lambda idx: torch.tensor(
++            [mapping[int(i)] for i in idx]
++        )
++    )
++    prefill.peer_fetch_begin(3, list(range(24)), 0, None, None)
++    decode.peer_prefix_serve(
++        ctx(
++            tree,
++            hybrid=True,
++            sliding_window_size=8,
++            allocator=allocator,
++            restore_allowed=False,
++        )
++    )
++    fetch = prefill.peer_fetch(3)
++    assert fetch.hit_len == 16  # host part not served for hybrid models
++    assert fetch.swa_blocks == [2502, 2503] and fetch.swa_endpoint == "decode-swa"
++    assert swa.registered[0][0] == "peerswa:3"
++
++
++def test_lease_released_when_raiden_reports_the_send():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    prefill.peer_fetch_begin(6, list(range(20)), 0, None, None)
++    decode.peer_prefix_serve(ctx(tree))
++    decode._completed_send.add("peer:6")
++    decode.peer_prefix_serve(ctx(tree))
++    assert tree.unlocks and "peer:6" not in decode._completed_send
++
++
++def test_start_read_failure_and_timeout_fail_closed():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    prefill.peer_fetch_begin(7, list(range(20)), 0, None, None)
++    decode.peer_prefix_serve(ctx(tree))
++    prefill.engine.fail_start = True
++    assert not prefill.peer_fetch_start_read(7, [1, 2, 3, 4], [])
++    assert prefill.peer_fetch(7).stage == pp.STAGE_FAILED
++    prefill.peer_fetch_end(7)
++    prefill.peer_fetch_begin(8, list(range(20)), 0, None, None)
++    prefill.peer_fetch(8).sent_at -= 1000
++    assert prefill.peer_fetch_poll(8, 1) == pp.STAGE_FAILED
++
++
++# --------------------------------------------------------------------------- #
++# Scheduler hook (prefill), world size 1.
++# --------------------------------------------------------------------------- #
++class FakeAllocator:
++    def __init__(self):
++        self.page_size = PAGE
++        self.freed = []
++        self.next = 3000
++
++    def alloc_extend(self, pl, plc, sl, slc, last_loc, n):
++        out = torch.arange(self.next, self.next + n, dtype=torch.int32)
++        self.next += n
++        return out
++
++    def free(self, idx):
++        self.freed.append(idx.tolist())
++
++
++def make_queue(tree, manager):
++    scheduler = SimpleNamespace(
++        tree_cache=tree,
++        token_to_kv_pool_allocator=FakeAllocator(),
++        attn_tp_cpu_group=None,
++        sliding_window_size=None,
++    )
++    return SimpleNamespace(scheduler=scheduler, kv_manager=manager, __dict__={})
++
++
++def make_req(room, n=20):
++    return SimpleNamespace(
++        rid=f"r{room}",
++        bootstrap_room=room,
++        origin_input_ids=list(range(n)),
++        extra_key=None,
++        cache_salt=None,
++        # No _peer_fetch attribute, as on a real Req before any fetch.
++    )
++
++
++def test_hook_pulls_inserts_and_releases(monkeypatch):
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    tree.token_to_kv_pool_allocator = None  # marks a real pool-backed tree
++    evictions = []
++    monkeypatch.setattr(hook, "evict_from_tree_cache", lambda t, n: evictions.append(n))
++    queue = make_queue(tree, prefill)
++    req = make_req(11)
++    fetch = hook._Fetch(room=11, matched_len=4, want_len=16)
++    fetch.prefix_indices = torch.arange(1000, 1004, dtype=torch.int64)
++    fetch.lock_node = ("dev", 4)
++    fetch.lock_params = ("dec", ("dev", 4))
++    req._peer_fetch = fetch
++    prefill.peer_fetch_begin(11, req.origin_input_ids[:16], 4, None, None)
++    held = [req]
++    assert hook._advance_held(queue, held) == [] and held == [req]  # waiting
++    decode.peer_prefix_serve(ctx(tree))
++    assert hook._advance_held(queue, held) == []  # replied -> reading
++    assert prefill.peer_fetch(11).stage == pp.STAGE_READING
++    assert evictions == [12 + PAGE]  # room for the 12 pulled tokens, evicted first
++    assert prefill.engine.reads[0][4] == [750, 751, 752]
++    prefill._completed_recv.add("peer:11")
++    out = hook._advance_held(queue, held)
++    assert out == [req] and held == []
++    params = tree.inserts[0]
++    assert list(params.key.token_ids) == list(range(16))
++    assert params.value.tolist() == [1000, 1001, 1002, 1003] + list(range(3000, 3012))
++    assert params.prev_prefix_len == 4 and params.inserted_len == 4
++    assert tree.unlocks == [(("dev", 4), ("dec", ("dev", 4)))]
++    assert req._peer_fetch is None and prefill.peer_fetch(11) is None
++    # The inserted prefix stays pinned until the scheduler takes the request.
++    assert tree.locks[-1] == ("dev", 16) and req._peer_lock is not None
++    queue.scheduler.waiting_queue = [req]
++    hook._release_scheduled_locks(queue, [], [])
++    assert len(tree.unlocks) == 1
++    queue.scheduler.waiting_queue = []
++    hook._release_scheduled_locks(queue, [], [])
++    assert tree.unlocks[-1] == (("dev", 16), ("dec", ("dev", 16)))
++    assert req._peer_lock is None and queue.__dict__["_peer_locked"] == []
++    assert decode.sent[-1][1][0] == PrefixBlocks.TAG or any(
++        p[1][0] == PrefixRelease.TAG for p in prefill.sent
++    )
++
++
++def test_hook_abandons_on_miss_and_frees_on_failure():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=4)
++    queue = make_queue(tree, prefill)
++    req = make_req(12)
++    fetch = hook._Fetch(room=12, matched_len=4, want_len=16)
++    fetch.prefix_indices = torch.arange(1000, 1004, dtype=torch.int64)
++    req._peer_fetch = fetch
++    prefill.peer_fetch_begin(12, req.origin_input_ids[:16], 4, None, None)
++    decode.peer_prefix_serve(ctx(tree))  # miss
++    held = [req]
++    assert hook._advance_held(queue, held) == [req]
++    assert req._peer_fetch is None and tree.inserts == []
++    # failure after the read started: pages drain until Raiden settles
++    tree2 = FakeTree(device_tokens=16)
++    queue2 = make_queue(tree2, prefill)
++    req2 = make_req(13)
++    f2 = hook._Fetch(room=13, matched_len=0, want_len=16)
++    f2.prefix_indices = torch.empty((0,), dtype=torch.int64)
++    req2._peer_fetch = f2
++    prefill.peer_fetch_begin(13, req2.origin_input_ids[:16], 0, None, None)
++    decode.peer_prefix_serve(ctx(tree2))
++    held = [req2]
++    hook._advance_held(queue2, held)  # reading
++    prefill._failed.add("peer:13")
++    assert hook._advance_held(queue2, held) == [req2]
++    assert queue2.scheduler.token_to_kv_pool_allocator.freed == [
++        list(range(3000, 3016))
++    ]
++
++
++def test_decode_hook_serves_through_the_scheduler(monkeypatch):
++    """The decode wrapper builds its context from the scheduler and calls serve."""
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    scheduler = SimpleNamespace(
++        tree_cache=tree,
++        token_to_kv_pool_allocator=SimpleNamespace(page_size=PAGE),
++        sliding_window_size=None,
++        enable_decode_hicache=True,
++        disagg_decode_prealloc_queue=SimpleNamespace(kv_manager=decode),
++    )
++    monkeypatch.setattr(
++        hook,
++        "get_disagg",
++        lambda: SimpleNamespace(disaggregation_decode_enable_radix_cache=True),
++    )
++    monkeypatch.setattr(hook, "_min_tokens", lambda page: PAGE)
++    calls = []
++    hook._process_decode_queue(lambda s: calls.append(s), scheduler)
++    assert calls == [scheduler]
++    prefill.peer_fetch_begin(21, list(range(20)), 0, None, None)
++    hook._process_decode_queue(lambda s: None, scheduler)
++    assert prefill.peer_fetch(21).hit_len == 16
++    assert scheduler._peer_prefix_ctx.restore_allowed is True
++
++
++def test_inflight_pages_count_as_uncached_until_committed():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    queue = make_queue(tree, prefill)
++    req = make_req(31)
++    fetch = hook._Fetch(room=31, matched_len=0, want_len=16)
++    fetch.prefix_indices = torch.empty((0,), dtype=torch.int64)
++    req._peer_fetch = fetch
++    prefill.peer_fetch_begin(31, req.origin_input_ids[:16], 0, None, None)
++    decode.peer_prefix_serve(ctx(tree))
++    held = [req]
++    hook._advance_held(queue, held)  # replied -> reading: pages allocated
++    seen = {}
++
++    def upstream(checker, ps, uncached=0):
++        seen["uncached"] = uncached
++        return False, ""
++
++    hook._check_full_pool(upstream, object(), None, uncached=5)
++    assert seen["uncached"] == 5 + 16
++    prefill._completed_recv.add("peer:31")
++    hook._advance_held(queue, held)  # committed: the tree owns them
++    hook._check_full_pool(upstream, object(), None)
++    assert seen["uncached"] == 0
++
++
++def test_mismatched_reply_abandons_and_frees_before_any_read():
++    """A decode reply whose page count differs from the agreed hit is refused
++    on this rank; the reduced decision then abandons on every rank."""
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    queue = make_queue(tree, prefill)
++    req = make_req(41)
++    fetch = hook._Fetch(room=41, matched_len=0, want_len=16)
++    fetch.prefix_indices = torch.empty((0,), dtype=torch.int64)
++    req._peer_fetch = fetch
++    prefill.peer_fetch_begin(41, req.origin_input_ids[:16], 0, None, None)
++    decode.peer_prefix_serve(ctx(tree))
++    peer = prefill.peer_fetch(41)
++    peer.blocks = peer.blocks[:-1]  # the decode on this rank answered one page short
++    held = [req]
++    assert hook._advance_held(queue, held) == [req]
++    assert prefill.engine.reads == [] and req._peer_fetch is None
++    # The mismatch is seen before any page is allocated: nothing to free.
++    assert queue.scheduler.token_to_kv_pool_allocator.freed == []
++    assert hook._inflight_tokens() == 0
++
++
++def test_commit_failure_releases_without_raising():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    tree.insert = lambda params: (_ for _ in ()).throw(RuntimeError("tree says no"))
++    queue = make_queue(tree, prefill)
++    req = make_req(42)
++    fetch = hook._Fetch(room=42, matched_len=0, want_len=16)
++    fetch.prefix_indices = torch.empty((0,), dtype=torch.int64)
++    req._peer_fetch = fetch
++    prefill.peer_fetch_begin(42, req.origin_input_ids[:16], 0, None, None)
++    decode.peer_prefix_serve(ctx(tree))
++    held = [req]
++    hook._advance_held(queue, held)  # reading
++    prefill._completed_recv.add("peer:42")
++    assert hook._advance_held(queue, held) == [req]
++    assert req._peer_fetch is None and hook._inflight_tokens() == 0
++
++
++def test_read_budget_holds_a_second_pull_until_the_first_settles():
++    prefill, decode = pair()
++    prefill._full_engine_max_blocks = 4  # budget = 4 pages: one 16-token pull at a time
++    tree = FakeTree(device_tokens=16)
++    queue = make_queue(tree, prefill)
++    reqs = []
++    for room in (51, 52):
++        req = make_req(room)
++        fetch = hook._Fetch(room=room, matched_len=0, want_len=16)
++        fetch.prefix_indices = torch.empty((0,), dtype=torch.int64)
++        req._peer_fetch = fetch
++        prefill.peer_fetch_begin(room, req.origin_input_ids[:16], 0, None, None)
++        reqs.append(req)
++    decode.peer_prefix_serve(ctx(tree))
++    held = list(reqs)
++    assert hook._advance_held(queue, held) == []
++    stages = [prefill.peer_fetch(r._peer_fetch.room).stage for r in reqs]
++    assert stages == [pp.STAGE_READING, pp.STAGE_REPLIED]  # the second waits
++    assert prefill.peer_inflight_pages() == 4
++    prefill._completed_recv.add("peer:51")
++    out = hook._advance_held(queue, held)
++    assert out == [reqs[0]]
++    assert (
++        prefill.peer_fetch(52).stage == pp.STAGE_READING
++    )  # admitted after the first settled
++
++
++def test_hybrid_restore_serves_window_when_present_and_misses_when_tombstoned():
++    prefill, decode = pair()
++    swa = FakeEngine()
++    decode._swa_engine = swa
++    decode.swa_raiden_endpoint = "decode-swa"
++    tree = FakeTree(device_tokens=8, host_tokens=8)
++    mapping = {i: 9000 + i for i in list(range(1000, 1008)) + list(range(5000, 5008))}
++    allocator = SimpleNamespace(
++        translate_loc_from_full_to_swa=lambda idx: torch.tensor(
++            [mapping[int(i)] for i in idx]
++        )
++    )
++    c = ctx(
++        tree,
++        hybrid=True,
++        sliding_window_size=8,
++        allocator=allocator,
++        restore_allowed=True,
++    )
++    prefill.peer_fetch_begin(61, list(range(24)), 0, None, None)
++    decode.peer_prefix_serve(c)
++    fetch = prefill.peer_fetch(61)
++    assert fetch.hit_len == 16 and fetch.blocks == [250, 251, 1250, 1251]
++    assert fetch.swa_blocks == [
++        3500,
++        3501,
++    ]  # the window sits in the restored part (5000.. -> 14000..)
++    assert tree.locks == [("dev", 8), ("restored", 8)]
++    prefill.peer_fetch_end(61)
++    decode.peer_prefix_serve(c)
++    tree.swa_missing = [(8, 16)]
++    prefill.peer_fetch_begin(62, list(range(24)), 0, None, None)
++    decode.peer_prefix_serve(c)
++    assert prefill.peer_fetch(62).hit_len == 0
++    assert prefill.peer_fetch(62).error == "SWA window missing"
++    assert decode.peer_stats()["serving"] == 0
++
++
++def test_decode_offer_is_pulled_speculatively_and_inserted(monkeypatch):
++    monkeypatch.setattr(hook, "_min_tokens", lambda page: PAGE)
++    prefill, decode = pair()
++    decode._peer_prefill_endpoint = "tcp://10.0.0.1:31000"
++    tree = FakeTree(device_tokens=16)  # the decode holds the prefix
++    queue = make_queue(FakeTree(device_tokens=0), prefill)  # the prefill holds nothing
++    queue.scheduler.token_to_kv_pool_allocator.size = 1000
++
++    def available_size():
++        return 900
++
++    queue.scheduler.token_to_kv_pool_allocator.available_size = available_size
++    # the decode finished a request: offer its prefix
++    assert decode.peer_offer(71, list(range(16)), None, None)
++    assert prefill.peer_peek_offer_room() == 71
++    held = []
++    hook._admit_offer(queue, held)  # rank 0, world size 1: admit at once
++    assert len(held) == 1 and held[0]._peer_offer and held[0]._peer_fetch.room == 71
++    assert prefill.peer_fetch(71).stage == pp.STAGE_SENT
++    decode.peer_prefix_serve(ctx(tree))  # the decode serves its own offer
++    assert hook._advance_held(queue, held) == []  # reading
++    prefill._completed_recv.add("peer:71")
++    out = hook._advance_held(queue, held)
++    assert [r.rid for r in out] == ["offer:71"] and held == []
++    assert list(queue.scheduler.tree_cache.inserts[0].key.token_ids) == list(range(16))
++    assert prefill.peer_fetch(71) is None
++
++
++def test_offer_is_declined_without_headroom(monkeypatch):
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    queue = make_queue(tree, prefill)
++    queue.scheduler.token_to_kv_pool_allocator.size = 1000
++    queue.scheduler.token_to_kv_pool_allocator.available_size = lambda: 100
++    prefill._peer_offers.append(
++        SimpleNamespace(
++            room=72, token_ids=list(range(16)), extra_key=None, cache_salt=None
++        )
++    )
++    held = []
++    hook._admit_offer(queue, held)
++    assert held == [] and prefill.peer_fetch(72) is None
++
++
++def test_decode_finished_request_triggers_an_offer(monkeypatch):
++    monkeypatch.setattr(hook, "_min_tokens", lambda page: PAGE)
++    prefill, decode = pair()
++    decode._peer_prefill_endpoint = "tcp://10.0.0.1:31000"
++    cache = SimpleNamespace(page_size=PAGE)
++    hook._OFFER_MANAGERS[id(cache)] = decode
++
++    def req_ns(room, finished):
++        return SimpleNamespace(
++            rid=f"r{room}",
++            bootstrap_room=room,
++            origin_input_ids=list(range(12)),
++            output_ids=[7, 8, 9, 10],
++            extra_key=None,
++            cache_salt=None,
++            is_retracted=False,
++            finished=lambda: finished,
++        )
++
++    calls = []
++    req = req_ns(73, True)
++    hook._checkpoint(
++        lambda c, r, up_to=None: calls.append((r, up_to)), cache, req, up_to=16
++    )
++    assert calls == [(req, 16)]
++    offer = prefill.peer_take_offer()
++    assert offer is not None and offer.room == 73 and len(offer.token_ids) == 16
++    # an unfinished checkpoint offers nothing
++    hook._checkpoint(lambda c, r, up_to=None: None, cache, req_ns(74, False), up_to=12)
++    assert prefill.peer_take_offer() is None
++
++
++def test_pull_larger_than_budget_is_admitted_when_nothing_is_in_flight():
++    prefill, decode = pair()
++    prefill._full_engine_max_blocks = 2  # budget smaller than one 16-token pull
++    tree = FakeTree(device_tokens=16)
++    queue = make_queue(tree, prefill)
++    req = make_req(81)
++    fetch = hook._Fetch(room=81, matched_len=0, want_len=16)
++    fetch.prefix_indices = torch.empty((0,), dtype=torch.int64)
++    req._peer_fetch = fetch
++    prefill.peer_fetch_begin(81, req.origin_input_ids[:16], 0, None, None)
++    decode.peer_prefix_serve(ctx(tree))
++    held = [req]
++    hook._advance_held(queue, held)
++    assert prefill.peer_fetch(81).stage == pp.STAGE_READING
++
++
++def test_install_wraps_every_target(monkeypatch):
++    """The hook wraps real classes; a wrong target name must fail here, not at engine start."""
++    monkeypatch.setenv("SGLANG_TPU_PEER_PREFIX", "1")
++    hook.install()
++    from sglang.srt.disaggregation import decode as decode_mod
++    from sglang.srt.disaggregation import prefill as prefill_mod
++    from sglang.srt.managers.scheduler import Scheduler
++    from sglang.srt.managers.scheduler_components.invariant_checker import (
++        SchedulerInvariantChecker,
++    )
++    from sglang.srt.mem_cache.unified_radix_cache import UnifiedRadixCache
++
++    for owner, name in (
++        (decode_mod.SchedulerDisaggregationDecodeMixin, "process_decode_queue"),
++        (prefill_mod.PrefillBootstrapQueue, "pop_bootstrapped"),
++        (Scheduler, "_add_request_to_queue"),
++        (Scheduler, "abort_request"),
++        (UnifiedRadixCache, "checkpoint"),
++        (SchedulerInvariantChecker, "_check_full_pool"),
++        (SchedulerInvariantChecker, "_check_swa_pool"),
++    ):
++        assert getattr(getattr(owner, name), "_peer_prefix_wrapped", False), name
++
++
++# ---------------------------------------------------------------------------
++# Step 4: schedule-time pulls served from the decode's own restore.
++# ---------------------------------------------------------------------------
++
++
++def make_decode_request(room, l1=8, l2=8, status="pending"):
++    """A fake DecodeRequest as the decode's prealloc/transfer queues hold it."""
++    pm = SimpleNamespace(
++        l1_prefix_len=l1,
++        l2_host_hit_length=l2,
++        needs_local_restore=l2 > 0,
++        prefix_indices=torch.arange(1000, 1000 + l1, dtype=torch.int64),
++        last_device_node=("dev", l1),
++    )
++    return SimpleNamespace(
++        req=SimpleNamespace(bootstrap_room=room, last_node=("dev", l1)),
++        prefix_match=pm,
++        hicache_restore_status=SimpleNamespace(value=status),
++        hicache_restored_kv_indices=None,
++        hicache_restored_node=None,
++        hicache_load_consumer_index=-1,
++    )
++
++
++def test_serve_rides_the_decodes_own_restore_for_a_preallocated_room():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=0)  # the tree path would find nothing
++    tree.load_back_slot = False  # and could not restore either
++    dr = make_decode_request(21)
++    rooms = {21: dr}
++    c = ctx(tree, lookup_room=rooms.get)
++    assert prefill.peer_fetch_begin(21, list(range(20)), 0, None, None)
++    decode.peer_prefix_serve(c)
++    # Restore not queued yet by the decode: wait, L1 locked, no reply.
++    assert prefill.peer_fetch(21).stage == pp.STAGE_SENT
++    assert tree.locks == [("dev", 8)] and decode.engine.registered == []
++    # The decode queues its load-back; its state machine has not seen the
++    # DMA land yet (the event poll is a collective, so it is not asked here).
++    dr.hicache_restored_kv_indices = torch.arange(5000, 5008, dtype=torch.int64)
++    dr.hicache_restored_node = ("restored", 16)
++    dr.hicache_load_consumer_index = 3
++    decode.peer_prefix_serve(c)
++    assert prefill.peer_fetch(21).stage == pp.STAGE_SENT
++    # READY: served from L1 + the restored pages, both locked for the lease.
++    dr.hicache_restore_status = SimpleNamespace(value="ready")
++    decode.peer_prefix_serve(c)
++    fetch = prefill.peer_fetch(21)
++    assert fetch.stage == pp.STAGE_REPLIED and fetch.hit_len == 16
++    assert fetch.blocks == [250, 251, 1250, 1251]
++    assert tree.locks == [("dev", 8), ("restored", 16)]
++    decode._peer_lease_release(c, 21)
++    assert sorted(n for n, _ in tree.unlocks) == [("dev", 8), ("restored", 16)]
++
++
++def test_piggyback_restore_failure_serves_hbm_part_or_misses():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=0)
++    dr = make_decode_request(22, l1=8, l2=8, status="failed")
++    c = ctx(tree, lookup_room={22: dr}.get)
++    prefill.peer_fetch_begin(22, list(range(20)), 0, None, None)
++    decode.peer_prefix_serve(c)
++    fetch = prefill.peer_fetch(22)
++    assert fetch.stage == pp.STAGE_REPLIED and fetch.hit_len == 8
++    assert fetch.blocks == [250, 251]
++    # Nothing beyond what the prefill holds: a miss, lease released.
++    prefill2, decode2 = pair()
++    tree2 = FakeTree(device_tokens=0)
++    dr2 = make_decode_request(23, l1=8, l2=8, status="failed")
++    c2 = ctx(tree2, lookup_room={23: dr2}.get)
++    prefill2.peer_fetch_begin(23, list(range(20)), 8, None, None)
++    decode2.peer_prefix_serve(c2)
++    assert prefill2.peer_fetch(23).hit_len == 0
++    assert decode2.peer_stats()["serving"] == 0 and len(tree2.unlocks) == 1
++
++
++def test_piggyback_misses_when_the_room_is_gone_before_the_restore_lands():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=0)
++    dr = make_decode_request(24)
++    rooms = {24: dr}
++    c = ctx(tree, lookup_room=rooms.get)
++    prefill.peer_fetch_begin(24, list(range(20)), 0, None, None)
++    decode.peer_prefix_serve(c)
++    rooms.clear()  # the decode aborted the request
++    decode.peer_prefix_serve(c)
++    # An error reply fails the fetch closed; the prefill recomputes.
++    assert prefill.peer_fetch(24).stage == pp.STAGE_FAILED
++    assert prefill.peer_fetch(24).error == "room gone"
++    assert decode.peer_stats()["serving"] == 0
++
++
++def test_pop_decides_a_pull_when_the_prefix_was_lost_during_bootstrap(monkeypatch):
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=0)  # the prefill lost the prefix meanwhile
++    queue = make_queue(tree, prefill)
++    queue.scheduler.disaggregation_mode = DisaggregationMode.PREFILL
++    queue.scheduler.disagg_prefill_bootstrap_queue = queue
++    monkeypatch.setattr(hook, "_min_tokens", lambda page_size: PAGE)
++    monkeypatch.setattr(
++        hook,
++        "_match_prefix_result",
++        lambda tree, req, tokens: tree.match_prefix(
++            SimpleNamespace(key=SimpleNamespace(token_ids=tokens))
++        ),
++    )
++    req = make_req(31)
++    req._compute_max_prefix_len = lambda n: n
++    req.finished = lambda: False
++    monkeypatch.setenv(hook.ENV_JIT, "0")
++    out = hook._pop_bootstrapped(lambda q: [req], queue)
++    assert out == [] and queue.__dict__["_peer_held"] == [req]
++    fetch = req._peer_fetch
++    assert fetch is not None and fetch.matched_len == 0 and fetch.want_len == 20
++    assert prefill.peer_fetch(31).stage == pp.STAGE_SENT
++    # The decode serves 16 tokens; the request is released once committed.
++    decode.peer_prefix_serve(ctx(FakeTree(device_tokens=16)))
++    assert hook._pop_bootstrapped(lambda q: [], queue) == []
++    assert prefill.peer_fetch(31).stage == pp.STAGE_READING
++    prefill._completed_recv.add("peer:31")
++    assert hook._pop_bootstrapped(lambda q: [], queue) == [req]
++    assert req._peer_fetch is None and len(tree.inserts[0].value) == 16
++
++
++def test_inbox_is_served_only_when_every_rank_has_the_room():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    views = []
++    c = ctx(tree, gather=lambda local: views)
++    prefill.peer_fetch_begin(41, list(range(20)), 0, None, None)
++    # The other rank has not received room 41 yet: nothing is served.
++    s41 = prefill.peer_fetch(41).seq
++    views[:] = [(((41, s41),), ()), ((), ())]
++    decode.peer_prefix_serve(c)
++    assert prefill.peer_fetch(41).stage == pp.STAGE_SENT
++    assert decode.peer_stats()["inbox"] == 1 and tree.locks == []
++    # Both ranks have it: served, in room order.
++    prefill.peer_fetch_begin(40, list(range(20)), 0, None, None)
++    s40 = prefill.peer_fetch(40).seq
++    views[:] = [(((40, s40), (41, s41)), ()), (((40, s40), (41, s41)), ())]
++    decode.peer_prefix_serve(c)
++    assert [r[0] for r in decode.engine.registered] == ["peer:40", "peer:41"]
++    assert decode.peer_stats()["inbox"] == 0
++
++
++def test_inbox_entry_missing_on_a_rank_times_out_with_a_miss():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    c = ctx(tree, gather=lambda local: [local, ((), ())], lease_timeout_s=0.0)
++    prefill.peer_fetch_begin(42, list(range(20)), 0, None, None)
++    decode._peer_inbox_at[(42, prefill.peer_fetch(42).seq)] -= 1.0
++    decode.peer_prefix_serve(c)
++    assert prefill.peer_fetch(42).stage == pp.STAGE_FAILED
++    assert prefill.peer_fetch(42).error == "inbox timeout"
++    assert decode.peer_stats()["inbox"] == 0 and tree.locks == []
++
++
++def test_popped_requests_are_released_just_in_time(monkeypatch):
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=20)  # prefix intact: no pull needed
++    queue = make_queue(tree, prefill)
++    queue.scheduler.disaggregation_mode = DisaggregationMode.PREFILL
++    queue.scheduler.disagg_prefill_bootstrap_queue = queue
++    queue.scheduler.waiting_queue = ["computing"]
++    monkeypatch.setattr(hook, "_min_tokens", lambda page_size: PAGE)
++    monkeypatch.setattr(
++        hook,
++        "_match_prefix_result",
++        lambda tree, req, tokens: tree.match_prefix(
++            SimpleNamespace(key=SimpleNamespace(token_ids=tokens))
++        ),
++    )
++    a, b = make_req(51), make_req(52)
++    for r in (a, b):
++        r._compute_max_prefix_len = lambda n: n
++        r.finished = lambda: False
++    # No room: both wait outside the waiting queue, in order.
++    assert hook._pop_bootstrapped(lambda q: [a, b], queue) == []
++    assert queue.__dict__["_peer_deferred"] == [a, b]
++    # One slot: the oldest is released; its prefix is present, so no pull.
++    queue.scheduler.waiting_queue = []
++    assert hook._pop_bootstrapped(lambda q: [], queue) == [a]
++    assert getattr(a, "_peer_fetch", None) is None and prefill.peer_fetch(51) is None
++    # The prefix of the next one is gone by the time it is released: pull.
++    tree.device_tokens = 0
++    assert hook._pop_bootstrapped(lambda q: [], queue) == []
++    assert b._peer_fetch is not None and prefill.peer_fetch(52).stage == pp.STAGE_SENT
++    assert (
++        queue.__dict__["_peer_held"] == [b] and queue.__dict__["_peer_deferred"] == []
++    )
++    # A pull in flight occupies the slot: a newly popped request waits.
++    c = make_req(53)
++    c._compute_max_prefix_len = lambda n: n
++    c.finished = lambda: False
++    assert hook._pop_bootstrapped(lambda q: [c], queue) == []
++    assert queue.__dict__["_peer_deferred"] == [c]
++
++
++def test_arrival_fetch_that_misses_still_waits_at_the_gate(monkeypatch):
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=20)
++    queue = make_queue(tree, prefill)
++    queue.scheduler.disaggregation_mode = DisaggregationMode.PREFILL
++    queue.scheduler.disagg_prefill_bootstrap_queue = queue
++    queue.scheduler.waiting_queue = ["computing"]
++    monkeypatch.setattr(hook, "_min_tokens", lambda page_size: PAGE)
++    monkeypatch.setattr(
++        hook,
++        "_match_prefix_result",
++        lambda tree, req, tokens: tree.match_prefix(
++            SimpleNamespace(key=SimpleNamespace(token_ids=tokens))
++        ),
++    )
++    req = make_req(61)
++    req._compute_max_prefix_len = lambda n: n
++    req.finished = lambda: False
++    # Asked at arrival with a near-full local match; the decode says short hit.
++    req._peer_fetch = hook._Fetch(room=61, matched_len=16, want_len=20)
++    prefill.peer_fetch_begin(61, req.origin_input_ids, 16, None, None)
++    decode.peer_prefix_serve(ctx(FakeTree(device_tokens=16)))
++    assert hook._pop_bootstrapped(lambda q: [req], queue) == []
++    assert req._peer_fetch is None  # the miss settled the fetch
++    assert queue.__dict__["_peer_deferred"] == [req]  # but the gate holds it
++    queue.scheduler.waiting_queue = []
++    assert hook._pop_bootstrapped(lambda q: [], queue) == [req]
++
++
++def test_a_prompt_the_decode_lacks_is_asked_once_at_the_gate_then_runs(monkeypatch):
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=0)  # nothing cached on the prefill
++    queue = make_queue(tree, prefill)
++    queue.scheduler.disaggregation_mode = DisaggregationMode.PREFILL
++    queue.scheduler.disagg_prefill_bootstrap_queue = queue
++    queue.scheduler.waiting_queue = []
++    monkeypatch.setattr(hook, "_min_tokens", lambda page_size: PAGE)
++    monkeypatch.setattr(
++        hook,
++        "_match_prefix_result",
++        lambda tree, req, tokens: tree.match_prefix(
++            SimpleNamespace(key=SimpleNamespace(token_ids=tokens))
++        ),
++    )
++    req = make_req(71)
++    req._compute_max_prefix_len = lambda n: n
++    req.finished = lambda: False
++    from sglang_tpu.disaggregation.raiden.serde import PrefixReq
++
++    def asks():
++        return sum(1 for _, frames in prefill.sent if frames[0] == PrefixReq.TAG)
++
++    assert hook._pop_bootstrapped(lambda q: [req], queue) == []  # asked, held
++    assert asks() == 1
++    decode.peer_prefix_serve(ctx(FakeTree(device_tokens=0)))  # nothing there
++    # The miss settles the fetch; the request runs and is not asked again.
++    out = hook._pop_bootstrapped(lambda q: [], queue)
++    assert out == [req] and req._peer_fetch is None
++    for _ in range(3):
++        assert hook._pop_bootstrapped(lambda q: [], queue) == []
++    assert asks() == 1 and queue.__dict__["_peer_deferred"] == []
++
++
++def test_stale_release_and_stale_reply_are_ignored():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    c = ctx(tree)
++    # First ask, served, then abandoned by the prefill: a release goes out.
++    assert prefill.peer_fetch_begin(81, list(range(20)), 0, None, None)
++    first_seq = prefill.peer_fetch(81).seq
++    decode.peer_prefix_serve(c)
++    assert prefill.peer_fetch(81).stage == pp.STAGE_REPLIED
++    prefill.peer_fetch_end(81, notify=True)
++    # Second ask for the same room arrives in the same decode tick as the
++    # release of the first: the new serve must survive and be answered.
++    assert prefill.peer_fetch_begin(81, list(range(20)), 0, None, None)
++    assert prefill.peer_fetch(81).seq == first_seq + 1
++    decode.peer_prefix_serve(c)
++    assert prefill.peer_fetch(81).stage == pp.STAGE_REPLIED
++    assert decode.peer_stats()["serving"] == 1
++    # A late release carrying the first sequence does not end the new serve.
++    decode._peer_lease_release(c, 81, seq=first_seq)
++    assert decode.peer_stats()["serving"] == 1
++    decode._peer_lease_release(c, 81, seq=first_seq + 1)
++    assert decode.peer_stats()["serving"] == 0
++    # A late reply for an earlier ask is ignored by the prefill.
++    assert prefill.peer_fetch_begin(82, list(range(20)), 0, None, None)
++    stale = PrefixBlocks(
++        room=82, hit_len=16, uuid=1, blocks=[1], endpoint="x", seq=1
++    ).to_frames()
++    prefill._on_prefix_blocks(stale)
++    assert prefill.peer_fetch(82).stage == pp.STAGE_SENT
++
++
++def test_gate_pull_uses_the_short_timeout(monkeypatch):
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=0)
++    queue = make_queue(tree, prefill)
++    queue.scheduler.disaggregation_mode = DisaggregationMode.PREFILL
++    queue.scheduler.disagg_prefill_bootstrap_queue = queue
++    queue.scheduler.waiting_queue = []
++    monkeypatch.setattr(hook, "_min_tokens", lambda page_size: PAGE)
++    monkeypatch.setattr(
++        hook,
++        "_match_prefix_result",
++        lambda tree, req, tokens: tree.match_prefix(
++            SimpleNamespace(key=SimpleNamespace(token_ids=tokens))
++        ),
++    )
++    monkeypatch.setenv(hook.ENV_GATE_TIMEOUT, "7")
++    req = make_req(91)
++    req._compute_max_prefix_len = lambda n: n
++    req.finished = lambda: False
++    assert hook._pop_bootstrapped(lambda q: [req], queue) == []
++    assert req._peer_fetch.timeout == 7.0
++
++
++def test_a_newer_ask_supersedes_an_older_one_waiting_in_the_inbox():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=16)
++    held_views = []
++    c = ctx(tree, gather=lambda local: held_views)
++    # First ask waits in the inbox (the other rank has not seen it).
++    prefill.peer_fetch_begin(43, list(range(20)), 16, None, None)
++    held_views[:] = [((), ()), ((), ())]
++    decode.peer_prefix_serve(c)
++    assert decode.peer_stats()["inbox"] == 1
++    # The prefill gives up on it and asks again with a lower local match.
++    prefill.peer_fetch_end(43, notify=True)
++    prefill.peer_fetch_begin(43, list(range(20)), 0, None, None)
++    assert decode.peer_stats()["inbox"] == 1  # the older ask is gone
++    seq = prefill.peer_fetch(43).seq
++    held_views[:] = [(((43, seq),), ()), (((43, seq),), ())]
++    decode.peer_prefix_serve(c)
++    fetch = prefill.peer_fetch(43)
++    assert fetch.stage == pp.STAGE_REPLIED and fetch.hit_len == 16
++
++
++class FakeAbortUpstream:
++    """Upstream abort_request: pops matching requests from the waiting queue."""
++
++    def __init__(self):
++        self.aborted = []
++
++    def __call__(self, scheduler, recv_req):
++        keep = []
++        for req in scheduler.waiting_queue:
++            if recv_req.abort_all or req.rid.startswith(recv_req.rid):
++                self.aborted.append(req)
++            else:
++                keep.append(req)
++        scheduler.waiting_queue = keep
++
++
++def test_abort_reaches_a_deferred_request():
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=20)
++    queue = make_queue(tree, prefill)
++    queue.scheduler.disaggregation_mode = DisaggregationMode.PREFILL
++    queue.scheduler.disagg_prefill_bootstrap_queue = queue
++    computing = make_req(50)
++    queue.scheduler.waiting_queue = [computing]
++    a, b = make_req(52), make_req(53)
++    queue.__dict__["_peer_deferred"] = [a, b]
++    upstream = FakeAbortUpstream()
++    hook._abort_request(
++        upstream, queue.scheduler, SimpleNamespace(rid="r53", abort_all=False)
++    )
++    assert upstream.aborted == [b]
++    assert queue.__dict__["_peer_deferred"] == [a]
++    assert queue.scheduler.waiting_queue == [computing]
++
++
++def test_abort_of_a_held_pull_abandons_it_and_aborts_the_request(monkeypatch):
++    prefill, decode = pair()
++    tree = FakeTree(device_tokens=0)
++    queue = make_queue(tree, prefill)
++    queue.scheduler.disaggregation_mode = DisaggregationMode.PREFILL
++    queue.scheduler.disagg_prefill_bootstrap_queue = queue
++    queue.scheduler.waiting_queue = []
++    req = make_req(54)
++    req._peer_fetch = hook._Fetch(room=54, matched_len=0, want_len=20)
++    prefill.peer_fetch_begin(54, req.origin_input_ids, 0, None, None)
++    queue.__dict__["_peer_held"] = [req]
++    upstream = FakeAbortUpstream()
++    monkeypatch.setattr(hook, "_UPSTREAM_ABORT", upstream)
++    hook._abort_request(
++        upstream, queue.scheduler, SimpleNamespace(rid="r54", abort_all=False)
++    )
++    assert req._peer_abort_req is not None  # flagged, pull still in flight
++    out = hook._pop_bootstrapped(lambda q: [], queue)
++    assert out == [] and upstream.aborted == [req]
++    assert req._peer_fetch is None and prefill.peer_fetch(54) is None
++    assert queue.__dict__["_peer_held"] == [] and queue.scheduler.waiting_queue == []
+-- 
+2.43.0
+
