@@ -1,0 +1,218 @@
+[
+ {
+  "i": 0,
+  "room": 6484737806424686535,
+  "code": 500,
+  "s": 0.3,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='7de4acec92bb4894bded49264d0e3cf8' decode_req.req.bootstrap_room=6484737806424686535 with exception KVTransferError(bootstrap_room=6484737806424686535): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 1,
+  "room": 7517217711893045180,
+  "code": 500,
+  "s": 0.4,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='6f7e309a063441f5869bdbee12a7f22d' decode_req.req.bootstrap_room=7517217711893045180 with exception KVTransferError(bootstrap_room=7517217711893045180): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 2,
+  "room": 1262210333009999591,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='2be58b4d295c4f92bef6e510b6340741' decode_req.req.bootstrap_room=1262210333009999591 with exception KVTransferError(bootstrap_room=1262210333009999591): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 3,
+  "room": 1723075193748189701,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='168efb11891845c9ad9f96f18ef960d1' decode_req.req.bootstrap_room=1723075193748189701 with exception KVTransferError(bootstrap_room=1723075193748189701): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 4,
+  "room": 1170486088231192071,
+  "code": 500,
+  "s": 19.9,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='e240fd053f4548e6879f2786d8925d1f' decode_req.req.bootstrap_room=1170486088231192071 with exception KVTransferError(bootstrap_room=1170486088231192071): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 5,
+  "room": 1702974183183138063,
+  "code": 500,
+  "s": 19.9,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='f6413d0160494a26b7d7b2fcc596bc95' decode_req.req.bootstrap_room=1702974183183138063 with exception KVTransferError(bootstrap_room=1702974183183138063): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 6,
+  "room": 4194503594274620581,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='7ee18f0dba8440c3a4eb896255a4efe9' decode_req.req.bootstrap_room=4194503594274620581 with exception KVTransferError(bootstrap_room=4194503594274620581): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 7,
+  "room": 5547059463779710203,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='e63fd6e459dd4812a6c992e8c9643bbe' decode_req.req.bootstrap_room=5547059463779710203 with exception KVTransferError(bootstrap_room=5547059463779710203): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 8,
+  "room": 8247832364567976483,
+  "code": 500,
+  "s": 19.9,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='2c0ac1c8fef14f2a9f28e19305f9e3c5' decode_req.req.bootstrap_room=8247832364567976483 with exception KVTransferError(bootstrap_room=8247832364567976483): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 9,
+  "room": 5699897421765818007,
+  "code": 500,
+  "s": 19.9,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='f66aa562913d442599a8a536ec42670c' decode_req.req.bootstrap_room=5699897421765818007 with exception KVTransferError(bootstrap_room=5699897421765818007): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 10,
+  "room": 3512176893868859540,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='c731d3414ca14680ad5b6827b187544d' decode_req.req.bootstrap_room=3512176893868859540 with exception KVTransferError(bootstrap_room=3512176893868859540): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 11,
+  "room": 9170329613766672348,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='42086667c65a44a48c227e48d2662ac4' decode_req.req.bootstrap_room=9170329613766672348 with exception KVTransferError(bootstrap_room=9170329613766672348): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 12,
+  "room": 252607874069695766,
+  "code": 500,
+  "s": 19.9,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='c5e03bbc4a1641829387348770e9da8a' decode_req.req.bootstrap_room=252607874069695766 with exception KVTransferError(bootstrap_room=252607874069695766): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 13,
+  "room": 4158745309150761490,
+  "code": 500,
+  "s": 19.9,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='054523b1cee545a9be15b7e169e2b4a1' decode_req.req.bootstrap_room=4158745309150761490 with exception KVTransferError(bootstrap_room=4158745309150761490): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 14,
+  "room": 8963018200761305344,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='08f3823915ff4501a2cd9a57e302db44' decode_req.req.bootstrap_room=8963018200761305344 with exception KVTransferError(bootstrap_room=8963018200761305344): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 15,
+  "room": 8480487467448696371,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='b2a10d36418143669e7042df192d7c80' decode_req.req.bootstrap_room=8480487467448696371 with exception KVTransferError(bootstrap_room=8480487467448696371): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 16,
+  "room": 4767693473907348080,
+  "code": 500,
+  "s": 19.9,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='349cde87bad64f92b2728ef18cecb6f2' decode_req.req.bootstrap_room=4767693473907348080 with exception KVTransferError(bootstrap_room=4767693473907348080): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 17,
+  "room": 6784971626947715071,
+  "code": 500,
+  "s": 19.9,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='767b7d9ac1cf4e0c8938ecff7bb2c2da' decode_req.req.bootstrap_room=6784971626947715071 with exception KVTransferError(bootstrap_room=6784971626947715071): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 18,
+  "room": 1201784144475570915,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='375db94d9ffc48a180387a1a822e8501' decode_req.req.bootstrap_room=1201784144475570915 with exception KVTransferError(bootstrap_room=1201784144475570915): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 19,
+  "room": 172912318059209835,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='da32c59275c24e2e8aa03e7fdb5506df' decode_req.req.bootstrap_room=172912318059209835 with exception KVTransferError(bootstrap_room=172912318059209835): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 20,
+  "room": 2214687143725544990,
+  "code": 500,
+  "s": 19.9,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='f955a43e361447de8a35b3b4607dbe7f' decode_req.req.bootstrap_room=2214687143725544990 with exception KVTransferError(bootstrap_room=2214687143725544990): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 21,
+  "room": 2912144487832895003,
+  "code": 500,
+  "s": 19.9,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='308dbd7c0e8b489b9fbefd9a65405ae0' decode_req.req.bootstrap_room=2912144487832895003 with exception KVTransferError(bootstrap_room=2912144487832895003): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 22,
+  "room": 988472993858695149,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='df166262a9194462ad9139cf3de315af' decode_req.req.bootstrap_room=988472993858695149 with exception KVTransferError(bootstrap_room=988472993858695149): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 23,
+  "room": 3917947279315945994,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='f6cfb3b72da74937824565988840896c' decode_req.req.bootstrap_room=3917947279315945994 with exception KVTransferError(bootstrap_room=3917947279315945994): Raiden full-attention receive failed: request needs 64 pages but a host staging slot holds 32. Raise SGLANG_RAIDEN_MAX_BLOCKS if this request size is expected.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ }
+]
