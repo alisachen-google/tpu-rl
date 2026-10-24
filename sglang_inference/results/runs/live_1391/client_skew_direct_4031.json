@@ -1,0 +1,20 @@
+[
+ {
+  "i": 0,
+  "room": 6676342443409302866,
+  "code": 500,
+  "s": 0.2,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='4e3fc32435f64bb197f8dcbbade7d72f' decode_req.req.bootstrap_room=6676342443409302866 with exception KVTransferError(bootstrap_room=6676342443409302866): Raiden SWA receive failed: the prefill announced 2 sliding-window pages but this decode allocated 3; prefill and decode compute the P/D sliding-window transfer start differently. Run the same sglang version on both sides.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ },
+ {
+  "i": 1,
+  "room": 8993076181426573174,
+  "code": 500,
+  "s": 0.1,
+  "placeholder": false,
+  "real": true,
+  "body": "{\"object\":\"error\",\"message\":\"Decode transfer failed for request rank=0 decode_req.req.rid='46f52494a06341bcbe09a9e46a90b065' decode_req.req.bootstrap_room=8993076181426573174 with exception KVTransferError(bootstrap_room=8993076181426573174): Raiden SWA receive failed: the prefill announced 2 sliding-window pages but this decode allocated 3; prefill and decode compute the P/D sliding-window transfer start differently. Run the same sglang version on both sides.\",\"type\":\"500\",\"param\":null,\"code\":500}"
+ }
+]
