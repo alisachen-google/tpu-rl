@@ -1,0 +1,194 @@
+[
+ {
+  "L": 1982,
+  "L_mod_P": 62,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 1982,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 1792,
+    "prompt_tokens": 1982,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 1792,
+    "prompt_tokens": 1982,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 1983,
+  "L_mod_P": 63,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 1983,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 1792,
+    "prompt_tokens": 1983,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 1792,
+    "prompt_tokens": 1983,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 1984,
+  "L_mod_P": 0,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 1984,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 1856,
+    "prompt_tokens": 1984,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 1856,
+    "prompt_tokens": 1984,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 1985,
+  "L_mod_P": 1,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 1985,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 1856,
+    "prompt_tokens": 1985,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 1856,
+    "prompt_tokens": 1985,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 4030,
+  "L_mod_P": 62,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 4030,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3840,
+    "prompt_tokens": 4030,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3840,
+    "prompt_tokens": 4030,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 4031,
+  "L_mod_P": 63,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 4031,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3840,
+    "prompt_tokens": 4031,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3840,
+    "prompt_tokens": 4031,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 4032,
+  "L_mod_P": 0,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 4032,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3904,
+    "prompt_tokens": 4032,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3904,
+    "prompt_tokens": 4032,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 4033,
+  "L_mod_P": 1,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 4033,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3904,
+    "prompt_tokens": 4033,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3904,
+    "prompt_tokens": 4033,
+    "err": null
+   }
+  ]
+ }
+]

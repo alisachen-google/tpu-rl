@@ -1,0 +1,194 @@
+[
+ {
+  "L": 511,
+  "L_mod_P": 63,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 511,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 320,
+    "prompt_tokens": 511,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 320,
+    "prompt_tokens": 511,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 512,
+  "L_mod_P": 0,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 512,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 384,
+    "prompt_tokens": 512,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 384,
+    "prompt_tokens": 512,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 1023,
+  "L_mod_P": 63,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 1023,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 832,
+    "prompt_tokens": 1023,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 832,
+    "prompt_tokens": 1023,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 1024,
+  "L_mod_P": 0,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 1024,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 896,
+    "prompt_tokens": 1024,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 896,
+    "prompt_tokens": 1024,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 1983,
+  "L_mod_P": 63,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 1983,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 1792,
+    "prompt_tokens": 1983,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 1792,
+    "prompt_tokens": 1983,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 4031,
+  "L_mod_P": 63,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 4031,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3840,
+    "prompt_tokens": 4031,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3840,
+    "prompt_tokens": 4031,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 8191,
+  "L_mod_P": 63,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 8191,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 8000,
+    "prompt_tokens": 8191,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 8000,
+    "prompt_tokens": 8191,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 8192,
+  "L_mod_P": 0,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 8192,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 8064,
+    "prompt_tokens": 8192,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 8064,
+    "prompt_tokens": 8192,
+    "err": null
+   }
+  ]
+ }
+]

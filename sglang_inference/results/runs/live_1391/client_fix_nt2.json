@@ -1,0 +1,74 @@
+[
+ {
+  "L": 4030,
+  "L_mod_P": 62,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 4030,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3840,
+    "prompt_tokens": 4030,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3840,
+    "prompt_tokens": 4030,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 4031,
+  "L_mod_P": 63,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 4031,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 4031,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 4031,
+    "err": null
+   }
+  ]
+ },
+ {
+  "L": 4032,
+  "L_mod_P": 0,
+  "turns": [
+   {
+    "code": 200,
+    "cached": 0,
+    "prompt_tokens": 4032,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3904,
+    "prompt_tokens": 4032,
+    "err": null
+   },
+   {
+    "code": 200,
+    "cached": 3904,
+    "prompt_tokens": 4032,
+    "err": null
+   }
+  ]
+ }
+]
