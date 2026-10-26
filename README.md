@@ -8,6 +8,7 @@ TPU v7x (Ironwood) RL benchmarking — runbooks, launchers, and command referenc
 
 ### Background
 - [TPU communication lowering and routing](docs/diagrams/README.md) — monochrome architecture diagram: XLA HLO and Pallas / LLO paths through DMA, routing, and the interconnect; SVG, PNG, PDF, and Mermaid source.
+- [gemma4/GEMMA4_E2B_GSM8K_ACCURACY_PARITY.md](gemma4/GEMMA4_E2B_GSM8K_ACCURACY_PARITY.md) — GSM8K TPU-vs-GPU accuracy parity: the metric mismatch that looked like a 4 pp gap, the 9 fixes (-it ckpt, token TIS on tunix 0.1.8, fp32 master, no-checkpoint, local TB, EVAL-V2ACC), results (step 0/20/40 within ±1 pp), recipe in `gemma4/parity/`
 - [gemma4/GEMMA4_E2B_RUN.md](gemma4/GEMMA4_E2B_RUN.md) — commands for running gemma4-e2b GRPO RL
 - [gemma4/GEMMA_BENCH_PLAN.md](gemma4/GEMMA_BENCH_PLAN.md) — benchmark ladder
 - [RUNBOOK.md](RUNBOOK.md) — Fix Catalog #1–21
