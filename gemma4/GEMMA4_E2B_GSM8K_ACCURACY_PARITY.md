@@ -1,30 +1,43 @@
 # gemma4-E2B GSM8K: TPU v7x vs GPU accuracy parity — what the gap was and how it was closed
 
-**Status (2026-10-27 05:20 UTC):** the definitive seed-42 run (all 11 fixes below, resumable
-checkpoints every 20 steps) is in progress; its step-0 eval is 81.50 (GPU 80.31 ± 0.24) and its
-training reward is 0.87–0.91 from the first updates (GPU training accuracy 84.5 % → 89.8 % over
-updates 1–40). The table below is from the **earlier seed-42 run and is superseded**: fix #11 shows
-that run was trained on a format-only reward (every boxed answer scored 0.1, never 1.0), so its
-curve is not the GPU experiment even though it happened to land inside ±1 pp. Eval numbers were
-always computed correctly; the step-0 point stands. Seeds 43/44 follow one at a time for the
-3-seed gate (step-250 mean v2 accuracy ≥ 91.42, GPU 92.42).
-
-**Definitive seed-42 run (all fixes, in progress, updated as evals land):**
+**Status (2026-10-27 10:05 UTC): seed 42 complete — GATE PASSED.** Step-250 scorer-v2 accuracy
+**92.49 %** vs the GPU 3-seed step-250 mean 92.42 ± 0.42 (gate ≥ 91.42). Every one of the 13 eval
+points is within ±1.2 pp of the GPU mean (mean delta +0.18 pp); the two platforms are statistically
+indistinguishable at the single-run Wilson width (±1.4 pp). Seeds 43/44 are queued for the 3-seed mean.
 
 | step | TPU seed 42 (scorer-v2 acc, 1319 Qs, Wilson 95 %) | GPU 3-seed mean ± SD (min–max) | delta |
 |---:|---:|---:|---:|
-| 0 | **81.50** [79.3, 83.5] | 80.31 ± 0.24 (80.14–80.59) | +1.19 |
-| 20 | **92.04** [90.5, 93.4] | 91.03 ± 0.53 (90.52–91.58) | +1.01 |
-| 40 | **91.43** [89.8, 92.8] | 91.69 ± 1.07 (90.45–92.34) | −0.25 |
-| 60 | **92.19** [90.6, 93.5] | 91.36 ± 0.23 (91.13–91.58) | +0.83 |
+| 0 | 81.50 [79.3, 83.5] | 80.31 ± 0.24 (80.14–80.59) | +1.19 |
+| 20 | 92.04 [90.5, 93.4] | 91.03 ± 0.53 (90.52–91.58) | +1.01 |
+| 40 | 91.43 [89.8, 92.8] | 91.69 ± 1.07 (90.45–92.34) | −0.25 |
+| 60 | 92.19 [90.6, 93.5] | 91.36 ± 0.23 (91.13–91.58) | +0.83 |
+| 80 | 91.66 [90.0, 93.0] | 91.84 ± 0.53 (91.28–92.34) | −0.18 |
+| 100 | 91.89 [90.3, 93.2] | 91.64 ± 0.16 (91.51–91.81) | +0.25 |
+| 120 | 92.12 [90.5, 93.5] | 92.04 ± 0.55 (91.43–92.49) | +0.08 |
+| 140 | 92.57 [91.0, 93.9] | 92.67 ± 0.12 (92.57–92.80) | −0.10 |
+| 160 | — (startup eval of the first resume scored un-synced weights; see fix #15) | 92.77 ± 0.19 | — |
+| 180 | 93.18 [91.7, 94.4] | 92.52 ± 0.23 (92.27–92.72) | +0.66 |
+| 200 | 92.49 [90.9, 93.8] | 92.65 ± 0.15 (92.49–92.80) | −0.15 |
+| 220 | 92.27 [90.7, 93.6] | 92.60 ± 0.24 (92.42–92.87) | −0.33 |
+| 240 | 92.65 [91.1, 93.9] | 92.65 ± 0.42 (92.19–93.03) | +0.00 |
+| **250** | **92.49** [90.9, 93.8] | **92.42 ± 0.42** (91.96–92.80) | **+0.08** |
 
-Training reward (mean scorer-v2 score per update) 0.87–0.92 over updates 1–60; k3 KL 3.3–5e-4 and
-ESS 0.9993 per step (GPU 3.4e-4–5e-4, ≥ 0.999); boxed rate 88.9 % → 100 % at step 20 (GPU 87.95 % →
-100 %); wall time 35.1 s median per update (GPU seeds 31.7 / 33.1 / 35.0). Two differences to watch:
-the TPU per-step **maximum** IS weight reaches the cap 3.0 (GPU per-step max 1.50–1.71; means and
-clipped fractions match), and TPU training rollouts are shorter so far (~450 vs ~480 tokens).
-Figures: [`parity/figures/00_overview.png`](parity/figures/00_overview.png); per-question dumps of
-this run in `parity/evals_definitive/`.
+The step-250 value is the eval at step 260: MaxText derives the loop length from batches × epochs
+(290) while the cosine schedule ends at 250 with final LR 0, so steps 251+ apply no update (logged
+`learning_rate 0`); fix #16 stops later seeds at 250 exactly. The run was resumed twice from
+checkpoints (steps 160 and 200; fixes #12–#15), and the second pass over steps 200–220 reproduced
+the first pass's step-220 eval to the question (92.27 % twice; the first pass read 92.65 / 92.87 at
+200 / 220 before a save failure, run-to-run spread ≈ 0.5 pp).
+
+Also matched: training reward 0.87–0.95 per update (GPU training accuracy 84.5 % → 92.1 %), boxed
+rate 88.9 % → 100 % at step 20 (GPU 87.95 % → 100 %), wrong→right / right→wrong question counts
+(TPU 158–178 / 17–27 vs GPU 162–185 / 14–22), k3 KL 3.3–5e-4 and ESS 0.9993 per step (GPU
+3.4e-4–5e-4, ≥ 0.999), wall time 34.6 s median per update on 64 v7x chips (GPU seeds 31.7 / 33.1 /
+35.0 s). Two differences, not affecting accuracy: the TPU per-step **maximum** IS weight sits at
+the cap 3.0 (GPU 1.50–1.71; means and clipped fractions match), and TPU training rollouts stay at
+~430 tokens while the GPU's grow from 480 to 610 by step 170 (eval responses: 1250–1450 chars on
+both). Figures: [`parity/figures/00_overview.png`](parity/figures/00_overview.png); per-question
+dumps of this run in `parity/evals_definitive/` (file name = train step; 250 = the step-260 eval).
 
 Earlier seed-42 run (format-only reward, superseded; the step-0 point is valid):
 
@@ -96,6 +109,8 @@ n_chars, tail`) so TPU vs GPU can be diffed question by question. `k` is the eva
 | 13 | JobSet failed within minutes of admission, twice: the head pod is host-network with fixed ports and another tenant's Pathways head (`default/lb-xprof-c4-pathways-head-0-0`, not a JobSet, invisible to the preferred anti-affinity) owned 29000/29001 on the same CPU node → proxy `Address already in use`, our RM aborted on a strict-compat pipe to theirs, 10 restarts in 7 min. | Non-default ports 29140 (proxy) / 29141 (RM). | `build_g4pt.py` PORTS |
 | 14 | **2-hour admission limit.** The cluster's `time-limit-controller` deactivates every ubench-regression-tests workload 120 min after its pods are ready (per admission); a 250-step run needs ~2.9 h. | Resumable checkpoints (#12) + `tools/chain-seeds2.sh`: on deactivation it deletes the JobSet and re-applies the same manifest, and tunix restores the latest checkpoint (seed 42: "Restored params from step 160 in 17 s"). | `tools/chain-seeds2.sh` |
 | 15 | After a restore, the rollout engine still holds the initial weights: tunix syncs actor → rollout only *after* each update, so the resumed process's startup eval and first batch used the base policy (seed 42 step 160: TIS log-ratio 0.23 vs 0.007 normal, ESS 0.43; startup eval = step-0 value). | Patcher edit J: `rl_engine.sync_weights()` right after the global step is restored. Seed 42 carries one TIS-corrected off-policy update at step 160; later seeds do not. The figure script skips startup-eval dumps. | `patch_sampler_is.py` edit J |
+| 16 | Training ran past 250 (to 290) at learning rate 0: MaxText sets `train_steps = num_batches × num_iterations × train_fraction × num_epoch` (1250 with `num_epoch=5`) and the loop only ends on data exhaustion. Harmless for accuracy (no update after 250) but wastes ~25 min and misplaces the final eval. | Patcher edit K: `max_steps = min(train_steps, num_batches)` → stops at 250 and the post-training eval scores step 250. Applied to seeds 43/44. | `patch_sampler_is.py` edit K |
+| 17 | A transient GCS write error in an async checkpoint save (step 220) is re-raised by orbax at the *next* save → trainer exit; on the restart, orbax removes the leftover uncommitted directory **sequentially** (~100k objects) and the trainer hangs for an hour. | JobSet restarts resume from the last committed step; `tools/clean-uncommitted-ckpts.py` (batched parallel delete, ~100 s) runs in the chain's resume step, plus a hung-trainer guard (no train step for 25 min → resume). | `tools/chain-seeds3.sh`, `tools/clean-uncommitted-ckpts.py` |
 | 10 | Run **completed at step 58**, not 250 (JobSet `Completed`, no error). `train_rl.py` slices `train_dataset[:num_batches*batch_size]` and then `.repeat(num_epoch)`; GSM8K train has 7473 rows < 32000 and `num_epoch` defaults to 1, so 7473/128 = 58 batches is one epoch and the loop ends. The GPU run covers ~4.3 epochs. | `num_epoch=5` (5 × 58 = 290 ≥ 250; the trainer still stops at `num_batches=250`). Watch for `Config param num_epoch: 5` in the log. | `build_g4pt.py` |
 
 ## 3. Verified identical to the GPU recipe (audited, not assumed)

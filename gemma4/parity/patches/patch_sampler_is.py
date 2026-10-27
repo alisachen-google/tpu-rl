@@ -132,9 +132,16 @@ H_REPLACE = (
     "    print('RLMETRIC-WRAP skipped: %r' % (_tp_e,), flush=True)"
 )
 
+# ---- K) STOP AT THE RECIPE'S 250 UPDATES. MaxText derives train_steps = num_batches*num_iterations*
+# train_fraction*num_epoch (types.py) = 1250 with num_epoch=5, so the loop only ends on data exhaustion
+# (58*5 = 290 batches); steps 251-290 run at LR 0 (cosine schedule ends at 250). Cap max_steps at
+# num_batches so training stops at 250 and the post-training eval scores the step-250 weights. ----
+K_ANCHOR = "          max_steps=trainer_config.train_steps,\n"
+K_REPLACE = "          max_steps=min(trainer_config.train_steps, trainer_config.num_batches),  # _TIS_PARITY: stop at num_batches\n"
+
 for anchor, label in ((A_ANCHOR, "GrpoConfig"), (B_ANCHOR, "return_logprobs"),
                       (C_ANCHOR, "eval_coverage"), (F_ANCHOR, "rollout_dtype"),
-                      (H_ANCHOR, "tb_local")):
+                      (H_ANCHOR, "tb_local"), (K_ANCHOR, "max_steps_cap")):
     n = src.count(anchor)
     if n != 1:
         fail(f"{label}: anchor count {n} != 1 in {TR}")
@@ -147,6 +154,7 @@ new = (
     .replace(C_ANCHOR, C_REPLACE, 1)
     .replace(F_ANCHOR, F_REPLACE, 1)
     .replace(H_ANCHOR, H_REPLACE, 1)
+    .replace(K_ANCHOR, K_REPLACE, 1)
 )
 try:
     ast.parse(new)
@@ -389,6 +397,6 @@ else:
 print(
     "TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=%s, return_logprobs=True, "
     "eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; "
-    "evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt; rl_learner resume-sync)" % THRESHOLD,
+    "evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt; rl_learner resume-sync; max_steps=num_batches)" % THRESHOLD,
     flush=True,
 )

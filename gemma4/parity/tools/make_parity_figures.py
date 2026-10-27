@@ -25,6 +25,7 @@ GPU_C, TPU_C = "#2a78d6", "#eb6834"
 INK, INK2, GRID, SURF = "#0b0b0b", "#52514e", "#e6e5e1", "#fcfcfb"
 MARKERS = ["o", "s", "D", "^", "v"]
 GATE = None  # computed from GPU mean - 1pp
+SKIP_DUMPS = set()  # dump indices to ignore (e.g. a startup eval scored on un-synced rollout weights)
 
 plt.rcParams.update({
     "figure.facecolor": SURF, "axes.facecolor": SURF, "savefig.facecolor": SURF,
@@ -145,11 +146,16 @@ def load_tpu(name, dumpdir, logs):
         # dumps are named eval_<train_steps>.jsonl; the periodic eval fires after the step counter has
         # advanced (20 -> "021"), so snap to the eval grid (multiples of 20, or the final step 250)
         step = k if (k % 20 == 0 or k == 250) else (k - 1 if ((k - 1) % 20 == 0 or k - 1 == 250) else k)
-        if k % 20 == 0 and k > 0 and k != 250:
-            # a dump named exactly <multiple of 20> is the STARTUP eval of a resumed process (periodic evals
-            # are named <step+1>); before patcher edit J it scored the un-synced rollout weights -> skip
-            print(f"  [skip] {os.path.basename(fp)}: startup eval of a resumed process", file=sys.stderr)
+        if k in SKIP_DUMPS:
+            print(f"  [skip] {os.path.basename(fp)} (explicitly excluded)", file=sys.stderr)
             continue
+        if step in evals:
+            # two dumps for one step (a first pass and a resumed re-run): keep the one from the LATER file
+            # name is not meaningful, so prefer the re-run = the dump written last (mtime)
+            if os.path.getmtime(fp) < evals[step].get("mtime", 0):
+                print(f"  [skip] {os.path.basename(fp)}: older duplicate of step {step}", file=sys.stderr)
+                continue
+            print(f"  [replace] step {step}: {os.path.basename(fp)} supersedes the earlier dump", file=sys.stderr)
         n = len(rows)
         accs = np.array([float(r["acc"]) for r in rows])
         acc = accs.mean()
@@ -161,18 +167,19 @@ def load_tpu(name, dumpdir, logs):
         if prev is not None:
             w2r = sum(1 for q, a in bykey.items() if a >= 1 and prev.get(q, 1) < 1)
             r2w = sum(1 for q, a in bykey.items() if a < 1 and prev.get(q, 0) >= 1)
-        evals[step] = dict(k=k, n=n, acc=acc, wilson=wilson(acc, n), boxed=boxed, nobox=nobox,
+        evals[step] = dict(k=k, n=n, acc=acc, wilson=wilson(acc, n), boxed=boxed, nobox=nobox, mtime=os.path.getmtime(fp),
                            chars_mean=float(np.nanmean(chars)), chars_p95=float(np.nanpercentile(chars, 95)),
                            w2r=w2r, r2w=r2w, bykey=bykey)
         if prev is None:
             prev = bykey  # transitions are vs step 0 (GPU convention)
+    evals = OrderedDict(sorted(evals.items()))
     # per-step wall time: diff of consecutive "Train step" timestamps, excluding eval steps (both sides of an eval)
     times = {}
     for a, b in zip(trained, trained[1:]):
         if b == a + 1 and "t" in steps_log[a] and "t" in steps_log[b]:
             dt = steps_log[b]["t"] - steps_log[a]["t"]
             # drop sub-5s artifacts (duplicate step lines across restarts) and eval-adjacent steps
-            if 5 < dt < 3600 and not steps_log[a].get("eval") and not steps_log[b].get("eval"):
+            if 5 < dt < 300 and not steps_log[a].get("eval") and not steps_log[b].get("eval"):  # >300 s = a restart/resume gap, not a step
                 times[b] = dt
     return dict(name=name, evals=evals, steps=steps_log, times=times, trained=trained)
 
@@ -372,7 +379,9 @@ def summary_md(gpu, tpu_runs, gate, out):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gpu", required=True); ap.add_argument("--tpu", nargs="+", required=True); ap.add_argument("--out", required=True)
+    ap.add_argument("--skip-dumps", default="", help="comma-separated dump indices to ignore, e.g. 160")
     a = ap.parse_args()
+    SKIP_DUMPS.update(int(x) for x in a.skip_dumps.split(",") if x.strip())
     os.makedirs(a.out, exist_ok=True)
     gpu = load_gpu(a.gpu)
     gate = gpu["eval"][250]["acc_v2"]["mean"] * 100 - 1.0
