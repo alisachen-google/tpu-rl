@@ -142,7 +142,9 @@ def load_tpu(name, dumpdir, logs):
         rows = [json.loads(l) for l in open(fp) if l.strip()]
         # step for eval k: 20k (eval period 20; k=0 is the pre-RL eval). The final eval runs at the last
         # trained step (250, or earlier if the run ended early): if 20k overshoots it, snap to it.
-        step = k  # dumps are named eval_<step>.jsonl (step-named since the resumable-run patcher)
+        # dumps are named eval_<train_steps>.jsonl; the periodic eval fires after the step counter has
+        # advanced (20 -> "021"), so snap to the eval grid (multiples of 20, or the final step 250)
+        step = k if (k % 20 == 0 or k == 250) else (k - 1 if ((k - 1) % 20 == 0 or k - 1 == 250) else k)
         n = len(rows)
         accs = np.array([float(r["acc"]) for r in rows])
         acc = accs.mean()

@@ -9,6 +9,25 @@ curve is not the GPU experiment even though it happened to land inside ±1 pp. E
 always computed correctly; the step-0 point stands. Seeds 43/44 follow one at a time for the
 3-seed gate (step-250 mean v2 accuracy ≥ 91.42, GPU 92.42).
 
+**Definitive seed-42 run (all fixes, in progress, updated as evals land):**
+
+| step | TPU seed 42 (scorer-v2 acc, 1319 Qs, Wilson 95 %) | GPU 3-seed mean ± SD (min–max) | delta |
+|---:|---:|---:|---:|
+| 0 | **81.50** [79.3, 83.5] | 80.31 ± 0.24 (80.14–80.59) | +1.19 |
+| 20 | **92.04** [90.5, 93.4] | 91.03 ± 0.53 (90.52–91.58) | +1.01 |
+| 40 | **91.43** [89.8, 92.8] | 91.69 ± 1.07 (90.45–92.34) | −0.25 |
+| 60 | **92.19** [90.6, 93.5] | 91.36 ± 0.23 (91.13–91.58) | +0.83 |
+
+Training reward (mean scorer-v2 score per update) 0.87–0.92 over updates 1–60; k3 KL 3.3–5e-4 and
+ESS 0.9993 per step (GPU 3.4e-4–5e-4, ≥ 0.999); boxed rate 88.9 % → 100 % at step 20 (GPU 87.95 % →
+100 %); wall time 35.1 s median per update (GPU seeds 31.7 / 33.1 / 35.0). Two differences to watch:
+the TPU per-step **maximum** IS weight reaches the cap 3.0 (GPU per-step max 1.50–1.71; means and
+clipped fractions match), and TPU training rollouts are shorter so far (~450 vs ~480 tokens).
+Figures: [`parity/figures/00_overview.png`](parity/figures/00_overview.png); per-question dumps of
+this run in `parity/evals_definitive/`.
+
+Earlier seed-42 run (format-only reward, superseded; the step-0 point is valid):
+
 | step | TPU seed 42, format-only-reward run (superseded) | GPU 3-seed mean (± SD) | delta |
 |---:|---:|---:|---:|
 | 0 | **81.50** (valid: same weights, greedy) | 80.31 ± 0.24 | +1.19 |
@@ -132,8 +151,7 @@ not comparable).
 
 ## 6. Open items
 
-* The parity figures in `parity/figures/` (steps 0–58) are from the superseded format-only-reward run;
-  they are regenerated from the definitive run as its evals land (`tools/make_parity_figures.py`).
+* `parity/figures/` are regenerated from the definitive run as its evals land (`tools/make_parity_figures.py`).
 
 * Finish seed 42 to step 250 (relaunched 2026-10-26 23:29 UTC with `num_epoch=5`; admitted once,
   then preempted by an in-cohort reclamation and requeued); run seeds 43 and 44 (needs tpu7x quota
