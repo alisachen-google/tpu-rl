@@ -349,9 +349,46 @@ else:
         fail(f"patched checkpoint_manager does not parse: {e}")
     open(_CM, "w", encoding="utf-8").write(cnew)
 
+# ---- J) RESUME SYNC. tunix syncs actor -> rollout weights only AFTER each update, so a process that
+# RESTORED a checkpoint generates its first batch (and runs its startup eval) with the rollout engine's
+# initial weights: seed-42 resume at step 160 showed TIS logratio_absmean 0.23 (normal 0.007), ESS 0.43,
+# and a startup eval equal to step 0. Push the restored actor weights to the rollout engine right after
+# the global step is restored, before any generation. ----
+try:
+    _RL = os.path.join(os.path.dirname(_tnx.__file__), "rl/rl_learner.py")
+except Exception as e:  # pylint: disable=broad-exception-caught
+    fail(f"cannot locate tunix rl_learner: {e}")
+lsrc = open(_RL, encoding="utf-8").read()
+if "_TIS_PARITY" in lsrc:
+    print("TIS-PARITY PATCH: rl_learner already patched", flush=True)
+else:
+    J_ANCHOR = (
+        "    self.should_sync_weights = not (\n"
+        "        rl_utils.is_sharing_weights(\n"
+        "            self.rl_engine.actor_trainer.model,\n"
+        "            self.rl_engine.rollout.model(),\n"
+        "        )\n"
+        "    )\n"
+    )
+    J_REPLACE = J_ANCHOR + (
+        "    if self.rl_engine.global_steps > 0 and self.should_sync_weights:  # _TIS_PARITY: resumed run\n"
+        "      print(\"RESUME-SYNC pushing restored actor weights (global_steps=%d) to the rollout engine before the first generation\"\n"
+        "            % self.rl_engine.global_steps, flush=True)\n"
+        "      self.rl_engine.sync_weights()\n"
+    )
+    n = lsrc.count(J_ANCHOR)
+    if n != 1:
+        fail(f"rl_learner resume-sync anchor count {n} != 1 in {_RL}")
+    lnew = lsrc.replace(J_ANCHOR, J_REPLACE, 1)
+    try:
+        ast.parse(lnew)
+    except SyntaxError as e:
+        fail(f"patched rl_learner does not parse: {e}")
+    open(_RL, "w", encoding="utf-8").write(lnew)
+
 print(
     "TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=%s, return_logprobs=True, "
     "eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; "
-    "evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt)" % THRESHOLD,
+    "evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt; rl_learner resume-sync)" % THRESHOLD,
     flush=True,
 )

@@ -145,6 +145,11 @@ def load_tpu(name, dumpdir, logs):
         # dumps are named eval_<train_steps>.jsonl; the periodic eval fires after the step counter has
         # advanced (20 -> "021"), so snap to the eval grid (multiples of 20, or the final step 250)
         step = k if (k % 20 == 0 or k == 250) else (k - 1 if ((k - 1) % 20 == 0 or k - 1 == 250) else k)
+        if k % 20 == 0 and k > 0 and k != 250:
+            # a dump named exactly <multiple of 20> is the STARTUP eval of a resumed process (periodic evals
+            # are named <step+1>); before patcher edit J it scored the un-synced rollout weights -> skip
+            print(f"  [skip] {os.path.basename(fp)}: startup eval of a resumed process", file=sys.stderr)
+            continue
         n = len(rows)
         accs = np.array([float(r["acc"]) for r in rows])
         acc = accs.mean()
