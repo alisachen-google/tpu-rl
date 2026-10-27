@@ -432,6 +432,7 @@ data:
         lr_schedule_type='cosine' \
         weight_dtype=float32 \
         mu_dtype=float32 \
+        num_epoch=5 \
         learning_rate_schedule_steps=250 \
         warmup_steps_fraction=0.04 \
         learning_rate_final_fraction=0.0 \

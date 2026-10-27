@@ -22,9 +22,12 @@ import json
 import re
 import sys
 
-SP = "${PARITY_DIR:-$(dirname "$0")/..}"
+import os
+# Repo layout: this file lives in gemma4/parity/; patches/ sits next to it. g4pf.yaml (the full-recipe
+# source manifest) is not in the tree -- place it here or point PARITY_DIR at a dir that has it.
+SP = os.environ.get("PARITY_DIR", os.path.dirname(os.path.abspath(__file__)))
 SRC = f"{SP}/g4pf.yaml"
-PATCH = f"{SP}/patch_sampler_is_new.py"
+PATCH = f"{SP}/patches/patch_sampler_is.py"
 IDX = sys.argv[1] if len(sys.argv) > 1 else "1"
 assert IDX in ("1", "2", "3"), IDX
 SEED = {"1": 42, "2": 43, "3": 44}[IDX]
@@ -45,7 +48,7 @@ assert raw.count("g4pf") > 0
 #   patch_flash_sa.py   -> sa_block_kv 2048->1024 so splash divides the UNPACKED TIS recompute (3072)
 SWAPS = {
     "patch_sampler_is.py": new_patch,
-    "patch_flash_sa.py": open(f"{SP}/g4patches/patch_flash_sa.py", encoding="utf-8").read(),
+    "patch_flash_sa.py": open(f"{SP}/patches/patch_flash_sa.py", encoding="utf-8").read(),
 }
 
 
@@ -101,7 +104,12 @@ repl("        enable_checkpointing=true \\", "        enable_checkpointing=False
 repl("        lr_schedule_type='cosine' \\",
      "        lr_schedule_type='cosine' \\\n"
      "        weight_dtype=float32 \\\n"
-     "        mu_dtype=float32 \\")
+     "        mu_dtype=float32 \\\n"
+     "        num_epoch=5 \\")
+# ---- num_epoch=5: train_rl.py does `train_dataset[:num_batches*batch_size]` (7473 GSM8K rows < 32000)
+# then `.repeat(num_epoch)`; the default num_epoch=1 yields 7473/128 = 58 batches and the run exits
+# cleanly at step 58 (g4pt1 2026-10-26 23:25, JobSet Completed). GPU = 250 steps ~ 4.3 epochs. 5x58=290
+# >= 250; the trainer stops at train_steps=250. ----
 
 # ---- 3) add seed knobs after rollout_micro_batch_size=128 ----
 ANCHOR = "        rollout_micro_batch_size=128 \\"

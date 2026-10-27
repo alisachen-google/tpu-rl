@@ -1,15 +1,20 @@
 # gemma4-E2B GSM8K: TPU v7x vs GPU accuracy parity — what the gap was and how it was closed
 
-**Status (2026-10-26):** TPU tracks the frozen GPU reference curve within the ±1 pp standard at
-every point measured so far, once both sides are scored with the same scorer. Seed 42 is running to
-step 250; seeds 43/44 follow one at a time for the 3-seed gate (step-250 mean v2 accuracy ≥ 91.42,
-GPU 92.42).
+**Status (2026-10-27):** TPU tracks the frozen GPU reference curve within the ±1 pp standard at
+every point measured so far, once both sides are scored with the same scorer. The first seed-42 run
+ended cleanly at step 58 (one data epoch, see fix #10); the full 250-step seed-42 run is relaunched
+with `num_epoch=5`, and seeds 43/44 follow one at a time for the 3-seed gate (step-250 mean v2
+accuracy ≥ 91.42, GPU 92.42).
 
 | step | TPU seed 42 (scorer-v2 acc, 1319 Qs) | GPU 3-seed mean (± SD) | delta |
 |---:|---:|---:|---:|
 | 0 | **81.50** | 80.31 ± 0.24 | +1.19 |
 | 20 | **91.13** | 91.03 ± 0.53 | +0.10 |
 | 40 | **90.98** | 91.69 ± 1.07 (seeds 92.27 / 92.34 / 90.45) | −0.71 |
+| 58 (end of run 1) | **91.21** | 91.36 (GPU step 60) | −0.15 |
+
+Per-step time of the parity run: steady-state median 34.6 s (mean 34.9, p90 36.5) on 64 v7x chips,
+vs GPU per-seed medians 31.7 / 33.1 / 35.0 s. Each 1319-question eval adds ~140 s.
 
 Recipe files: [`parity/`](parity/) (builder, patches, tools, the seed-42 manifest, per-question
 eval dumps). Same tree is archived at `gs://ubench-logs/alisachen-tpu7x/parity-recipe/`.
@@ -64,6 +69,7 @@ n_chars, tail`) so TPU vs GPU can be diffed question by question. `k` is the eva
 | 7 | Main thread died at step 40 on GCS `412 PreconditionFailed`: tensorboardX's GCS event-file writer flushes from two threads with a generation precondition. | Tensorboard `log_dir` → local disk (`/tmp/tb_local`); stdout is the parity source of truth. | edit H |
 | 8 | Any restart after a mid-run checkpoint died in `maybe_restore`: `Failed to restore from step 20` ← orbax v1 `NoEntryError: incompatible handler` for `model_params`. Resume is broken on this image. | `enable_checkpointing=False` (the inherited command had `enable_checkpointing=true` **after** `checkpoint_period`; pyconfig takes the last occurrence, so flip that line). For an already-running job: delete `<step>/commit_success.txt` (+ `_CHECKPOINT_METADATA`) and orbax reports `Found 0 checkpoint steps` (`tools/guard-ckpt.sh`). | `build_g4pt.py`, `tools/guard-ckpt.sh` |
 | 9 | No comparable accuracy metric / no per-question visibility. | `EVAL-V2ACC`, `EVAL-BREAKDOWN`, per-question JSONL (section 1). | edit G |
+| 10 | Run **completed at step 58**, not 250 (JobSet `Completed`, no error). `train_rl.py` slices `train_dataset[:num_batches*batch_size]` and then `.repeat(num_epoch)`; GSM8K train has 7473 rows < 32000 and `num_epoch` defaults to 1, so 7473/128 = 58 batches is one epoch and the loop ends. The GPU run covers ~4.3 epochs. | `num_epoch=5` (5 × 58 = 290 ≥ 250; the trainer still stops at `num_batches=250`). Watch for `Config param num_epoch: 5` in the log. | `build_g4pt.py` |
 
 ## 3. Verified identical to the GPU recipe (audited, not assumed)
 
@@ -94,8 +100,10 @@ SEEN_MAX=0 bash tools/watch-evals-gcs.sh   # credential-independent: scores each
 
 `build_g4pt.py` derives the manifest from the full-recipe `g4pf.yaml` (not in this tree; the built
 `g4pt1-seed42.yaml` is), swaps `patch_sampler_is.py` / `patch_flash_sa.py` into the patches
-ConfigMap (the launcher already runs them), sets fp32 master/Adam, disables checkpointing, sets
-`maxRestarts: 3`, seeds, and self-verifies (anchors, YAML round-trip, markers).
+ConfigMap (the launcher already runs them), sets fp32 master/Adam, `num_epoch=5`, disables
+checkpointing, sets `maxRestarts: 3`, seeds, and self-verifies (anchors, YAML round-trip, markers).
+`evals/g4pt1_eval_00{0..3}.jsonl` are the per-question dumps of the first seed-42 run (steps 0, 20,
+40, 58).
 
 **Monitoring lines:** `TIS-PARITY PATCH: APPLIED …` · `TIS-ACTIVE weight_min<1` (TIS biting) ·
 `EVAL-BREAKDOWN` / `EVAL-V2ACC` (the parity metric) · `Intermediate Eval (step=N)` (MaxText's own,
@@ -118,7 +126,10 @@ not comparable).
 
 ## 6. Open items
 
-* Finish seed 42 to step 250; run seeds 43 and 44 (needs tpu7x quota back on the queue).
+* Finish seed 42 to step 250 (relaunched 2026-10-26 23:29 UTC with `num_epoch=5`; admitted once,
+  then preempted by an in-cohort reclamation and requeued); run seeds 43 and 44 (needs tpu7x quota
+  back on the queue).
+* A "Completed" JobSet is not proof of 250 steps: check for `Intermediate Eval (step=250)` / `k=12`.
 * GPU per-question validation dumps (runs `gemma4_e2b_gsm8k8k_16n64g_s250_seed{1,2,3}_1024_*`) are
   not in any reachable bucket; staging them under `gs://gke-aishared-gsc-dev/alisachen-gemma4-parity/`
   enables the question-by-question diff against `parity/evals/`.
