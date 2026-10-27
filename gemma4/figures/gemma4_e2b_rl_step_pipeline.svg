@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#52514e"/></marker>
+    <marker id="arrR" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#d93025"/></marker>
+  </defs>
+  <rect width="1400" height="760" fill="#fcfcfb"/>
+  <text x="20" y="30" font-size="20" font-weight="bold" fill="#0b0b0b">gemma4-E2B GRPO step on TPU v7x 4x4x4 (64 chips = 128 devices, TP1 x DP128) — where the time goes and where each lever bites</text>
+  <text x="20" y="52" fill="#52514e">Clean step g4r68: rollout 31.4 s (88%) · trainer 3.8 s · weight-sync 0.45 s · rewards 0.2 s · global 35.7 s.  Banked stack g4ucf: ~27 s.  Numbers in red = lever and measured effect.</text>
+
+  <!-- HEAD -->
+  <rect x="20" y="80" width="400" height="300" rx="8" fill="#fff4ce" stroke="#f9ab00" stroke-width="2"/>
+  <text x="32" y="102" font-weight="bold" fill="#0b0b0b">Pathways head (one Python process, 44 cores, serial)</text>
+  <rect x="35" y="115" width="370" height="46" rx="6" fill="#ffffff" stroke="#f9ab00"/>
+  <text x="45" y="134">1. Admit 2048 requests (256 prompts x 8), route each to a DP rank</text>
+  <text x="45" y="152" fill="#d93025">least_loaded probes all 128 ranks per request (2048 proxy IPCs/window) → round_robin: −72 s (g4r20b→g4r56)</text>
+  <rect x="35" y="170" width="370" height="46" rx="6" fill="#ffffff" stroke="#f9ab00"/>
+  <text x="45" y="189">2. Merge / pad / ONE global decode submission per continue-decode window</text>
+  <text x="45" y="207" fill="#d93025">window 64 → 512 : −11 s (g4r33→g4r32b); md 1024→1536 flat (orchestration off the critical path)</text>
+  <rect x="35" y="225" width="370" height="46" rx="6" fill="#ffffff" stroke="#f9ab00"/>
+  <text x="45" y="244">3. device_get → stop scan → re-pack → update 128 scheduler children</text>
+  <text x="45" y="262" fill="#d93025">EOS-check interval 8 → 32: −4 % (g4uca); 64 is worse (g4ucb)</text>
+  <rect x="35" y="280" width="370" height="46" rx="6" fill="#ffffff" stroke="#f9ab00"/>
+  <text x="45" y="299">4. detok / logprobs / answer-extract / reward scoring (64-proc pool)</text>
+  <text x="45" y="317" fill="#d93025">async off the critical path: rewards 12 s → 0.2 s; async reward −5.6 s (g4r35↔g4r32b)</text>
+  <text x="35" y="350" fill="#52514e">Serial host cost per window scales with DP: 0.78 s @64 → 2.4 s @128 (xplane/Perfetto)</text>
+  <text x="35" y="368" fill="#52514e">Devices ~2-3 % busy in the g4r19 baseline (52 ms device per 2.5 s window)</text>
+
+  <!-- TPU MESH -->
+  <rect x="470" y="80" width="560" height="300" rx="8" fill="#e8f0fe" stroke="#1a73e8" stroke-width="2"/>
+  <text x="482" y="102" font-weight="bold" fill="#0b0b0b">TPU mesh: 128 DP engines, one compiled continue-decode program (vLLM / tpu_inference)</text>
+  <rect x="485" y="115" width="250" height="60" rx="6" fill="#ffffff" stroke="#1a73e8"/>
+  <text x="495" y="134">Prefill (ISL ~150 tok)</text>
+  <text x="495" y="152" fill="#52514e">~0.02 s, compute-bound</text>
+  <text x="495" y="168" fill="#d93025">prefix caching ON = −6 s WORSE (33j)</text>
+  <rect x="750" y="115" width="265" height="60" rx="6" fill="#ffffff" stroke="#1a73e8"/>
+  <text x="760" y="134">Weight stream per decode step</text>
+  <text x="760" y="152" fill="#52514e">9.26 GB bf16 / 7.37 TB/s = 1.3 ms (HBM roof)</text>
+  <text x="760" y="168" fill="#d93025">int8 weights: no HBM win (bf16 resident), reward 0.568</text>
+  <rect x="485" y="185" width="530" height="120" rx="6" fill="#ffffff" stroke="#1a73e8"/>
+  <text x="495" y="204" font-weight="bold">continue-decode while_loop (fused: forward → logits → sample → KV update), 16 seqs/rank</text>
+  <text x="495" y="224">Device op split (xplane): RPA attention over growing KV ~46 % · 262k-vocab logits+sampling ~40 % · GEMM ~2 %</text>
+  <text x="495" y="244" fill="#d93025">approx_max_k replaces exact top-k over 262144: 0.709 → 0.263 ms, −3 % step, reward-exact (g4ubz)</text>
+  <text x="495" y="264" fill="#d93025">RPA tiling: default tiles already fastest (80.6 µs/call); forced 1,8192 = 29 s vs 27 s (g4uci)</text>
+  <text x="495" y="284" fill="#52514e">Measured per-step wall ~5.4 ms (CDTIMING) ≈ device floor incl. attention + vocab path; pure-decode ~2.4 ms/token</text>
+  <rect x="485" y="315" width="530" height="55" rx="6" fill="#ffebe6" stroke="#d93025"/>
+  <text x="495" y="334" font-weight="bold" fill="#d93025">STRAGGLER: makespan = longest completion x per-step time. ~8 chips grind the tail while ~24 idle in collective-permute-done</text>
+  <text x="495" y="354" fill="#d93025">OSL cap 8192 → 2560: 34.5 → 28.35 s (−18 %, reward 0.600);  → 2048: 24.4 s (−29 %, reward 0.512 at the parity floor)</text>
+
+  <!-- REWARD POOL -->
+  <rect x="1080" y="80" width="300" height="130" rx="8" fill="#e6f4ea" stroke="#1e8e3e" stroke-width="2"/>
+  <text x="1092" y="102" font-weight="bold">Reward scoring (host pool, 64 procs)</text>
+  <text x="1092" y="124">math_verify + check_numbers per completion</text>
+  <text x="1092" y="144" fill="#d93025">parallel pool 30 s → 8-10 s; per-item sympy timeout</text>
+  <text x="1092" y="162" fill="#d93025">kills 156 s spikes → 0.26 s (g4r32c)</text>
+  <text x="1092" y="182" fill="#d93025">async during rollout: 0.2 s/step (g4r55)</text>
+  <text x="1092" y="200" fill="#52514e">length reward-shaping / adv-bias: INERT under GRPO</text>
+
+  <!-- TRAINER -->
+  <rect x="1080" y="230" width="300" height="150" rx="8" fill="#f3e8fd" stroke="#8430ce" stroke-width="2"/>
+  <text x="1092" y="252" font-weight="bold">Actor update (same 128 devices, FSDP)</text>
+  <text x="1092" y="274">GRPO loss over packed 8192-token rows</text>
+  <text x="1092" y="294" fill="#d93025">flash/splash trainer attn + jit_unroll: 15 → ~4 s</text>
+  <text x="1092" y="312" fill="#d93025">TMBS 8 / HBM 0.3: null at win64 (g4r40)</text>
+  <text x="1092" y="332" fill="#52514e">now 3.7 s (g4r68); roofline ~0.8 s</text>
+  <text x="1092" y="352" font-weight="bold">Weight sync → engines: 0.45 s</text>
+  <text x="1092" y="370" fill="#d93025">keep-KV + jit-unroll: 1.0 → 0.45 s (at floor)</text>
+
+  <!-- arrows -->
+  <line x1="420" y1="140" x2="470" y2="140" stroke="#52514e" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="470" y1="250" x2="420" y2="250" stroke="#52514e" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="1030" y1="140" x2="1080" y2="140" stroke="#52514e" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="1030" y1="300" x2="1080" y2="300" stroke="#52514e" stroke-width="2" marker-end="url(#arr)"/>
+  <path d="M1230,380 C1230,420 760,420 760,380" fill="none" stroke="#8430ce" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="900" y="412" fill="#8430ce">weight sync (fsdp → DP replicas)</text>
+
+  <!-- TIMELINE -->
+  <text x="20" y="455" font-size="16" font-weight="bold" fill="#0b0b0b">One clean step, to scale (g4r68 best config, 35.7 s)</text>
+  <rect x="20" y="470" width="1256" height="34" fill="#1a73e8" opacity="0.85"/>
+  <text x="30" y="492" fill="#ffffff" font-weight="bold">rollout = engine_generate 31.4 s (88 %) : ~8 windows x 512 tokens; device 5.2 s + serial host ~26 s in the g4r68 analysis</text>
+  <rect x="1276" y="470" width="76" height="34" fill="#8430ce" opacity="0.85"/>
+  <text x="1280" y="492" fill="#ffffff" font-size="11">train 3.8</text>
+  <rect x="1352" y="470" width="12" height="34" fill="#1e8e3e"/>
+  <text x="1366" y="492" font-size="10" fill="#52514e">sync+rw</text>
+
+  <text x="20" y="535" font-size="16" font-weight="bold" fill="#0b0b0b">Same step after the straggler campaign (g4ucf banked, ~27 s)</text>
+  <rect x="20" y="550" width="880" height="34" fill="#1a73e8" opacity="0.85"/>
+  <text x="30" y="572" fill="#ffffff" font-weight="bold">rollout ~25 s : longest completion capped at 2560 tok x ~5.4 ms/step (device-bound floor incl. attention + 262k vocab)</text>
+  <rect x="900" y="550" width="60" height="34" fill="#8430ce" opacity="0.85"/>
+  <text x="904" y="572" fill="#ffffff" font-size="11">train</text>
+  <rect x="960" y="550" width="12" height="34" fill="#1e8e3e"/>
+  <text x="985" y="572" fill="#52514e">← 7.5 s removed (−22 %); 2048 cap removes ~3 s more at the reward floor</text>
+
+  <!-- ROOFLINE BOX -->
+  <rect x="20" y="610" width="1360" height="130" rx="8" fill="#ffffff" stroke="#52514e"/>
+  <text x="32" y="632" font-weight="bold">Roofline ladder (per device, TP1 replica, batch 16 seqs/rank, OSL ~1420-2560)</text>
+  <text x="32" y="654">v1 (weights only): 9.26 GB / 7.37 TB/s = 1.3 ms/step → 1.8-3.3 s rollout floor → "7x gap" → drove the host-work hunt (rr routing, windows, async host work): 175.6 → 34.5 s.</text>
+  <text x="32" y="676">v2 (healthy model, 2026-09-04): decode 4.4 + trainer 0.8 + prefill 0.02 + sync 0.5 = 5.7 s/step → "6.3x gap, all rollout host overhead" at 35.7 s.</text>
+  <text x="32" y="698">v3 (CDTIMING, 2026-10-24): measured 4.8-5.9 ms per decode step, constant vs active seqs → device-bound; attention over KV + 262k-vocab path are ~4 ms the weight-only floor ignored.</text>
+  <text x="32" y="720" fill="#d93025">Consequence: the reclaimable gap is the straggler LENGTH, not kernels. Rollout = longest-of-2048 completion x 5.4 ms. OSL cap is the lever that moved it; reweighting cannot (max-of-N argument).</text>
+</svg>

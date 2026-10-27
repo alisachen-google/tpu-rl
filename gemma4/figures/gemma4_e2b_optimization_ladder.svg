@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <rect width="1400" height="620" fill="#fcfcfb"/>
+  <text x="20" y="30" font-size="20" font-weight="bold" fill="#0b0b0b">gemma4-E2B GRPO on TPU v7x 4x4x4 — clean step time along the optimization ladder (seconds, clean-step medians)</text>
+  <text x="20" y="52" fill="#52514e">Blue = mechanical perf (Ladder A/B, 2026-09). Orange = straggler campaign on the proven 34.5 s stack (2026-10). Hatched = parity-floor option. Reward (check_numbers) under each bar; GPU band 0.50-0.57 (target ~0.55).</text>
+  <!-- axis -->
+  <line x1="80" y1="470" x2="1380" y2="470" stroke="#52514e"/>
+  <line x1="80" y1="90" x2="80" y2="470" stroke="#52514e"/>
+  <g fill="#52514e" font-size="11">
+    <text x="40" y="474">0</text><line x1="76" y1="470" x2="80" y2="470" stroke="#52514e"/>
+    <text x="36" y="366">50</text><line x1="76" y1="362" x2="80" y2="362" stroke="#52514e"/>
+    <text x="30" y="258">100</text><line x1="76" y1="254" x2="80" y2="254" stroke="#52514e"/>
+    <text x="30" y="150">150</text><line x1="76" y1="146" x2="80" y2="146" stroke="#52514e"/>
+    <text x="30" y="96">175</text><line x1="76" y1="92" x2="80" y2="92" stroke="#52514e"/>
+  </g>
+  <g stroke="#e6e5e1"><line x1="80" y1="362" x2="1380" y2="362"/><line x1="80" y1="254" x2="1380" y2="254"/><line x1="80" y1="146" x2="1380" y2="146"/></g>
+  <!-- scale: 1 s = 2.16 px ; y = 470 - 2.16*v -->
+  <!-- bars: x positions every 118 px starting 100, width 80 -->
+  <g>
+    <rect x="100" y="90.7" width="80" height="379.3" fill="#2a78d6"/>
+    <text x="140" y="84" text-anchor="middle" font-weight="bold">175.6</text>
+    <text x="140" y="490" text-anchor="middle" font-size="11">g4r19 baseline</text>
+    <text x="140" y="505" text-anchor="middle" font-size="10" fill="#52514e">tp1xdp128, win64</text>
+    <text x="140" y="520" text-anchor="middle" font-size="10" fill="#52514e">serial host work</text>
+    <text x="140" y="540" text-anchor="middle" font-size="10" fill="#d93025">reward 0.02 (bad ckpt)</text>
+  </g>
+  <g>
+    <rect x="218" y="358.3" width="80" height="111.7" fill="#2a78d6"/>
+    <text x="258" y="352" text-anchor="middle" font-weight="bold">51.7</text>
+    <text x="258" y="490" text-anchor="middle" font-size="11">g4r33 base bundle</text>
+    <text x="258" y="505" text-anchor="middle" font-size="10" fill="#52514e">async detok/logprobs/</text>
+    <text x="258" y="520" text-anchor="middle" font-size="10" fill="#52514e">rewards, rr routing, XLA</text>
+    <text x="258" y="540" text-anchor="middle" font-size="10" fill="#1a73e8">−124 s</text>
+  </g>
+  <g>
+    <rect x="336" y="376.2" width="80" height="93.8" fill="#2a78d6"/>
+    <text x="376" y="370" text-anchor="middle" font-weight="bold">43.4</text>
+    <text x="376" y="490" text-anchor="middle" font-size="11">g4r32 CD window 512</text>
+    <text x="376" y="505" text-anchor="middle" font-size="10" fill="#52514e">+ textual end_of_turn stop</text>
+    <text x="376" y="540" text-anchor="middle" font-size="10" fill="#1a73e8">−11.0 (window) −6.8 (stop)</text>
+  </g>
+  <g>
+    <rect x="454" y="383.4" width="80" height="86.6" fill="#2a78d6"/>
+    <text x="494" y="377" text-anchor="middle" font-weight="bold">40.1</text>
+    <text x="494" y="490" text-anchor="middle" font-size="11">g4r32c async reward</text>
+    <text x="494" y="505" text-anchor="middle" font-size="10" fill="#52514e">+ per-item sympy timeout</text>
+    <text x="494" y="540" text-anchor="middle" font-size="10" fill="#1a73e8">−5.6; spike 156 s → 0.26 s</text>
+  </g>
+  <g>
+    <rect x="572" y="395.5" width="80" height="74.5" fill="#2a78d6"/>
+    <text x="612" y="389" text-anchor="middle" font-weight="bold">34.5</text>
+    <text x="612" y="490" text-anchor="middle" font-size="11">g4r55 fixed checkpoint</text>
+    <text x="612" y="505" text-anchor="middle" font-size="10" fill="#52514e">raw2 embedding reconvert;</text>
+    <text x="612" y="520" text-anchor="middle" font-size="10" fill="#52514e">model stops natively (id 106)</text>
+    <text x="612" y="540" text-anchor="middle" font-size="10" fill="#1e8e3e">reward 0.02 → 0.58</text>
+  </g>
+  <g>
+    <rect x="690" y="408.8" width="80" height="61.2" fill="#eb6834"/>
+    <text x="730" y="402" text-anchor="middle" font-weight="bold">28.35</text>
+    <text x="730" y="490" text-anchor="middle" font-size="11">g4ubj OSL cap 2560</text>
+    <text x="730" y="505" text-anchor="middle" font-size="10" fill="#52514e">max_target 8192 → 6656</text>
+    <text x="730" y="520" text-anchor="middle" font-size="10" fill="#52514e">+ DP_SCHED_ROUTING=round_robin</text>
+    <text x="730" y="540" text-anchor="middle" font-size="10" fill="#1e8e3e">−18 %, reward 0.600</text>
+  </g>
+  <g>
+    <rect x="808" y="410.6" width="80" height="59.4" fill="#eb6834"/>
+    <text x="848" y="404" text-anchor="middle" font-weight="bold">27.5</text>
+    <text x="848" y="490" text-anchor="middle" font-size="11">g4ubz + approx_max_k</text>
+    <text x="848" y="505" text-anchor="middle" font-size="10" fill="#52514e">262k top-k 0.71 → 0.26 ms</text>
+    <text x="848" y="540" text-anchor="middle" font-size="10" fill="#1e8e3e">−3 %, reward-exact</text>
+  </g>
+  <g>
+    <rect x="926" y="411.3" width="80" height="58.7" fill="#eb6834"/>
+    <text x="966" y="405" text-anchor="middle" font-weight="bold">27.2</text>
+    <text x="966" y="490" text-anchor="middle" font-size="11">g4uca EOS interval 32</text>
+    <text x="966" y="505" text-anchor="middle" font-size="10" fill="#52514e">(isolated, no approx)</text>
+    <text x="966" y="540" text-anchor="middle" font-size="10" fill="#1e8e3e">−4 %, reward-safe</text>
+  </g>
+  <g>
+    <rect x="1044" y="411.7" width="80" height="58.3" fill="#eb6834"/>
+    <text x="1084" y="405" text-anchor="middle" font-weight="bold">~27</text>
+    <text x="1084" y="490" text-anchor="middle" font-size="11">g4ucf BANKED stack</text>
+    <text x="1084" y="505" text-anchor="middle" font-size="10" fill="#52514e">2560 + rr + approx + EOS32</text>
+    <text x="1084" y="520" text-anchor="middle" font-size="10" fill="#52514e">100 steps, KL=0</text>
+    <text x="1084" y="540" text-anchor="middle" font-size="10" fill="#1e8e3e">−22 %, reward 0.547 (g4uco)</text>
+  </g>
+  <g>
+    <defs><pattern id="hatch" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#eb6834" stroke-width="3"/></pattern></defs>
+    <rect x="1162" y="417.3" width="80" height="52.7" fill="url(#hatch)" stroke="#eb6834"/>
+    <text x="1202" y="411" text-anchor="middle" font-weight="bold">24.4</text>
+    <text x="1202" y="490" text-anchor="middle" font-size="11">g4ucq OSL cap 2048</text>
+    <text x="1202" y="505" text-anchor="middle" font-size="10" fill="#52514e">max_target 6144</text>
+    <text x="1202" y="520" text-anchor="middle" font-size="10" fill="#52514e">100 steps, KL=0</text>
+    <text x="1202" y="540" text-anchor="middle" font-size="10" fill="#d93025">−29 %, reward 0.512 (floor)</text>
+  </g>
+  <!-- roofline lines -->
+  <line x1="80" y1="457.7" x2="1380" y2="457.7" stroke="#52514e" stroke-dasharray="6,4"/>
+  <text x="1290" y="453" font-size="11" fill="#52514e">roofline v2: 5.7 s/step</text>
+  <line x1="690" y1="440.2" x2="1380" y2="440.2" stroke="#d93025" stroke-dasharray="6,4"/>
+  <text x="1250" y="436" font-size="11" fill="#d93025">device floor 2560 x 5.4 ms ≈ 13.8 s + train</text>
+  <text x="20" y="585" fill="#52514e" font-size="12">Sources: OPTIMIZATION_175_to_34.md, GEMMA4_PERF_LADDER_DETAILED.md, G4R68_20STEP_BEST_PERF.md, GEMMA4_PERF_PROFILING_HEADROOM.md. g4r33 = reference bundle held at window 64; g4r68 20-step confirm of the g4r55 config = 35.7 s median.</text>
+  <text x="20" y="605" fill="#52514e" font-size="12">Not on the chart (ruled out): int8 rollout weights (bf16-resident, 0.568), prefix caching (−6 s worse), larger CD window md1536 (flat), TP4xDP32 (88-92 s), spec-decode ngram (tau 1.13), length reward-shaping / advantage bias (inert), fused top-k (1.00x).</text>
+</svg>
