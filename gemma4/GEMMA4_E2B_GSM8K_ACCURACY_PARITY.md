@@ -1,17 +1,20 @@
 # gemma4-E2B GSM8K: TPU v7x vs GPU accuracy parity — what the gap was and how it was closed
 
-**Status (2026-10-27):** TPU tracks the frozen GPU reference curve within the ±1 pp standard at
-every point measured so far, once both sides are scored with the same scorer. The first seed-42 run
-ended cleanly at step 58 (one data epoch, see fix #10); the full 250-step seed-42 run is relaunched
-with `num_epoch=5`, and seeds 43/44 follow one at a time for the 3-seed gate (step-250 mean v2
-accuracy ≥ 91.42, GPU 92.42).
+**Status (2026-10-27 05:20 UTC):** the definitive seed-42 run (all 11 fixes below, resumable
+checkpoints every 20 steps) is in progress; its step-0 eval is 81.50 (GPU 80.31 ± 0.24) and its
+training reward is 0.87–0.91 from the first updates (GPU training accuracy 84.5 % → 89.8 % over
+updates 1–40). The table below is from the **earlier seed-42 run and is superseded**: fix #11 shows
+that run was trained on a format-only reward (every boxed answer scored 0.1, never 1.0), so its
+curve is not the GPU experiment even though it happened to land inside ±1 pp. Eval numbers were
+always computed correctly; the step-0 point stands. Seeds 43/44 follow one at a time for the
+3-seed gate (step-250 mean v2 accuracy ≥ 91.42, GPU 92.42).
 
-| step | TPU seed 42 (scorer-v2 acc, 1319 Qs) | GPU 3-seed mean (± SD) | delta |
+| step | TPU seed 42, format-only-reward run (superseded) | GPU 3-seed mean (± SD) | delta |
 |---:|---:|---:|---:|
-| 0 | **81.50** | 80.31 ± 0.24 | +1.19 |
-| 20 | **91.13** | 91.03 ± 0.53 | +0.10 |
-| 40 | **90.98** | 91.69 ± 1.07 (seeds 92.27 / 92.34 / 90.45) | −0.71 |
-| 58 (end of run 1) | **91.21** | 91.36 (GPU step 60) | −0.15 |
+| 0 | **81.50** (valid: same weights, greedy) | 80.31 ± 0.24 | +1.19 |
+| 20 | 91.13 | 91.03 ± 0.53 | +0.10 |
+| 40 | 90.98 | 91.69 ± 1.07 (seeds 92.27 / 92.34 / 90.45) | −0.71 |
+| 58 (end of run 1) | 91.21 | 91.36 (GPU step 60) | −0.15 |
 
 Per-step time of the parity run: steady-state median 34.6 s (mean 34.9, p90 36.5) on 64 v7x chips,
 vs GPU per-seed medians 31.7 / 33.1 / 35.0 s. Each 1319-question eval adds ~140 s.
@@ -69,6 +72,9 @@ n_chars, tail`) so TPU vs GPU can be diffed question by question. `k` is the eva
 | 7 | Main thread died at step 40 on GCS `412 PreconditionFailed`: tensorboardX's GCS event-file writer flushes from two threads with a generation precondition. | Tensorboard `log_dir` → local disk (`/tmp/tb_local`); stdout is the parity source of truth. | edit H |
 | 8 | Any restart after a mid-run checkpoint died in `maybe_restore`: `Failed to restore from step 20` ← orbax v1 `NoEntryError: incompatible handler` for `model_params`. Resume is broken on this image. | `enable_checkpointing=False` (the inherited command had `enable_checkpointing=true` **after** `checkpoint_period`; pyconfig takes the last occurrence, so flip that line). For an already-running job: delete `<step>/commit_success.txt` (+ `_CHECKPOINT_METADATA`) and orbax reports `Found 0 checkpoint steps` (`tools/guard-ckpt.sh`). | `build_g4pt.py`, `tools/guard-ckpt.sh` |
 | 9 | No comparable accuracy metric / no per-question visibility. | `EVAL-V2ACC`, `EVAL-BREAKDOWN`, per-question JSONL (section 1). | edit G |
+| 11 | **Training reward was format-only.** The stdout metric mirror (`RLMETRIC rewards/max`) read 0.1 at every step: tunix passes the batched `answer` column to the reward function as a numpy array, and `reward_parity_boxed._ground_truths` only recognised list/tuple, so it replicated the whole array as every completion's gold → every boxed answer scored 0.1 ("boxed, wrong"), nothing ever scored 1.0. The eval path passes golds per row and was unaffected, which is why eval accuracy looked right while training learned only the `\boxed{}` format. | `gts.tolist()` for array golds, bytes decode, one-time `REWARD-DEBUG` print. Verified offline: old helper on array golds → `[0.1, 0.1, 0.0]` for (correct, wrong, no-box); new → `[1.0, 0.1, 0.0]`. In-run: training `rewards/mean` 0.08 → 0.87–0.91. | `patches/reward_parity_boxed.py` |
+| 12 | Any restart after a mid-run save died in `maybe_restore` (orbax v1 `NoEntryError … incompatible handler`). Root cause one level down: `ValueError: Unsupported dtype: key<fry>` — `nnx.state(model)` includes the model's typed PRNG keys and the Pathways array handler cannot load that dtype. | Save/restore `model_params` as `nnx.state(model, nnx.Not(nnx.RngState))` with `partial_load=True`; verified in the pinned image on CPU. Checkpoints every 20 steps are now on, so a Kueue preemption costs ≤ 20 steps (fix #8's "disable checkpointing" is withdrawn). | `patch_sampler_is.py` edit I, `build_g4pt.py` (`CKPT=1`) |
+| 13 | JobSet failed within minutes of admission, twice: the head pod is host-network with fixed ports and another tenant's Pathways head (`default/lb-xprof-c4-pathways-head-0-0`, not a JobSet, invisible to the preferred anti-affinity) owned 29000/29001 on the same CPU node → proxy `Address already in use`, our RM aborted on a strict-compat pipe to theirs, 10 restarts in 7 min. | Non-default ports 29140 (proxy) / 29141 (RM). | `build_g4pt.py` PORTS |
 | 10 | Run **completed at step 58**, not 250 (JobSet `Completed`, no error). `train_rl.py` slices `train_dataset[:num_batches*batch_size]` and then `.repeat(num_epoch)`; GSM8K train has 7473 rows < 32000 and `num_epoch` defaults to 1, so 7473/128 = 58 batches is one epoch and the loop ends. The GPU run covers ~4.3 epochs. | `num_epoch=5` (5 × 58 = 290 ≥ 250; the trainer still stops at `num_batches=250`). Watch for `Config param num_epoch: 5` in the log. | `build_g4pt.py` |
 
 ## 3. Verified identical to the GPU recipe (audited, not assumed)
@@ -125,6 +131,9 @@ not comparable).
   credential once made the chain try to launch the next seed (the apply failed on the same error).
 
 ## 6. Open items
+
+* The parity figures in `parity/figures/` (steps 0–58) are from the superseded format-only-reward run;
+  they are regenerated from the definitive run as its evals land (`tools/make_parity_figures.py`).
 
 * Finish seed 42 to step 250 (relaunched 2026-10-26 23:29 UTC with `num_epoch=5`; admitted once,
   then preempted by an in-cohort reclamation and requeued); run seeds 43 and 44 (needs tpu7x quota

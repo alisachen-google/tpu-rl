@@ -19,13 +19,11 @@ This builder:
 Usage: python3 build_g4pt.py <seed_index 1|2|3>
 """
 import json
+import os
 import re
 import sys
 
-import os
-# Repo layout: this file lives in gemma4/parity/; patches/ sits next to it. g4pf.yaml (the full-recipe
-# source manifest) is not in the tree -- place it here or point PARITY_DIR at a dir that has it.
-SP = os.environ.get("PARITY_DIR", os.path.dirname(os.path.abspath(__file__)))
+SP = os.environ.get("PARITY_DIR", os.path.dirname(os.path.abspath(__file__)))  # repo: gemma4/parity; g4pf.yaml (source manifest) is not in the tree
 SRC = f"{SP}/g4pf.yaml"
 PATCH = f"{SP}/patches/patch_sampler_is.py"
 IDX = sys.argv[1] if len(sys.argv) > 1 else "1"
@@ -49,6 +47,10 @@ assert raw.count("g4pf") > 0
 SWAPS = {
     "patch_sampler_is.py": new_patch,
     "patch_flash_sa.py": open(f"{SP}/patches/patch_flash_sa.py", encoding="utf-8").read(),
+    # 2026-10-27: ndarray/bytes gold handling + REWARD-DEBUG line (training rewards were 0.1-capped:
+    # tunix passes the batched `answer` column as a numpy array, the old helper replicated the whole
+    # array as every completion's gold). Eval path was unaffected.
+    "reward_parity_boxed.py": open(f"{SP}/patches/reward_parity_boxed.py", encoding="utf-8").read(),
 }
 
 
@@ -83,7 +85,7 @@ if CAP != "2560":
 # ---- fail-fast on a persistent crash (e.g. cap OOM) instead of churning to deactivation.
 # g4ps1 (8192 cap) hit 23 JobSet restarts under maxRestarts=50 before Kueue deactivated it;
 # a low cap makes an OOM surface loudly within one window instead of silently churning.
-repl("    maxRestarts: 50", "    maxRestarts: 3")
+repl("    maxRestarts: 50", "    maxRestarts: 10")  # 3 was exhausted by a transient head-pod proxy crashloop (2026-10-27 04:12); restarts resume from the last checkpoint now
 
 # ---- NO mid-run checkpoints. g4pt1 (checkpoint_period=20) proved two things on this container:
 # (1) resume is BROKEN: every restart died in tunix maybe_restore ("Failed to restore from step 20"
@@ -94,7 +96,12 @@ repl("    maxRestarts: 50", "    maxRestarts: 3")
 # The accuracy curve needs no checkpoint; the initial -it load (load_parameters_path) is separate.
 # NOTE: the inherited command already carries `enable_checkpointing=true` AFTER checkpoint_period;
 # pyconfig takes the LAST occurrence, so flip that line in place (an inserted duplicate loses).
-repl("        enable_checkpointing=true \\", "        enable_checkpointing=False \\")
+if os.environ.get("CKPT") == "1":
+    # resumable run: patcher edit I makes restore work (RNG-free model_params); save every 20 steps so a
+    # Kueue preemption costs <= 20 steps. checkpoint_period=100 in the inherited command -> 20.
+    repl("        checkpoint_period=100 \\", "        checkpoint_period=20 \\")
+else:
+    repl("        enable_checkpointing=true \\", "        enable_checkpointing=False \\")
 
 # ---- precision parity (guide sec 4/47): GPU uses FP32 master + FP32 Adam, BF16 compute.
 # rl.yml defaults weight_dtype=bfloat16 (bf16 master) and mu_dtype="" inherits weight_dtype
@@ -110,6 +117,35 @@ repl("        lr_schedule_type='cosine' \\",
 # then `.repeat(num_epoch)`; the default num_epoch=1 yields 7473/128 = 58 batches and the run exits
 # cleanly at step 58 (g4pt1 2026-10-26 23:25, JobSet Completed). GPU = 250 steps ~ 4.3 epochs. 5x58=290
 # >= 250; the trainer stops at train_steps=250. ----
+
+# ---- 2b) SPOT=1: pin the TPU workers to the spot flavor. The ubench ClusterQueue has tpu7x-flavor
+# nominal 0 since 2026-10-26 22:14Z, so every admission is a cohort BORROW that any tenant with nominal
+# quota reclaims (g4pt1 was preempted 3x in 2h, once 3 min into training). The queue may also borrow
+# up to 160 chips of `tpu7x-spot` from the spot-pool CQ (0 used, reclaimWithinCohort=Never). Adding
+# gke-spot=true to the worker nodeSelector makes the reserved flavor's TAS fit fail (no reserved node
+# carries that label) so Kueue falls through to tpu7x-spot; Kueue injects that flavor's tolerations.
+# Risk moves from Kueue reclamation to GCE spot preemption. Same chips, same recipe. ----
+if os.environ.get("SPOT") == "1":
+    repl("            nodeSelector:\n              cloud.google.com/gke-tpu-topology: \"4x4x4\"\n              cloud.google.com/gke-tpu-accelerator: tpu7x\n",
+         "            nodeSelector:\n              cloud.google.com/gke-tpu-topology: \"4x4x4\"\n              cloud.google.com/gke-tpu-accelerator: tpu7x\n              cloud.google.com/gke-spot: \"true\"\n")
+
+# ---- 2c) NON-DEFAULT PATHWAYS PORTS. The head pod is hostNetwork with fixed ports; other tenants'
+# Pathways heads (e.g. default/lb-xprof-c4-pathways-head-0-0, a non-JobSet pod our preferred
+# anti-affinity cannot see) bind 29000/29001 on the same cpu-np node -> our proxy "Address already in
+# use" and our RM aborts on a strict-compat pipe to THEIR RM; 10 JobSet restarts in 7 min, JobSet
+# Failed (2026-10-27 04:12 and 04:33). Proxy 29000->29140, RM 29001->29141 (worker ports stay). ----
+PORTS = {
+    "export JAX_BACKEND_TARGET=grpc://127.0.0.1:29000": "export JAX_BACKEND_TARGET=grpc://127.0.0.1:29140",
+    "value: grpc://g4pf-pathways-head-0-0.g4pf:29000": "value: grpc://g4pf-pathways-head-0-0.g4pf:29140",
+    "- --server_port=29001": "- --server_port=29141",
+    "- --server_port=29000": "- --server_port=29140",
+    "- --resource_manager_address=g4pf-pathways-head-0-0.g4pf:29001": "- --resource_manager_address=g4pf-pathways-head-0-0.g4pf:29141",
+}
+for _o, _n in PORTS.items():
+    _c = raw.count(_o)
+    assert _c >= 1, f"port anchor {_o!r} not found"
+    raw = raw.replace(_o, _n)
+assert "29000" not in raw and "29001" not in raw, "default pathways ports still present"
 
 # ---- 3) add seed knobs after rollout_micro_batch_size=128 ----
 ANCHOR = "        rollout_micro_batch_size=128 \\"

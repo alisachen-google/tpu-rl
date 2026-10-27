@@ -110,7 +110,26 @@ H_REPLACE = (
     "  metrics_logging_options = metrics_logger.MetricsLoggerOptions(\n"
     "      log_dir=(os.makedirs(\"/tmp/tb_local\", exist_ok=True) or \"/tmp/tb_local\"),  # _TIS_PARITY: local TB (GCS 412 race)\n"
     "      flush_every_n_steps=trainer_config.log_period,\n"
-    "  )"
+    "  )\n"
+    "  try:  # _TIS_PARITY: mirror every logged RL metric (loss/entropy/pg_clipfrac/kl/lr/...) to stdout\n"
+    "    _tp_ML = metrics_logger.MetricsLogger\n"
+    "    if not getattr(_tp_ML, '_tp_stdout', False):\n"
+    "      _tp_ML._tp_orig_log = _tp_ML.log\n"
+    "      def _tp_fmt(x):\n"
+    "        try:\n"
+    "          return '%.6g' % float(x)\n"
+    "        except Exception:\n"
+    "          return repr(x)[:80]\n"
+    "      def _tp_log(self, *a, **k):\n"
+    "        try:\n"
+    "          print('RLMETRIC ' + ' '.join([_tp_fmt(x) for x in a] + ['%s=%s' % (kk, _tp_fmt(vv)) for kk, vv in k.items()]), flush=True)\n"
+    "        except Exception:\n"
+    "          pass\n"
+    "        return _tp_ML._tp_orig_log(self, *a, **k)\n"
+    "      _tp_ML.log = _tp_log\n"
+    "      _tp_ML._tp_stdout = True\n"
+    "  except Exception as _tp_e:\n"
+    "    print('RLMETRIC-WRAP skipped: %r' % (_tp_e,), flush=True)"
 )
 
 for anchor, label in ((A_ANCHOR, "GrpoConfig"), (B_ANCHOR, "return_logprobs"),
@@ -187,8 +206,15 @@ else:
     )
     D_REPLACE = (
         '      _tis_wmin = float(jnp.min(jnp.where(asst_mask_f > 0, sampler_is_weights, 1.0)))  # _TIS_STDOUT\n'
-        '      print("TIS-ACTIVE weight_mean=%.5f weight_min=%.5f weight_max=%.5f frac_clipped=%.6f"\n'
-        '            % (is_mean, _tis_wmin, is_max, frac_clipped), flush=True)\n'
+        '      _tis_w = jnp.exp(log_ratio) * asst_mask_f  # unclipped token weights (GPU ESS / k3 definitions)\n'
+        '      _tis_ess = float(_tis_w.sum() ** 2 / jnp.maximum((_tis_w ** 2).sum() * mask_sum, 1e-12))\n'
+        '      _tis_d = -log_ratio  # log(pi_sampler) - log(pi_trainer)\n'
+        '      _tis_k3 = float(((jnp.exp(_tis_d) - _tis_d - 1.0) * asst_mask_f).sum() / mask_sum)\n'
+        '      _tis_lrm = float((log_ratio * asst_mask_f).sum() / mask_sum)\n'
+        '      _tis_lra = float((jnp.abs(log_ratio) * asst_mask_f).sum() / mask_sum)\n'
+        '      print("TIS-ACTIVE weight_mean=%.5f weight_min=%.5f weight_max=%.5f frac_clipped=%.6f "\n'
+        '            "k3_kl=%.4e ess=%.6f logratio_mean=%.4e logratio_absmean=%.4e ntok=%d"\n'
+        '            % (is_mean, _tis_wmin, is_max, frac_clipped, _tis_k3, _tis_ess, _tis_lrm, _tis_lra, int(mask_sum)), flush=True)\n'
         '      self.rl_engine.buffer_metrics(\n'
         '          {\n'
         '              "sampler_is/weight_mean": (is_mean, np.mean),'
@@ -258,11 +284,15 @@ else:
     _tp_mc = sum(r["n_chars"] for r in _v2_rows) / _tp_n
     _tp_k = getattr(evaluate, "_tp_k", 0)
     evaluate._tp_k = _tp_k + 1
+    try:  # actual RL update step (restart-safe: a resumed process restarts the k counter)
+      _tp_step = int(rl_cluster.actor_trainer.train_steps)
+    except Exception:  # pylint: disable=broad-exception-caught
+      _tp_step = 20 * _tp_k
     _tp_dir = f"{str(getattr(tmvp_config, 'base_output_directory', '/tmp')).rstrip('/')}/{getattr(tmvp_config, 'run_name', 'run')}/evals"
-    _tp_path = f"{_tp_dir}/eval_{_tp_k:03d}.jsonl"
+    _tp_path = f"{_tp_dir}/eval_{_tp_step:03d}.jsonl"
     _tp_epath.Path(_tp_dir).mkdir(parents=True, exist_ok=True)
     _tp_epath.Path(_tp_path).write_text("\n".join(_tp_json.dumps(r) for r in _v2_rows) + "\n")
-    max_logging.log(f"EVAL-BREAKDOWN k={_tp_k} total={_v2_acc_n} acc={_tp_acc / _tp_n * 100:.2f}% boxed_wrong={_tp_bw / _tp_n * 100:.2f}% nobox={_tp_nb / _tp_n * 100:.2f}% mean_chars={_tp_mc:.0f} dump={_tp_path}")
+    max_logging.log(f"EVAL-BREAKDOWN step={_tp_step} k={_tp_k} total={_v2_acc_n} acc={_tp_acc / _tp_n * 100:.2f}% boxed_wrong={_tp_bw / _tp_n * 100:.2f}% nobox={_tp_nb / _tp_n * 100:.2f}% mean_chars={_tp_mc:.0f} dump={_tp_path}")
   except Exception as _tp_e:  # pylint: disable=broad-exception-caught
     max_logging.log(f"[eval-dump] failed: {_tp_e!r}")
   max_logging.log(  # _TIS_PARITY
@@ -283,9 +313,45 @@ else:
     if "EVAL-V2ACC" not in open(EV, encoding="utf-8").read():
         fail("evaluate_rl verification marker missing after write")
 
+# ---- I) RESUMABLE CHECKPOINTS. Every restart after a mid-run save died in tunix
+# checkpoint_manager.maybe_restore: orbax v1 NoEntryError "incompatible handler" whose ROOT cause is
+# `ValueError: Unsupported dtype: key<fry>` -- nnx.state(model) includes the model's RNG stream
+# (typed jax.random keys) and the Pathways persistence array handler cannot describe that dtype on
+# load. Save and restore `model_params` WITHOUT RngState and allow a partial load (checkpoints already
+# written with keys still restore). Verified in the pinned image on CPU (orbax 0.12.1 / flax 0.12.8). ----
+try:
+    _CM = os.path.join(os.path.dirname(_tnx.__file__), "sft/checkpoint_manager.py")
+except Exception as e:  # pylint: disable=broad-exception-caught
+    fail(f"cannot locate tunix checkpoint_manager: {e}")
+csrc = open(_CM, encoding="utf-8").read()
+if "_TIS_PARITY" in csrc:
+    print("TIS-PARITY PATCH: checkpoint_manager already patched", flush=True)
+else:
+    I1_ANCHOR = "      params = nnx.state(model)\n"
+    I1_REPLACE = "      params = nnx.state(model, nnx.Not(nnx.RngState))  # _TIS_PARITY: PRNG keys (key<fry>) are not loadable under Pathways\n"
+    I2_ANCHOR = (
+        "      model_params_state = nnx.state(model)\n"
+        "      load_ctx = self._context\n"
+    )
+    I2_REPLACE = (
+        "      model_params_state = nnx.state(model, nnx.Not(nnx.RngState))  # _TIS_PARITY: see save()\n"
+        "      load_ctx = ocp.Context(self._context)\n"
+        "      load_ctx.pytree.loading.partial_load = True  # _TIS_PARITY: checkpoint may still carry the RNG entries\n"
+    )
+    for anchor, label in ((I1_ANCHOR, "ckpt_save"), (I2_ANCHOR, "ckpt_restore")):
+        n = csrc.count(anchor)
+        if n != 1:
+            fail(f"checkpoint_manager {label}: anchor count {n} != 1 in {_CM}")
+    cnew = csrc.replace(I1_ANCHOR, I1_REPLACE, 1).replace(I2_ANCHOR, I2_REPLACE, 1)
+    try:
+        ast.parse(cnew)
+    except SyntaxError as e:
+        fail(f"patched checkpoint_manager does not parse: {e}")
+    open(_CM, "w", encoding="utf-8").write(cnew)
+
 print(
     "TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=%s, return_logprobs=True, "
-    "eval full-coverage drop_remainder=False, rollout bf16; grpo_learner TIS-ACTIVE stdout; "
-    "evaluate_rl EVAL-V2ACC)" % THRESHOLD,
+    "eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; "
+    "evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt)" % THRESHOLD,
     flush=True,
 )

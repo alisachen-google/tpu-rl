@@ -43,6 +43,12 @@ def _ground_truths(n, answer, kwargs):
     if gts is None:
         raise ValueError("reward_parity_boxed: no ground-truth kwarg found "
                          f"(saw keys: {sorted(kwargs)})")
+    # tunix batches dataset columns into numpy arrays (training path); eval passes a scalar/list.
+    # An ndarray is NOT a list -> the old code replicated the WHOLE array as every completion's
+    # gold -> every boxed answer scored 0.1 "wrong" and nothing ever scored 1.0 (found 2026-10-27
+    # via the RLMETRIC stdout mirror: rewards/max == 0.1 for all steps).
+    if hasattr(gts, "tolist") and not isinstance(gts, (str, bytes)):
+        gts = gts.tolist()
     if not isinstance(gts, (list, tuple)):
         gts = [gts] * n
     if len(gts) != n:
@@ -56,6 +62,8 @@ def _gold_str(gt):
     accept a plain string or number too, for robustness."""
     if isinstance(gt, (int, float)):
         return str(gt)
+    if isinstance(gt, (bytes, bytearray)):
+        gt = gt.decode("utf-8", "replace")
     s = str(gt)
     try:
         parsed = json.loads(s)
@@ -85,10 +93,20 @@ def _score_one(completion, gt, want):
         return 0.0
 
 
+_DEBUGGED = [0]
+
+
 def compute_score(prompts, completions, answer=None, **kwargs):
     """TRAINING reward: scorer-v2 score in {1.0, 0.1, 0.0}. One float per completion."""
     gts = _ground_truths(len(completions), answer, kwargs)
-    return [_score_one(c, gts[i], "score") for i, c in enumerate(completions)]
+    out = [_score_one(c, gts[i], "score") for i, c in enumerate(completions)]
+    if _DEBUGGED[0] < 3:  # one-time visibility of what the training scorer actually sees
+        _DEBUGGED[0] += 1
+        n1 = sum(1 for v in out if v >= 1.0); n01 = sum(1 for v in out if 0.0 < v < 1.0)
+        print("REWARD-DEBUG n=%d answer_type=%s gold0=%r gold_str0=%r n_correct=%d n_boxed_wrong=%d n_zero=%d tail0=%r"
+              % (len(out), type(answer).__name__, (gts[0] if gts else None), _gold_str(gts[0]) if gts else None,
+                 n1, n01, len(out) - n1 - n01, str(completions[0])[-80:]), flush=True)
+    return out
 
 
 def compute_acc(prompts, completions, answer=None, **kwargs):
