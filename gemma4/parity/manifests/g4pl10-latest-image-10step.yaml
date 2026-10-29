@@ -317,7 +317,7 @@ data:
     export PARITY_SAMPLER_IS=token
     export PARITY_SAMPLER_IS_THRESHOLD=3.0
     export ASYNC_REWARD=off
-export DP_SCHED_ROUTING=round_robin   # native round-robin DP routing (replaces patch_dp_rr_routing on this image)
+    export DP_SCHED_ROUTING=round_robin   # native round-robin DP routing (replaces patch_dp_rr_routing on this image)
     export ASYNC_LOGPROBS=off
     export LENGTH_SHAPE_LAMBDA=0.25
     export LENGTH_SHAPE_TARGET=3500

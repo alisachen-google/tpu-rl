@@ -35,7 +35,7 @@ patch = open(f"{SP}/patches/patch_sampler_is_newimg.py", encoding="utf-8").read(
 m = re.search(r'^(\s*)patch_sampler_is\.py: ".*"$', raw, re.M); assert m
 raw = raw[:m.start()] + f"{m.group(1)}patch_sampler_is.py: {json.dumps(patch)}" + raw[m.end():]
 # native knobs
-repl("export ASYNC_REWARD=off", "export ASYNC_REWARD=off\nexport DP_SCHED_ROUTING=round_robin   # native round-robin DP routing (replaces patch_dp_rr_routing on this image)")
+repl("    export ASYNC_REWARD=off", "    export ASYNC_REWARD=off\n    export DP_SCHED_ROUTING=round_robin   # native round-robin DP routing (replaces patch_dp_rr_routing on this image)")
 repl("        num_batches=250 \\", "        num_batches=10 \\\n        free_kv_cache_during_weight_sync=false \\\n        vllm_block_size=128 \\")
 repl("    maxRestarts: 10", "    maxRestarts: 3")
 raw = raw.replace("g4pt1", "g4pl10")
