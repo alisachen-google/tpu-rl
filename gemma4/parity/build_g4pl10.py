@@ -30,7 +30,8 @@ def repl(old, new, n=1):
 
 repl(OLD_IMG, NEW_IMG)
 repl("20260730-jax_0.10.2", "20261028-jax_0.11.0", 3)
-# ported parity patcher
+raw = raw.replace("g4pt1", "g4pl10")
+# ported parity patcher (embedded after the rename so the ConfigMap value equals the file byte for byte)
 patch = open(f"{SP}/patches/patch_sampler_is_newimg.py", encoding="utf-8").read()
 m = re.search(r'^(\s*)patch_sampler_is\.py: ".*"$', raw, re.M); assert m
 raw = raw[:m.start()] + f"{m.group(1)}patch_sampler_is.py: {json.dumps(patch)}" + raw[m.end():]
@@ -38,7 +39,6 @@ raw = raw[:m.start()] + f"{m.group(1)}patch_sampler_is.py: {json.dumps(patch)}" 
 repl("    export ASYNC_REWARD=off", "    export ASYNC_REWARD=off\n    export DP_SCHED_ROUTING=round_robin   # native round-robin DP routing (replaces patch_dp_rr_routing on this image)")
 repl("        num_batches=250 \\", "        num_batches=10 \\\n        free_kv_cache_during_weight_sync=false \\\n        vllm_block_size=128 \\")
 repl("    maxRestarts: 10", "    maxRestarts: 3")
-raw = raw.replace("g4pt1", "g4pl10")
 open(f"{SP}/g4pl10.yaml", "w", encoding="utf-8").write(raw)
 docs = [d for d in yaml.safe_load_all(raw) if d]
 cm = [d for d in docs if d["kind"] == "ConfigMap" and "patch_sampler_is.py" in d["data"]][0]
