@@ -1,0 +1,46 @@
+CD-PROPER PATCH: FAILED [ml-import] anchor found 0 times, expected 1
+LENDIST PATCH: APPLIED
+RPA-BLOCKS PATCH: FAILED anchor found 0 times, expected 1
+CD-MASK2 PATCH: APPLIED
+CD-REPORT PATCH: APPLIED
+PHASETIME2 PATCH: APPLIED
+REWARD-PAR PATCH: APPLIED
+LENGTH-SHAPE PATCH: APPLIED (enable with LENGTH_SHAPE=1)
+TIS-PARITY PATCH: FAILED GrpoConfig: anchor count 0 != 1 in /deps/src/maxtext/trainers/post_train/rl/train_rl.py
+SHARDED-SAMPLING PATCH: APPLIED
+BLOCK-SIZE PATCH: APPLIED
+WARNING 10-29 06:22:14 [tpu_platform.py:543] Pin memory is not supported on TPU.
+WARNING 10-29 06:22:34 [tpu_platform.py:226] Error getting device name: 'NoneType' object has no attribute 'name'
+INFO 10-29 06:22:44 [importing.py:74] Triton is installed but 0 active driver(s) found (expected 1). Disabling Triton to prevent runtime errors.
+ERROR 10-29 06:22:47 [tpu_info.py:40]   <title>Error 404 (Not Found)!!1</title>
+ERROR 10-29 06:22:47 [tpu_info.py:40]     *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}
+ERROR 10-29 06:22:47 [tpu_info.py:40]   <p><b>404.</b> <ins>That’s an error.</ins>
+ERROR 10-29 06:22:47 [tpu_info.py:40]   <title>Error 404 (Not Found)!!1</title>
+ERROR 10-29 06:22:47 [tpu_info.py:40]     *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}
+ERROR 10-29 06:22:47 [tpu_info.py:40]   <p><b>404.</b> <ins>That’s an error.</ins>
+ERROR 10-29 06:22:47 [tpu_info.py:40]   <title>Error 404 (Not Found)!!1</title>
+ERROR 10-29 06:22:47 [tpu_info.py:40]     *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}
+ERROR 10-29 06:22:47 [tpu_info.py:40]   <p><b>404.</b> <ins>That’s an error.</ins>
+ERROR 10-29 06:22:47 [tpu_info.py:40]   <title>Error 404 (Not Found)!!1</title>
+ERROR 10-29 06:22:47 [tpu_info.py:40]     *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}
+ERROR 10-29 06:22:47 [tpu_info.py:40]   <p><b>404.</b> <ins>That’s an error.</ins>
+ERROR 10-29 06:22:47 [__init__.py:81] Error occurred while logging TPU info: 'NoneType' object has no attribute 'startswith'. Are you running on CPU?
+APPROX-TOPK PATCH: APPLIED
+ASYNC-DETOK PATCH: FAILED tunix anchor 0
+ASYNC-LOGPROBS PATCH: FAILED anchor tunix=0 engine_pool=False
+DP-RR-ROUTING PATCH: FAILED anchor 0
+STOP-TOKENS PATCH: FAILED anchor 0
+RUNNER-EOS PATCH: APPLIED
+FAST-EXTRACT PATCH: APPLIED
+G4-FORMAT-GUARD PATCH: APPLIED
+ASYNC-REWARD PATCH: FAILED anchor engine 0
+FLASH-SA PATCH: APPLIED n=30
+JIT-UNROLL PATCH: FAILED anchor count 0
+SYNC-KEEPKV PATCH: FAILED anchor count 0 for 'self.llm.collective_rpc("delete_kv_cache") # will '
+HOST-EXTRACT PATCH: FAILED prologue anchor count 0
+CD-NOGLOBAL PATCH: APPLIED
+PADDING-BUCKET PATCH: FAILED runner call anchor
+LOG-STATS PATCH: APPLIED
+TEXTUAL-STOP PATCH: FAILED requires patch_host_extract first
+VERIFY-TIMEOUT PATCH: APPLIED (VERIFY_ITEM_TIMEOUT=5(default))
+REWARD-DUMP PATCH: APPLIED (REWARD_DUMP_N=0(default))
