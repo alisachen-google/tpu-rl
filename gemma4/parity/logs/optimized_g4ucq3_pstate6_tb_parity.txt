@@ -1,0 +1,8 @@
+check_numbers: steps=100 first10=0.5068 last10=0.5195 overall=0.5118 min=0.4326 max=0.5737  trend(last-first)=+0.0127
+score/mean:    overall=0.5800 last10=0.5890 min=0.4965 max=0.6470
+kl:            overall=0.000000 max=0.000000  (FLAT ~0)
+per-10-step check_numbers: 0.507 0.507 0.519 0.506 0.514 0.504 0.516 0.500 0.526 0.519
+
+=== PARITY VERDICT (GPU ref: check_numbers 0.50-0.57, ~0.55; score 0.54-0.65) ===
+  overall check_numbers 0.5118 IN [0.50,0.57]  | drift 0.0127 (flat)  | kl ok
+  => SUSTAINED GPU PARITY

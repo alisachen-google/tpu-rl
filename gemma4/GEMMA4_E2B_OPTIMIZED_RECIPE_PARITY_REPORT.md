@@ -8,6 +8,26 @@ g4ucq run (0.5118, 24.0 s) to three decimals.
 
 ![optimized recipe parity](parity/figures/hires/optimized_24s_recipe_parity.png)
 
+## 0. Update 2026-10-29: rerun at `xla_tpu_dvfs_p_state=6` (g4ucq3)
+
+The cluster does not permit p-state 7, so the recipe was rerun unchanged except `--xla_tpu_dvfs_p_state=6`
+(manifest `parity/manifests/g4ucq3-optimized-24s-pstate6.yaml`), 100 updates, same seed and data order:
+
+| | g4ucq (original, p7) | g4ucq2 (rerun, p7) | **g4ucq3 (p-state 6)** |
+|---|---:|---:|---:|
+| run_global_step median / mean / p90 (steps 5–99) | 24.0 / 25.0 / 25.3 s | 23.5 / 23.8 / 25.0 s | **25.3 / 26.5 / 26.7 s** |
+| engine_generate median | 20.6 s | 20.0 s | 21.5 s |
+| `check_numbers` overall (first-10 / last-10) | 0.5118 | 0.5118 (0.507 / 0.520) | **0.5118 (0.507 / 0.520)** |
+| `score/mean`, KL | 0.580, 0 | 0.580, 0 | 0.580, 0 |
+| verdict | parity | parity | **SUSTAINED GPU PARITY** |
+
+p-state 6 costs **+7.5 % per update** (25.3 vs 23.5 s median; generation +7 %) and changes nothing
+numerically: the reward trajectory is identical to the p-state-7 runs to four decimals (same seed, same
+data order, deterministic scorer). The −29 % figure of the ladder becomes −27 % vs the 34.5 s baseline at
+p-state 6. Step 0 carried a one-time cold compile (939 s) because the new XLA flag set misses the
+compilation cache; steady state is unaffected. Evidence: `parity/logs/optimized_g4ucq3_pstate6_tb_parity.txt`,
+`parity/logs/optimized_g4ucq3_pstate6_phasetime.log`.
+
 ## 1. What the recipe is
 
 The fastest point on the gemma4-E2B perf ladder ([`GEMMA4_E2B_OPTIMIZATION_PATH.md`](GEMMA4_E2B_OPTIMIZATION_PATH.md)):
