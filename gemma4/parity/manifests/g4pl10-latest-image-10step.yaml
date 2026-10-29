@@ -171,7 +171,7 @@ data:
       python3 /workload/patches/patch_sampler_is.py
     fi
     if [ -f /workload/patches/patch_sharded_sampling.py ]; then
-      python3 /workload/patches/patch_sharded_sampling.py
+      echo "SHARDED-SAMPLING PATCH: SKIPPED (native distributed sampling in tpu_inference on this image)"
     fi
     if [ -f /workload/patches/patch_profiler_fix.py ]; then
       python3 /workload/patches/patch_profiler_fix.py

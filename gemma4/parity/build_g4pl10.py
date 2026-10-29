@@ -42,9 +42,9 @@ raw = raw[:m.start()] + f"{m.group(1)}patch_sampler_is.py: {json.dumps(patch)}" 
 #   `_distributed_sampling_*`); its appended `sample(rng, mesh, logits, md)` lacks the new kwarg ->
 #   "TypeError: sample() got an unexpected keyword argument 'allow_distributed_sampling'" (g4pl10 08:15Z).
 # Removing the ConfigMap key makes the launcher's `if [ -f ... ]` skip it.
-for _drop in ("patch_sharded_sampling.py",):
-    m2 = re.search(r'^\s*' + re.escape(_drop) + r': ".*"\n', raw, re.M); assert m2, _drop
-    raw = raw[:m2.start()] + raw[m2.end():]
+# the launcher applies it under `if [ -f ... ]`; neutralise the apply line instead of deleting the (block-scalar) key
+repl("  python3 /workload/patches/patch_sharded_sampling.py",
+     "  echo \"SHARDED-SAMPLING PATCH: SKIPPED (native distributed sampling in tpu_inference on this image)\"")
 # native knobs
 repl("    export ASYNC_REWARD=off", "    export ASYNC_REWARD=off\n    export DP_SCHED_ROUTING=round_robin   # native round-robin DP routing (replaces patch_dp_rr_routing on this image)")
 repl("        num_batches=250 \\", "        num_batches=10 \\\n        free_kv_cache_during_weight_sync=false \\\n        vllm_block_size=128 \\")
