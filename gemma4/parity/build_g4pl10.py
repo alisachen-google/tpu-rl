@@ -36,7 +36,7 @@ repl("20260730-jax_0.10.2", "20261028-jax_0.11.0", 3)
 # default, the rollout model produced gibberish at step 0 (0 % accuracy, 100 % no-box) on 2026-10-29.
 NAME = "g4pl10"
 if os.environ.get("WCONV") == "0":
-    repl("        num_batches=10 \\", "        num_batches=10 \\\n        use_weight_converter=false \\")
+    repl("        num_batches=250 \\", "        num_batches=250 \\\n        use_weight_converter=false \\")  # before the 250->10 rewrite below
     NAME = "g4pl10a"
 raw = raw.replace("g4pt1", NAME)
 # ported parity patcher (embedded after the rename so the ConfigMap value equals the file byte for byte)
