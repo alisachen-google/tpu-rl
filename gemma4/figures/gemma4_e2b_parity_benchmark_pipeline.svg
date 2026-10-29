@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620" font-family="Helvetica, Arial, sans-serif" font-size="14">
+  <rect width="1400" height="620" fill="#fcfcfb"/>
+  <text x="20" y="34" font-size="22" font-weight="bold" fill="#0b0b0b">gemma4-E2B · GSM8K accuracy-parity benchmark: identical recipe, identical scorer, two platforms</text>
+  <!-- shared inputs -->
+  <rect x="20" y="70" width="300" height="190" rx="10" fill="#f1f1ee" stroke="#c3c2b7"/>
+  <text x="35" y="95" font-weight="bold" fill="#0b0b0b">Frozen, identical on both sides</text>
+  <text x="35" y="120" fill="#52514e">• google/gemma-4-E2B-it (HF rev 3e22461f)</text>
+  <text x="35" y="140" fill="#52514e">• GSM8K train 7473 Q (shuffle seed) / test 1319 Q</text>
+  <text x="35" y="160" fill="#52514e">• native &lt;|turn&gt; chat template, one &lt;bos&gt;</text>
+  <text x="35" y="180" fill="#52514e">• system prompt "…final answer within \boxed{}"</text>
+  <text x="35" y="200" fill="#52514e">• GRPO: 128 prompts × 16 samples, T=1.0, top_p 1, top_k −1</text>
+  <text x="35" y="220" fill="#52514e">• token TIS w=min(exp(Δlogp),3), LR 2e-6 cosine, 250 updates</text>
+  <text x="35" y="240" fill="#52514e">• eval every 20 updates: greedy, 1319 Q, scorer-v2</text>
+  <!-- GPU side -->
+  <rect x="380" y="70" width="420" height="190" rx="10" fill="#e8f0fb" stroke="#2a78d6"/>
+  <text x="395" y="95" font-weight="bold" fill="#2a78d6">GPU reference (frozen)</text>
+  <text x="395" y="120" fill="#52514e">verl + vLLM, 16 nodes × 8 GPUs, FSDP</text>
+  <text x="395" y="140" fill="#52514e">3 seeds · gemma4_e2b_gsm8k8k_16n64g_s250_seed{1,2,3}</text>
+  <text x="395" y="160" fill="#52514e">per-eval: acc_v2, Wilson 95 %, boxed, tokens, flips</text>
+  <text x="395" y="180" fill="#52514e">per-step: k3 KL 3.4–5e-4, ESS ≥ 0.999, grad-norm</text>
+  <text x="395" y="200" fill="#52514e">step time 31.7 / 33.1 / 35.0 s (seed medians)</text>
+  <text x="395" y="225" font-weight="bold" fill="#2a78d6">step-250 acc_v2: 92.42 ± 0.42 (3-seed mean)</text>
+  <!-- TPU side -->
+  <rect x="860" y="70" width="520" height="190" rx="10" fill="#fdeee7" stroke="#eb6834"/>
+  <text x="875" y="95" font-weight="bold" fill="#eb6834">TPU v7x (this work)</text>
+  <text x="875" y="120" fill="#52514e">MaxText train_rl + tunix 0.1.8 + vLLM-TPU, Pathways, 64 chips (4x4x4)</text>
+  <text x="875" y="140" fill="#52514e">JobSet on GKE/Kueue; 17 fixes applied at pod start (patches ConfigMap)</text>
+  <text x="875" y="160" fill="#52514e">fp32 master/Adam, bf16 compute &amp; rollout; checkpoints every 20 steps</text>
+  <text x="875" y="180" fill="#52514e">stdout telemetry: EVAL-V2ACC, EVAL-BREAKDOWN, TIS-ACTIVE(k3, ESS), RLMETRIC</text>
+  <text x="875" y="200" fill="#52514e">step time 34.6 / 36.2 s (seed 42 / 43 medians)</text>
+  <text x="875" y="225" font-weight="bold" fill="#eb6834">step-250 acc_v2: 92.49 (seed 42), 92.65 (seed 43) → mean 92.57</text>
+  <!-- arrows to scorer -->
+  <line x1="590" y1="260" x2="590" y2="330" stroke="#2a78d6" stroke-width="3" marker-end="url(#a)"/>
+  <line x1="1120" y1="260" x2="1120" y2="330" stroke="#eb6834" stroke-width="3" marker-end="url(#a)"/>
+  <line x1="170" y1="260" x2="170" y2="330" stroke="#52514e" stroke-width="2" marker-end="url(#a)"/>
+  <defs><marker id="a" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#52514e"/></marker></defs>
+  <!-- scorer -->
+  <rect x="20" y="330" width="1360" height="110" rx="10" fill="#f1f1ee" stroke="#c3c2b7"/>
+  <text x="35" y="355" font-weight="bold" fill="#0b0b0b">One scorer for both platforms: boxed_math_reward_v2.compute_score (hash-verified copy of the GPU fixture)</text>
+  <text x="35" y="380" fill="#52514e">extract the last \boxed{…} → normalise → compare to the GSM8K gold → score 1.0 (correct) / 0.1 (boxed but wrong) / 0.0 (no box).   acc = share of 1.0.   Not MaxText's own `accuracy` (lenient math_verify; 78.1 % vs 81.5 % at step 0).</text>
+  <text x="35" y="405" fill="#52514e">per-question JSONL dumps on both sides (qhash = sha1(question)[:12]) → question-level diff: wrong→right / right→wrong counts, boxed rate, response length.</text>
+  <text x="35" y="428" fill="#52514e">Per-step telemetry compared in the same units: training reward, k3 KL, ESS, max IS weight, rollout tokens, wall time per update.</text>
+  <!-- gate -->
+  <rect x="20" y="470" width="1360" height="120" rx="10" fill="#eaf6f0" stroke="#1baf7a"/>
+  <text x="35" y="495" font-weight="bold" fill="#0b0b0b">Parity standard</text>
+  <text x="35" y="520" fill="#52514e">Gate: TPU step-250 accuracy (seed mean) ≥ GPU step-250 3-seed mean − 1 pp = 92.42 − 1.00 = 91.42 %.   Curve: every eval point within ±1 pp of the GPU mean, judged against the single-run Wilson 95 % width (±1.4 pp at n = 1319).</text>
+  <text x="35" y="545" fill="#52514e">Also required: same boxed-rate trajectory, same question-flip counts, sampler/trainer mismatch (k3 KL, ESS) in the GPU range, step time within the GPU seed spread.</text>
+  <text x="35" y="575" font-weight="bold" fill="#1baf7a">Result 2026-10-27: 92.57 ≥ 91.42 → PASS. 27 of 27 eval points within ±1.2 pp (mean delta +0.24 pp).</text>
+</svg>

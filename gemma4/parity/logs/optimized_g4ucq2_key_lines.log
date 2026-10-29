@@ -1,0 +1,83 @@
+# optimized 24 s recipe rerun (g4ucq2): 2026-10-27 10:52-11:45 UTC, 100 updates
+# key lines extracted from the head-pod stdout (jax-tpu container); per-step streams thinned to every 10th line
+I1027 10:53:30.934525 132380894792576 pyconfig.py:585] Config param batch_size: 256
+I1027 10:53:30.935192 132380894792576 pyconfig.py:585] Config param checkpoint_period: 100
+I1027 10:53:30.936205 132380894792576 pyconfig.py:585] Config param data_shuffle_seed: 42
+I1027 10:53:30.936338 132380894792576 pyconfig.py:585] Config param dataset_processor_path: /workload/patches/gemma_data.py
+I1027 10:53:30.936963 132380894792576 pyconfig.py:585] Config param decode_sampling_nucleus_p: 0.95
+I1027 10:53:30.937060 132380894792576 pyconfig.py:585] Config param decode_sampling_temperature: 0.8
+I1027 10:53:30.937107 132380894792576 pyconfig.py:585] Config param decode_sampling_top_k: 50
+I1027 10:53:30.937591 132380894792576 pyconfig.py:585] Config param enable_checkpointing: True
+I1027 10:53:30.938832 132380894792576 pyconfig.py:585] Config param eval_interval: 10
+I1027 10:53:30.942096 132380894792576 pyconfig.py:585] Config param learning_rate: 1e-06
+I1027 10:53:30.942214 132380894792576 pyconfig.py:585] Config param learning_rate_schedule_steps: 100
+I1027 10:53:30.942462 132380894792576 pyconfig.py:585] Config param load_parameters_path: gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw2/0/items
+I1027 10:53:30.943470 132380894792576 pyconfig.py:585] Config param max_prefill_predict_length: 4096
+I1027 10:53:30.943513 132380894792576 pyconfig.py:585] Config param max_target_length: 6144
+I1027 10:53:30.944891 132380894792576 pyconfig.py:585] Config param mu_dtype: bfloat16
+I1027 10:53:30.945104 132380894792576 pyconfig.py:585] Config param num_batches: 100
+I1027 10:53:30.945130 132380894792576 pyconfig.py:585] Config param num_epoch: 1
+I1027 10:53:30.948169 132380894792576 pyconfig.py:585] Config param reward_functions: 
+I1027 10:53:30.952981 132380894792576 pyconfig.py:585] Config param warmup_steps_fraction: 0.1
+I1027 10:53:30.953024 132380894792576 pyconfig.py:585] Config param weight_dtype: bfloat16
+I1027 10:58:02.634332 132380894792576 checkpoint_manager.py:1820] Found 0 checkpoint steps in gs://ubench-logs/g4ucq2/checkpoints/actor
+LENDIST step=0 n=2048 cap=2048 truncated=518 (25.29%) eos_at_cap=0 osl_mean=1194.2 isl_mean=151.0 first_think=0/2048
+PHASETIME step=0 compute_rewards=51.12 engine_generate=66.80 generate_and_advantage=121.01 micro_batch_steps=166.05 prepare_data=125.32 run_global_step=166.05
+LENDIST step=9 n=2048 cap=2048 truncated=615 (30.03%) eos_at_cap=0 osl_mean=1290.7 isl_mean=144.7 first_think=0/2048
+PHASETIME step=9 compute_rewards=0.21 engine_generate=19.96 generate_and_advantage=20.45 micro_batch_steps=23.16 prepare_data=20.72 run_global_step=23.16
+LENDIST step=19 n=2048 cap=2048 truncated=592 (28.91%) eos_at_cap=0 osl_mean=1327.3 isl_mean=149.7 first_think=0/2048
+PHASETIME step=19 compute_rewards=0.21 engine_generate=20.76 generate_and_advantage=21.22 micro_batch_steps=23.91 prepare_data=21.49 run_global_step=23.91
+LENDIST step=4 n=2048 cap=2048 truncated=560 (27.34%) eos_at_cap=0 osl_mean=1233.9 isl_mean=149.4 first_think=0/2048
+PHASETIME step=4 compute_rewards=0.22 engine_generate=19.44 generate_and_advantage=19.95 micro_batch_steps=22.71 prepare_data=20.21 run_global_step=22.71
+LENDIST step=15 n=2048 cap=2048 truncated=468 (22.85%) eos_at_cap=0 osl_mean=1222.3 isl_mean=150.4 first_think=0/2048
+PHASETIME step=15 compute_rewards=0.21 engine_generate=20.37 generate_and_advantage=20.85 micro_batch_steps=23.53 prepare_data=21.12 run_global_step=23.53
+LENDIST step=26 n=2048 cap=2048 truncated=587 (28.66%) eos_at_cap=0 osl_mean=1258.2 isl_mean=149.5 first_think=0/2048
+PHASETIME step=26 compute_rewards=0.20 engine_generate=19.67 generate_and_advantage=20.15 micro_batch_steps=22.84 prepare_data=20.42 run_global_step=22.84
+LENDIST step=36 n=2048 cap=2048 truncated=647 (31.59%) eos_at_cap=0 osl_mean=1300.7 isl_mean=149.5 first_think=0/2048
+PHASETIME step=36 compute_rewards=0.20 engine_generate=20.04 generate_and_advantage=20.55 micro_batch_steps=23.21 prepare_data=20.83 run_global_step=23.22
+LENDIST step=46 n=2048 cap=2048 truncated=524 (25.59%) eos_at_cap=0 osl_mean=1213.7 isl_mean=146.1 first_think=0/2048
+PHASETIME step=46 compute_rewards=0.19 engine_generate=18.58 generate_and_advantage=19.04 micro_batch_steps=23.24 prepare_data=19.33 run_global_step=23.24
+LENDIST step=22 n=2048 cap=2048 truncated=565 (27.59%) eos_at_cap=0 osl_mean=1249.9 isl_mean=146.0 first_think=0/2048
+PHASETIME step=22 compute_rewards=0.21 engine_generate=19.69 generate_and_advantage=20.16 micro_batch_steps=22.85 prepare_data=20.43 run_global_step=22.85
+LENDIST step=33 n=2048 cap=2048 truncated=617 (30.13%) eos_at_cap=0 osl_mean=1312.8 isl_mean=150.5 first_think=0/2048
+PHASETIME step=33 compute_rewards=0.23 engine_generate=20.15 generate_and_advantage=20.68 micro_batch_steps=29.99 prepare_data=20.97 run_global_step=29.99
+LENDIST step=44 n=2048 cap=2048 truncated=627 (30.62%) eos_at_cap=0 osl_mean=1255.3 isl_mean=146.4 first_think=0/2048
+PHASETIME step=44 compute_rewards=0.19 engine_generate=18.43 generate_and_advantage=18.88 micro_batch_steps=21.60 prepare_data=19.16 run_global_step=21.60
+LENDIST step=55 n=2048 cap=2048 truncated=596 (29.10%) eos_at_cap=0 osl_mean=1288.8 isl_mean=154.1 first_think=0/2048
+PHASETIME step=55 compute_rewards=0.23 engine_generate=20.95 generate_and_advantage=21.48 micro_batch_steps=24.24 prepare_data=21.82 run_global_step=24.24
+LENDIST step=65 n=2048 cap=2048 truncated=538 (26.27%) eos_at_cap=0 osl_mean=1254.5 isl_mean=145.8 first_think=0/2048
+PHASETIME step=65 compute_rewards=0.20 engine_generate=21.09 generate_and_advantage=21.58 micro_batch_steps=24.25 prepare_data=21.86 run_global_step=24.26
+PHASETIME step=74 compute_rewards=0.22 engine_generate=19.89 generate_and_advantage=20.39 micro_batch_steps=23.20 prepare_data=20.70 run_global_step=23.20
+LENDIST step=75 n=2048 cap=2048 truncated=675 (32.96%) eos_at_cap=0 osl_mean=1303.1 isl_mean=147.1 first_think=0/2048
+PHASETIME step=84 compute_rewards=0.21 engine_generate=21.84 generate_and_advantage=22.31 micro_batch_steps=25.04 prepare_data=22.60 run_global_step=25.04
+LENDIST step=85 n=2048 cap=2048 truncated=558 (27.25%) eos_at_cap=0 osl_mean=1254.1 isl_mean=154.5 first_think=0/2048
+PHASETIME step=94 compute_rewards=0.21 engine_generate=21.89 generate_and_advantage=22.34 micro_batch_steps=25.10 prepare_data=22.63 run_global_step=25.10
+LENDIST step=95 n=2048 cap=2048 truncated=604 (29.49%) eos_at_cap=0 osl_mean=1255.8 isl_mean=149.1 first_think=0/2048
+PHASETIME step=80 compute_rewards=0.20 engine_generate=19.48 generate_and_advantage=19.92 micro_batch_steps=24.26 prepare_data=20.21 run_global_step=24.26
+LENDIST step=82 n=2048 cap=2048 truncated=616 (30.08%) eos_at_cap=0 osl_mean=1239.5 isl_mean=151.4 first_think=0/2048
+PHASETIME step=91 compute_rewards=0.21 engine_generate=21.56 generate_and_advantage=22.06 micro_batch_steps=24.79 prepare_data=22.36 run_global_step=24.79
+LENDIST step=93 n=2048 cap=2048 truncated=576 (28.12%) eos_at_cap=0 osl_mean=1231.7 isl_mean=144.0 first_think=0/2048
+I1027 11:43:24.207489 132312507348672 atomicity.py:847] [process=0][thread=async_save] Finished saving checkpoint (finalized tmp dir) to `gs://ubench-logs/g4ucq2/checkpoints/actor/100`.
+PHASETIME step=77 compute_rewards=0.20 engine_generate=19.01 generate_and_advantage=19.50 micro_batch_steps=22.23 prepare_data=19.80 run_global_step=22.23
+LENDIST step=80 n=2048 cap=2048 truncated=593 (28.96%) eos_at_cap=0 osl_mean=1269.2 isl_mean=146.8 first_think=0/2048
+PHASETIME step=89 compute_rewards=0.21 engine_generate=21.30 generate_and_advantage=21.79 micro_batch_steps=24.54 prepare_data=22.09 run_global_step=24.54
+LENDIST step=92 n=2048 cap=2048 truncated=510 (24.90%) eos_at_cap=0 osl_mean=1192.9 isl_mean=150.5 first_think=0/2048
+PHASETIME step=76 compute_rewards=0.21 engine_generate=19.06 generate_and_advantage=19.54 micro_batch_steps=24.41 prepare_data=19.84 run_global_step=24.41
+LENDIST step=81 n=2048 cap=2048 truncated=585 (28.56%) eos_at_cap=0 osl_mean=1243.7 isl_mean=151.6 first_think=0/2048
+PHASETIME step=90 compute_rewards=0.18 engine_generate=18.91 generate_and_advantage=19.34 micro_batch_steps=22.06 prepare_data=19.63 run_global_step=22.06
+LENDIST step=96 n=2048 cap=2048 truncated=599 (29.25%) eos_at_cap=0 osl_mean=1296.4 isl_mean=150.0 first_think=0/2048
+PHASETIME step=79 compute_rewards=0.26 engine_generate=19.52 generate_and_advantage=20.08 micro_batch_steps=25.20 prepare_data=20.41 run_global_step=25.20
+LENDIST step=86 n=2048 cap=2048 truncated=614 (29.98%) eos_at_cap=0 osl_mean=1285.4 isl_mean=144.1 first_think=0/2048
+PHASETIME step=95 compute_rewards=0.21 engine_generate=18.88 generate_and_advantage=19.35 micro_batch_steps=22.06 prepare_data=19.65 run_global_step=22.06
+LENDIST step=76 n=2048 cap=2048 truncated=606 (29.59%) eos_at_cap=0 osl_mean=1279.5 isl_mean=152.0 first_think=0/2048
+PHASETIME step=85 compute_rewards=0.25 engine_generate=18.94 generate_and_advantage=19.50 micro_batch_steps=22.22 prepare_data=19.81 run_global_step=22.22
+LENDIST step=91 n=2048 cap=2048 truncated=554 (27.05%) eos_at_cap=0 osl_mean=1268.8 isl_mean=146.9 first_think=0/2048
+PHASETIME step=75 compute_rewards=0.21 engine_generate=21.47 generate_and_advantage=21.97 micro_batch_steps=24.77 prepare_data=22.26 run_global_step=24.77
+LENDIST step=87 n=2048 cap=2048 truncated=498 (24.32%) eos_at_cap=0 osl_mean=1182.2 isl_mean=146.1 first_think=0/2048
+PHASETIME step=96 compute_rewards=0.47 engine_generate=22.08 generate_and_advantage=22.80 micro_batch_steps=25.49 prepare_data=23.09 run_global_step=25.49
+LENDIST step=79 n=2048 cap=2048 truncated=578 (28.22%) eos_at_cap=0 osl_mean=1288.9 isl_mean=151.0 first_think=0/2048
+PHASETIME step=88 compute_rewards=0.25 engine_generate=19.45 generate_and_advantage=19.97 micro_batch_steps=22.70 prepare_data=20.26 run_global_step=22.70
+LENDIST step=77 n=2048 cap=2048 truncated=559 (27.29%) eos_at_cap=0 osl_mean=1247.5 isl_mean=152.1 first_think=0/2048
+PHASETIME step=86 compute_rewards=0.20 engine_generate=21.66 generate_and_advantage=22.13 micro_batch_steps=24.83 prepare_data=22.42 run_global_step=24.84
+LENDIST step=99 n=2048 cap=2048 truncated=531 (25.93%) eos_at_cap=0 osl_mean=1234.1 isl_mean=157.8 first_think=0/2048
+PHASETIME step=83 compute_rewards=0.22 engine_generate=19.48 generate_and_advantage=19.98 micro_batch_steps=22.69 prepare_data=20.27 run_global_step=22.69

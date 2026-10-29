@@ -86,7 +86,7 @@ stream_until_done(){  # $1 = jobset name; streams head-pod log; resumes on deact
 }
 
 log "chain3 start: g4pt1 state=$(state g4pt1)"
-for i in 1 2 3; do
+for i in ${SEEDS:-1 2 3}; do
   name="g4pt$i"
   st=$(state "$name")
   if [ "$st" = "completed" ] || [ "$st" = "failed" ]; then log "$name already $st; skipping"; continue; fi

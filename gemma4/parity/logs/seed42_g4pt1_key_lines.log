@@ -1,0 +1,460 @@
+# seed 42 (g4pt1): three admissions 05:07 / 07:12 / 09:13 UTC 2026-10-27; resumed from checkpoints 160 and 200
+# key lines extracted from the head-pod stdout (jax-tpu container); per-step streams thinned to every 10th line
+I1027 04:51:05.060229 139864277531520 evaluate_rl.py:354] EVAL-BREAKDOWN step=0 k=0 total=1319 acc=81.50% boxed_wrong=7.35% nobox=11.14% mean_chars=1445 dump=gs://ubench-logs/g4pt1/evals/eval_000.jsonl
+I1027 04:51:05.060341 139864277531520 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=81.5011% mean_reward=0.8224
+W1027 04:51:05.061333 139864277531520 train_rl.py:780] Pre RL Training: corr=1030, total=1319, accuracy=78.08946171341927%, partial_accuracy=79.15087187263077%, format_accuracy=0.0%, mean_reward=0.8224
+LENDIST step=0 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=465.5 isl_mean=93.2 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99999 weight_min=0.14995 weight_max=2.96637 frac_clipped=0.000000 k3_kl=3.6529e-04 ess=0.999302 logratio_mean=-3.5757e-04 logratio_absmean=6.5978e-03 ntok=953392
+PHASETIME step=0 compute_rewards=3.45 engine_generate=56.94 generate_and_advantage=70.54 micro_batch_steps=96.50 prepare_data=71.64 run_global_step=96.50
+RLMETRIC 'rewards' 'mean' 0.0773438 'train' 0
+LENDIST step=10 n=2048 cap=2560 truncated=2 (0.10%) eos_at_cap=0 osl_mean=497.1 isl_mean=99.1 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.33639 weight_max=2.76665 frac_clipped=0.000000 k3_kl=3.4394e-04 ess=0.999318 logratio_mean=-3.2315e-04 logratio_absmean=6.7754e-03 ntok=1018008
+PHASETIME step=10 compute_rewards=0.23 engine_generate=29.93 generate_and_advantage=31.97 micro_batch_steps=34.26 prepare_data=32.55 run_global_step=34.26
+RLMETRIC 'rewards' 'mean' 0.0998535 'train' 10
+LENDIST step=1 n=2048 cap=2560 truncated=5 (0.24%) eos_at_cap=0 osl_mean=500.8 isl_mean=98.1 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.31775 weight_max=2.87989 frac_clipped=0.000000 k3_kl=3.5156e-04 ess=0.999298 logratio_mean=-3.6534e-04 logratio_absmean=6.8409e-03 ntok=1025582
+PHASETIME step=1 compute_rewards=0.21 engine_generate=37.97 generate_and_advantage=39.93 micro_batch_steps=42.46 prepare_data=40.51 run_global_step=42.46
+RLMETRIC 'rewards' 'mean' 0.0805176 'train' 1
+TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=3.0, return_logprobs=True, eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_man
+I1027 05:08:36.196665 137313602337664 pyconfig.py:585] Config param batch_size: 128
+I1027 05:08:36.197110 137313602337664 pyconfig.py:585] Config param checkpoint_period: 20
+I1027 05:08:36.198405 137313602337664 pyconfig.py:585] Config param data_shuffle_seed: 42
+I1027 05:08:36.198628 137313602337664 pyconfig.py:585] Config param dataset_processor_path: /workload/patches/gemma_data_parity_native.py
+I1027 05:08:36.199439 137313602337664 pyconfig.py:585] Config param decode_sampling_nucleus_p: 1.0
+I1027 05:08:36.199510 137313602337664 pyconfig.py:585] Config param decode_sampling_temperature: 1.0
+I1027 05:08:36.199537 137313602337664 pyconfig.py:585] Config param decode_sampling_top_k: -1
+I1027 05:08:36.199852 137313602337664 pyconfig.py:585] Config param enable_checkpointing: True
+I1027 05:08:36.201216 137313602337664 pyconfig.py:585] Config param eval_interval: 20
+I1027 05:08:36.203717 137313602337664 pyconfig.py:585] Config param learning_rate: 2e-06
+I1027 05:08:36.203773 137313602337664 pyconfig.py:585] Config param learning_rate_schedule_steps: 250
+I1027 05:08:36.203891 137313602337664 pyconfig.py:585] Config param load_parameters_path: gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-it-fresh/0/items
+I1027 05:08:36.204552 137313602337664 pyconfig.py:585] Config param max_prefill_predict_length: 512
+I1027 05:08:36.204575 137313602337664 pyconfig.py:585] Config param max_target_length: 3072
+I1027 05:08:36.205540 137313602337664 pyconfig.py:585] Config param mu_dtype: float32
+I1027 05:08:36.205846 137313602337664 pyconfig.py:585] Config param num_batches: 250
+I1027 05:08:36.205873 137313602337664 pyconfig.py:585] Config param num_epoch: 5
+I1027 05:08:36.209347 137313602337664 pyconfig.py:585] Config param reward_functions: compute_score
+I1027 05:08:36.214501 137313602337664 pyconfig.py:585] Config param warmup_steps_fraction: 0.04
+I1027 05:08:36.214545 137313602337664 pyconfig.py:585] Config param weight_dtype: float32
+PARITY-PROMPT '<|turn>system\nYou are a helpful assistant. Please reason step by step, and put your final answer within \\boxed{}.<turn|>\n<|turn>user\nMaria has 4 dimes, 4 quarters, and 7 nickels in her piggy bank. Her mom gives her 5 quarters. How much money
+PARITY-GOLD   '["3"]'
+I1027 05:10:55.215711 137313602337664 checkpoint_manager.py:1820] Found 0 checkpoint steps in gs://ubench-logs/g4pt1/checkpoints/actor
+REWARD-DEBUG n=1 answer_type=list gold0=np.str_('["300"]') gold_str0='300' n_correct=1 n_boxed_wrong=0 n_zero=0 tail0='t reached the farmers that day is 300 tons.\n\n$$\\boxed{300 \\text{ tons}}$$<turn|>'
+REWARD-DEBUG n=1 answer_type=list gold0=np.str_('["450"]') gold_str0='450' n_correct=0 n_boxed_wrong=1 n_zero=0 tail0=' (150). This is correct.\n\nGrandpa can eat 50 small beans.\n\n$$\\boxed{50}$$<turn|>'
+REWARD-DEBUG n=1 answer_type=list gold0=np.str_('["320"]') gold_str0='320' n_correct=1 n_boxed_wrong=0 n_zero=0 tail0='ext{Total} = 50 + 40 + 80 + 150$$\n$$\\text{Total} = 320$$\n\n$$\\boxed{320}$$<turn|>'
+I1027 05:14:06.495299 137313602337664 evaluate_rl.py:354] EVAL-BREAKDOWN step=0 k=0 total=1319 acc=81.50% boxed_wrong=7.35% nobox=11.14% mean_chars=1445 dump=gs://ubench-logs/g4pt1/evals/eval_000.jsonl
+I1027 05:14:06.495420 137313602337664 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=81.5011% mean_reward=0.8224
+W1027 05:14:06.496391 137313602337664 train_rl.py:780] Pre RL Training: corr=1030, total=1319, accuracy=78.08946171341927%, partial_accuracy=79.15087187263077%, format_accuracy=0.0%, mean_reward=0.8224
+PHASETIME step=1 compute_rewards=0.22 engine_generate=39.79 generate_and_advantage=41.86 micro_batch_steps=44.51 prepare_data=42.41 run_global_step=44.52
+RLMETRIC 'rewards' 'mean' 0.691797 'train' 1
+LENDIST step=2 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=488.9 isl_mean=92.3 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.14833 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.7301e-04 ess=0.999257 logratio_mean=-3.7993e-04 logratio_absmean=7.1826e-03 ntok=1001250
+PHASETIME step=9 compute_rewards=0.25 engine_generate=30.62 generate_and_advantage=32.83 micro_batch_steps=35.27 prepare_data=33.38 run_global_step=35.27
+RLMETRIC 'rewards' 'mean' 0.896582 'train' 9
+LENDIST step=12 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=471.9 isl_mean=98.3 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.23930 weight_max=2.82206 frac_clipped=0.000000 k3_kl=3.2809e-04 ess=0.999351 logratio_mean=-3.4254e-04 logratio_absmean=6.1773e-03 ntok=966548
+PHASETIME step=19 compute_rewards=0.20 engine_generate=29.00 generate_and_advantage=30.94 micro_batch_steps=41.19 prepare_data=31.51 run_global_step=41.19
+RLMETRIC 'rewards' 'mean' 0.883105 'train' 19
+LENDIST step=5 n=2048 cap=2560 truncated=8 (0.39%) eos_at_cap=0 osl_mean=487.3 isl_mean=94.8 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00006 weight_min=0.16175 weight_max=2.98603 frac_clipped=0.000000 k3_kl=3.4301e-04 ess=0.999323 logratio_mean=-2.7791e-04 logratio_absmean=6.5796e-03 ntok=998065
+PHASETIME step=11 compute_rewards=0.22 engine_generate=31.01 generate_and_advantage=33.12 micro_batch_steps=35.56 prepare_data=33.73 run_global_step=35.56
+RLMETRIC 'rewards' 'mean' 0.892773 'train' 11
+LENDIST step=16 n=2048 cap=2560 truncated=2 (0.10%) eos_at_cap=0 osl_mean=464.8 isl_mean=97.5 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.46627 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.1532e-04 ess=0.999367 logratio_mean=-3.2702e-04 logratio_absmean=6.0524e-03 ntok=951985
+I1027 05:27:55.781985 137247886042816 atomicity.py:847] [process=0][thread=async_save] Finished saving checkpoint (finalized tmp dir) to `gs://ubench-logs/g4pt1/checkpoints/actor/20`.
+I1027 05:30:35.830474 137313602337664 evaluate_rl.py:354] EVAL-BREAKDOWN step=21 k=1 total=1319 acc=92.04% boxed_wrong=7.96% nobox=0.00% mean_chars=1360 dump=gs://ubench-logs/g4pt1/evals/eval_021.jsonl
+I1027 05:30:35.830588 137313602337664 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.0394% mean_reward=0.9284
+W1027 05:30:35.831714 137313602337664 hooks.py:98] Intermediate Eval (step=20): corr=1160, total=1319, accuracy=87.94541319181198%, partial_accuracy=88.70356330553449%, format_accuracy=0.0%, mean_reward=0.9284
+PHASETIME step=22 compute_rewards=0.20 engine_generate=29.43 generate_and_advantage=31.46 micro_batch_steps=33.76 prepare_data=32.03 run_global_step=33.76
+RLMETRIC 'rewards' 'mean' 0.924854 'train' 22
+LENDIST step=26 n=2048 cap=2560 truncated=4 (0.20%) eos_at_cap=0 osl_mean=473.0 isl_mean=93.2 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00003 weight_min=0.29574 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.1627e-04 ess=0.999351 logratio_mean=-2.8364e-04 logratio_absmean=6.0182e-03 ntok=968651
+PHASETIME step=32 compute_rewards=0.19 engine_generate=29.78 generate_and_advantage=31.76 micro_batch_steps=34.03 prepare_data=32.32 run_global_step=34.03
+RLMETRIC 'rewards' 'mean' 0.905664 'train' 32
+LENDIST step=24 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=428.9 isl_mean=94.2 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99999 weight_min=0.13489 weight_max=2.32107 frac_clipped=0.000000 k3_kl=3.2258e-04 ess=0.999366 logratio_mean=-3.2809e-04 logratio_absmean=6.0549e-03 ntok=878364
+PHASETIME step=30 compute_rewards=0.19 engine_generate=26.90 generate_and_advantage=28.85 micro_batch_steps=32.94 prepare_data=29.42 run_global_step=32.94
+RLMETRIC 'rewards' 'mean' 0.898438 'train' 30
+LENDIST step=35 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=474.8 isl_mean=98.0 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99994 weight_min=0.29239 weight_max=2.34946 frac_clipped=0.000000 k3_kl=3.2418e-04 ess=0.999358 logratio_mean=-3.7829e-04 logratio_absmean=6.1922e-03 ntok=972312
+I1027 05:44:30.154804 137313602337664 evaluate_rl.py:354] EVAL-BREAKDOWN step=41 k=2 total=1319 acc=91.43% boxed_wrong=8.57% nobox=0.00% mean_chars=1328 dump=gs://ubench-logs/g4pt1/evals/eval_041.jsonl
+I1027 05:44:30.154903 137313602337664 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.4329% mean_reward=0.9229
+W1027 05:44:30.155830 137313602337664 hooks.py:98] Intermediate Eval (step=40): corr=1159, total=1319, accuracy=87.86959818043972%, partial_accuracy=89.0068233510235%, format_accuracy=0.0%, mean_reward=0.9229
+PHASETIME step=41 compute_rewards=0.19 engine_generate=29.51 generate_and_advantage=31.46 micro_batch_steps=33.74 prepare_data=32.05 run_global_step=33.74
+RLMETRIC 'rewards' 'mean' 0.911084 'train' 41
+LENDIST step=45 n=2048 cap=2560 truncated=2 (0.10%) eos_at_cap=0 osl_mean=435.1 isl_mean=94.0 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.01833 weight_max=2.38488 frac_clipped=0.000000 k3_kl=3.5384e-04 ess=0.999406 logratio_mean=-3.1126e-04 logratio_absmean=5.3633e-03 ntok=891093
+PHASETIME step=26 compute_rewards=0.19 engine_generate=29.35 generate_and_advantage=31.29 micro_batch_steps=33.54 prepare_data=31.85 run_global_step=33.54
+RLMETRIC 'rewards' 'mean' 0.956738 'train' 26
+LENDIST step=32 n=2048 cap=2560 truncated=6 (0.29%) eos_at_cap=0 osl_mean=463.4 isl_mean=92.6 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.11416 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.3038e-04 ess=0.999356 logratio_mean=-2.9708e-04 logratio_absmean=6.1152e-03 ntok=949024
+PHASETIME step=38 compute_rewards=0.19 engine_generate=23.84 generate_and_advantage=25.93 micro_batch_steps=28.19 prepare_data=26.50 run_global_step=28.19
+RLMETRIC 'rewards' 'mean' 0.891016 'train' 38
+LENDIST step=43 n=2048 cap=2560 truncated=3 (0.15%) eos_at_cap=0 osl_mean=464.3 isl_mean=97.2 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.08831 weight_max=2.34480 frac_clipped=0.000000 k3_kl=3.5778e-04 ess=0.999307 logratio_mean=-3.3094e-04 logratio_absmean=6.4517e-03 ntok=950870
+PHASETIME step=49 compute_rewards=0.19 engine_generate=30.10 generate_and_advantage=32.12 micro_batch_steps=34.42 prepare_data=32.68 run_global_step=34.42
+RLMETRIC 'rewards' 'mean' 0.939746 'train' 49
+LENDIST step=54 n=2048 cap=2560 truncated=2 (0.10%) eos_at_cap=0 osl_mean=446.8 isl_mean=95.8 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.30042 weight_max=2.61184 frac_clipped=0.000000 k3_kl=3.1802e-04 ess=0.999366 logratio_mean=-2.9262e-04 logratio_absmean=5.7761e-03 ntok=915024
+PHASETIME step=59 compute_rewards=0.20 engine_generate=30.74 generate_and_advantage=32.69 micro_batch_steps=39.69 prepare_data=33.25 run_global_step=39.69
+RLMETRIC 'rewards' 'mean' 0.905078 'train' 59
+LENDIST step=25 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=474.2 isl_mean=96.3 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.01764 weight_max=2.64802 frac_clipped=0.000000 k3_kl=3.8215e-04 ess=0.999359 logratio_mean=-3.2181e-04 logratio_absmean=6.1763e-03 ntok=971183
+PHASETIME step=33 compute_rewards=0.19 engine_generate=27.75 generate_and_advantage=31.74 micro_batch_steps=34.01 prepare_data=32.31 run_global_step=34.01
+RLMETRIC 'rewards' 'mean' 0.933203 'train' 33
+LENDIST step=38 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=459.4 isl_mean=91.2 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.23737 weight_max=2.32361 frac_clipped=0.000000 k3_kl=3.3825e-04 ess=0.999334 logratio_mean=-3.3456e-04 logratio_absmean=6.4712e-03 ntok=940762
+PHASETIME step=45 compute_rewards=0.19 engine_generate=29.59 generate_and_advantage=31.59 micro_batch_steps=33.87 prepare_data=32.17 run_global_step=33.87
+RLMETRIC 'rewards' 'mean' 0.922998 'train' 45
+LENDIST step=50 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=430.6 isl_mean=95.0 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.15518 weight_max=2.54055 frac_clipped=0.000000 k3_kl=3.0982e-04 ess=0.999387 logratio_mean=-3.0297e-04 logratio_absmean=5.7051e-03 ntok=881884
+PHASETIME step=56 compute_rewards=0.20 engine_generate=31.21 generate_and_advantage=33.21 micro_batch_steps=35.49 prepare_data=33.79 run_global_step=35.49
+RLMETRIC 'rewards' 'mean' 0.917822 'train' 56
+I1027 05:58:36.408093 137313602337664 evaluate_rl.py:354] EVAL-BREAKDOWN step=61 k=3 total=1319 acc=92.19% boxed_wrong=7.73% nobox=0.08% mean_chars=1297 dump=gs://ubench-logs/g4pt1/evals/eval_061.jsonl
+I1027 05:58:36.408197 137313602337664 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.1911% mean_reward=0.9296
+W1027 05:58:36.409158 137313602337664 hooks.py:98] Intermediate Eval (step=60): corr=1169, total=1319, accuracy=88.62774829416225%, partial_accuracy=89.23426838514025%, format_accuracy=0.0%, mean_reward=0.9296
+LENDIST step=61 n=2048 cap=2560 truncated=2 (0.10%) eos_at_cap=0 osl_mean=444.5 isl_mean=95.8 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.11604 weight_max=2.23709 frac_clipped=0.000000 k3_kl=3.5702e-04 ess=0.999306 logratio_mean=-3.3429e-04 logratio_absmean=6.5904e-03 ntok=910374
+PHASETIME step=67 compute_rewards=0.21 engine_generate=27.90 generate_and_advantage=29.91 micro_batch_steps=32.20 prepare_data=30.50 run_global_step=32.21
+RLMETRIC 'rewards' 'mean' 0.879492 'train' 67
+LENDIST step=71 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=454.5 isl_mean=96.1 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00005 weight_min=0.31402 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.3873e-04 ess=0.999323 logratio_mean=-2.7975e-04 logratio_absmean=6.0859e-03 ntok=930876
+PHASETIME step=60 compute_rewards=0.19 engine_generate=27.19 generate_and_advantage=29.16 micro_batch_steps=175.48 prepare_data=29.75 run_global_step=175.48
+RLMETRIC 'rewards' 'mean' 0.933643 'train' 60
+LENDIST step=66 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=425.4 isl_mean=92.1 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99997 weight_min=0.14528 weight_max=2.78858 frac_clipped=0.000000 k3_kl=3.4013e-04 ess=0.999338 logratio_mean=-3.5548e-04 logratio_absmean=6.2252e-03 ntok=871216
+PHASETIME step=71 compute_rewards=0.19 engine_generate=31.46 generate_and_advantage=33.42 micro_batch_steps=35.71 prepare_data=34.00 run_global_step=35.71
+RLMETRIC 'rewards' 'mean' 0.941113 'train' 71
+LENDIST step=77 n=2048 cap=2560 truncated=8 (0.39%) eos_at_cap=0 osl_mean=450.0 isl_mean=94.3 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.11154 weight_max=2.52179 frac_clipped=0.000000 k3_kl=3.5304e-04 ess=0.999318 logratio_mean=-3.5580e-04 logratio_absmean=6.3575e-03 ntok=921658
+I1027 06:12:43.752943 137313602337664 evaluate_rl.py:354] EVAL-BREAKDOWN step=81 k=4 total=1319 acc=91.66% boxed_wrong=8.11% nobox=0.23% mean_chars=1274 dump=gs://ubench-logs/g4pt1/evals/eval_081.jsonl
+I1027 06:12:43.753083 137313602337664 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.6603% mean_reward=0.9247
+W1027 06:12:43.754410 137313602337664 hooks.py:98] Intermediate Eval (step=80): corr=1175, total=1319, accuracy=89.08263836239576%, partial_accuracy=89.84078847611828%, format_accuracy=0.0%, mean_reward=0.9247
+PHASETIME step=81 compute_rewards=0.21 engine_generate=29.13 generate_and_advantage=35.29 micro_batch_steps=37.07 prepare_data=35.90 run_global_step=37.07
+RLMETRIC 'rewards' 'mean' 0.944531 'train' 81
+LENDIST step=87 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=410.8 isl_mean=95.5 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.19868 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.4535e-04 ess=0.999324 logratio_mean=-3.2467e-04 logratio_absmean=6.1178e-03 ntok=841239
+PHASETIME step=63 compute_rewards=0.19 engine_generate=26.95 generate_and_advantage=28.94 micro_batch_steps=30.63 prepare_data=29.51 run_global_step=30.63
+RLMETRIC 'rewards' 'mean' 0.93667 'train' 63
+LENDIST step=72 n=2048 cap=2560 truncated=3 (0.15%) eos_at_cap=0 osl_mean=446.1 isl_mean=98.1 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.39534 weight_max=3.00000 frac_clipped=0.000002 k3_kl=3.6597e-04 ess=0.999269 logratio_mean=-3.3618e-04 logratio_absmean=6.8171e-03 ntok=913559
+PHASETIME step=75 compute_rewards=0.19 engine_generate=28.48 generate_and_advantage=30.39 micro_batch_steps=32.65 prepare_data=30.97 run_global_step=32.65
+RLMETRIC 'rewards' 'mean' 0.930469 'train' 75
+LENDIST step=83 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=412.6 isl_mean=94.9 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99997 weight_min=0.23526 weight_max=2.54357 frac_clipped=0.000000 k3_kl=3.5072e-04 ess=0.999318 logratio_mean=-3.6644e-04 logratio_absmean=6.1742e-03 ntok=844973
+PHASETIME step=86 compute_rewards=0.20 engine_generate=33.88 generate_and_advantage=35.85 micro_batch_steps=38.15 prepare_data=36.43 run_global_step=38.16
+RLMETRIC 'rewards' 'mean' 0.916504 'train' 86
+LENDIST step=94 n=2048 cap=2560 truncated=8 (0.39%) eos_at_cap=0 osl_mean=458.2 isl_mean=97.4 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.03093 weight_max=2.89808 frac_clipped=0.000000 k3_kl=3.9382e-04 ess=0.999291 logratio_mean=-3.4304e-04 logratio_absmean=6.3195e-03 ntok=938406
+PHASETIME step=96 compute_rewards=0.20 engine_generate=29.48 generate_and_advantage=31.42 micro_batch_steps=33.66 prepare_data=31.99 run_global_step=33.66
+RLMETRIC 'rewards' 'mean' 0.917334 'train' 96
+I1027 06:26:44.630060 137313602337664 evaluate_rl.py:354] EVAL-BREAKDOWN step=101 k=5 total=1319 acc=91.89% boxed_wrong=7.88% nobox=0.23% mean_chars=1263 dump=gs://ubench-logs/g4pt1/evals/eval_101.jsonl
+I1027 06:26:44.630190 137313602337664 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.8878% mean_reward=0.9268
+W1027 06:26:44.631236 137313602337664 hooks.py:98] Intermediate Eval (step=100): corr=1178, total=1319, accuracy=89.31008339651251%, partial_accuracy=90.29567854435177%, format_accuracy=0.0%, mean_reward=0.9268
+LENDIST step=102 n=2048 cap=2560 truncated=4 (0.20%) eos_at_cap=0 osl_mean=420.8 isl_mean=95.6 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.14302 weight_max=2.97138 frac_clipped=0.000000 k3_kl=3.8519e-04 ess=0.999260 logratio_mean=-3.6325e-04 logratio_absmean=6.4593e-03 ntok=861725
+PHASETIME step=103 compute_rewards=0.20 engine_generate=29.99 generate_and_advantage=31.93 micro_batch_steps=34.19 prepare_data=32.50 run_global_step=34.19
+RLMETRIC 'rewards' 'mean' 0.911035 'train' 103
+LENDIST step=112 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=438.0 isl_mean=95.3 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.12063 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.7418e-04 ess=0.999274 logratio_mean=-3.3909e-04 logratio_absmean=6.6251e-03 ntok=897054
+PHASETIME step=113 compute_rewards=0.21 engine_generate=25.12 generate_and_advantage=27.11 micro_batch_steps=28.83 prepare_data=27.70 run_global_step=28.83
+RLMETRIC 'rewards' 'mean' 0.940625 'train' 113
+LENDIST step=104 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=426.2 isl_mean=92.2 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99999 weight_min=0.12599 weight_max=2.06420 frac_clipped=0.000000 k3_kl=3.4758e-04 ess=0.999326 logratio_mean=-3.4304e-04 logratio_absmean=6.1163e-03 ntok=872811
+PHASETIME step=104 compute_rewards=0.20 engine_generate=29.31 generate_and_advantage=31.22 micro_batch_steps=33.46 prepare_data=31.77 run_global_step=33.47
+RLMETRIC 'rewards' 'mean' 0.913379 'train' 104
+LENDIST step=115 n=2048 cap=2560 truncated=2 (0.10%) eos_at_cap=0 osl_mean=440.8 isl_mean=96.1 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00004 weight_min=0.06646 weight_max=2.58935 frac_clipped=0.000000 k3_kl=3.5035e-04 ess=0.999332 logratio_mean=-2.9089e-04 logratio_absmean=5.9913e-03 ntok=902703
+PHASETIME step=115 compute_rewards=0.19 engine_generate=30.13 generate_and_advantage=32.07 micro_batch_steps=34.35 prepare_data=32.66 run_global_step=34.35
+RLMETRIC 'rewards' 'mean' 0.922119 'train' 115
+I1027 06:40:37.978140 137313602337664 evaluate_rl.py:354] EVAL-BREAKDOWN step=121 k=6 total=1319 acc=92.12% boxed_wrong=7.73% nobox=0.15% mean_chars=1271 dump=gs://ubench-logs/g4pt1/evals/eval_121.jsonl
+I1027 06:40:37.978260 137313602337664 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.1152% mean_reward=0.9289
+W1027 06:40:37.978317 137313602337664 hooks.py:98] Intermediate Eval (step=120): corr=1178, total=1319, accuracy=89.31008339651251%, partial_accuracy=90.44730856709629%, format_accuracy=0.0%, mean_reward=0.9289
+LENDIST step=125 n=2048 cap=2560 truncated=10 (0.49%) eos_at_cap=0 osl_mean=465.6 isl_mean=93.7 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.18022 weight_max=2.58884 frac_clipped=0.000000 k3_kl=3.7171e-04 ess=0.999285 logratio_mean=-3.5455e-04 logratio_absmean=6.5800e-03 ntok=953565
+PHASETIME step=125 compute_rewards=0.19 engine_generate=30.63 generate_and_advantage=32.59 micro_batch_steps=34.90 prepare_data=33.16 run_global_step=34.90
+RLMETRIC 'rewards' 'mean' 0.913379 'train' 125
+PHASETIME step=102 compute_rewards=0.20 engine_generate=28.46 generate_and_advantage=30.38 micro_batch_steps=32.65 prepare_data=30.96 run_global_step=32.65
+RLMETRIC 'rewards' 'mean' 0.889062 'train' 102
+LENDIST step=105 n=2048 cap=2560 truncated=15 (0.73%) eos_at_cap=0 osl_mean=460.4 isl_mean=94.6 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.17040 weight_max=2.74192 frac_clipped=0.000000 k3_kl=3.8907e-04 ess=0.999242 logratio_mean=-3.8113e-04 logratio_absmean=7.1532e-03 ntok=942919
+PHASETIME step=116 compute_rewards=0.20 engine_generate=25.34 generate_and_advantage=31.82 micro_batch_steps=33.52 prepare_data=32.39 run_global_step=33.52
+RLMETRIC 'rewards' 'mean' 0.932959 'train' 116
+LENDIST step=117 n=2048 cap=2560 truncated=5 (0.24%) eos_at_cap=0 osl_mean=425.8 isl_mean=97.8 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00005 weight_min=0.06919 weight_max=3.00000 frac_clipped=0.000005 k3_kl=3.5573e-04 ess=0.999286 logratio_mean=-2.8595e-04 logratio_absmean=5.9130e-03 ntok=872106
+I1027 06:38:20.848091 137229128349376 atomicity.py:847] [process=0][thread=async_save] Finished saving checkpoint (finalized tmp dir) to `gs://ubench-logs/g4pt1/checkpoints/actor/120`.
+PHASETIME step=127 compute_rewards=0.19 engine_generate=29.56 generate_and_advantage=31.50 micro_batch_steps=33.23 prepare_data=32.09 run_global_step=33.23
+RLMETRIC 'rewards' 'mean' 0.957764 'train' 127
+LENDIST step=128 n=2048 cap=2560 truncated=2 (0.10%) eos_at_cap=0 osl_mean=433.6 isl_mean=95.9 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.06602 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.5809e-04 ess=0.999316 logratio_mean=-3.6220e-04 logratio_absmean=6.1421e-03 ntok=888017
+PHASETIME step=137 compute_rewards=0.19 engine_generate=30.11 generate_and_advantage=32.05 micro_batch_steps=34.31 prepare_data=32.62 run_global_step=34.31
+RLMETRIC 'rewards' 'mean' 0.937012 'train' 137
+LENDIST step=138 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=425.8 isl_mean=96.4 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99996 weight_min=0.01802 weight_max=3.00000 frac_clipped=0.000001 k3_kl=4.3920e-04 ess=0.999336 logratio_mean=-3.6669e-04 logratio_absmean=5.5481e-03 ntok=872073
+I1027 06:54:51.177124 137313602337664 evaluate_rl.py:354] EVAL-BREAKDOWN step=141 k=7 total=1319 acc=92.57% boxed_wrong=7.43% nobox=0.00% mean_chars=1262 dump=gs://ubench-logs/g4pt1/evals/eval_141.jsonl
+I1027 06:54:51.177238 137313602337664 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.5701% mean_reward=0.9331
+W1027 06:54:51.178329 137313602337664 hooks.py:98] Intermediate Eval (step=140): corr=1183, total=1319, accuracy=89.68915845337376%, partial_accuracy=90.52312357846853%, format_accuracy=0.0%, mean_reward=0.9331
+PHASETIME step=141 compute_rewards=0.19 engine_generate=24.99 generate_and_advantage=26.93 micro_batch_steps=29.25 prepare_data=27.52 run_global_step=29.25
+RLMETRIC 'rewards' 'mean' 0.930518 'train' 141
+LENDIST step=143 n=2048 cap=2560 truncated=3 (0.15%) eos_at_cap=0 osl_mean=428.6 isl_mean=94.1 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99996 weight_min=0.14207 weight_max=3.00000 frac_clipped=0.000002 k3_kl=3.5228e-04 ess=0.999307 logratio_mean=-3.7671e-04 logratio_absmean=6.1737e-03 ntok=877736
+PHASETIME step=151 compute_rewards=0.21 engine_generate=31.03 generate_and_advantage=33.00 micro_batch_steps=34.72 prepare_data=33.59 run_global_step=34.72
+RLMETRIC 'rewards' 'mean' 0.949268 'train' 151
+LENDIST step=153 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=388.1 isl_mean=94.1 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00003 weight_min=0.11050 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.2184e-04 ess=0.999349 logratio_mean=-2.7849e-04 logratio_absmean=4.9707e-03 ntok=794885
+PHASETIME step=142 compute_rewards=0.20 engine_generate=29.86 generate_and_advantage=31.86 micro_batch_steps=34.16 prepare_data=32.44 run_global_step=34.16
+RLMETRIC 'rewards' 'mean' 0.933203 'train' 142
+LENDIST step=144 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=425.7 isl_mean=95.3 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99999 weight_min=0.00043 weight_max=2.84792 frac_clipped=0.000000 k3_kl=2.4249e-02 ess=0.999269 logratio_mean=-4.4000e-04 logratio_absmean=6.1956e-03 ntok=871852
+PHASETIME step=153 compute_rewards=0.20 engine_generate=24.83 generate_and_advantage=26.81 micro_batch_steps=28.51 prepare_data=27.39 run_global_step=28.51
+RLMETRIC 'rewards' 'mean' 0.9521 'train' 153
+LENDIST step=155 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=415.6 isl_mean=94.6 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00005 weight_min=0.03501 weight_max=2.80764 frac_clipped=0.000000 k3_kl=3.5963e-04 ess=0.999352 logratio_mean=-2.6877e-04 logratio_absmean=5.4509e-03 ntok=851154
+PHASETIME step=145 compute_rewards=0.20 engine_generate=30.84 generate_and_advantage=32.78 micro_batch_steps=35.08 prepare_data=33.39 run_global_step=35.08
+RLMETRIC 'rewards' 'mean' 0.904004 'train' 145
+LENDIST step=147 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=425.6 isl_mean=94.5 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00006 weight_min=0.05979 weight_max=3.00000 frac_clipped=0.000003 k3_kl=3.7134e-04 ess=0.999289 logratio_mean=-2.8484e-04 logratio_absmean=6.1131e-03 ntok=871543
+PHASETIME step=157 compute_rewards=0.19 engine_generate=32.30 generate_and_advantage=34.31 micro_batch_steps=36.63 prepare_data=34.91 run_global_step=36.63
+RLMETRIC 'rewards' 'mean' 0.933398 'train' 157
+LENDIST step=159 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=417.1 isl_mean=95.7 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00003 weight_min=0.20673 weight_max=2.45154 frac_clipped=0.000000 k3_kl=3.4108e-04 ess=0.999337 logratio_mean=-2.9625e-04 logratio_absmean=5.5447e-03 ntok=854248
+PHASETIME step=150 compute_rewards=0.19 engine_generate=26.27 generate_and_advantage=28.20 micro_batch_steps=29.95 prepare_data=28.78 run_global_step=29.95
+RLMETRIC 'rewards' 'mean' 0.931445 'train' 150
+LENDIST step=152 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=441.5 isl_mean=97.5 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.38088 weight_max=3.00000 frac_clipped=0.000002 k3_kl=3.4259e-04 ess=0.999301 logratio_mean=-3.2318e-04 logratio_absmean=5.8570e-03 ntok=904263
+PHASETIME step=146 compute_rewards=0.20 engine_generate=30.59 generate_and_advantage=32.55 micro_batch_steps=34.81 prepare_data=33.14 run_global_step=34.82
+RLMETRIC 'rewards' 'mean' 0.938428 'train' 146
+LENDIST step=148 n=2048 cap=2560 truncated=10 (0.49%) eos_at_cap=0 osl_mean=434.6 isl_mean=93.6 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.12156 weight_max=2.23293 frac_clipped=0.000000 k3_kl=3.6587e-04 ess=0.999298 logratio_mean=-3.7130e-04 logratio_absmean=6.3089e-03 ntok=890054
+PHASETIME step=140 compute_rewards=0.19 engine_generate=29.99 generate_and_advantage=31.96 micro_batch_steps=188.97 prepare_data=32.52 run_global_step=188.98
+RLMETRIC 'rewards' 'mean' 0.927002 'train' 140
+LENDIST step=142 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=435.3 isl_mean=97.2 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00004 weight_min=0.13037 weight_max=2.80260 frac_clipped=0.000000 k3_kl=3.5688e-04 ess=0.999303 logratio_mean=-3.0194e-04 logratio_absmean=6.2603e-03 ntok=891472
+PHASETIME step=158 compute_rewards=0.19 engine_generate=32.24 generate_and_advantage=34.25 micro_batch_steps=36.55 prepare_data=34.83 run_global_step=36.56
+RLMETRIC 'rewards' 'mean' 0.929932 'train' 158
+LENDIST step=160 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=422.4 isl_mean=96.0 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99996 weight_min=0.26447 weight_max=2.99036 frac_clipped=0.000000 k3_kl=3.4504e-04 ess=0.999331 logratio_mean=-3.7591e-04 logratio_absmean=5.7649e-03 ntok=865031
+PHASETIME step=156 compute_rewards=0.19 engine_generate=30.65 generate_and_advantage=32.64 micro_batch_steps=34.33 prepare_data=33.21 run_global_step=34.33
+RLMETRIC 'rewards' 'mean' 0.921484 'train' 156
+LENDIST step=158 n=2048 cap=2560 truncated=4 (0.20%) eos_at_cap=0 osl_mean=442.7 isl_mean=93.7 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00004 weight_min=0.29343 weight_max=2.31497 frac_clipped=0.000000 k3_kl=3.5707e-04 ess=0.999293 logratio_mean=-3.1133e-04 logratio_absmean=6.2732e-03 ntok=906720
+I1027 07:13:34.553498 135744164219776 pyconfig.py:585] Config param batch_size: 128
+I1027 07:13:34.553827 135744164219776 pyconfig.py:585] Config param checkpoint_period: 20
+I1027 07:13:34.554554 135744164219776 pyconfig.py:585] Config param data_shuffle_seed: 42
+I1027 07:13:34.554674 135744164219776 pyconfig.py:585] Config param dataset_processor_path: /workload/patches/gemma_data_parity_native.py
+I1027 07:13:34.555132 135744164219776 pyconfig.py:585] Config param decode_sampling_nucleus_p: 1.0
+I1027 07:13:34.555199 135744164219776 pyconfig.py:585] Config param decode_sampling_temperature: 1.0
+I1027 07:13:34.555228 135744164219776 pyconfig.py:585] Config param decode_sampling_top_k: -1
+I1027 07:13:34.555501 135744164219776 pyconfig.py:585] Config param enable_checkpointing: True
+I1027 07:13:34.556256 135744164219776 pyconfig.py:585] Config param eval_interval: 20
+I1027 07:13:34.558235 135744164219776 pyconfig.py:585] Config param learning_rate: 2e-06
+I1027 07:13:34.558295 135744164219776 pyconfig.py:585] Config param learning_rate_schedule_steps: 250
+I1027 07:13:34.558424 135744164219776 pyconfig.py:585] Config param load_parameters_path: gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-it-fresh/0/items
+I1027 07:13:34.559085 135744164219776 pyconfig.py:585] Config param max_prefill_predict_length: 512
+I1027 07:13:34.559118 135744164219776 pyconfig.py:585] Config param max_target_length: 3072
+I1027 07:13:34.559870 135744164219776 pyconfig.py:585] Config param mu_dtype: float32
+I1027 07:13:34.560124 135744164219776 pyconfig.py:585] Config param num_batches: 250
+I1027 07:13:34.560152 135744164219776 pyconfig.py:585] Config param num_epoch: 5
+I1027 07:13:34.562051 135744164219776 pyconfig.py:585] Config param reward_functions: compute_score
+I1027 07:13:34.565130 135744164219776 pyconfig.py:585] Config param warmup_steps_fraction: 0.04
+I1027 07:13:34.565158 135744164219776 pyconfig.py:585] Config param weight_dtype: float32
+I1027 07:16:03.512426 135744164219776 checkpoint_manager.py:1820] Found 8 checkpoint steps in gs://ubench-logs/g4pt1/checkpoints/actor
+I1027 07:16:20.870015 135744164219776 checkpoint_manager.py:293] Restored params from step: 160 in 17.356 seconds
+I1027 07:19:26.334939 135744164219776 evaluate_rl.py:354] EVAL-BREAKDOWN step=160 k=0 total=1319 acc=81.50% boxed_wrong=7.35% nobox=11.14% mean_chars=1445 dump=gs://ubench-logs/g4pt1/evals/eval_160.jsonl
+I1027 07:19:26.335052 135744164219776 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=81.5011% mean_reward=0.8224
+W1027 07:19:26.335996 135744164219776 train_rl.py:780] Pre RL Training: corr=1030, total=1319, accuracy=78.08946171341927%, partial_accuracy=79.15087187263077%, format_accuracy=0.0%, mean_reward=0.8224
+PHASETIME step=163 compute_rewards=0.20 engine_generate=26.24 generate_and_advantage=29.05 micro_batch_steps=30.78 prepare_data=29.63 run_global_step=30.78
+RLMETRIC 'rewards' 'mean' 0.923047 'train' 163
+LENDIST step=164 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=392.2 isl_mean=95.5 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99994 weight_min=0.18139 weight_max=2.48968 frac_clipped=0.000000 k3_kl=3.2447e-04 ess=0.999388 logratio_mean=-3.6679e-04 logratio_absmean=4.9590e-03 ntok=803136
+PHASETIME step=173 compute_rewards=0.19 engine_generate=27.28 generate_and_advantage=30.39 micro_batch_steps=32.08 prepare_data=30.95 run_global_step=32.08
+RLMETRIC 'rewards' 'mean' 0.9354 'train' 173
+LENDIST step=174 n=2048 cap=2560 truncated=5 (0.24%) eos_at_cap=0 osl_mean=406.9 isl_mean=100.2 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.14294 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.7558e-04 ess=0.999286 logratio_mean=-3.4758e-04 logratio_absmean=5.6364e-03 ntok=833253
+LENDIST step=163 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=409.1 isl_mean=92.4 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.07887 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.5205e-04 ess=0.999342 logratio_mean=-3.2818e-04 logratio_absmean=5.6961e-03 ntok=837758
+PHASETIME step=164 compute_rewards=0.19 engine_generate=23.53 generate_and_advantage=25.54 micro_batch_steps=27.24 prepare_data=26.12 run_global_step=27.24
+RLMETRIC 'rewards' 'mean' 0.946826 'train' 164
+LENDIST step=175 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=420.2 isl_mean=95.6 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99999 weight_min=0.03422 weight_max=2.82035 frac_clipped=0.000000 k3_kl=3.9895e-04 ess=0.999272 logratio_mean=-3.7141e-04 logratio_absmean=6.1912e-03 ntok=860654
+PHASETIME step=175 compute_rewards=0.21 engine_generate=31.56 generate_and_advantage=33.51 micro_batch_steps=35.78 prepare_data=34.11 run_global_step=35.78
+RLMETRIC 'rewards' 'mean' 0.899756 'train' 175
+I1027 07:33:24.994061 135665620199104 atomicity.py:847] [process=0][thread=async_save] Finished saving checkpoint (finalized tmp dir) to `gs://ubench-logs/g4pt1/checkpoints/actor/180`.
+I1027 07:35:38.490720 135744164219776 evaluate_rl.py:354] EVAL-BREAKDOWN step=181 k=1 total=1319 acc=93.18% boxed_wrong=6.82% nobox=0.00% mean_chars=1254 dump=gs://ubench-logs/g4pt1/evals/eval_181.jsonl
+I1027 07:35:38.490840 135744164219776 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=93.1766% mean_reward=0.9386
+W1027 07:35:38.491842 135744164219776 hooks.py:98] Intermediate Eval (step=180): corr=1184, total=1319, accuracy=89.76497346474602%, partial_accuracy=90.7505686125853%, format_accuracy=0.0%, mean_reward=0.9386
+LENDIST step=185 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=424.8 isl_mean=97.2 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.03301 weight_max=2.63975 frac_clipped=0.000000 k3_kl=3.8237e-04 ess=0.999333 logratio_mean=-3.1540e-04 logratio_absmean=5.6507e-03 ntok=869888
+PHASETIME step=185 compute_rewards=0.19 engine_generate=29.04 generate_and_advantage=31.01 micro_batch_steps=33.29 prepare_data=31.58 run_global_step=33.29
+RLMETRIC 'rewards' 'mean' 0.949414 'train' 185
+LENDIST step=181 n=2048 cap=2560 truncated=3 (0.15%) eos_at_cap=0 osl_mean=407.2 isl_mean=95.4 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.11674 weight_max=2.80138 frac_clipped=0.000000 k3_kl=3.8924e-04 ess=0.999277 logratio_mean=-3.4515e-04 logratio_absmean=5.6706e-03 ntok=833869
+PHASETIME step=181 compute_rewards=0.20 engine_generate=27.99 generate_and_advantage=29.93 micro_batch_steps=31.68 prepare_data=30.51 run_global_step=31.68
+RLMETRIC 'rewards' 'mean' 0.952393 'train' 181
+LENDIST step=192 n=2048 cap=2560 truncated=7 (0.34%) eos_at_cap=0 osl_mean=433.2 isl_mean=95.0 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.24427 weight_max=2.47641 frac_clipped=0.000000 k3_kl=3.6596e-04 ess=0.999287 logratio_mean=-3.4694e-04 logratio_absmean=5.9698e-03 ntok=887292
+PHASETIME step=192 compute_rewards=0.19 engine_generate=28.04 generate_and_advantage=30.00 micro_batch_steps=32.26 prepare_data=30.56 run_global_step=32.26
+RLMETRIC 'rewards' 'mean' 0.954395 'train' 192
+I1027 07:49:52.585020 135744164219776 evaluate_rl.py:354] EVAL-BREAKDOWN step=201 k=2 total=1319 acc=92.65% boxed_wrong=7.13% nobox=0.23% mean_chars=1268 dump=gs://ubench-logs/g4pt1/evals/eval_201.jsonl
+I1027 07:49:52.585145 135744164219776 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.6459% mean_reward=0.9336
+W1027 07:49:52.586148 135744164219776 hooks.py:98] Intermediate Eval (step=200): corr=1178, total=1319, accuracy=89.31008339651251%, partial_accuracy=90.52312357846853%, format_accuracy=0.0%, mean_reward=0.9336
+LENDIST step=202 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=386.4 isl_mean=92.3 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.12363 weight_max=3.00000 frac_clipped=0.000005 k3_kl=3.6539e-04 ess=0.999240 logratio_mean=-3.4811e-04 logratio_absmean=5.5943e-03 ntok=791297
+PHASETIME step=202 compute_rewards=0.19 engine_generate=28.24 generate_and_advantage=30.16 micro_batch_steps=31.82 prepare_data=30.71 run_global_step=31.82
+RLMETRIC 'rewards' 'mean' 0.931445 'train' 202
+LENDIST step=190 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=413.3 isl_mean=93.5 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.23934 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.4101e-04 ess=0.999326 logratio_mean=-3.0946e-04 logratio_absmean=5.5028e-03 ntok=846521
+PHASETIME step=190 compute_rewards=0.19 engine_generate=26.98 generate_and_advantage=30.81 micro_batch_steps=32.53 prepare_data=31.38 run_global_step=32.53
+RLMETRIC 'rewards' 'mean' 0.940674 'train' 190
+LENDIST step=201 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=403.6 isl_mean=93.1 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00004 weight_min=0.07796 weight_max=3.00000 frac_clipped=0.000002 k3_kl=3.4588e-04 ess=0.999313 logratio_mean=-2.8002e-04 logratio_absmean=5.0291e-03 ntok=826660
+PHASETIME step=201 compute_rewards=0.19 engine_generate=22.42 generate_and_advantage=24.34 micro_batch_steps=26.03 prepare_data=24.91 run_global_step=26.03
+RLMETRIC 'rewards' 'mean' 0.966162 'train' 201
+LENDIST step=212 n=2048 cap=2560 truncated=6 (0.29%) eos_at_cap=0 osl_mean=442.6 isl_mean=92.8 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.07998 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.7587e-04 ess=0.999280 logratio_mean=-3.5669e-04 logratio_absmean=6.1211e-03 ntok=906485
+PHASETIME step=212 compute_rewards=0.19 engine_generate=31.43 generate_and_advantage=33.40 micro_batch_steps=35.67 prepare_data=33.97 run_global_step=35.67
+RLMETRIC 'rewards' 'mean' 0.912256 'train' 212
+I1027 08:04:05.664809 135744164219776 evaluate_rl.py:354] EVAL-BREAKDOWN step=221 k=3 total=1319 acc=92.87% boxed_wrong=6.97% nobox=0.15% mean_chars=1267 dump=gs://ubench-logs/g4pt1/evals/eval_221.jsonl
+I1027 08:04:05.664923 135744164219776 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.8734% mean_reward=0.9357
+W1027 08:04:05.666010 135744164219776 hooks.py:98] Intermediate Eval (step=220): corr=1182, total=1319, accuracy=89.61334344200151%, partial_accuracy=90.82638362395754%, format_accuracy=0.0%, mean_reward=0.9357
+LENDIST step=222 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=412.3 isl_mean=99.1 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.10955 weight_max=2.40721 frac_clipped=0.000000 k3_kl=3.5746e-04 ess=0.999305 logratio_mean=-3.3517e-04 logratio_absmean=5.7562e-03 ntok=844464
+PHASETIME step=222 compute_rewards=0.19 engine_generate=27.47 generate_and_advantage=29.41 micro_batch_steps=31.65 prepare_data=29.96 run_global_step=31.65
+RLMETRIC 'rewards' 'mean' 0.921338 'train' 222
+LENDIST step=232 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=384.1 isl_mean=92.3 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00003 weight_min=0.06089 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.7993e-04 ess=0.999315 logratio_mean=-3.0955e-04 logratio_absmean=5.4491e-03 ntok=786570
+PHASETIME step=232 compute_rewards=0.19 engine_generate=23.80 generate_and_advantage=25.76 micro_batch_steps=27.44 prepare_data=26.36 run_global_step=27.44
+RLMETRIC 'rewards' 'mean' 0.944629 'train' 232
+PHASETIME step=226 compute_rewards=0.20 engine_generate=27.85 generate_and_advantage=29.82 micro_batch_steps=31.58 prepare_data=30.45 run_global_step=31.58
+RLMETRIC 'rewards' 'mean' 0.927441 'train' 226
+LENDIST step=227 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=401.2 isl_mean=95.8 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.31154 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.4577e-04 ess=0.999330 logratio_mean=-3.3321e-04 logratio_absmean=5.3862e-03 ntok=821728
+PHASETIME step=237 compute_rewards=0.19 engine_generate=31.68 generate_and_advantage=33.68 micro_batch_steps=35.39 prepare_data=34.26 run_global_step=35.39
+RLMETRIC 'rewards' 'mean' 0.88833 'train' 237
+LENDIST step=238 n=2048 cap=2560 truncated=3 (0.15%) eos_at_cap=0 osl_mean=409.8 isl_mean=99.0 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.13733 weight_max=2.85166 frac_clipped=0.000000 k3_kl=3.6632e-04 ess=0.999318 logratio_mean=-3.3628e-04 logratio_absmean=5.2979e-03 ntok=839206
+I1027 08:17:50.774031 135728149699456 pyconfig.py:585] Config param batch_size: 128
+I1027 08:17:50.774401 135728149699456 pyconfig.py:585] Config param checkpoint_period: 20
+I1027 08:17:50.775043 135728149699456 pyconfig.py:585] Config param data_shuffle_seed: 42
+I1027 08:17:50.775281 135728149699456 pyconfig.py:585] Config param dataset_processor_path: /workload/patches/gemma_data_parity_native.py
+I1027 08:17:50.775726 135728149699456 pyconfig.py:585] Config param decode_sampling_nucleus_p: 1.0
+I1027 08:17:50.775787 135728149699456 pyconfig.py:585] Config param decode_sampling_temperature: 1.0
+I1027 08:17:50.775815 135728149699456 pyconfig.py:585] Config param decode_sampling_top_k: -1
+I1027 08:17:50.776144 135728149699456 pyconfig.py:585] Config param enable_checkpointing: True
+I1027 08:17:50.776962 135728149699456 pyconfig.py:585] Config param eval_interval: 20
+I1027 08:17:50.778981 135728149699456 pyconfig.py:585] Config param learning_rate: 2e-06
+I1027 08:17:50.779038 135728149699456 pyconfig.py:585] Config param learning_rate_schedule_steps: 250
+I1027 08:17:50.779198 135728149699456 pyconfig.py:585] Config param load_parameters_path: gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-it-fresh/0/items
+I1027 08:17:50.779846 135728149699456 pyconfig.py:585] Config param max_prefill_predict_length: 512
+I1027 08:17:50.779872 135728149699456 pyconfig.py:585] Config param max_target_length: 3072
+I1027 08:17:50.780649 135728149699456 pyconfig.py:585] Config param mu_dtype: float32
+I1027 08:17:50.780874 135728149699456 pyconfig.py:585] Config param num_batches: 250
+I1027 08:17:50.780900 135728149699456 pyconfig.py:585] Config param num_epoch: 5
+I1027 08:17:50.782781 135728149699456 pyconfig.py:585] Config param reward_functions: compute_score
+I1027 08:17:50.785897 135728149699456 pyconfig.py:585] Config param warmup_steps_fraction: 0.04
+I1027 08:17:50.785924 135728149699456 pyconfig.py:585] Config param weight_dtype: float32
+I1027 08:20:00.662330 135728149699456 checkpoint_manager.py:1820] Found 10 checkpoint steps in gs://ubench-logs/g4pt1/checkpoints/actor
+I1027 08:20:33.927530 135728149699456 checkpoint_manager.py:293] Restored params from step: 200 in 33.264 seconds
+RESUME-SYNC pushing restored actor weights (global_steps=200) to the rollout engine before the first generation
+REWARD-DEBUG n=1 answer_type=list gold0=np.str_('["300"]') gold_str0='300' n_correct=1 n_boxed_wrong=0 n_zero=0 tail0=' of fertiliser that reached the farmers that day is 300.\n\n$$\\boxed{300}$$<turn|>'
+REWARD-DEBUG n=1 answer_type=list gold0=np.str_('["450"]') gold_str0='450' n_correct=0 n_boxed_wrong=1 n_zero=0 tail0=' = 50$.\n\nThe number of small beans Grandpa can eat is 50.\n\n$$\\boxed{50}$$<turn|>'
+REWARD-DEBUG n=1 answer_type=list gold0=np.str_('["320"]') gold_str0='320' n_correct=1 n_boxed_wrong=0 n_zero=0 tail0='f people that entered the restaurant on that day is 320.\n\n$$\\boxed{320}$$<turn|>'
+I1027 08:23:31.877058 135728149699456 evaluate_rl.py:354] EVAL-BREAKDOWN step=200 k=0 total=1319 acc=92.49% boxed_wrong=7.28% nobox=0.23% mean_chars=1270 dump=gs://ubench-logs/g4pt1/evals/eval_200.jsonl
+I1027 08:23:31.877197 135728149699456 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.4943% mean_reward=0.9322
+W1027 08:23:31.878191 135728149699456 train_rl.py:780] Pre RL Training: corr=1176, total=1319, accuracy=89.15845337376801%, partial_accuracy=90.29567854435177%, format_accuracy=0.0%, mean_reward=0.9322
+PHASETIME step=203 compute_rewards=0.19 engine_generate=23.62 generate_and_advantage=25.62 micro_batch_steps=27.41 prepare_data=26.22 run_global_step=27.41
+LENDIST step=204 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=450.6 isl_mean=96.7 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.19436 weight_max=2.61437 frac_clipped=0.000000 k3_kl=3.5494e-04 ess=0.999306 logratio_mean=-3.2927e-04 logratio_absmean=5.9749e-03 ntok=922888
+RLMETRIC 'rewards' 'mean' 0.897119 'train' 204
+PHASETIME step=213 compute_rewards=0.19 engine_generate=29.73 generate_and_advantage=31.73 micro_batch_steps=34.04 prepare_data=32.32 run_global_step=34.04
+LENDIST step=214 n=2048 cap=2560 truncated=7 (0.34%) eos_at_cap=0 osl_mean=473.6 isl_mean=96.1 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99999 weight_min=0.06141 weight_max=3.00000 frac_clipped=0.000005 k3_kl=4.3589e-04 ess=0.999121 logratio_mean=-4.1789e-04 logratio_absmean=7.0910e-03 ntok=969889
+RLMETRIC 'rewards' 'mean' 0.885889 'train' 214
+LENDIST step=205 n=2048 cap=2560 truncated=4 (0.20%) eos_at_cap=0 osl_mean=455.0 isl_mean=96.3 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.27279 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.7848e-04 ess=0.999212 logratio_mean=-3.8071e-04 logratio_absmean=6.4868e-03 ntok=931749
+PHASETIME step=205 compute_rewards=0.21 engine_generate=29.17 generate_and_advantage=31.14 micro_batch_steps=33.49 prepare_data=31.73 run_global_step=33.49
+RLMETRIC 'rewards' 'mean' 0.945068 'train' 206
+LENDIST step=216 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=399.9 isl_mean=91.7 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.06671 weight_max=3.00000 frac_clipped=0.000002 k3_kl=3.8154e-04 ess=0.999288 logratio_mean=-3.6844e-04 logratio_absmean=5.6786e-03 ntok=818899
+PHASETIME step=216 compute_rewards=0.19 engine_generate=28.09 generate_and_advantage=30.07 micro_batch_steps=31.75 prepare_data=30.64 run_global_step=31.75
+RLMETRIC 'rewards' 'mean' 0.969238 'train' 217
+I1027 08:39:02.170151 135728149699456 evaluate_rl.py:354] EVAL-BREAKDOWN step=220 k=1 total=1319 acc=92.27% boxed_wrong=7.73% nobox=0.00% mean_chars=1268 dump=gs://ubench-logs/g4pt1/evals/eval_220.jsonl
+I1027 08:39:02.170273 135728149699456 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.2669% mean_reward=0.9304
+W1027 08:39:02.171427 135728149699456 hooks.py:98] Intermediate Eval (step=220): corr=1172, total=1319, accuracy=88.855193328279%, partial_accuracy=90.37149355572403%, format_accuracy=0.0%, mean_reward=0.9304
+I1027 09:14:09.748651 137321199041408 pyconfig.py:585] Config param batch_size: 128
+I1027 09:14:09.749399 137321199041408 pyconfig.py:585] Config param checkpoint_period: 20
+I1027 09:14:09.750256 137321199041408 pyconfig.py:585] Config param data_shuffle_seed: 42
+I1027 09:14:09.750426 137321199041408 pyconfig.py:585] Config param dataset_processor_path: /workload/patches/gemma_data_parity_native.py
+I1027 09:14:09.751277 137321199041408 pyconfig.py:585] Config param decode_sampling_nucleus_p: 1.0
+I1027 09:14:09.751357 137321199041408 pyconfig.py:585] Config param decode_sampling_temperature: 1.0
+I1027 09:14:09.751412 137321199041408 pyconfig.py:585] Config param decode_sampling_top_k: -1
+I1027 09:14:09.751841 137321199041408 pyconfig.py:585] Config param enable_checkpointing: True
+I1027 09:14:09.752663 137321199041408 pyconfig.py:585] Config param eval_interval: 20
+I1027 09:14:09.755871 137321199041408 pyconfig.py:585] Config param learning_rate: 2e-06
+I1027 09:14:09.755990 137321199041408 pyconfig.py:585] Config param learning_rate_schedule_steps: 250
+I1027 09:14:09.756209 137321199041408 pyconfig.py:585] Config param load_parameters_path: gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-it-fresh/0/items
+I1027 09:14:09.756967 137321199041408 pyconfig.py:585] Config param max_prefill_predict_length: 512
+I1027 09:14:09.757024 137321199041408 pyconfig.py:585] Config param max_target_length: 3072
+I1027 09:14:09.758269 137321199041408 pyconfig.py:585] Config param mu_dtype: float32
+I1027 09:14:09.758512 137321199041408 pyconfig.py:585] Config param num_batches: 250
+I1027 09:14:09.758541 137321199041408 pyconfig.py:585] Config param num_epoch: 5
+I1027 09:14:09.761628 137321199041408 pyconfig.py:585] Config param reward_functions: compute_score
+I1027 09:14:09.766050 137321199041408 pyconfig.py:585] Config param warmup_steps_fraction: 0.04
+I1027 09:14:09.766131 137321199041408 pyconfig.py:585] Config param weight_dtype: float32
+PARITY-PROMPT '<|turn>system\nYou are a helpful assistant. Please reason step by step, and put your final answer within \\boxed{}.<turn|>\n<|turn>user\nJame gets 20 singing lessons.  He gets the first lesson free and after the first 10 paid lessons he only nee
+PARITY-GOLD   '["35"]'
+PARITY-PROMPT '<|turn>system\nYou are a helpful assistant. Please reason step by step, and put your final answer within \\boxed{}.<turn|>\n<|turn>user\nA wildlife team is monitoring the number of birds in a park. There are 3 blackbirds in each of the park’s 7 
+PARITY-GOLD   '["34"]'
+I1027 09:16:17.311594 137321199041408 checkpoint_manager.py:1820] Found 10 checkpoint steps in gs://ubench-logs/g4pt1/checkpoints/actor
+I1027 09:16:34.754801 137321199041408 checkpoint_manager.py:293] Restored params from step: 200 in 17.442 seconds
+I1027 09:19:32.911761 137321199041408 evaluate_rl.py:354] EVAL-BREAKDOWN step=200 k=0 total=1319 acc=92.49% boxed_wrong=7.28% nobox=0.23% mean_chars=1270 dump=gs://ubench-logs/g4pt1/evals/eval_200.jsonl
+I1027 09:19:32.911881 137321199041408 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.4943% mean_reward=0.9322
+W1027 09:19:32.912974 137321199041408 train_rl.py:780] Pre RL Training: corr=1176, total=1319, accuracy=89.15845337376801%, partial_accuracy=90.29567854435177%, format_accuracy=0.0%, mean_reward=0.9322
+LENDIST step=202 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=399.9 isl_mean=93.1 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.03181 weight_max=3.00000 frac_clipped=0.000002 k3_kl=3.9856e-04 ess=0.999370 logratio_mean=-3.0668e-04 logratio_absmean=4.9581e-03 ntok=818944
+PHASETIME step=204 compute_rewards=0.20 engine_generate=35.64 generate_and_advantage=37.64 micro_batch_steps=39.96 prepare_data=38.23 run_global_step=39.96
+RLMETRIC 'rewards' 'mean' 0.918066 'train' 205
+PHASETIME step=210 compute_rewards=0.21 engine_generate=29.90 generate_and_advantage=31.95 micro_batch_steps=34.35 prepare_data=32.53 run_global_step=34.35
+LENDIST step=212 n=2048 cap=2560 truncated=1 (0.05%) eos_at_cap=0 osl_mean=431.0 isl_mean=92.8 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.32897 weight_max=3.00000 frac_clipped=0.000003 k3_kl=3.6775e-04 ess=0.999236 logratio_mean=-3.4266e-04 logratio_absmean=6.0757e-03 ntok=882605
+RLMETRIC 'rewards' 'mean' 0.914209 'train' 213
+PHASETIME step=201 compute_rewards=3.23 engine_generate=54.55 generate_and_advantage=67.50 micro_batch_steps=117.91 prepare_data=94.66 run_global_step=117.92
+LENDIST step=207 n=2048 cap=2560 truncated=6 (0.29%) eos_at_cap=0 osl_mean=424.5 isl_mean=93.2 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99999 weight_min=0.20966 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.6761e-04 ess=0.999273 logratio_mean=-3.6822e-04 logratio_absmean=5.9364e-03 ntok=869378
+RLMETRIC 'rewards' 'mean' 0.943164 'train' 209
+PHASETIME step=213 compute_rewards=0.20 engine_generate=30.35 generate_and_advantage=32.48 micro_batch_steps=34.86 prepare_data=33.08 run_global_step=34.86
+LENDIST step=220 n=2048 cap=2560 truncated=7 (0.34%) eos_at_cap=0 osl_mean=413.5 isl_mean=93.8 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.06903 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.4590e-04 ess=0.999349 logratio_mean=-3.1591e-04 logratio_absmean=5.5031e-03 ntok=846757
+I1027 09:35:22.641300 137321199041408 evaluate_rl.py:354] EVAL-BREAKDOWN step=220 k=1 total=1319 acc=92.27% boxed_wrong=7.73% nobox=0.00% mean_chars=1268 dump=gs://ubench-logs/g4pt1/evals/eval_220.jsonl
+I1027 09:35:22.641443 137321199041408 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.2669% mean_reward=0.9304
+W1027 09:35:22.642754 137321199041408 hooks.py:98] Intermediate Eval (step=220): corr=1172, total=1319, accuracy=88.855193328279%, partial_accuracy=90.37149355572403%, format_accuracy=0.0%, mean_reward=0.9304
+RLMETRIC 'rewards' 'mean' 0.872998 'train' 222
+PHASETIME step=223 compute_rewards=0.19 engine_generate=28.93 generate_and_advantage=30.94 micro_batch_steps=33.33 prepare_data=31.53 run_global_step=33.33
+LENDIST step=230 n=2048 cap=2560 truncated=9 (0.44%) eos_at_cap=0 osl_mean=442.1 isl_mean=93.9 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00003 weight_min=0.16663 weight_max=3.00000 frac_clipped=0.000004 k3_kl=3.7326e-04 ess=0.999070 logratio_mean=-3.3289e-04 logratio_absmean=6.2282e-03 ntok=905432
+RLMETRIC 'rewards' 'mean' 0.90459 'train' 232
+PHASETIME step=233 compute_rewards=0.20 engine_generate=25.27 generate_and_advantage=27.34 micro_batch_steps=29.08 prepare_data=27.94 run_global_step=29.08
+LENDIST step=235 n=2048 cap=2560 truncated=2 (0.10%) eos_at_cap=0 osl_mean=451.6 isl_mean=97.4 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.24636 weight_max=2.83326 frac_clipped=0.000000 k3_kl=3.4705e-04 ess=0.999327 logratio_mean=-3.1800e-04 logratio_absmean=5.5958e-03 ntok=924953
+RLMETRIC 'rewards' 'mean' 0.941895 'train' 237
+PHASETIME step=238 compute_rewards=0.20 engine_generate=30.14 generate_and_advantage=32.19 micro_batch_steps=33.98 prepare_data=32.80 run_global_step=33.98
+I1027 09:49:43.433661 137321199041408 evaluate_rl.py:354] EVAL-BREAKDOWN step=240 k=2 total=1319 acc=92.65% boxed_wrong=7.13% nobox=0.23% mean_chars=1285 dump=gs://ubench-logs/g4pt1/evals/eval_240.jsonl
+I1027 09:49:43.433794 137321199041408 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.6459% mean_reward=0.9336
+W1027 09:49:43.434876 137321199041408 hooks.py:98] Intermediate Eval (step=240): corr=1177, total=1319, accuracy=89.23426838514025%, partial_accuracy=90.29567854435177%, format_accuracy=0.0%, mean_reward=0.9336
+LENDIST step=245 n=2048 cap=2560 truncated=5 (0.24%) eos_at_cap=0 osl_mean=460.4 isl_mean=96.5 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.13125 weight_max=2.33875 frac_clipped=0.000000 k3_kl=3.7035e-04 ess=0.999287 logratio_mean=-3.3497e-04 logratio_absmean=6.2535e-03 ntok=942995
+RLMETRIC 'rewards' 'mean' 0.933203 'train' 247
+PHASETIME step=229 compute_rewards=0.19 engine_generate=27.89 generate_and_advantage=29.95 micro_batch_steps=34.38 prepare_data=30.56 run_global_step=34.38
+LENDIST step=238 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=409.2 isl_mean=90.2 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99996 weight_min=0.22211 weight_max=2.68177 frac_clipped=0.000000 k3_kl=3.7138e-04 ess=0.999273 logratio_mean=-3.9875e-04 logratio_absmean=6.1244e-03 ntok=838049
+RLMETRIC 'rewards' 'mean' 0.915967 'train' 240
+PHASETIME step=241 compute_rewards=0.25 engine_generate=29.64 generate_and_advantage=31.69 micro_batch_steps=34.05 prepare_data=32.29 run_global_step=34.05
+LENDIST step=249 n=2048 cap=2560 truncated=0 (0.00%) eos_at_cap=0 osl_mean=420.0 isl_mean=93.8 first_think=0/2048
+TIS-ACTIVE weight_mean=1.00000 weight_min=0.18394 weight_max=3.00000 frac_clipped=0.000003 k3_kl=3.4598e-04 ess=0.999282 logratio_mean=-3.3123e-04 logratio_absmean=5.5595e-03 ntok=860084
+PHASETIME step=251 compute_rewards=0.19 engine_generate=30.05 generate_and_advantage=32.04 micro_batch_steps=34.33 prepare_data=32.63 run_global_step=34.33
+RLMETRIC 'rewards' 'mean' 0.94502 'train' 251
+LENDIST step=259 n=2048 cap=2560 truncated=6 (0.29%) eos_at_cap=0 osl_mean=420.9 isl_mean=91.8 first_think=0/2048
+TIS-ACTIVE weight_mean=0.99998 weight_min=0.18282 weight_max=2.12106 frac_clipped=0.000000 k3_kl=3.5673e-04 ess=0.999311 logratio_mean=-3.6264e-04 logratio_absmean=5.8115e-03 ntok=862079
+I1027 10:04:00.614954 137321199041408 evaluate_rl.py:354] EVAL-BREAKDOWN step=260 k=3 total=1319 acc=92.49% boxed_wrong=7.35% nobox=0.15% mean_chars=1286 dump=gs://ubench-logs/g4pt1/evals/eval_260.jsonl
+I1027 10:04:00.615147 137321199041408 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.4943% mean_reward=0.9323
+W1027 10:04:00.616380 137321199041408 hooks.py:98] Intermediate Eval (step=260): corr=1175, total=1319, accuracy=89.08263836239576%, partial_accuracy=90.14404852160727%, format_accuracy=0.0%, mean_reward=0.9323
