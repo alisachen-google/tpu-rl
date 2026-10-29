@@ -1,9 +1,33 @@
 # gemma4-E2B GSM8K: TPU v7x vs GPU accuracy parity — what the gap was and how it was closed
 
-**Status (2026-10-27 10:05 UTC): seed 42 complete — GATE PASSED.** Step-250 scorer-v2 accuracy
-**92.49 %** vs the GPU 3-seed step-250 mean 92.42 ± 0.42 (gate ≥ 91.42). Every one of the 13 eval
-points is within ±1.2 pp of the GPU mean (mean delta +0.18 pp); the two platforms are statistically
-indistinguishable at the single-run Wilson width (±1.4 pp). Seeds 43/44 are queued for the 3-seed mean.
+**Status (2026-10-29): two seeds complete — GATE PASSED on the 2-seed mean.** Step-250 scorer-v2
+accuracy seed 42 **92.49 %**, seed 43 **92.65 %** → mean **92.57 %** vs the GPU 3-seed step-250 mean
+92.42 ± 0.42 (gate ≥ 91.42). All 27 eval points of the two seeds are within ±1.2 pp of the GPU mean
+(seed 42 mean delta +0.18 pp, seed 43 +0.30 pp); seed 43 ran fully unattended, including its
+2-hour-limit resume at step 200. Seed 44 is built (`parity/manifests/g4pt3-seed44.yaml`) and only
+needs a valid user credential on the launch VM to be applied.
+
+| step | TPU seed 43 | GPU 3-seed mean | delta |
+|---:|---:|---:|---:|
+| 0 | 81.12 | 80.31 | +0.81 |
+| 20 | 91.96 | 91.03 | +0.93 |
+| 40 | 91.28 | 91.69 | −0.41 |
+| 60 | 91.21 | 91.36 | −0.15 |
+| 80 | 92.12 | 91.84 | +0.28 |
+| 100 | 92.49 | 91.64 | +0.85 |
+| 120 | 92.57 | 92.04 | +0.53 |
+| 140 | 92.65 | 92.67 | −0.02 |
+| 160 | 93.33 | 92.77 | +0.56 |
+| 180 | 92.87 | 92.52 | +0.35 |
+| 200 | 92.34 | 92.65 | −0.31 |
+| 220 | 92.95 | 92.60 | +0.35 |
+| 240 | 92.80 | 92.65 | +0.15 |
+| **250** | **92.65** | **92.42 ± 0.42** | **+0.23** |
+
+Seed 43 wall time: 36.2 s median per update (seed 42: 34.6 s). Per-question dumps:
+`parity/evals_seed43/`. Figures (`parity/figures/`) now show both seeds.
+
+Seed 42 (first definitive run):
 
 | step | TPU seed 42 (scorer-v2 acc, 1319 Qs, Wilson 95 %) | GPU 3-seed mean ± SD (min–max) | delta |
 |---:|---:|---:|---:|
