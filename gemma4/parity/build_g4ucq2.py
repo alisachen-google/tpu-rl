@@ -14,9 +14,9 @@ Usage: [SPOT=1] [TIS=1] python3 build_g4ucq2.py
 """
 import os, re, yaml
 
-SP = os.environ.get("PARITY_DIR", os.path.dirname(os.path.abspath(__file__)))  # needs g4ucq.yaml (source manifest) here
+SP = os.environ.get("PARITY_DIR", os.path.dirname(os.path.abspath(__file__)))
 raw = open(f"{SP}/g4ucq.yaml", encoding="utf-8").read()
-NAME = "g4ucq2"
+NAME = os.environ.get("NAME", "g4ucq3")  # g4ucq3 = p-state 6 rerun (2026-10-29)
 
 
 def repl(old, new):
@@ -37,12 +37,16 @@ for _o, _n in {
     assert raw.count(_o) >= 1, f"port anchor {_o!r} not found"
     raw = raw.replace(_o, _n)
 assert "29000" not in raw and "29001" not in raw
+# ---- DVFS: the cluster does not allow xla_tpu_dvfs_p_state=7 (user, 2026-10-29); use 6 everywhere ----
+assert raw.count("--xla_tpu_dvfs_p_state=7") >= 1, "p_state anchor"
+raw = raw.replace("--xla_tpu_dvfs_p_state=7", "--xla_tpu_dvfs_p_state=6")
+
 if os.environ.get("SPOT") == "1":
     repl("            nodeSelector:\n              cloud.google.com/gke-tpu-topology: \"4x4x4\"\n              cloud.google.com/gke-tpu-accelerator: tpu7x\n",
          "            nodeSelector:\n              cloud.google.com/gke-tpu-topology: \"4x4x4\"\n              cloud.google.com/gke-tpu-accelerator: tpu7x\n              cloud.google.com/gke-spot: \"true\"\n")
 if os.environ.get("TIS") == "1":
     import json
-    patch = open(f"{SP}/patch_sampler_is_new.py", encoding="utf-8").read()
+    patch = open(f"{SP}/patches/patch_sampler_is.py", encoding="utf-8").read()
     # add the patch file to the patches ConfigMap (after patch_flash_sa.py) and run it in the launcher
     m = re.search(r'^(\s*)patch_flash_sa\.py: ".*"$', raw, re.M)
     assert m, "patch_flash_sa.py CM entry not found"

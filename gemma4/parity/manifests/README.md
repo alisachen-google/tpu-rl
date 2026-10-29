@@ -56,3 +56,7 @@ gsutil -m cp -r "gs://ubench-logs/g4ucq2/tensorboard/*" tb/ && python3 ../tools/
 `../build_g4pt.py` builds `g4pt{1,2,3}.yaml` from the full-recipe source manifest (`g4pf.yaml`, not
 in the tree) with `CKPT=1`; `../build_g4ucq2.py` derives the optimized-recipe rerun from `g4ucq.yaml`.
 The embedded patches are the files under `../patches/`.
+
+**2026-10-29:** every manifest here now sets `--xla_tpu_dvfs_p_state=6` (7 is not allowed on this cluster).
+`g4ucq3-optimized-24s-pstate6.yaml` is the 24 s recipe rerun at p-state 6; `g4pl10-latest-image-10step.yaml`
+is the 35 s recipe on the latest image (`2026-09-22-head`, 10 updates) for the perf-regression check.

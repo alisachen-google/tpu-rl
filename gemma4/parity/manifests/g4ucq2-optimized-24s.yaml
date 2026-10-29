@@ -558,7 +558,7 @@ spec:
               - --server_port=29140
               - --resource_manager_address=g4ucq2-pathways-head-0-0.g4ucq2:29141
               - --gcs_scratch_location=gs://ubench-logs/compilation_cache/qwen3-0.6b/rl_repro_pathways_tpu7x_20260730
-              - --xla_tpu_dvfs_p_state=7
+              - --xla_tpu_dvfs_p_state=6
               - --xla_tpu_scoped_vmem_limit_kib=65536
               - --xla_tpu_num_sparse_cores_for_gather_offloading=1
               - --xla_tpu_bf16_emission_mode=NATIVE_EMISSION

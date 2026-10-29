@@ -17,7 +17,8 @@ Patches that no longer apply on the new image are replaced by the knobs the imag
   patch_sampler_is     -> re-based anchors (patch_sampler_is_newimg.py); all other parity edits unchanged
 Usage: python3 build_g4pl10.py   (from g4pt1.yaml built with CKPT=1)
 """
-import json, os, re, yaml
+import json
+import os, re, yaml
 SP = os.environ.get("PARITY_DIR", os.path.dirname(os.path.abspath(__file__)))
 raw = open(f"{SP}/g4pt1.yaml", encoding="utf-8").read()
 NEW_IMG = "gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:4dc6ca720017bf93b6bae9524519cf5b7a8b16706ca6aab2a355af26d75a6bf3"

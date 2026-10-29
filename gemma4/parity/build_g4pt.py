@@ -23,7 +23,7 @@ import os
 import re
 import sys
 
-SP = os.environ.get("PARITY_DIR", os.path.dirname(os.path.abspath(__file__)))  # repo: gemma4/parity; g4pf.yaml (source manifest) is not in the tree
+SP = os.environ.get("PARITY_DIR", os.path.dirname(os.path.abspath(__file__)))
 SRC = f"{SP}/g4pf.yaml"
 PATCH = f"{SP}/patches/patch_sampler_is.py"
 IDX = sys.argv[1] if len(sys.argv) > 1 else "1"
@@ -160,6 +160,10 @@ for _o, _n in PORTS.items():
     assert _c >= 1, f"port anchor {_o!r} not found"
     raw = raw.replace(_o, _n)
 assert "29000" not in raw and "29001" not in raw, "default pathways ports still present"
+
+# ---- DVFS: the cluster does not allow xla_tpu_dvfs_p_state=7 (user, 2026-10-29); use 6 everywhere ----
+assert raw.count("--xla_tpu_dvfs_p_state=7") >= 1, "p_state anchor"
+raw = raw.replace("--xla_tpu_dvfs_p_state=7", "--xla_tpu_dvfs_p_state=6")
 
 # ---- 3) add seed knobs after rollout_micro_batch_size=128 ----
 ANCHOR = "        rollout_micro_batch_size=128 \\"
