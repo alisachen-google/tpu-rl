@@ -198,7 +198,46 @@ kl:            overall=0.000000 max=0.000000  (FLAT ~0)
 PHASETIME step=94 engine_generate=19.63 compute_rewards=0.21 run_global_step=22.88
 ```
 
-## 4. Reproduce
+## 4. What we fixed to get here
+
+The TPU stack started from the perf-ladder configuration (27 s recipe). Reaching a *measured* parity
+took 17 changes; the first group changed what was being learned or measured, the second made a
+250-step run survive the cluster. Each is a self-applying patch or a manifest knob in `parity/`
+(details and evidence per fix in [`GEMMA4_E2B_GSM8K_ACCURACY_PARITY.md`](GEMMA4_E2B_GSM8K_ACCURACY_PARITY.md)).
+
+### 4.1 Fixes that changed the science (accuracy, learning signal, or the metric)
+
+| # | symptom | root cause | fix | effect |
+|---|---|---|---|---|
+| 1 | TPU "base" checkpoint scored 0–6 % at step 0; another 94.5 % | on-cluster `gemma4-e2b-raw` was the base model, `raw2` an over-trained one; GPU starts from `gemma-4-E2B-it` | converted the public `-it` (HF rev 3e22461f) to MaxText; tokenizer / template / generation config hash-match the GPU fixture | step 0 = 81.5 % vs GPU 80.3 % |
+| 2 | apparent −2.2 / −4.4 pp gap at steps 0 / 20 | compared MaxText's lenient `accuracy` (own `check_correctness` + `math_verify`) with the GPU's scorer-v2 `acc` | log scorer-v2 accuracy per eval (`EVAL-V2ACC`, `EVAL-BREAKDOWN`) + per-question JSONL dumps | 78.09 → 81.50 at step 0 in the right metric; gap gone |
+| 3 | TIS inert (`weight_min == 1.0`), curve plateaued ~87.6 % at step 20 | standard tunix `GrpoLearner` never received `sampler_is`; rollout returned no logprobs; image is tunix 0.1.8 (digest), not the 0.1.7 the tag suggested | config-only patch: `sampler_is="token", sampler_is_threshold=3.0`, `return_logprobs=True`; `TIS-ACTIVE` stdout proof | weights 0.1–3.0, mean 1.000, clipped 1e-6 (GPU 3.7e-6) |
+| 4 | **training reward never exceeded 0.1** (found via the `RLMETRIC` mirror) | tunix passes the batched `answer` column as a numpy array; the reward helper only accepted list/tuple and replicated the whole array as every completion's gold → every boxed answer "wrong" | `tolist()` for array golds, bytes decode, `REWARD-DEBUG` print; verified offline (old `[0.1,0.1,0.0]` → new `[1.0,0.1,0.0]`) | training reward 0.08 → 0.87–0.95; earlier TPU curves (format-only learning) superseded |
+| 5 | eval covered 1280 of 1319 questions | `drop_remainder=True` on the eval batch (1319 is prime) | `drop_remainder=False` for eval only | full test set, exact comparability |
+| 6 | bf16 master weights / bf16 Adam vs GPU fp32 master + fp32 Adam | `rl.yml` defaults | `weight_dtype=float32 mu_dtype=float32`; rollout pinned to bf16 (a fp32 rollout crashed the RPA kernel) | recipe fidelity (measured effect at step 20: +0.3 pp, noise) |
+| 7 | run ended cleanly at step 58 | `train_dataset[:num_batches*batch_size]` on 7473 rows with `num_epoch=1` = one epoch of 58 batches | `num_epoch=5` | 250 updates possible |
+| 8 | training continued to 290 at LR 0; final eval misplaced | MaxText derives `train_steps = batches × iterations × fraction × epochs` (1250), loop ends on data exhaustion | `max_steps = min(train_steps, num_batches)` | stops at 250, post-training eval = step 250 (seed 43) |
+| 9 | first batch after a checkpoint resume was off-policy (log-ratio 0.23, ESS 0.43); startup eval showed step-0 accuracy | tunix syncs actor → rollout only *after* each update; the rollout engine kept its initial weights | `sync_weights()` right after the global step is restored (`RESUME-SYNC`) | post-restore batches on-policy (k3 4.8e-4), restart eval scores the restored weights |
+
+### 4.2 Fixes that made a 250-step run complete on the shared cluster
+
+| # | symptom | root cause | fix |
+|---|---|---|---|
+| 10 | crash after step 0 with TIS | TIS actor recompute is unpacked at `max_target_length=3072`; splash `kv_block=2048` does not divide it | `sa_block_kv` 2048 → 1024 |
+| 11 | main thread died at step 40 on GCS `412 PreconditionFailed` | tensorboardX's GCS writer flushes from two threads with a generation precondition | tensorboard to local disk; stdout is the source of truth |
+| 12 | every restart after a mid-run save died (`NoEntryError … incompatible handler`) | one level down: `Unsupported dtype: key<fry>` — `nnx.state(model)` includes typed PRNG keys the Pathways array handler cannot load | save/restore `model_params` without `RngState`, partial load; verified on CPU in the pinned image; checkpoints every 20 steps | 
+| 13 | JobSet failed within minutes of admission (proxy `Address already in use`, RM abort) | head pod is host-network on fixed ports 29000/29001; another tenant's Pathways head (not a JobSet, invisible to the anti-affinity) held them on the same CPU node | non-default ports 29140/29141 |
+| 14 | workload deactivated 120 min after pods ready | cluster `time-limit-controller` (120 min per admission for this namespace; `declared-duration-minutes` can only shorten it) | resume-aware chain: delete + re-apply the same manifest → checkpoint restore; one resume per 250-step run |
+| 15 | eviction loop while the queue's nominal quota was 0 (reassigned by admins) | every admission was a cohort borrow reclaimed by other tenants (`reclaimWithinCohort: Any`); spot flavor cannot be steered by nodeSelector | wait for quota (restored next morning); made the run resumable so lost windows cost ≤ 20 steps |
+| 16 | trainer exit at the *next* save after a transient GCS write error; then a 1-hour hang on restart | orbax re-raises the stored async-save error; on restart it removes the uncommitted step dir sequentially (~100k objects) | batched parallel cleanup of uncommitted step dirs before re-apply (`clean-uncommitted-ckpts.py`, ~100 s) + hung-trainer guard |
+| 17 | eval dumps overwritten / mis-indexed across restarts | dump index was a per-process counter | dumps named by train step; figure parser snaps to the 20-step grid and prefers the re-run on duplicates |
+
+What did **not** need changing (audited identical): advantage normalisation, loss aggregation,
+LR schedule and optimizer constants, sampling parameters (explicit top_p 1.0 / top_k −1 override
+vLLM's generation-config defaults), chat template and BOS handling, system prompt, scorer, eval
+decoding and stop ids, truncation (≤ 0.9 % of rollouts at the 2560 cap).
+
+## 5. Reproduce
 
 Ready-to-apply manifests and commands: [`parity/manifests/README.md`](parity/manifests/README.md).
 Figures/tables: `python3 parity/tools/make_parity_figures.py --gpu <aggregate_summary.json> --tpu "seed42=<dumps>:<log>" "seed43=<dumps>:<log>" --out figs --dpi 300`.
