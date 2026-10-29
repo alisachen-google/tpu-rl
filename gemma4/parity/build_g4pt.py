@@ -44,9 +44,16 @@ assert raw.count("g4pf") > 0
 # ---- 1) swap ConfigMap patch values (single-line JSON-escaped scalars) ----
 #   patch_sampler_is.py -> the TIS config patcher (sampler_is=token + return_logprobs + eval 1319)
 #   patch_flash_sa.py   -> sa_block_kv 2048->1024 so splash divides the UNPACKED TIS recompute (3072)
+_flash = open(f"{SP}/patches/patch_flash_sa.py", encoding="utf-8").read()
+if CAP == "2048":
+    # target 2560 = 2^9*5: the unpacked TIS recompute runs at q_seq_len=2560, which 1024 does not divide
+    # ("q_block_size=1024 should divide q_seq_len=2560", g4pt1c2048p 2026-10-29). 512 divides 2560 and the
+    # packed 8192. Tiling only; no numeric effect.
+    assert _flash.count('return "1024"') == 2, _flash.count('return "1024"')
+    _flash = _flash.replace('return "1024"', 'return "512"')
 SWAPS = {
     "patch_sampler_is.py": new_patch,
-    "patch_flash_sa.py": open(f"{SP}/patches/patch_flash_sa.py", encoding="utf-8").read(),
+    "patch_flash_sa.py": _flash,
     # 2026-10-27: ndarray/bytes gold handling + REWARD-DEBUG line (training rewards were 0.1-capped:
     # tunix passes the batched `answer` column as a numpy array, the old helper replicated the whole
     # array as every completion's gold). Eval path was unaffected.
@@ -178,7 +185,7 @@ checks = {
     "old inert env-marker gone": "_SAMPLER_IS_PARITY" not in v,  # old patch's injected marker
     "return_logprobs enabled by patch": "return_logprobs=True,  # _TIS_PARITY" in v,
     "eval full-coverage (1319)": "drop_remainder=False)  # _TIS_PARITY" in v,
-    "splash kv block 1024 (divides unpacked recompute)": 'startswith(\\"sa_block_kv\\"): return \\"1024\\"' in v,
+    "splash kv block divides unpacked recompute": ('startswith(\\"sa_block_kv\\"): return \\"%s\\"' % ("512" if CAP == "2048" else "1024")) in v,
     f"cap target {TARGET}": f"max_target_length={TARGET}" in v,
     f"cap kv {TARGET}": f"kv_cache_buffer={TARGET}" in v,
     "prefill 512 kept": "max_prefill_predict_length=512" in v,
