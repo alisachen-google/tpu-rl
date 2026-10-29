@@ -32,9 +32,9 @@ SEED = {"1": 42, "2": 43, "3": 44}[IDX]
 # Response cap (tokens). Default 2560 = g4pf's cap (guaranteed to fit on 64 chips; isolates the
 # TIS variable cleanly). 5120 adds the middle-ground cap bump (target 5632). 8192 OOM'd.
 CAP = sys.argv[2] if len(sys.argv) > 2 else "2560"
-assert CAP in ("2560", "4096", "5120"), CAP
-TARGET = {"2560": "3072", "4096": "4608", "5120": "5632"}[CAP]  # +512 prefill
-NAME = f"g4pt{IDX}" if CAP == "2560" else f"g4pt{IDX}c{CAP}"
+assert CAP in ("2048", "2560", "4096", "5120"), CAP
+TARGET = {"2048": "2560", "2560": "3072", "4096": "4608", "5120": "5632"}[CAP]  # +512 prefill
+NAME = (f"g4pt{IDX}" if CAP == "2560" else f"g4pt{IDX}c{CAP}") + ("p" if os.environ.get("PERF") == "1" else "")
 OUT = f"{SP}/{NAME}.yaml"
 
 raw = open(SRC, encoding="utf-8").read()
@@ -117,6 +117,13 @@ repl("        lr_schedule_type='cosine' \\",
 # then `.repeat(num_epoch)`; the default num_epoch=1 yields 7473/128 = 58 batches and the run exits
 # cleanly at step 58 (g4pt1 2026-10-26 23:25, JobSet Completed). GPU = 250 steps ~ 4.3 epochs. 5x58=290
 # >= 250; the trainer stops at train_steps=250. ----
+
+# ---- 2a) PERF=1: the two levers of the 24 s recipe the parity harness does not use by default
+# (round-robin routing, approx-top-k and EOS-check interval 32 are already in the launcher):
+# async reward scoring during the rollout (ASYNC_REWARD=on). Async logprobs stays off (TIS needs the
+# sampler logprobs returned synchronously). Combine with CAP=2048 for the 24 s response cap. ----
+if os.environ.get("PERF") == "1":
+    repl("export ASYNC_REWARD=off", "export ASYNC_REWARD=on")
 
 # ---- 2b) SPOT=1: pin the TPU workers to the spot flavor. The ubench ClusterQueue has tpu7x-flavor
 # nominal 0 since 2026-10-26 22:14Z, so every admission is a cohort BORROW that any tenant with nominal

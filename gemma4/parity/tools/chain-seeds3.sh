@@ -86,12 +86,11 @@ stream_until_done(){  # $1 = jobset name; streams head-pod log; resumes on deact
 }
 
 log "chain3 start: g4pt1 state=$(state g4pt1)"
-for i in ${SEEDS:-1 2 3}; do
-  name="g4pt$i"
+for name in ${NAMES:-$(for i in ${SEEDS:-1 2 3}; do echo g4pt$i; done)}; do
   st=$(state "$name")
   if [ "$st" = "completed" ] || [ "$st" = "failed" ]; then log "$name already $st; skipping"; continue; fi
   if [ "$st" = "absent" ]; then
-    log "applying $name.yaml (seed $((41+i)))"
+    log "applying $name.yaml"
     K apply --server-side --force-conflicts -f "$SP/$name.yaml" 2>&1 | tail -1 | while read -r l; do log "  $l"; done
     : > "$SP/$name-raw.log"
   else
