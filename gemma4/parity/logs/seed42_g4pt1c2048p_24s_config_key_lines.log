@@ -1,0 +1,55 @@
+EXIT_CODE=0
+I1029 10:47:52.044688 133759197170560 checkpoint_manager.py:1820] Found 7 checkpoint steps in gs://ubench-logs/g4pt1c2048p/checkpoints/actor
+I1029 10:48:11.613764 133759197170560 checkpoint_manager.py:293] Restored params from step: 140 in 19.568 seconds
+I1029 10:52:25.682360 133759197170560 evaluate_rl.py:354] EVAL-BREAKDOWN step=140 k=0 total=1319 acc=91.96% boxed_wrong=7.73% nobox=0.30% mean_chars=1575 dump=gs://ubench-logs/g4pt1c2048p/evals/eval_140.jsonl
+I1029 10:52:25.682526 133759197170560 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.9636% mean_reward=0.9274
+I1029 11:20:53.215236 133759197170560 evaluate_rl.py:354] EVAL-BREAKDOWN step=160 k=1 total=1319 acc=92.19% boxed_wrong=7.35% nobox=0.45% mean_chars=1554 dump=gs://ubench-logs/g4pt1c2048p/evals/eval_160.jsonl
+I1029 11:20:53.215363 133759197170560 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.1911% mean_reward=0.9293
+I1029 11:34:06.754596 133759197170560 evaluate_rl.py:354] EVAL-BREAKDOWN step=180 k=2 total=1319 acc=91.96% boxed_wrong=7.73% nobox=0.30% mean_chars=1556 dump=gs://ubench-logs/g4pt1c2048p/evals/eval_180.jsonl
+I1029 11:34:06.754717 133759197170560 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.9636% mean_reward=0.9274
+I1029 11:48:27.605313 133759197170560 evaluate_rl.py:354] EVAL-BREAKDOWN step=200 k=3 total=1319 acc=91.81% boxed_wrong=7.96% nobox=0.23% mean_chars=1542 dump=gs://ubench-logs/g4pt1c2048p/evals/eval_200.jsonl
+I1029 11:48:27.605437 133759197170560 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.8120% mean_reward=0.9261
+I1029 12:01:52.327799 133759197170560 evaluate_rl.py:354] EVAL-BREAKDOWN step=220 k=4 total=1319 acc=92.12% boxed_wrong=7.58% nobox=0.30% mean_chars=1552 dump=gs://ubench-logs/g4pt1c2048p/evals/eval_220.jsonl
+I1029 12:01:52.327976 133759197170560 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.1152% mean_reward=0.9287
+I1029 12:15:29.971042 133759197170560 evaluate_rl.py:354] EVAL-BREAKDOWN step=240 k=5 total=1319 acc=92.27% boxed_wrong=7.58% nobox=0.15% mean_chars=1540 dump=gs://ubench-logs/g4pt1c2048p/evals/eval_240.jsonl
+I1029 12:15:29.971155 133759197170560 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.2669% mean_reward=0.9303
+I1029 12:24:34.380052 133759197170560 evaluate_rl.py:354] EVAL-BREAKDOWN step=250 k=6 total=1319 acc=92.42% boxed_wrong=7.13% nobox=0.45% mean_chars=1560 dump=gs://ubench-logs/g4pt1c2048p/evals/eval_250.jsonl
+I1029 12:24:34.380170 133759197170560 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.4185% mean_reward=0.9313
+RESUME-SYNC pushing restored actor weights (global_steps=140) to the rollout engine before the first generation
+TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=3.0, return_logprobs=True, eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt; rl_learner
+W1029 12:24:34.381498 133759197170560 train_rl.py:818] Post RL Training: corr=1195, total=1319, accuracy=90.5989385898408%, partial_accuracy=91.81197877179682%, format_accuracy=0.0%, mean_reward=0.9313
+[05:55:17] g4pt1c2048p | EVAL-BREAKDOWN step=0 k=0 total=1319 acc=81.27%
+[05:55:17] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=81.2737% mean_reward=0.8196
+[05:55:17] g4pt1c2048p | Found 0 checkpoint steps
+[06:09:16] g4pt1c2048p | EVAL-BREAKDOWN step=0 k=0 total=1319 acc=81.27%
+[06:09:16] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=81.2737% mean_reward=0.8196
+[06:09:16] g4pt1c2048p | Found 0 checkpoint steps
+[06:39:27] g4pt1c2048p | EVAL-BREAKDOWN step=21 k=1 total=1319 acc=91.66%
+[06:39:27] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=91.6603% mean_reward=0.9248
+[06:49:30] g4pt1c2048p | EVAL-BREAKDOWN step=41 k=2 total=1319 acc=91.05%
+[06:49:30] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=91.0538% mean_reward=0.9193
+[06:59:34] g4pt1c2048p | EVAL-BREAKDOWN step=61 k=3 total=1319 acc=91.43%
+[06:59:34] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=91.4329% mean_reward=0.9227
+[07:19:40] g4pt1c2048p | EVAL-BREAKDOWN step=81 k=4 total=1319 acc=91.36%
+[07:19:40] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=91.3571% mean_reward=0.9221
+[07:29:44] g4pt1c2048p | EVAL-BREAKDOWN step=101 k=5 total=1319 acc=91.66%
+[07:29:44] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=91.6603% mean_reward=0.9246
+[07:39:47] g4pt1c2048p | EVAL-BREAKDOWN step=121 k=6 total=1319 acc=92.57%
+[07:39:47] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=92.5701% mean_reward=0.9331
+[07:58:08] g4pt1c2048p | EVAL-BREAKDOWN step=141 k=7 total=1319 acc=92.34%
+[07:58:08] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=92.3427% mean_reward=0.9307
+[10:54:42] g4pt1c2048p | EVAL-BREAKDOWN step=140 k=0 total=1319 acc=91.96%
+[10:54:42] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=91.9636% mean_reward=0.9274
+[10:54:42] g4pt1c2048p | Found 7 checkpoint steps
+[10:54:42] g4pt1c2048p | Restored params from step: 140
+[11:24:54] g4pt1c2048p | EVAL-BREAKDOWN step=160 k=1 total=1319 acc=92.19%
+[11:24:54] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=92.1911% mean_reward=0.9293
+[11:34:57] g4pt1c2048p | EVAL-BREAKDOWN step=180 k=2 total=1319 acc=91.96%
+[11:55:04] g4pt1c2048p | EVAL-BREAKDOWN step=200 k=3 total=1319 acc=91.81%
+[11:55:04] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=91.8120% mean_reward=0.9261
+[12:05:07] g4pt1c2048p | EVAL-BREAKDOWN step=220 k=4 total=1319 acc=92.12%
+[12:05:07] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=92.1152% mean_reward=0.9287
+[12:24:57] g4pt1c2048p | EVAL-BREAKDOWN step=240 k=5 total=1319 acc=92.27%
+[12:24:57] g4pt1c2048p | EVAL-BREAKDOWN step=250 k=6 total=1319 acc=92.42%
+[12:24:57] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=92.2669% mean_reward=0.9303
+[12:24:57] g4pt1c2048p | EVAL-V2ACC total=1319 v2_acc=92.4185% mean_reward=0.9313

@@ -185,6 +185,10 @@ Config param learning_rate_schedule_steps: 250 / learning_rate_final_fraction: 0
 
 ### 3.5 The optimized 24 s recipe (reward-band parity)
 
+**Update 2026-10-29:** the 24 s configuration also passed the full accuracy-curve check (seed 42,
+250 updates, step-250 = 92.42 = GPU mean, all 14 points within ±1 pp):
+`GEMMA4_E2B_24S_CONFIG_PARITY_REPORT.md`.
+
 `g4ucq2` (OpenMathInstruct-2, 256 × 8 rollouts, 2048-token response cap, round-robin DP routing,
 approx-top-k sampling, async reward; 100 updates on the same slice): steady step time **23.9 s
 median** (banked 24.4 s), `check_numbers` **0.5118** over 100 updates (first-10 0.507, last-10
