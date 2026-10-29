@@ -11,6 +11,7 @@ Patches that no longer apply on the new image are replaced by the knobs the imag
   patch_async_detok / patch_async_logprobs -> tunix VllmSampler overlap_postprocessing=True (default)
   patch_jit_unroll     -> tunix generate/utils._unroll_scanned_layers is jax.jit'ed upstream
   patch_stop_tokens    -> tunix eos_tokens handling upstream (default = chat-turn terminator)
+  patch_sharded_sampling -> tpu_inference distributed sampling (native; the patch is DROPPED, see below)
   patch_cd_proper / host_extract / textual_stop / padding_bucket / rpa_blocks -> tpu_inference decode_loop
                           rewrite upstream (verified by phase times in the run, not by code)
   patch_async_reward   -> inert for the parity harness (custom reward); native reward_num_workers left 0
@@ -36,6 +37,14 @@ raw = raw.replace("g4pt1", "g4pl10")
 patch = open(f"{SP}/patches/patch_sampler_is_newimg.py", encoding="utf-8").read()
 m = re.search(r'^(\s*)patch_sampler_is\.py: ".*"$', raw, re.M); assert m
 raw = raw[:m.start()] + f"{m.group(1)}patch_sampler_is.py: {json.dumps(patch)}" + raw[m.end():]
+# drop patches that the new image has upstreamed AND whose stale replacement breaks the native call:
+#   patch_sharded_sampling -> tpu_inference distributed sampling (sampling.py `allow_distributed_sampling`,
+#   `_distributed_sampling_*`); its appended `sample(rng, mesh, logits, md)` lacks the new kwarg ->
+#   "TypeError: sample() got an unexpected keyword argument 'allow_distributed_sampling'" (g4pl10 08:15Z).
+# Removing the ConfigMap key makes the launcher's `if [ -f ... ]` skip it.
+for _drop in ("patch_sharded_sampling.py",):
+    m2 = re.search(r'^\s*' + re.escape(_drop) + r': ".*"\n', raw, re.M); assert m2, _drop
+    raw = raw[:m2.start()] + raw[m2.end():]
 # native knobs
 repl("    export ASYNC_REWARD=off", "    export ASYNC_REWARD=off\n    export DP_SCHED_ROUTING=round_robin   # native round-robin DP routing (replaces patch_dp_rr_routing on this image)")
 repl("        num_batches=250 \\", "        num_batches=10 \\\n        free_kv_cache_during_weight_sync=false \\\n        vllm_block_size=128 \\")
