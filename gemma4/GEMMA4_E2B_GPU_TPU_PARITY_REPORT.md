@@ -84,6 +84,23 @@ Largest deviation of any point from the GPU mean: +1.19 pp (seed 42, step 0, whe
 themselves span 0.45 pp); mean deviation over the 27 points +0.24 pp; sign changes 11 times, i.e. no
 systematic offset.
 
+### 3.1b Seed 44 (third seed, in progress as of 2026-10-29 18:00 UTC)
+
+`g4pt3` has reached update 180 (checkpoints 20–180 committed) across three admissions (an autoscaler
+node scale-down at start, a two-node TPU failure at update 121, and a stuck re-admission that the chain
+resolved by re-applying from checkpoint 120). Every evaluation so far is inside the GPU band:
+
+| step | 0 | 20 | 40 | 60 | 80 | 100 | 120 | 140 | 160 | 180 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| seed 44 | 80.44 | 92.04 | 91.66 | 91.36 | 91.21 | 91.96 | 91.66 | 92.34 | 91.89 | 91.74 |
+| Δ vs GPU mean | +0.13 | +1.01 | −0.03 | 0.00 | −0.63 | +0.32 | −0.38 | −0.33 | −0.88 | −0.78 |
+
+(The +1.01 at step 20 is the one point at the edge of the ±1 pp band; the GPU SD there is 0.53.)
+The 3-seed figures with seed 44 partial are in `parity/figures_3seed/` (seed-42/43 curves complete);
+the run resumes from checkpoint 180 to 250 and this section is replaced by the final 3-seed table then.
+Seed-44 step time at p-state 6: median 38.6 s (n = 58), versus 34.6 s (seed 42) and 36.2 s (seed 43) at
+p-state 7.
+
 ### 3.2 Dynamics
 
 | quantity | GPU | TPU seed 42 | TPU seed 43 |
