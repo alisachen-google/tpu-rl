@@ -129,7 +129,18 @@ model's own formatting ("**Answer:** 14 lollipops" without `\boxed{}`), not trun
 long); RL drives them to 0.0 % by step 20 on both platforms (GPU boxed 87.95 % → 100 %). TPU
 completions carry the literal `<turn|>` end marker; the scorer ignores it, strip it before raw diffs.
 
+## 3b. The optimized 24/25 s recipe re-checked (g4ucq2, 2026-10-27 11:45 UTC)
+
+Re-ran the perf-optimized recipe (`parity/manifests/g4ucq2-optimized-24s.yaml`: OpenMathInstruct-2,
+256×8 rollouts, 2048-token response cap, round-robin DP routing, approx-top-k sampling, async reward,
+100 updates) on the same 64-chip slice with the host-port fix: steady-state **23.9 s/update median**
+(100 steps, matches the banked 24.4 s), `check_numbers` **0.5118** over 100 steps (first-10 0.507,
+last-10 0.520, flat), `score/mean` 0.580, KL 0 → inside the GPU verl band 0.50–0.57 → **sustained
+parity**, identical to the original g4ucq result (0.5118).
+
 ## 4. How to run the parity check
+
+Ready-to-apply manifests with the exact commands: [`parity/manifests/`](parity/manifests/).
 
 ```bash
 cd gemma4/parity
