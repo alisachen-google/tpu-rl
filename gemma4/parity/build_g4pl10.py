@@ -18,8 +18,7 @@ Patches that no longer apply on the new image are replaced by the knobs the imag
   patch_sampler_is     -> re-based anchors (patch_sampler_is_newimg.py); all other parity edits unchanged
 Usage: python3 build_g4pl10.py   (from g4pt1.yaml built with CKPT=1)
 """
-import json
-import os, re, yaml
+import json, os, re, yaml
 SP = os.environ.get("PARITY_DIR", os.path.dirname(os.path.abspath(__file__)))
 raw = open(f"{SP}/g4pt1.yaml", encoding="utf-8").read()
 NEW_IMG = "gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:4dc6ca720017bf93b6bae9524519cf5b7a8b16706ca6aab2a355af26d75a6bf3"
@@ -32,7 +31,14 @@ def repl(old, new, n=1):
 
 repl(OLD_IMG, NEW_IMG)
 repl("20260730-jax_0.10.2", "20261028-jax_0.11.0", 3)
-raw = raw.replace("g4pt1", "g4pl10")
+# WCONV=0: legacy trainer->rollout weight-sync path (the new image defaults use_weight_converter=True, a
+# generic "direct" WeightConverter; the pinned fork image used the gemma4-specific converter). With the
+# default, the rollout model produced gibberish at step 0 (0 % accuracy, 100 % no-box) on 2026-10-29.
+NAME = "g4pl10"
+if os.environ.get("WCONV") == "0":
+    repl("        num_batches=10 \\", "        num_batches=10 \\\n        use_weight_converter=false \\")
+    NAME = "g4pl10a"
+raw = raw.replace("g4pt1", NAME)
 # ported parity patcher (embedded after the rename so the ConfigMap value equals the file byte for byte)
 patch = open(f"{SP}/patches/patch_sampler_is_newimg.py", encoding="utf-8").read()
 m = re.search(r'^(\s*)patch_sampler_is\.py: ".*"$', raw, re.M); assert m
@@ -49,7 +55,7 @@ repl("  python3 /workload/patches/patch_sharded_sampling.py",
 repl("    export ASYNC_REWARD=off", "    export ASYNC_REWARD=off\n    export DP_SCHED_ROUTING=round_robin   # native round-robin DP routing (replaces patch_dp_rr_routing on this image)")
 repl("        num_batches=250 \\", "        num_batches=10 \\\n        free_kv_cache_during_weight_sync=false \\\n        vllm_block_size=128 \\")
 repl("    maxRestarts: 10", "    maxRestarts: 3")
-open(f"{SP}/g4pl10.yaml", "w", encoding="utf-8").write(raw)
+open(f"{SP}/{NAME}.yaml", "w", encoding="utf-8").write(raw)
 docs = [d for d in yaml.safe_load_all(raw) if d]
 cm = [d for d in docs if d["kind"] == "ConfigMap" and "patch_sampler_is.py" in d["data"]][0]
 assert cm["data"]["patch_sampler_is.py"] == patch
@@ -59,4 +65,4 @@ for k in ("DP_SCHED_ROUTING=round_robin", "num_batches=10", "free_kv_cache_durin
 js = [d for d in docs if d["kind"] == "JobSet"][0]
 imgs = sorted({c["image"] for rj in js["spec"]["replicatedJobs"] for c in rj["template"]["spec"]["template"]["spec"].get("containers", []) + rj["template"]["spec"]["template"]["spec"].get("initContainers", [])})
 print("images:", imgs)
-print(f"BUILT {SP}/g4pl10.yaml")
+print(f"BUILT {SP}/{NAME}.yaml")
