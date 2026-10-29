@@ -1,0 +1,60 @@
+CD-PROPER PATCH: FAILED [ml-import] anchor found 0 times, expected 1
+LENDIST PATCH: APPLIED
+RPA-BLOCKS PATCH: FAILED anchor found 0 times, expected 1
+CD-MASK2 PATCH: APPLIED
+CD-REPORT PATCH: APPLIED
+PHASETIME2 PATCH: APPLIED
+REWARD-PAR PATCH: APPLIED
+LENGTH-SHAPE PATCH: APPLIED (enable with LENGTH_SHAPE=1)
+TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=3.0, return_logprobs=True, eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt; rl_learner
+SHARDED-SAMPLING PATCH: SKIPPED (native distributed sampling in tpu_inference on this image)
+BLOCK-SIZE PATCH: APPLIED
+APPROX-TOPK PATCH: APPLIED
+ASYNC-DETOK PATCH: FAILED tunix anchor 0
+ASYNC-LOGPROBS PATCH: FAILED anchor tunix=0 engine_pool=False
+DP-RR-ROUTING PATCH: FAILED anchor 0
+STOP-TOKENS PATCH: FAILED anchor 0
+RUNNER-EOS PATCH: APPLIED
+FAST-EXTRACT PATCH: APPLIED
+G4-FORMAT-GUARD PATCH: APPLIED
+ASYNC-REWARD PATCH: FAILED anchor engine 0
+FLASH-SA PATCH: APPLIED n=30
+JIT-UNROLL PATCH: FAILED anchor count 0
+SYNC-KEEPKV PATCH: FAILED anchor count 0 for 'self.llm.collective_rpc("delete_kv_cache") # will '
+HOST-EXTRACT PATCH: FAILED prologue anchor count 0
+CD-NOGLOBAL PATCH: APPLIED
+PADDING-BUCKET PATCH: FAILED runner call anchor
+LOG-STATS PATCH: APPLIED
+TEXTUAL-STOP PATCH: FAILED requires patch_host_extract first
+VERIFY-TIMEOUT PATCH: APPLIED (VERIFY_ITEM_TIMEOUT=5(default))
+REWARD-DUMP PATCH: APPLIED (REWARD_DUMP_N=0(default))
+[convert] START google/gemma-4-E2B-it -> gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-it-newimg at Thu Oct 29 10:02:29 UTC 2026
+[convert] DONE exit=0 at Thu Oct 29 10:07:18 UTC 2026
+CD-PROPER PATCH: FAILED [ml-import] anchor found 0 times, expected 1
+LENDIST PATCH: APPLIED
+RPA-BLOCKS PATCH: FAILED anchor found 0 times, expected 1
+CD-MASK2 PATCH: APPLIED
+CD-REPORT PATCH: APPLIED
+PHASETIME2 PATCH: APPLIED
+REWARD-PAR PATCH: APPLIED
+LENGTH-SHAPE PATCH: APPLIED (enable with LENGTH_SHAPE=1)
+TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=3.0, return_logprobs=True, eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt; rl_learner
+SHARDED-SAMPLING PATCH: SKIPPED (native distributed sampling in tpu_inference on this image)
+BLOCK-SIZE PATCH: APPLIED
+APPROX-TOPK PATCH: APPLIED
+ASYNC-DETOK PATCH: FAILED tunix anchor 0
+ASYNC-LOGPROBS PATCH: FAILED anchor tunix=0 engine_pool=False
+DP-RR-ROUTING PATCH: FAILED anchor 0
+STOP-TOKENS PATCH: FAILED anchor 0
+RUNNER-EOS PATCH: APPLIED
+FAST-EXTRACT PATCH: APPLIED
+G4-FORMAT-GUARD PATCH: APPLIED
+ASYNC-REWARD PATCH: FAILED anchor engine 0
+FLASH-SA PATCH: APPLIED n=30
+JIT-UNROLL PATCH: FAILED anchor count 0
+SYNC-KEEPKV PATCH: FAILED anchor count 0 for 'self.llm.collective_rpc("delete_kv_cache") # will '
+HOST-EXTRACT PATCH: FAILED prologue anchor count 0
+CD-NOGLOBAL PATCH: APPLIED
+PADDING-BUCKET PATCH: FAILED runner call anchor
+LOG-STATS PATCH: APPLIED
+TEXTUAL-STOP PATCH: FAILED requires patch_host_extract first

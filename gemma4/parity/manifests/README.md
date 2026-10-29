@@ -59,4 +59,7 @@ The embedded patches are the files under `../patches/`.
 
 **2026-10-29:** every manifest here now sets `--xla_tpu_dvfs_p_state=6` (7 is not allowed on this cluster).
 `g4ucq3-optimized-24s-pstate6.yaml` is the 24 s recipe rerun at p-state 6; `g4pl10-latest-image-10step.yaml`
-is the 35 s recipe on the latest image (`2026-09-22-head`, 10 updates) for the perf-regression check.
+is the 35 s recipe on the latest image (`2026-09-22-head`, 10 updates) for the perf-regression check;
+`g4pl10a/b/d-*` are its variants (legacy sync, re-converted checkpoint, native vLLM model). None of the four
+runs on that image: see `../../GEMMA4_E2B_LATEST_IMAGE_STATUS.md` (rollout weights gibberish, missing gemma4
+vLLM weight mapping, `local_sa_*` None crash).

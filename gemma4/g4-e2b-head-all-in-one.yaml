@@ -1,0 +1,509 @@
+# =============================================================================
+# g4hd -- gemma4-E2B GRPO on 64 TPU7x chips (one 4x4x4 slice),
+# built from the LATEST upstream image, PURE-HEAD (no runtime patches).
+#
+# Why pure-head: every perf/host-work optimization we developed is now MERGED
+# upstream and lives in this image (confirmed by image-check 2026-10-22):
+#   - DP_SCHED_ROUTING (our #3587)  - vectorized EOS trim (our #3586)
+#   - fixed-depth CD windows (#3509)  - overlap_postprocessing (#2233)
+#   - free_kv_cache_during_weight_sync (#2231/#5289)  - reward_num_workers (#1904/#5255)
+#   - gc_collect_after_weight_sync (#2086)  - max_seq_token_per_tpu (#5100)
+#   - num_vocab_tiling config (262k-vocab)  - packer copy=False removed (#2309)
+# So they are set as CONFIG/ENV below instead of runtime patches.
+#
+# gemma4-specific vs the Qwen3-0.6B template:
+#   - FIXED checkpoint gemma4-e2b-raw2 (THE parity lever; raw was embedding-corrupted)
+#   - scan_layers=False      (gemma4 shares KV caches across layers; cannot nn.scan)
+#   - train_micro_batch_size=1  (262k-vocab logits; tmbs>1 OOMs. qwen uses 32)
+#   - max_target_length=8192 / max_prefill_predict_length=4096  (response cap 4096)
+#   - NO chat_template_path  (reward-correctness prompt REMOVED: proven not needed for
+#     parity or perf -- fixed ckpt carries parity; textual g4r38=canonical g4r44=0.54)
+#   - stop at id 106 relies on the gemma4 tokenizer's native eos (like qwen); the
+#     fixed-depth window + host EOS-trim cut there. MEASURE truncation to confirm.
+#
+# image   : gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:4dc6ca720017bf93b6bae9524519cf5b7a8b16706ca6aab2a355af26d75a6bf3
+#           MaxText + tunix a3e92fba + tpu-inference c2289ee4b + vLLM 51da0ca6
+# pathways: 20260918-jax_0.11.0
+# queue   : priority-dev / multislice-queue (faster scheduling for dev iteration)
+# measure : enable_tunix_perf_metrics=True -> TensorBoard perf/train/global_step_time
+#           (median over steps >= 3), same methodology as the Qwen3 head run.
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "g4hd-patches"
+  namespace: default
+data:
+  gemma_data.py: |-
+    """gemma4: custom process_data (dataset_processor_path hook), ported from tianyu-rl-g4-003.
+    EMPIRICAL findings driving this design (theirs):
+    (1) the checkpoint outputs garbage under the canonical gemma-4 <|turn> markers (ids 105/106 are
+        effectively untrained for it),
+    (2) it answers math correctly under gemma-3-STYLE textual markers (<start_of_turn>... -- 7 BPE
+        pieces each, NOT special tokens in this tokenizer; teammate's 39/39-verified smoke used exactly
+        that), so this builder renders the gemma-3-style prompt MANUALLY (single wrap, no
+        apply_chat_template; no literal <bos> -- tunix's tokenize() lets the tokenizer add bos).
+    Consequence: there is no single-token turn terminator; sequences stop at <eos> (id 1), the textual
+    markers' final tokens via EXTRA_STOP_TOKEN_IDS ([106,50] union), or the cap."""
+    import json
+
+    SYSTEM_PROMPT = ("You are given a problem. Think about the problem and provide your reasoning. Place it between "
+                     "<reasoning> and </reasoning>. Then, provide the final answer (i.e., just one numerical value) "
+                     "between <answer> and </answer>.")
+
+    _PRINTED = [False]
+
+
+    def _s(v):
+        return v.decode("utf-8") if isinstance(v, bytes) else str(v)
+
+
+    def process_data(dataset_name, model_tokenizer, template_config, tmvp_config, x):
+        from maxtext.trainers.post_train.rl import utils_rl
+        for key in ("problem", "prompt", "question"):
+            if key in x:
+                question = _s(x[key]); break
+        for key in ("answer", "solution", "expected_answer"):
+            if key in x:
+                answer = _s(x[key]); break
+        qt = _s(x["question_type"]) if "question_type" in x else "default"
+        processed_answer = utils_rl.process_answer(question, answer, qt)
+        prompt = f"<start_of_turn>user\n{SYSTEM_PROMPT}\n\n{question}<end_of_turn>\n<start_of_turn>model\n"
+        if not _PRINTED[0]:
+            print("GEMMA-PROMPT %r" % prompt[:300], flush=True)
+            _PRINTED[0] = True
+        return {"prompts": prompt, "question": question, "answer": json.dumps(processed_answer)}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "g4hd-launcher"
+  namespace: default
+data:
+  launch-workload.sh: |-
+
+    #!/bin/bash
+    set -e
+
+    _sigterm() {
+      echo "Caught SIGTERM signal, sending to child process..."
+      kill -SIGTERM "$PID" 2>/dev/null
+    }
+    trap _sigterm SIGTERM
+
+    MAXTEXT_CONFIG_PATH="maxtext/configs/post_train/rl.yml"
+    if [ ! -f "${MAXTEXT_CONFIG_PATH}" ] && [ -f "src/${MAXTEXT_CONFIG_PATH}" ]; then
+      MAXTEXT_CONFIG_PATH="src/${MAXTEXT_CONFIG_PATH}"
+    fi
+
+    ls -la /workload/patches/ || true
+
+    # --- image check: the upstream changes our perf relies on must be present ---
+    python3 - <<'PYCHECK' || { echo 'FATAL: image check failed'; exit 1; }
+    import importlib.util, os, sys
+    def has(pkg, rel, needle):
+      root = importlib.util.find_spec(pkg).submodule_search_locations[0]
+      return needle in open(os.path.join(root, rel), encoding='utf-8').read()
+    need = {
+      'tunix overlap_postprocessing':         has('tunix','generate/vllm_sampler.py','overlap_postprocessing'),
+      'tunix free_kv_cache_during_weight_sync':has('tunix','generate/vllm_sampler.py','free_kv_cache_during_weight_sync'),
+      'tunix reward_num_workers':             has('tunix','rl/algorithm_config.py','reward_num_workers'),
+      'tpu-inference DP_SCHED_ROUTING':       has('tpu_inference','envs.py','DP_SCHED_ROUTING'),
+      'tpu-inference fixed-depth CD':         has('tpu_inference','runner/decode_loop.py','continue_decode_eos_check_interval <= 0'),
+      'tpu-inference vectorized EOS trim':    has('tpu_inference','runner/tpu_runner.py','_extract_valid_lengths_host'),
+      'maxtext max_seq_token_per_tpu':        has('maxtext','configs/types.py','max_seq_token_per_tpu'),
+      'maxtext num_vocab_tiling':             has('maxtext','configs/types.py','num_vocab_tiling'),
+    }
+    for k,ok in need.items(): print('IMAGE-CHECK','OK ' if ok else 'MISSING',k)
+    sys.exit(0 if all(need.values()) else 1)
+    PYCHECK
+
+    # round-robin DP routing (our #3587; least_loaded is much slower at DP128)
+    export DP_SCHED_ROUTING=round_robin
+    # 0 = fixed-depth continue-decode windows, no per-step on-device EOS check
+    export CONTINUE_DECODE_EOS_CHECK_INTERVAL="0"
+    export PHASED_PROFILING_DIR="gs://ubench-logs/${JOB_IDENTIFIER}/phased_profile"  # decode-path xplane for roofline
+    # ragged-paged-attention tile sizes
+    export RPA_V3_DECODE_BLOCK_SIZES="1,2048,1,2048"
+    export RPA_V3_MIXED_BLOCK_SIZES="512,1024,256,512"
+    export RPA_V3_PREFILL_BLOCK_SIZES="512,1024,256,512"
+
+    export HF_TOKEN=''
+    export HF_HUB_ENABLE_HF_TRANSFER=0
+    export HF_HUB_DISABLE_XET=1
+    export NUM_PRECOMPILE_WORKERS=1
+    export NEW_MODEL_DESIGN=1
+    export TPU_MIN_LOG_LEVEL=0
+    export TF_CPP_MIN_LOG_LEVEL=0
+    export TPU_STDERR_LOG_LEVEL=0
+    export JAX_BACKEND_TARGET=grpc://127.0.0.1:29000
+
+    (
+      export ENABLE_PATHWAYS_PERSISTENCE='1'
+      export JAX_PLATFORMS="${JAX_PLATFORMS:-proxy,cpu}"
+      export ENABLE_PJRT_COMPATIBILITY='true'
+
+      python3 -m maxtext.trainers.post_train.rl.train_rl "${MAXTEXT_CONFIG_PATH}" \
+        model_name='gemma4-e2b' \
+        tokenizer_path='google/gemma-4-E2B-it' \
+        dataset_processor_path=/workload/patches/gemma_data.py \
+        use_chat_template=false \
+        dataset_name='nvidia/OpenMathInstruct-2' \
+        hf_train_files='hf://datasets/nvidia/OpenMathInstruct-2/data/train_1M-*.parquet' \
+        train_split='train_1M' \
+        rl.num_generations=8 \
+        rl.grpo_beta=0.0 \
+        rl.grpo_epsilon=0.2 \
+        rl.epsilon_high=0.28 \
+        checkpoint_storage_use_ocdbt=False \
+        async_scheduling=False \
+        enable_prefix_caching=false \
+        max_seq_token_per_tpu=12288 \
+        vllm_block_size=128 \
+        gc_collect_after_weight_sync=false \
+        reward_num_workers=64 \
+        sa_block_q=1024 \
+        sa_block_q_dkv=1024 \
+        sa_block_q_dq=1024 \
+        sa_block_kv=2048 \
+        sa_block_kv_compute=2048 \
+        sa_block_kv_dkv=2048 \
+        sa_block_kv_dkv_compute=2048 \
+        sa_block_kv_dq=2048 \
+        sa_use_base2_exp=false \
+        local_sa_block_q=1024 \
+        local_sa_block_q_dkv=1024 \
+        local_sa_block_q_dq=1024 \
+        local_sa_block_kv=2048 \
+        local_sa_block_kv_compute=2048 \
+        local_sa_block_kv_dkv=2048 \
+        local_sa_block_kv_dkv_compute=2048 \
+        local_sa_block_kv_dq=2048 \
+        local_sa_q_layout=HEAD_DIM_MINOR \
+        local_sa_k_layout=HEAD_DIM_MINOR \
+        local_sa_v_layout=HEAD_DIM_MINOR \
+        eval_local_sa_q_layout=HEAD_DIM_MINOR \
+        eval_local_sa_k_layout=HEAD_DIM_MINOR \
+        eval_local_sa_v_layout=HEAD_DIM_MINOR \
+        eval_local_sa_block_q=512 \
+        eval_local_sa_block_kv=512 \
+        eval_local_sa_block_kv_compute=512 \
+        local_sa_use_fused_bwd_kernel=false \
+        local_use_splash_scheduler=false \
+        local_sa_fuse_reciprocal=true \
+        local_sa_use_base2_exp=true \
+        free_kv_cache_during_weight_sync=false \
+        math_verify_num_procs=64 \
+        chips_per_vm=8 \
+        num_batches=8 \
+        num_test_batches=0 \
+        debug=True \
+        profiler=xplane \
+        skip_first_n_steps_for_profiler=1 \
+        profiler_steps=1 \
+        gradient_clipping_threshold=1.0 \
+        decode_sampling_temperature=0.8 \
+        decode_sampling_top_k=50 \
+        decode_sampling_nucleus_p=0.95 \
+        max_target_length=8192 \
+        kv_cache_buffer=4352 \
+        max_prefill_predict_length=4096 \
+        learning_rate=1e-6 \
+        batch_size=256 \
+        train_micro_batch_size=1 \
+        rollout_micro_batch_size=256 \
+        trainer_devices_fraction=1.0 \
+        sampler_devices_fraction=1.0 \
+        rollout_data_parallelism=128 \
+        rollout_tensor_parallelism=1 \
+        enable_dp_attention=false \
+        hbm_utilization_vllm=0.3 \
+        max_num_seqs=256 \
+        max_num_batched_tokens=8448 \
+        scan_layers=False \
+        attention='flash' \
+        allow_split_physical_axes=True \
+        enable_tunix_perf_metrics=True \
+        checkpoint_period=100 \
+        max_num_checkpoints_to_keep=1000 \
+        enable_checkpointing=true \
+        load_parameters_path='gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw2/0/items' \
+        skip_jax_distributed_system=True \
+        vllm_hf_overrides='{architectures: ["MaxTextForCausalLM"]}' \
+        vllm_additional_config='{"enable_continue_decode": true, "max_decode_steps": 512, "maxtext_config": {"model_name": "gemma4-e2b", "model_call_mode": "inference", "log_config": false, "weight_dtype": "bfloat16", "allow_split_physical_axes": true}}' \
+        base_output_directory=${ARTIFACT_DIR} \
+        run_name=${JOB_IDENTIFIER}
+    ) & PID=$!
+
+    wait $PID
+    EXIT_CODE=$?
+    echo "MaxText Job Ended at: $(date) with exit code $EXIT_CODE"
+    exit $EXIT_CODE
+---
+apiVersion: jobset.x-k8s.io/v1alpha2
+kind: JobSet
+metadata:
+  name: "g4hd"
+  namespace: default
+  labels:
+    kueue.x-k8s.io/queue-name: "multislice-queue"
+spec:
+  network:
+    enableDNSHostnames: true
+    publishNotReadyAddresses: true
+  failurePolicy:
+    maxRestarts: 5
+  successPolicy:
+    operator: All
+    targetReplicatedJobs:
+    - pathways-head
+  replicatedJobs:
+  - name: pathways-head
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          kueue.x-k8s.io/queue-name: "multislice-queue"
+      spec:
+        parallelism: 1
+        completions: 1
+        backoffLimit: 0
+        template:
+          metadata:
+            labels:
+              kueue.x-k8s.io/podset: pathways-head
+              kueue.x-k8s.io/queue-name: "multislice-queue"
+            annotations:
+              kubectl.kubernetes.io/default-container: jax-tpu
+              gke-gcsfuse/volumes: "true"
+          spec:
+            restartPolicy: OnFailure
+            priorityClassName: "medium"
+            hostNetwork: true
+            hostIPC: true
+            dnsPolicy: ClusterFirstWithHostNet
+            nodeSelector:
+              cloud.google.com/gke-nodepool: "cpu-np"
+            affinity:
+              podAntiAffinity:
+                preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    topologyKey: kubernetes.io/hostname
+                    labelSelector:
+                      matchExpressions:
+                      - key: jobset.sigs.k8s.io/replicatedjob-name
+                        operator: In
+                        values: ["pathways-head"]
+            containers:
+            - name: jax-tpu
+              image: "gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:4dc6ca720017bf93b6bae9524519cf5b7a8b16706ca6aab2a355af26d75a6bf3"
+              command:
+              - bash
+              - -c
+              - |
+                echo Pathways Helm Start: $(date);
+                _sigterm() (kill -SIGTERM $! 2>/dev/null;);
+                trap _sigterm SIGTERM;
+                echo "Executing payload from /workload/launcher/launch-workload.sh..."
+                ( bash /workload/launcher/launch-workload.sh ) & PID=$!;
+                while kill -0 $PID 2>/dev/null; do sleep 5; done;
+                wait $PID;
+                EXIT_CODE=$?;
+                echo Pathways Helm End: $(date);
+                echo EXIT_CODE=$EXIT_CODE;
+                exit $EXIT_CODE
+              env:
+              - name: JAX_PLATFORMS
+                value: "proxy,cpu"
+              - name: PATHWAYS_HEAD
+                value: "g4hd-pathways-head-0-0.g4hd"
+              - name: JAX_BACKEND_TARGET
+                value: grpc://g4hd-pathways-head-0-0.g4hd:29000
+              - name: JOB_IDENTIFIER
+                value: "g4hd"
+              - name: ARTIFACT_DIR
+                value: "gs://ubench-logs"
+              - name: JAX_COMPILATION_CACHE_DIR
+                value: "gs://ubench-logs/compilation_cache/gemma4-e2b/rl_repro_jax_tpu7x_head"
+              - name: SKIP_JAX_PRECOMPILE
+                value: "1"
+              resources:
+                requests:
+                  cpu: "28"
+                  memory: 130G
+                limits:
+                  cpu: "44"
+                  memory: 170G
+              securityContext:
+                privileged: true
+              volumeMounts:
+              - name: workload-launcher
+                mountPath: /workload/launcher
+              - name: workload-patches
+                mountPath: /workload/patches
+              - name: shared-tmp
+                mountPath: /tmp
+            initContainers:
+            - name: pathways-rm
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260918-jax_0.11.0"
+              restartPolicy: Always
+              env:
+              - name: HOST_ADDRESS
+                value: "g4hd-pathways-head-0-0.g4hd"
+              args:
+              - --server_port=29001
+              - --node_type=resource_manager
+              - --gcs_scratch_location=gs://ubench-logs/compilation_cache/gemma4-e2b/rl_repro_pathways_tpu7x_head
+              - --instance_count=1
+              - --instance_type=tpu7x:4x4x4
+              resources:
+                requests:
+                  cpu: "2"
+                  memory: 8G
+                limits:
+                  cpu: "4"
+                  memory: 16G
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            - name: pathways-proxy
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/proxy_server:20260918-jax_0.11.0"
+              restartPolicy: Always
+              env:
+              - name: PATHWAYS_HEAD
+                value: "g4hd-pathways-head-0-0.g4hd"
+              args:
+              - --server_port=29000
+              - --resource_manager_address=g4hd-pathways-head-0-0.g4hd:29001
+              - --gcs_scratch_location=gs://ubench-logs/compilation_cache/gemma4-e2b/rl_repro_pathways_tpu7x_head
+              - --xla_tpu_dvfs_p_state=7
+              - --xla_tpu_scoped_vmem_limit_kib=65536
+              - --xla_tpu_num_sparse_cores_for_gather_offloading=1
+              - --xla_tpu_bf16_emission_mode=NATIVE_EMISSION
+              - --xla_tpu_enable_sparse_core_reduce_scatter_v2=true
+              - --xla_tpu_enable_sparse_core_collective_offload_all_gather=true
+              - --xla_tpu_enable_sparse_core_collective_offload_2d_all_gather=true
+              - --xla_tpu_use_tc_device_shape_on_sc=True
+              - --xla_sc_disable_megacore_partitioning=True
+              - --xla_tpu_enable_async_collective_fusion_fuse_all_gather=false
+              - --xla_enable_async_all_gather=true
+              - --xla_tpu_prefer_async_allgather_to_allreduce=true
+              - --xla_tpu_enable_sparse_core_collective_offload_all_reduce=true
+              - --xla_tpu_enable_sparse_core_collective_offload_reduce_scatter=true
+              - --xla_tpu_enable_sparse_core_collective_offload_3d_all_gather=true
+              - --xla_tpu_use_single_sparse_core_for_all_gather_offload=true
+              - --xla_tpu_enable_concurrent_sparse_core_offloading=true
+              - --xla_tpu_enable_offloading_gather_to_sparsecore=true
+              - --xla_tpu_sparse_core_all_gather_latency_multiplier=1
+              - --xla_tpu_sparse_core_reduce_scatter_latency_multiplier=3
+              - --xla_tpu_enable_sparse_core_collective_aggregator=true
+              - --xla_tpu_enable_latency_hiding_layer_scheduler=true
+              - --xla_tpu_scheduler_percent_shared_memory_limit=150
+              - --xla_tpu_enable_layer_scheduler_for_dependent_collectives=true
+              - --xla_tpu_enable_sparse_core_collective_offload_nd_reduce_scatter=true
+              - --xla_tpu_pcie_bandwidth_multiplier=0.03
+              - --xla_tpu_enable_sparse_core_offload_queuing_in_lhs=true
+              - --xla_tpu_enable_multi_compute_overlap_in_layer_scheduler=false
+              - --xla_tpu_enable_3d_reduce_scatter_decomposer=false
+              resources:
+                requests:
+                  cpu: "8"
+                  memory: 32G
+                limits:
+                  cpu: "16"
+                  memory: 64G
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            volumes:
+            - name: shared-tmp
+              hostPath:
+                path: /tmp
+                type: DirectoryOrCreate
+            - name: workload-launcher
+              configMap:
+                name: "g4hd-launcher"
+            - name: workload-patches
+              configMap:
+                name: "g4hd-patches"
+  - name: worker
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          kueue.x-k8s.io/queue-name: "multislice-queue"
+      spec:
+        parallelism: 16
+        completions: 16
+        backoffLimit: 32
+        completionMode: Indexed
+        template:
+          metadata:
+            annotations:
+              alpha.jobset.sigs.k8s.io/exclusive-topology: cloud.google.com/gke-nodepool
+            labels:
+              kueue.x-k8s.io/podset: worker
+              kueue.x-k8s.io/queue-name: "multislice-queue"
+          spec:
+            restartPolicy: OnFailure
+            priorityClassName: "medium"
+            hostNetwork: true
+            hostIPC: true
+            dnsPolicy: ClusterFirstWithHostNet
+            nodeSelector:
+              cloud.google.com/gke-tpu-topology: "4x4x4"
+              cloud.google.com/gke-tpu-accelerator: tpu7x
+              # use the tpu-priority-dev-team reserved pool (reserve the slice in the
+              # tpu-reservations app first; every nap tpu7x node is in this reservation)
+              cloud.google.com/reservation-name: "cloudtpu-20260710003900-159478293"
+            containers:
+            - name: pathways-worker
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260918-jax_0.11.0"
+              env:
+              - name: PATHWAYS_HEAD
+                value: "g4hd-pathways-head-0-0.g4hd"
+              - name: MEGASCALE_SLICE_ID
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/job-index']
+              - name: MEGASCALE_NUM_SLICES
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/replicatedjob-replicas']
+              - name: JOBSET_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['jobset.sigs.k8s.io/jobset-name']
+              - name: MEGASCALE_COORDINATOR_ADDRESS
+                value: "g4hd-pathways-head-0-0.g4hd"
+              - name: TPU_SKIP_MDS_QUERY
+                value: "true"
+              args:
+              - --server_port=29005
+              - --resource_manager_address=g4hd-pathways-head-0-0.g4hd:29001
+              - --gcs_scratch_location=gs://ubench-logs/compilation_cache/gemma4-e2b/rl_repro_pathways_tpu7x_head
+              - --enable_metrics_collection=true
+              - --xla_tpu_use_enhanced_launch_barrier=true
+              ports:
+              - containerPort: 29005
+                protocol: TCP
+              - containerPort: 29006
+                protocol: TCP
+              - containerPort: 8471
+                protocol: TCP
+              - containerPort: 8080
+                protocol: TCP
+              resources:
+                limits:
+                  google.com/tpu: "4"
+                requests:
+                  google.com/tpu: "4"
+              volumeMounts:
+              - name: shared-tmp
+                mountPath: /tmp
+            volumes:
+            - name: shared-tmp
+              hostPath:
+                path: /tmp
+                type: DirectoryOrCreate

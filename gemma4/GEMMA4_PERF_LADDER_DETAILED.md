@@ -34,6 +34,52 @@ async detok / logprobs / fast-extract are near-null on top of it. The step is
 serial-head-IPC-bound, not detok/logprob-bound. Rewards 0.53–0.59 (parity) across all four.
 Clean steps used (contention-excluded): g4r56 = 58.4/59.4, g4r57 = 59.8/60.2, g4r38 = 56.3/58.1.
 
+### What round-robin DP routing does (the mechanism behind the −70 s)
+
+The rollout runs **data-parallel across 128 engines** (DP ranks), and every generation
+request must be assigned to exactly one rank. A **router** on the serial Python head makes
+that choice per request.
+
+**The default (load-aware) router — the "all-rank state query":** to send each request to
+the least-loaded rank, it first asks *every* rank for its current state (queue depth / free
+KV-cache), then picks the emptiest:
+
+```
+for each request:              # 2048 requests per decode window
+    for each rank in 0..127:   # query all 128 ranks
+        ask rank: "how full is your queue / KV pool?"   # ← IPC round-trip through the Pathways proxy
+    pick the least-loaded rank and dispatch there
+```
+
+That inner "ask every rank its state" is the **all-rank state query**. Each ask is a real
+**cross-process IPC round-trip through the Pathways proxy** — not a local memory read — and
+the single Python head issues them **serially, on the critical path**, while the 128 TPU
+engines sit ~2–3% busy waiting. Per decode window that is **~2048 proxy IPCs**, and the cost
+is `count × per-IPC latency` paid in series. This is *why* the step was
+**serial-head-IPC-bound**.
+
+**Round-robin replaces the query with a local counter:**
+
+```
+for each request:
+    rank = counter % 128      # local integer math — ZERO IPC
+    counter += 1
+    dispatch to rank
+```
+
+No rank is queried; routing becomes a local modulo, and the ~2048 proxy IPCs/window vanish
+entirely. Because the workload is uniform (256 prompts × 8 identically-shaped completions),
+plain round-robin balances the ranks about as evenly as the load-aware version would have —
+so no balance is lost, and the whole IPC storm is deleted. That deletion is the −70 s.
+
+**Why it is the *dominant* lever, and what it implies for the residual gap:** rr routing
+killed the per-request *state query* (routing). The ~26 s of serial host that remains in the
+best config is the per-request *dispatch IPC* (2048 `add_request` calls/window) plus the
+serial output scan — the **same shape of problem** (2048 serial proxy round-trips/window),
+one layer down. Lever #1 in the headroom analysis (batched submission + deferred
+host-processing) does to *dispatch* what rr routing did to *routing*. See
+`GEMMA4_HEADROOM_ANALYSIS.md` §"Roofline gap on the current best".
+
 ## Per-rung component detail (median | mean, clean steps)
 
 ### L0 — g4r19 (baseline, old ckpt, win64)

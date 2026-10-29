@@ -1,0 +1,100 @@
+CD-PROPER PATCH: FAILED [ml-import] anchor found 0 times, expected 1
+LENDIST PATCH: APPLIED
+RPA-BLOCKS PATCH: FAILED anchor found 0 times, expected 1
+CD-MASK2 PATCH: APPLIED
+CD-REPORT PATCH: APPLIED
+PHASETIME2 PATCH: APPLIED
+REWARD-PAR PATCH: APPLIED
+LENGTH-SHAPE PATCH: APPLIED (enable with LENGTH_SHAPE=1)
+TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=3.0, return_logprobs=True, eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt; rl_learner
+SHARDED-SAMPLING PATCH: SKIPPED (native distributed sampling in tpu_inference on this image)
+BLOCK-SIZE PATCH: APPLIED
+APPROX-TOPK PATCH: APPLIED
+ASYNC-DETOK PATCH: FAILED tunix anchor 0
+ASYNC-LOGPROBS PATCH: FAILED anchor tunix=0 engine_pool=False
+DP-RR-ROUTING PATCH: FAILED anchor 0
+STOP-TOKENS PATCH: FAILED anchor 0
+RUNNER-EOS PATCH: APPLIED
+FAST-EXTRACT PATCH: APPLIED
+G4-FORMAT-GUARD PATCH: APPLIED
+ASYNC-REWARD PATCH: FAILED anchor engine 0
+FLASH-SA PATCH: APPLIED n=30
+JIT-UNROLL PATCH: FAILED anchor count 0
+SYNC-KEEPKV PATCH: FAILED anchor count 0 for 'self.llm.collective_rpc("delete_kv_cache") # will '
+HOST-EXTRACT PATCH: FAILED prologue anchor count 0
+CD-NOGLOBAL PATCH: APPLIED
+PADDING-BUCKET PATCH: FAILED runner call anchor
+LOG-STATS PATCH: APPLIED
+TEXTUAL-STOP PATCH: FAILED requires patch_host_extract first
+VERIFY-TIMEOUT PATCH: APPLIED (VERIFY_ITEM_TIMEOUT=5(default))
+REWARD-DUMP PATCH: APPLIED (REWARD_DUMP_N=0(default))
+I1029 09:47:19.220867 138302993959808 pyconfig.py:591] Config param use_standalone_converter: False
+I1029 09:47:19.221305 138302993959808 pyconfig.py:591] Config param use_weight_converter: False
+I1029 09:50:24.097855 138302993959808 evaluate_rl.py:85] Pass 1/1, responses: ['Here is the trucks trucks trucks trucks trucks trucks trucks trucks only full-formes-a-n-a-t-e \\text{ \\}}<turn|>', "Here_e complete the blanks.\n\n1.  Stated in the total total total at the answer the an;\n  *This is a
+I1029 09:50:24.098931 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the trucks trucks trucks trucks trucks trucks trucks trucks only full-formes-a-n-a-t-e \\text{ \\}}<turn|>']
+I1029 09:50:24.204630 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here_e complete the blanks.\n\n1.  Stated in the total total total at the answer the an;\n  *This is a number (e)e|U-in-g  Equation  Input Input Input:1. **(Implied: $\\text{A type of thing that can's me me ither-u-a-r
+I1029 09:50:24.208760 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the volume-oatmealbark?******************************XOY \n<turn|>']
+I1029 09:50:24.212105 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here\'를 4 4 3x?\n$\\text{P-S-P...} \\text{and then something else?)??"\n"No, that approach is too general. A specific instance of the number number number number number one...<turn|>']
+I1029 09:50:24.215427 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Hereby, we'\n*   Split-in-ت-U-A? No.<turn|>"]
+I1029 09:50:24.218667 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here are the restatement of the next two points, to be siegen.<turn|>']
+I1029 09:50:24.221938 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here are the names of the **specific type of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of
+I1029 09:50:24.224802 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the radial radial radial:\n\n1. }\n**`n = \n<turn|>']
+I1029 09:50:24.226843 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Hereは、このファイル이이이이이이이이이이이이이이이이이이이이이이이이이이이1<turn|>']
+I1029 09:50:24.228910 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here\'를 5 6 2 1.\n1. замечание: I apologize, I\'h\'gu?? (Just kidding, I am an-t-i-t-a-n-a\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\text{error-in-ngi pl 22/E443
+I1029 09:50:24.232438 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here by you, the says, $f(x)$)$)$)\n$\\text{P = 2, \xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0 \xa0 100% \\text{or3en-me-mineererherotototot!":: (Note: The User is NOT in thelampslamps人的人的人的人的人的人
+I1029 09:50:24.235893 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here 2'intervallarararar! Here is the **strong-ter-o-i-iɪlternin?? (The Structure, the structure is not a question, it'\n<turn|>"]
+I1029 09:50:24.238746 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the whole-说- 앙 ( - \n<turn|>']
+I1029 09:50:24.241768 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here, we' [**This is aอพสสสสสสสสสสสสสสสสสสสสสสสสสสสสสسسسسسسسسس的には、このため음음音音了了了了了了了了了了了了了了了了�
+I1029 09:50:24.244637 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here\'s a few different "facts-*} \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ e m m m > < = f o rda", "banana, light, major, is... (thenceirtis is is is is is. . . ) <turn|>']
+I1029 09:50:24.246932 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here's a total sum, a path-over-odd-with-kata-cup:*\n\n1. \\text{Text-in-all-up-ofourlines=10_error-in-o-i -> Invalid Operator::P”””””””””A?**\n\n**Explanation of the 3つの異なるアアアアア�
+I1029 09:50:24.249874 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here случилось случилось случилось случилось случилось случилось случилось случилось случилось случилось случилось сл
+I1029 09:50:24.254165 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here sets the areas, and the sum of the second-\nwithdng’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’ of a single-\ndown-a-level-it-ti, so that that tha
+I1029 09:50:24.258316 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the trucks trucks trucks trucks trucks trucks trucks trucks by the first letter.<turn|>']
+I1029 09:50:24.261355 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here'x the cost is <u></u><turn|>"]
+I1029 09:50:24.263586 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the factoren, the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the 
+I1029 09:50:24.266442 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the tiling, on,\n\n<turn|>']
+I1029 09:50:24.269621 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here sets the voice box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box bo
+I1029 09:50:24.272775 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here follows a **strong-l��������������������������������������������������mtextingingingingingingingingingingingingin
+I1029 09:50:24.275793 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here are the bagdad on the wrong way, let us see for agnes and her family and some notes\n\n** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** 1. (1) 20? \n 2. (A B) ( ) {0) - ( ( ( ( ( ( ( ( ( ( ( ( ( (
+I1029 09:50:24.278788 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here as you can-l-s- u-c-o·好的，假设检验，结论不代表完美，但更衣是，，，成格化ををををををををををををををををををををををををををををををををををををを�
+I1029 09:50:24.281794 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here proper and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and an
+I1029 09:50:24.286713 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here'\n# ��]/\n<turn|>"]
+I1029 09:50:24.289128 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the length is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is i
+I1029 09:50:24.292353 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the lifecycle of the 2-n-ア:\n1. $\\text{A is a type of thing, x,\n```math.text_content_text_content_g_t_s.1.111eeuaa1?----")|` `)`\n<eos>']
+I1029 09:50:24.294640 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here in, and you can'\ne | 1. Identify what the next step can optionally could be, is, ( ( ( ) ) ) = 440-\n<turn|>"]
+I1029 09:50:24.297955 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here:\n1. Let $t$ is the same-in-MC?\n<eos>']
+I1029 09:50:24.300822 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here are the numbers are not given, but let $\\text{A, B,\n} \\text{A, \n <b><i></i> \\text{and")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")"
+I1029 09:50:24.303780 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here RDS RDS RDS<turn|>']
+I1029 09:50:24.306698 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the successful execution of the challenge is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is 
+I1029 09:50:24.309641 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here'를 6 \n 4 8 $\\rightarrow \\\n\\text{A B C B'''''' below this is the matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix...[End<turn|>"]
+I1029 09:50:24.312722 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here are the \\text{auto-something-- 1. **This is a ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** = $2$):**<turn|>']
+I1029 09:50:24.315620 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here are theft.<turn|>']
+I1029 09:50:24.318541 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here'тболainainainain \n 2 \n...\nThe problem asks for the tickets for the steps to the that that that that that that that that that that that that that that that that that that that that that that that that that t
+I1029 09:50:24.321822 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here'를 \n 8 척척，**（** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** = <unused90><unused2180><unused2180><unused2180><unused2180><unused2180><unused2180><unused2180><unused
+I1029 09:50:24.324228 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here'entire-l-o-i-n\\e\\V-O-C_ _ _ 1 2 ~*\n\n**Understanding the amount is not the number is not a b c d e f g h(s) (or or or or or or or or or or or or or or or or or or or or or or or or or or or \n<turn|>"]
+I1029 09:50:24.326308 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here-of-OFF:******************\\text{Hades...*^...|\n```text-infix-shyei?\n  \n* * * * * * * * * * * * * * * \\text{ ( ) ( ) (2/1_)::\n' ( ( ( ( ( ( ( ( ( ( ( ( (\nابط<turn|>"]
+I1029 09:50:24.329041 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here = \r\r\r\r\r\r\r\n**1.  *This section is a 4. 정보. 没 然 體 供 區 H2\\_1) Ու嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角�
+I1029 09:50:24.332105 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here by the sale sale sale sale sale sale sale sale sale<channel|>The problem asks for the estimated number of people.<turn|>']
+I1029 09:50:24.334221 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here 走 <turn|>']
+I1029 09:50:24.336304 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Hereh.\n\n1. $\\text{P = \n 4 4 5\\text{ (This is a_b <- 0 1 ...",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",",
+I1029 09:50:24.339128 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here'ate a WONDERFUL IDEA! Let $\\boldsymbol{\\text{A, N E W? No.<turn|>"]
+I1029 09:50:24.342075 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here-s a $\\text{A-stuff-up-deanerlanaphtzoun*^&;** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** = 6次 (HITCHED**/**/**/**010B, 6, \n 6 \n...|...\n\n**Note: The **notion-o-d'o'a-
+I1029 09:50:24.344982 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the statement of the amount, and the_w,n\\_0 の 1 2 4 5$<turn|>']
+I1029 09:50:24.347901 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here are the pages<turn|>']
+I1029 09:50:24.350768 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here are the top-used-is-is: <tool_response|>\n<turn|>']
+I1029 09:50:24.353914 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here_en___ _ _ _ _ _ _ to gather the number.\n\n**Conceptual Bridge: The Power of Zero-to-车-in-g-i-u-a for the\n\nThe Themedgedd: 1. **Self-ma-s-u-cê-n-o c h u d s t r y'POSTEROLIMBOB}\n(Note: *The text text text te
+I1029 09:50:24.357091 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here'를 <em></em></em></em></em></em></em></em></em></em>تابعتابعتابعتابعتابعتابعتابعتابعتابعتابعتابعتابعتابعتابعتابعتابعتابعتابعتابعتابع
+I1029 09:50:24.359800 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Heredekekeke[s) (The text provided in the next step will be processesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesesese. . .<turn|>']
+I1029 09:50:24.361891 138302993959808 evaluate_rl.py:131] Evaluation Responses: ["Here'\n# 랬 <turn|>"]
+I1029 09:50:24.364814 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the sales_ 2.1 1 1 1 0 0 8… (This is a-in-g, is, not-dom-n_)::<tool_call|><eos>']
+I1029 09:50:24.367905 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here yours yours yours<turn|>']
+I1029 09:50:24.370783 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the total number of 4.5x, T, R, ... (symbols for the number is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is 
+I1029 09:50:24.373669 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here_en_eooooes;\n1. . . . . . . . . . \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\
+I1029 09:50:24.376775 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here, we\'ain\' to go, "Git back to the mailer" - let\'ある: " * * * | 🤖:1. วิ.к.e_e_l, sors,d,e,d-me-pl-u-l-s_\n<eos>']
+I1029 09:50:24.379904 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here are the margin of fate?  *A B ... Y D c$$($($$\n<turn|>']
+I1029 09:50:24.383000 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Hereby, we can look at the above, and therefore also also also also also also also also also also also also also also also also also also also also also also also also also also also also also also also also also also 
+I1029 09:50:24.385272 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here Be The T R E S T W N S L A K E \n �h:3330000l, 1,0,0i_ _ _ _ _ _ _ _ _ </stocklist=10.of.s.n.p.q+11111-8 $\\text{A<</g}$<turn|>']
+I1029 09:50:24.388185 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the point of the pool_table_box_this_the__or_... (I apologize, I have been to the duration: 1. 无/不就就就就就就就就就就就就就就就就就就就就就就就就就就就就就就就就就就就就
+I1029 09:50:24.391345 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Herea.<turn|>']
+I1029 09:50:24.394233 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the function function function function function function function function(x: str) ($\\text{A-A-N-$\\text{M}$ ( ( ( ( ( ( ( ( ö ö ö ö ö ö ö: <turn|>']
+I1029 09:50:24.397018 138302993959808 evaluate_rl.py:131] Evaluation Responses: ['Here is the number is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is shown.<tur

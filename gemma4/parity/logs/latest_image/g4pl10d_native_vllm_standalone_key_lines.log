@@ -1,0 +1,31 @@
+SHARDED-SAMPLING PATCH: SKIPPED (native distributed sampling in tpu_inference on this image)
+FLASH-SA PATCH: SKIPPED (sa_* fields are native in this image RL config)
+[convert] gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-it-newimg/0/items present; skipping conversion
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/tunix/generate/mappings.py", line 156, in maybe_call
+TypeError: TunixMaxTextAdapter.to_hf_mappings() takes 1 positional argument but 2 were given
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/deps/src/maxtext/trainers/post_train/rl/train_rl.py", line 824, in <module>
+  File "/usr/local/lib/python3.12/site-packages/absl/app.py", line 410, in run
+  File "/usr/local/lib/python3.12/site-packages/absl/app.py", line 355, in _run_main
+  File "/deps/src/maxtext/trainers/post_train/rl/train_rl.py", line 820, in main
+  File "/deps/src/maxtext/trainers/post_train/rl/train_rl.py", line 668, in rl_train
+  File "/deps/src/maxtext/trainers/post_train/rl/train_rl.py", line 734, in _rl_train_impl
+  File "/deps/src/maxtext/trainers/post_train/rl/train_rl.py", line 533, in create_rl_components
+  File "/usr/local/lib/python3.12/site-packages/tunix/rl/rl_cluster.py", line 153, in __init__
+  File "/usr/local/lib/python3.12/site-packages/tunix/rl/rl_cluster.py", line 370, in _init_engine
+  File "/deps/src/maxtext/integration/vllm/maxtext_vllm_rollout.py", line 598, in __init__
+  File "/usr/local/lib/python3.12/site-packages/tunix/generate/mappings.py", line 102, in build
+  File "/usr/local/lib/python3.12/site-packages/tunix/generate/mappings.py", line 162, in from_model
+  File "/usr/local/lib/python3.12/site-packages/tunix/generate/mappings.py", line 158, in maybe_call
+  File "/deps/src/maxtext/integration/tunix/tunix_adapter.py", line 171, in to_hf_mappings
+  File "/deps/src/maxtext/integration/tunix/utils.py", line 130, in to_hf_mapping
+  File "/deps/src/maxtext/integration/tunix/weight_mapping/__init__.py", line 49, in __getitem__
+  File "/deps/src/maxtext/integration/tunix/weight_mapping/__init__.py", line 46, in __getattr__
+    raise ValueError(f"{name} vLLM weight mapping not found.")
+ValueError: gemma4-e2b vLLM weight mapping not found.
+SHARDED-SAMPLING PATCH: SKIPPED (native distributed sampling in tpu_inference on this image)
+FLASH-SA PATCH: SKIPPED (sa_* fields are native in this image RL config)
+[convert] gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-it-newimg/0/items present; skipping conversion

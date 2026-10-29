@@ -1,0 +1,80 @@
+CD-PROPER PATCH: FAILED [ml-import] anchor found 0 times, expected 1
+LENDIST PATCH: APPLIED
+RPA-BLOCKS PATCH: FAILED anchor found 0 times, expected 1
+CD-MASK2 PATCH: APPLIED
+CD-REPORT PATCH: APPLIED
+PHASETIME2 PATCH: APPLIED
+REWARD-PAR PATCH: APPLIED
+LENGTH-SHAPE PATCH: APPLIED (enable with LENGTH_SHAPE=1)
+TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=3.0, return_logprobs=True, eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt; rl_learner
+SHARDED-SAMPLING PATCH: SKIPPED (native distributed sampling in tpu_inference on this image)
+BLOCK-SIZE PATCH: APPLIED
+APPROX-TOPK PATCH: APPLIED
+ASYNC-DETOK PATCH: FAILED tunix anchor 0
+ASYNC-LOGPROBS PATCH: FAILED anchor tunix=0 engine_pool=False
+DP-RR-ROUTING PATCH: FAILED anchor 0
+STOP-TOKENS PATCH: FAILED anchor 0
+RUNNER-EOS PATCH: APPLIED
+FAST-EXTRACT PATCH: APPLIED
+G4-FORMAT-GUARD PATCH: APPLIED
+ASYNC-REWARD PATCH: FAILED anchor engine 0
+FLASH-SA PATCH: APPLIED n=30
+JIT-UNROLL PATCH: FAILED anchor count 0
+SYNC-KEEPKV PATCH: FAILED anchor count 0 for 'self.llm.collective_rpc("delete_kv_cache") # will '
+HOST-EXTRACT PATCH: FAILED prologue anchor count 0
+CD-NOGLOBAL PATCH: APPLIED
+PADDING-BUCKET PATCH: FAILED runner call anchor
+LOG-STATS PATCH: APPLIED
+TEXTUAL-STOP PATCH: FAILED requires patch_host_extract first
+VERIFY-TIMEOUT PATCH: APPLIED (VERIFY_ITEM_TIMEOUT=5(default))
+REWARD-DUMP PATCH: APPLIED (REWARD_DUMP_N=0(default))
+I1029 09:33:39.172512 134478227700608 pyconfig.py:591] Config param max_target_length: 3072
+I1029 09:33:39.174754 134478227700608 pyconfig.py:591] Config param num_batches: 10
+I1029 09:33:39.183723 134478227700608 pyconfig.py:591] Config param use_standalone_converter: False
+I1029 09:33:39.183947 134478227700608 pyconfig.py:591] Config param use_weight_converter: True
+I1029 09:37:09.797945 134478227700608 evaluate_rl.py:85] Pass 1/1, responses: ['Here is the trucks trucks trucks trucks trucks trucks trucks trucks only full-formes-a-n-a-t-e \\text{ \\}}<turn|>', "Here_e complete the blanks.\n\n1.  Stated in the total total total at the answer the an;\n  *This is a
+I1029 09:37:09.798691 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here is the trucks trucks trucks trucks trucks trucks trucks trucks only full-formes-a-n-a-t-e \\text{ \\}}<turn|>']
+I1029 09:37:09.899894 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here_e complete the blanks.\n\n1.  Stated in the total total total at the answer the an;\n  *This is a number (e)e|U-in-g  Equation  Input Input Input:1. **(Implied: $\\text{A type of thing that can's me me ither-u-a-r
+I1029 09:37:09.903607 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here is the volume-oatmealbark?******************************XOY \n<turn|>']
+I1029 09:37:09.906738 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here\'를 4 4 3x?\n$\\text{P-S-P...} \\text{and then something else?)??"\n"No, that approach is too general. A specific instance of the number number number number number one...<turn|>']
+I1029 09:37:09.909968 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Hereby, we'\n*   Split-in-ت-U-A? No.<turn|>"]
+I1029 09:37:09.913347 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here are the restatement of the next two points, to be siegen.<turn|>']
+I1029 09:37:09.916611 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here are the names of the **specific type of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of of
+I1029 09:37:09.919426 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here is the radial radial radial:\n\n1. }\n**`n = \n<turn|>']
+I1029 09:37:09.921644 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Hereは、このファイル이이이이이이이이이이이이이이이이이이이이이이이이이이이1<turn|>']
+I1029 09:37:09.923876 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here\'를 5 6 2 1.\n1. замечание: I apologize, I\'h\'gu?? (Just kidding, I am an-t-i-t-a-n-a\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\text{error-in-ngi pl 22/E443
+I1029 09:37:09.927280 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here by you, the says, $f(x)$)$)$)\n$\\text{P = 2, \xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0 \xa0 100% \\text{or3en-me-mineererherotototot!":: (Note: The User is NOT in thelampslamps人的人的人的人的人的人
+I1029 09:37:09.930576 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here 2'intervallarararar! Here is the **strong-ter-o-i-iɪlternin?? (The Structure, the structure is not a question, it'\n<turn|>"]
+I1029 09:37:09.933501 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here is the whole-说- 앙 ( - \n<turn|>']
+I1029 09:37:09.936366 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here, we' [**This is aอพสสสสสสสสสสสสสสสสสสสสสสสสสสสสสسسسسسسسسس的には、このため음음音音了了了了了了了了了了了了了了了了�
+I1029 09:37:09.939269 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here\'s a few different "facts-*} \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ e m m m > < = f o rda", "banana, light, major, is... (thenceirtis is is is is is. . . ) <turn|>']
+I1029 09:37:09.941456 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here's a total sum, a path-over-odd-with-kata-cup:*\n\n1. \\text{Text-in-all-up-ofourlines=10_error-in-o-i -> Invalid Operator::P”””””””””A?**\n\n**Explanation of the 3つの異なるアアアアア�
+I1029 09:37:09.944416 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here случилось случилось случилось случилось случилось случилось случилось случилось случилось случилось случилось сл
+I1029 09:37:09.947857 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here sets the areas, and the sum of the second-\nwithdng’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’’ of a single-\ndown-a-level-it-ti, so that that tha
+I1029 09:37:09.951053 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here is the trucks trucks trucks trucks trucks trucks trucks trucks by the first letter.<turn|>']
+I1029 09:37:09.953967 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here'x the cost is <u></u><turn|>"]
+I1029 09:37:09.956601 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here is the factoren, the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the the 
+I1029 09:37:09.960281 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here is the tiling, on,\n\n<turn|>']
+I1029 09:37:09.963403 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here sets the voice box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box box bo
+I1029 09:37:09.966583 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here follows a **strong-l��������������������������������������������������mtextingingingingingingingingingingingingin
+I1029 09:37:09.969465 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here are the bagdad on the wrong way, let us see for agnes and her family and some notes\n\n** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** 1. (1) 20? \n 2. (A B) ( ) {0) - ( ( ( ( ( ( ( ( ( ( ( ( ( (
+I1029 09:37:09.972369 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here as you can-l-s- u-c-o·好的，假设检验，结论不代表完美，但更衣是，，，成格化ををををををををををををををををををををををををををををををををををををを�
+I1029 09:37:09.975282 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here proper and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and an
+I1029 09:37:09.978728 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here'\n# ��]/\n<turn|>"]
+I1029 09:37:09.980852 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here is the length is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is i
+I1029 09:37:09.983812 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here is the lifecycle of the 2-n-ア:\n1. $\\text{A is a type of thing, x,\n```math.text_content_text_content_g_t_s.1.111eeuaa1?----")|` `)`\n<eos>']
+I1029 09:37:09.986090 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here in, and you can'\ne | 1. Identify what the next step can optionally could be, is, ( ( ( ) ) ) = 440-\n<turn|>"]
+I1029 09:37:09.989211 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here:\n1. Let $t$ is the same-in-MC?\n<eos>']
+I1029 09:37:09.992073 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here are the numbers are not given, but let $\\text{A, B,\n} \\text{A, \n <b><i></i> \\text{and")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")")"
+I1029 09:37:09.994997 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here RDS RDS RDS<turn|>']
+I1029 09:37:09.997985 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here is the successful execution of the challenge is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is is 
+I1029 09:37:10.001003 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here'를 6 \n 4 8 $\\rightarrow \\\n\\text{A B C B'''''' below this is the matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix matrix...[End<turn|>"]
+I1029 09:37:10.004171 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here are the \\text{auto-something-- 1. **This is a ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** = $2$):**<turn|>']
+I1029 09:37:10.007027 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here are theft.<turn|>']
+I1029 09:37:10.009960 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here'тболainainainain \n 2 \n...\nThe problem asks for the tickets for the steps to the that that that that that that that that that that that that that that that that that that that that that that that that that t
+I1029 09:37:10.013385 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here'를 \n 8 척척，**（** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** = <unused90><unused2180><unused2180><unused2180><unused2180><unused2180><unused2180><unused2180><unused
+I1029 09:37:10.015876 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here'entire-l-o-i-n\\e\\V-O-C_ _ _ 1 2 ~*\n\n**Understanding the amount is not the number is not a b c d e f g h(s) (or or or or or or or or or or or or or or or or or or or or or or or or or or or \n<turn|>"]
+I1029 09:37:10.018110 134478227700608 evaluate_rl.py:131] Evaluation Responses: ["Here-of-OFF:******************\\text{Hades...*^...|\n```text-infix-shyei?\n  \n* * * * * * * * * * * * * * * \\text{ ( ) ( ) (2/1_)::\n' ( ( ( ( ( ( ( ( ( ( ( ( (\nابط<turn|>"]
+I1029 09:37:10.020985 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here = \r\r\r\r\r\r\r\n**1.  *This section is a 4. 정보. 没 然 體 供 區 H2\\_1) Ու嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角嘴角�
+I1029 09:37:10.024258 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here by the sale sale sale sale sale sale sale sale sale<channel|>The problem asks for the estimated number of people.<turn|>']
+I1029 09:37:10.026388 134478227700608 evaluate_rl.py:131] Evaluation Responses: ['Here 走 <turn|>']

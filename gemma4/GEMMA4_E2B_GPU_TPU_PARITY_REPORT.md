@@ -237,6 +237,13 @@ LR schedule and optimizer constants, sampling parameters (explicit top_p 1.0 / t
 vLLM's generation-config defaults), chat template and BOS handling, system prompt, scorer, eval
 decoding and stop ids, truncation (≤ 0.9 % of rollouts at the 2560 cap).
 
+### 4.3 Latest image (`2026-09-22-head`): not yet runnable
+
+Four variants were tried on 2026-10-29 (default and legacy weight sync, re-converted checkpoint, native
+vLLM gemma4 model); the rollout model produces gibberish via the MaxText-in-vLLM path, the native path has
+no gemma4 weight mapping, and the trainer crashes on `None` local-attention splash fields. Details, logs
+and manifests: `GEMMA4_E2B_LATEST_IMAGE_STATUS.md`. The pinned image stays the recipe image.
+
 ## 5. Reproduce
 
 Ready-to-apply manifests and commands: [`parity/manifests/README.md`](parity/manifests/README.md).

@@ -38,6 +38,41 @@ NAME = "g4pl10"
 if os.environ.get("WCONV") == "0":
     repl("        num_batches=250 \\", "        num_batches=250 \\\n        use_weight_converter=false \\")  # before the 250->10 rewrite below
     NAME = "g4pl10a"
+# NEWCKPT=1: re-convert google/gemma-4-E2B-it with THIS image's converter (the launcher's guarded conversion
+# block runs when the target is absent) and load that checkpoint -> tests whether the gibberish comes from
+# checkpoint-format drift between the old converter and the new MaxText layers (attention_op/embeddings
+# changed ~2000 lines) rather than from the rollout weight sync.
+if os.environ.get("NEWCKPT") == "1":
+    raw = raw.replace("gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-it-fresh", "gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-it-newimg")
+    assert raw.count("gemma4-e2b-it-newimg") >= 2, raw.count("gemma4-e2b-it-newimg")
+    NAME = "g4pl10b"
+# NOFLASH=1: skip patch_flash_sa (the new RL config carries the sa_* fields natively; the patch rewrites 30
+# config reads in a heavily changed attention_op.py). g4pl10a crashed in create_sa_config with
+# "'<' not supported between 'int' and 'NoneType'" at the first training step.
+if os.environ.get("NOFLASH") == "1":
+    repl("  python3 /workload/patches/patch_flash_sa.py",
+         "  echo \"FLASH-SA PATCH: SKIPPED (sa_* fields are native in this image RL config)\"")
+    # the new attention_op uses the local-attention splash fields DIRECTLY (self.block_q = config.local_sa_block_q);
+    # the RL config leaves them None -> "'<' not supported between 'int' and 'NoneType'" in create_sa_config
+    # (g4pl10a, first training step). Set them explicitly (values = the global defaults).
+    LOCAL_SA = ("local_sa_block_q=512 local_sa_block_kv=512 local_sa_block_kv_compute=512 local_sa_block_q_dkv=512 "
+                "local_sa_block_kv_dkv=512 local_sa_block_kv_dkv_compute=512 local_sa_block_q_dq=512 local_sa_block_kv_dq=512 "
+                "local_sa_use_fused_bwd_kernel=false local_sa_q_layout=HEAD_DIM_MINOR local_sa_k_layout=HEAD_DIM_MINOR "
+                "local_sa_v_layout=HEAD_DIM_MINOR local_sa_fuse_reciprocal=true local_sa_use_base2_exp=true "
+                "eval_local_sa_block_q=512 eval_local_sa_block_kv=512 eval_local_sa_block_kv_compute=512 "
+                "eval_local_sa_q_layout=HEAD_DIM_MINOR eval_local_sa_k_layout=HEAD_DIM_MINOR eval_local_sa_v_layout=HEAD_DIM_MINOR")
+    repl("        num_batches=250 \\", "        num_batches=250 \\\n" + "".join(f"        {kv} \\\n" for kv in LOCAL_SA.split()).rstrip("\n"))
+    NAME = NAME + "c" if NAME.endswith("b") else NAME + "f"
+# NATIVE=1: let vLLM run its NATIVE gemma4 model (tpu_inference) with the standalone torchax converter instead of
+# MaxTextForCausalLM (maxtext_config). Three MaxText-in-vLLM variants (default sync, legacy sync, re-converted
+# checkpoint) all produced identical gibberish on this image.
+if os.environ.get("NATIVE") == "1":
+    old_cfg = ('vllm_additional_config=\'{"enable_continue_decode": true, "max_decode_steps": 1024, "maxtext_config": '
+               '{"model_name": "gemma4-e2b", "model_call_mode": "inference", "log_config": false, "weight_dtype": "bfloat16", '
+               '"allow_split_physical_axes": true}}\'')
+    repl(old_cfg, 'vllm_additional_config=\'{"enable_continue_decode": true, "max_decode_steps": 1024}\'')
+    repl("        num_batches=250 \\", "        num_batches=250 \\\n        use_standalone_converter=true \\")
+    NAME = "g4pl10d"
 raw = raw.replace("g4pt1", NAME)
 # ported parity patcher (embedded after the rename so the ConfigMap value equals the file byte for byte)
 patch = open(f"{SP}/patches/patch_sampler_is_newimg.py", encoding="utf-8").read()
