@@ -267,7 +267,7 @@ is small in absolute terms.
 points (2048 / 2560) to **cap 8192** on the latest image at p-state 6. That is a deliberate performance
 regression: 28.9 s (latest image, cap 2048) → **46.4 s per update** at cap 8192, from the uncapped rollout tail
 and trainer padding to 8704 tokens; truncation goes from 0.05–2.2 % to 0 %, and the comparison with the GPU
-(31.7–35.0 s per update on 128 GPUs) is now like for like. Details and the recipe:
+(31.7–35.0 s per update on 64 GPUs) is now like for like. Details and the recipe:
 `GEMMA4_E2B_OPTIMIZATION_REPORT_CAP8192.md`. The capped points above remain valid where a rare truncated tail is
 acceptable.
 

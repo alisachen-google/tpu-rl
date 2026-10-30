@@ -61,7 +61,7 @@ the training problem and are off the table for a GPU comparison).
 
 ## 3. Why the GPU comparison has to use cap 8192
 
-The GPU reference curve (verl + vLLM, 16 × 8 GPUs, runs `gemma4_e2b_gsm8k8k_16n64g_s250_seed{1,2,3}`) was
+The GPU reference curve (verl + vLLM, 16 nodes × 4 GPUs = 64 GPUs, runs `gemma4_e2b_gsm8k8k_16n64g_s250_seed{1,2,3}`) was
 trained with **`max_response_length=8192`** and `max_prompt_length=512`. The launcher echo of the run logs
 (`gs://xiaotongyang-bucket/meta-rl/GKE_repro/meta-RL/logs/`) is reproduced in
 `parity/logs/gpu_reference_verl_config.txt`; on GPU the cap bit on one update out of 250
@@ -74,7 +74,7 @@ before `\boxed{}`), and the GPU's longest completions (1.5k–4.8k tokens on mos
 TPU checks at cap 2048/2560 matched the GPU curve empirically because the mean rollout is ~500 tokens and the
 truncated tail is rare, but that is agreement in spite of a recipe difference, not a like-for-like comparison.
 **For any comparison with the GPU reference, the TPU recipe must use cap 8192, and the TPU performance number
-that goes with that comparison is 46.4 s per update** (GPU seeds: 31.7 / 33.1 / 35.0 s per update on 128 GPUs,
+that goes with that comparison is 46.4 s per update** (GPU seeds: 31.7 / 33.1 / 35.0 s per update on 64 GPUs,
 same recipe, same cap).
 
 ## 4. Accuracy parity at cap 8192 (run `g4lp8k`, seed 42, 250 updates)

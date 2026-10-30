@@ -18,7 +18,7 @@ at 46.4 s per update, a deliberate performance regression for a like-for-like co
 | element | definition |
 |---|---|
 | **Metric** | scorer-v2 accuracy on the GSM8K **test** split (1319 questions), greedy decode (`eval_temperature=0.01, top_k=1`, stop ids `[1, 106, 50]`): `acc = share of answers whose last `\boxed{…}` equals the gold`. Identical scorer file on both platforms (`boxed_math_reward_v2.compute_score`, hash-verified against the GPU fixture). |
-| **Reference** | the frozen GPU runs `gemma4_e2b_gsm8k8k_16n64g_s250_seed{1,2,3}` (verl + vLLM, 16 × 8 GPUs, FSDP): per-eval `acc_v2` with Wilson 95 % intervals, boxed rate, response tokens, question flips; per-step k3 KL, ESS, IS-weight max, grad-norm; per-seed step time. 3-seed step-250 mean 92.42 %, SD 0.42, seeds 91.96 / 92.49 / 92.80. |
+| **Reference** | the frozen GPU runs `gemma4_e2b_gsm8k8k_16n64g_s250_seed{1,2,3}` (verl + vLLM, 16 nodes × 4 GPUs = 64 GPUs, FSDP): per-eval `acc_v2` with Wilson 95 % intervals, boxed rate, response tokens, question flips; per-step k3 KL, ESS, IS-weight max, grad-norm; per-seed step time. 3-seed step-250 mean 92.42 %, SD 0.42, seeds 91.96 / 92.49 / 92.80. |
 | **Gate** | fixed-step-250, seed-mean, V2 accuracy: **TPU mean ≥ GPU mean − 1 pp = 91.42 %**. 1 pp is absolute, not relative, and the step is fixed at 250 (not the best step). |
 | **Curve** | every TPU eval point (0, 20, …, 240, 250) within **±1 pp of the GPU mean**, judged against the single-run Wilson 95 % half-width (±1.4 pp at n = 1319) and the GPU seed spread. |
 | **Dynamics** | boxed-rate trajectory, wrong→right / right→wrong counts vs step 0, training reward per update, sampler↔trainer k3 KL and ESS, rollout length and wall time per update all compared in the same units. A matching endpoint with different dynamics would not count. |
@@ -239,7 +239,7 @@ The cost is a performance regression relative to the capped operating points, ac
 | 24 s configuration | latest | 2048 | 28.9 s | 20-update check |
 | **GPU-matching recipe** | latest | **8192** | **46.4 s** (updates 2–19; 49.4 s over the whole run) | **parity PASS** (`g4lp8k`, seed 42: step-250 91.81 % ≥ 91.42; 12/14 points within ±1 pp, all within the Wilson width; `GEMMA4_E2B_OPTIMIZATION_REPORT_CAP8192.md` §4) |
 
-(GPU reference: 31.7 / 33.1 / 35.0 s per update on 128 GPUs at cap 8192.) The extra time is the uncapped
+(GPU reference: 31.7 / 33.1 / 35.0 s per update on 64 GPUs at cap 8192.) The extra time is the uncapped
 rollout tail and trainer padding to 8704 tokens; the capped points remain valid production choices where a rare
 truncated tail is acceptable.
 
