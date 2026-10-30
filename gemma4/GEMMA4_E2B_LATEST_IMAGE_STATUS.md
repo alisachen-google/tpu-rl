@@ -18,7 +18,7 @@ one line); the trainer's `None` local-attention splash fields are set explicitly
 | rollout length / truncation | 460–490 tokens, 0.05–0.9 % at the 2048 cap | same |
 
 **p-state comparison on the latest image** (`g4l24f7`: identical run at `xla_tpu_dvfs_p_state=7`, 10 updates,
-user-requested; the recipe default stays p-state 6):
+one-off comparison; the team does not use p-state 7 and no further p-state-7 jobs will be run):
 
 | | p-state 6 (`g4l24f`) | p-state 7 (`g4l24f7`) |
 |---|---|---|

@@ -27,7 +27,7 @@ def repl(old, new, n=1):
 repl(OLD_IMG, NEW_IMG)
 repl("20260730-jax_0.10.2", "20261028-jax_0.11.0", 3)
 assert "dvfs_p_state=6" in raw and "dvfs_p_state=7" not in raw
-if os.environ.get("PSTATE") == "7":   # user-requested comparison run (2026-10-30); p-state 6 is the default
+if os.environ.get("PSTATE") == "7":   # NOT used by the team (2026-10-30: "we don't use p-state-7"); kept only so the one historical comparison manifest can be rebuilt
     raw = raw.replace("--xla_tpu_dvfs_p_state=6", "--xla_tpu_dvfs_p_state=7")
 LOCAL_SA = ("local_sa_block_q=512 local_sa_block_kv=512 local_sa_block_kv_compute=512 local_sa_block_q_dkv=512 "
             "local_sa_block_kv_dkv=512 local_sa_block_kv_dkv_compute=512 local_sa_block_q_dq=512 local_sa_block_kv_dq=512 "
