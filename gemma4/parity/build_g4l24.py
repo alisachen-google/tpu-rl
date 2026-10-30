@@ -15,8 +15,9 @@ raw = open(f"{SP}/manifests/g4pt1c2048p-seed42-24s-config.yaml", encoding="utf-8
 NEW_IMG = "gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:4dc6ca720017bf93b6bae9524519cf5b7a8b16706ca6aab2a355af26d75a6bf3"
 OLD_IMG = "gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:f7c957d0b286e03966fdd6f9b15e7609fae8460a933a9da0b9fbab3e04723c94"
 STEPS = int(os.environ.get("STEPS", "10")); NOPERF = os.environ.get("NOPERF") == "1"
+CAP = int(os.environ.get("CAP", "2048"))   # response cap in tokens; sequence = 512 prefill + CAP
 NAME = "g4l24n" if NOPERF else "g4l24"
-NAME = os.environ.get("NAME", NAME)
+NAME = os.environ.get("NAME", NAME + NAME_CAP) if False else os.environ.get("NAME", NAME)
 if os.environ.get("PSTATE") == "7" and "NAME" not in os.environ: NAME += "7"
 
 def repl(old, new, n=1):
@@ -27,7 +28,13 @@ def repl(old, new, n=1):
 repl(OLD_IMG, NEW_IMG)
 repl("20260730-jax_0.10.2", "20261028-jax_0.11.0", 3)
 assert "dvfs_p_state=6" in raw and "dvfs_p_state=7" not in raw
-if os.environ.get("PSTATE") == "7":   # NOT used by the team (2026-10-30: "we don't use p-state-7"); kept only so the one historical comparison manifest can be rebuilt
+if CAP != 2048:
+    T = 512 + CAP; assert T % 512 == 0, "splash blocks (512) must divide the sequence"
+    repl("max_target_length=2560", f"max_target_length={T}"); repl("kv_cache_buffer=2560", f"kv_cache_buffer={T}")
+    NAME_CAP = f"c{CAP//1024}k" if CAP % 1024 == 0 else f"c{CAP}"
+else:
+    NAME_CAP = ""
+if os.environ.get("PSTATE") == "7":   # user-requested comparison run (2026-10-30); p-state 6 is the default
     raw = raw.replace("--xla_tpu_dvfs_p_state=6", "--xla_tpu_dvfs_p_state=7")
 LOCAL_SA = ("local_sa_block_q=512 local_sa_block_kv=512 local_sa_block_kv_compute=512 local_sa_block_q_dkv=512 "
             "local_sa_block_kv_dkv=512 local_sa_block_kv_dkv_compute=512 local_sa_block_q_dq=512 local_sa_block_kv_dq=512 "
@@ -57,6 +64,7 @@ if not NOPERF:
 else:
     raw = raw.replace("export ASYNC_REWARD=on", "export ASYNC_REWARD=off")  # bisect: perf levers off
 repl("    maxRestarts: 10", "    maxRestarts: 3")
+if "NAME" not in os.environ: NAME = NAME + NAME_CAP
 raw = raw.replace("g4pt1c2048p", NAME)
 patch = open(f"{SP}/patches/patch_sampler_is_newimg.py", encoding="utf-8").read()
 m = re.search(r'^(\s*)patch_sampler_is\.py: ".*"$', raw, re.M); assert m
@@ -72,7 +80,7 @@ open(f"{SP}/{NAME}.yaml", "w", encoding="utf-8").write(raw)
 docs = [d for d in yaml.safe_load_all(raw) if d]
 l = [d for d in docs if d["kind"] == "ConfigMap" and "launch-workload.sh" in d["data"]][0]["data"]["launch-workload.sh"]
 applied = re.findall(r"^\s*python3 /workload/patches/(patch_[a-z0-9_]+)\.py", l, re.M)
-for k in (f"num_batches={STEPS}", "max_target_length=2560", "local_sa_block_q=512", "data_shuffle_seed=42"):
+for k in (f"num_batches={STEPS}", f"max_target_length={512+CAP}", "local_sa_block_q=512", "data_shuffle_seed=42"):
     assert k in l, k
 js = [d for d in docs if d["kind"] == "JobSet"][0]
 imgs = sorted({c["image"] for rj in js["spec"]["replicatedJobs"] for c in rj["template"]["spec"]["template"]["spec"].get("containers", []) + rj["template"]["spec"]["template"]["spec"].get("initContainers", [])})

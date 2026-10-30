@@ -73,3 +73,9 @@ Required value`. The policy skips JobSets that carry an `ownerReference`. The he
 reads the `<name>-launcher` ConfigMap's uid, injects `metadata.ownerReferences` pointing at it, and applies the
 JobSet (a plain `kubectl apply` of these manifests no longer works). Deleting that ConfigMap garbage-collects the
 JobSet, so the chain's SSA re-apply (update, same uid) is safe.
+
+**Cap 8192 (matches the GPU reference's `max_response_length=8192`, 2026-10-30):** `g4l24fc8k-latest-image-cap8192-10step.yaml`
+(10-update perf check) and `g4lp8k-latest-image-cap8192-seed42-parity-250.yaml` (250-update accuracy-parity run, checkpoints
+every 20) are the 24 s configuration on the latest image with `max_target_length=8704` (512 prefill + 8192 response),
+p-state 6, KV-alias fix. Build: `CAP=8192 FIX=patches/patch_kv_alias_dedupe.py STEPS=<n> python3 ../build_g4l24.py`;
+run through `../tools/chain-seeds4.sh` (ownerReference-aware resume chain) for multi-admission runs.

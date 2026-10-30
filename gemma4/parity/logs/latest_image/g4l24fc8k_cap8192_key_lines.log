@@ -1,0 +1,67 @@
+APPROX-TOPK PATCH: APPLIED
+ASYNC-DETOK PATCH: FAILED tunix anchor 0
+ASYNC-LOGPROBS PATCH: FAILED anchor tunix=0 engine_pool=False
+ASYNC-REWARD PATCH: FAILED anchor engine 0
+BLOCK-SIZE PATCH: APPLIED
+CD-MASK2 PATCH: APPLIED
+CD-NOGLOBAL PATCH: APPLIED
+CD-PROPER PATCH: FAILED [ml-import] anchor found 0 times, expected 1
+CD-REPORT PATCH: APPLIED
+DP-RR-ROUTING PATCH: FAILED anchor 0
+EXIT_CODE=0
+FAST-EXTRACT PATCH: APPLIED
+G4-FORMAT-GUARD PATCH: APPLIED
+HOST-EXTRACT PATCH: FAILED prologue anchor count 0
+I1030 07:11:19.509890 131984969706368 evaluate_rl.py:354] EVAL-BREAKDOWN step=0 k=0 total=1319 acc=80.82% boxed_wrong=6.90% nobox=12.28% mean_chars=1424 dump=gs://ubench-logs/g4l24fc8k/evals/eval_000.jsonl
+I1030 07:11:19.510020 131984969706368 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=80.8188% mean_reward=0.8151
+I1030 07:36:10.363148 131984969706368 evaluate_rl.py:354] EVAL-BREAKDOWN step=10 k=1 total=1319 acc=90.60% boxed_wrong=9.40% nobox=0.00% mean_chars=1396 dump=gs://ubench-logs/g4l24fc8k/evals/eval_010.jsonl
+I1030 07:36:10.363310 131984969706368 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=90.5989% mean_reward=0.9154
+JIT-UNROLL PATCH: FAILED anchor count 0
+KV-ALIAS-DEDUPE: APPLIED /deps/src/maxtext/integration/vllm/hybrid_cache_utils.py
+LENDIST PATCH: APPLIED
+LENDIST step=0 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=464.3 isl_mean=93.2 first_think=0/2048
+LENDIST step=1 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=505.2 isl_mean=98.1 first_think=0/2048
+LENDIST step=2 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=492.6 isl_mean=92.3 first_think=0/2048
+LENDIST step=3 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=519.5 isl_mean=100.2 first_think=0/2048
+LENDIST step=4 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=473.0 isl_mean=92.6 first_think=0/2048
+LENDIST step=5 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=496.9 isl_mean=94.8 first_think=0/2048
+LENDIST step=6 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=462.0 isl_mean=95.6 first_think=0/2048
+LENDIST step=7 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=470.2 isl_mean=91.6 first_think=0/2048
+LENDIST step=8 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=484.8 isl_mean=92.7 first_think=0/2048
+LENDIST step=9 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=522.8 isl_mean=94.0 first_think=0/2048
+LENGTH-SHAPE PATCH: APPLIED (enable with LENGTH_SHAPE=1)
+LOG-STATS PATCH: APPLIED
+PADDING-BUCKET PATCH: FAILED runner call anchor
+PATCH_FLASH_SA: SKIPPED on the latest image (native)
+PATCH_SHARDED_SAMPLING: SKIPPED on the latest image (native)
+PHASETIME step=0 compute_rewards=3.51 engine_generate=172.25 generate_and_advantage=279.58 micro_batch_steps=801.05 prepare_data=283.83 run_global_step=801.05
+PHASETIME step=1 compute_rewards=0.09 engine_generate=31.93 generate_and_advantage=35.15 micro_batch_steps=48.70 prepare_data=35.84 run_global_step=48.71
+PHASETIME step=2 compute_rewards=0.09 engine_generate=97.26 generate_and_advantage=100.50 micro_batch_steps=113.53 prepare_data=101.17 run_global_step=113.54
+PHASETIME step=3 compute_rewards=0.08 engine_generate=27.39 generate_and_advantage=30.64 micro_batch_steps=43.58 prepare_data=31.31 run_global_step=43.58
+PHASETIME step=4 compute_rewards=0.09 engine_generate=31.35 generate_and_advantage=34.58 micro_batch_steps=47.54 prepare_data=35.23 run_global_step=47.54
+PHASETIME step=5 compute_rewards=0.09 engine_generate=37.15 generate_and_advantage=40.43 micro_batch_steps=53.40 prepare_data=41.10 run_global_step=53.40
+PHASETIME step=6 compute_rewards=0.09 engine_generate=21.83 generate_and_advantage=25.06 micro_batch_steps=49.75 prepare_data=25.71 run_global_step=49.75
+PHASETIME step=7 compute_rewards=0.09 engine_generate=32.77 generate_and_advantage=36.02 micro_batch_steps=49.02 prepare_data=36.71 run_global_step=49.02
+PHASETIME step=8 compute_rewards=0.09 engine_generate=31.85 generate_and_advantage=35.11 micro_batch_steps=49.08 prepare_data=35.80 run_global_step=49.08
+PHASETIME step=9 compute_rewards=0.09 engine_generate=30.46 generate_and_advantage=33.75 micro_batch_steps=47.57 prepare_data=34.45 run_global_step=47.57
+PHASETIME2 PATCH: APPLIED
+REWARD-DUMP PATCH: APPLIED (REWARD_DUMP_N=0(default))
+REWARD-PAR PATCH: APPLIED
+RPA-BLOCKS PATCH: FAILED anchor found 0 times, expected 1
+RUNNER-EOS PATCH: APPLIED
+STOP-TOKENS PATCH: FAILED anchor 0
+SYNC-KEEPKV PATCH: FAILED anchor count 0 for 'self.llm.collective_rpc("delete_kv_cache") # will '
+TEXTUAL-STOP PATCH: FAILED requires patch_host_extract first
+TIS-ACTIVE weight_mean=0.99995 weight_min=0.12254 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.7266e-04 ess=0.999285 logratio_mean=-4.0658e-04 logratio_absmean=6.8369e-03 ntok=1017647
+TIS-ACTIVE weight_mean=0.99997 weight_min=0.30394 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.5297e-04 ess=0.999295 logratio_mean=-3.7798e-04 logratio_absmean=6.5638e-03 ntok=946092
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.00052 weight_max=2.68972 frac_clipped=0.000000 k3_kl=2.3088e-03 ess=0.999261 logratio_mean=-3.6821e-04 logratio_absmean=7.1917e-03 ntok=992971
+TIS-ACTIVE weight_mean=1.00001 weight_min=0.26245 weight_max=2.47721 frac_clipped=0.000000 k3_kl=3.7588e-04 ess=0.999258 logratio_mean=-3.5818e-04 logratio_absmean=7.0665e-03 ntok=968763
+TIS-ACTIVE weight_mean=1.00002 weight_min=0.25060 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.5331e-04 ess=0.999297 logratio_mean=-3.2417e-04 logratio_absmean=6.7313e-03 ntok=962984
+TIS-ACTIVE weight_mean=1.00003 weight_min=0.07796 weight_max=2.60840 frac_clipped=0.000000 k3_kl=4.1033e-04 ess=0.999219 logratio_mean=-3.6475e-04 logratio_absmean=7.4737e-03 ntok=1008790
+TIS-ACTIVE weight_mean=1.00004 weight_min=0.00969 weight_max=3.00000 frac_clipped=0.000001 k3_kl=4.7008e-04 ess=0.999276 logratio_mean=-3.2125e-04 logratio_absmean=6.6981e-03 ntok=950981
+TIS-ACTIVE weight_mean=1.00005 weight_min=0.04787 weight_max=3.00000 frac_clipped=0.000001 k3_kl=4.2364e-04 ess=0.999232 logratio_mean=-3.3235e-04 logratio_absmean=7.1743e-03 ntok=1063977
+TIS-ACTIVE weight_mean=1.00005 weight_min=0.37105 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.7263e-04 ess=0.999249 logratio_mean=-3.1331e-04 logratio_absmean=7.1216e-03 ntok=1034739
+TIS-ACTIVE weight_mean=1.00007 weight_min=0.18662 weight_max=3.00000 frac_clipped=0.000001 k3_kl=3.9711e-04 ess=0.999214 logratio_mean=-3.2072e-04 logratio_absmean=7.3994e-03 ntok=1070650
+TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=3.0, return_logprobs=True, eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt; rl_learner
+VERIFY-TIMEOUT PATCH: APPLIED (VERIFY_ITEM_TIMEOUT=5(default))
+W1030 07:36:10.365737 131984969706368 train_rl.py:803] Post RL Training: corr=1144, total=1319, accuracy=86.73237300985596%, partial_accuracy=87.94541319181198%, format_accuracy=0.0%, mean_reward=0.9154
