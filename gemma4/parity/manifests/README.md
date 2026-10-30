@@ -79,3 +79,10 @@ JobSet, so the chain's SSA re-apply (update, same uid) is safe.
 every 20) are the 24 s configuration on the latest image with `max_target_length=8704` (512 prefill + 8192 response),
 p-state 6, KV-alias fix. Build: `CAP=8192 FIX=patches/patch_kv_alias_dedupe.py STEPS=<n> python3 ../build_g4l24.py`;
 run through `../tools/chain-seeds4.sh` (ownerReference-aware resume chain) for multi-admission runs.
+
+**20-update perf recipe, cap 8192, cleaned patch set (2026-10-30):** `g4p8k20-latest-image-cap8192-perf-20step.yaml` is the
+performance recipe: latest image, cap 8192, p-state 6, 20 updates, and only the 17 patches that still apply on this image
+(the 22 that fail/are skipped/are never invoked on `2026-09-22-head` are removed from the ConfigMap and the launcher).
+Build: `CAP=8192 FIX=patches/patch_kv_alias_dedupe.py STEPS=20 CLEAN=1 python3 ../build_g4l24.py`.
+`g4m8k-latest-image-cap8192-minimal-patches-20step.yaml` (`MINIMAL=1`) keeps only the parity patcher, the KV-alias fix and
+the instrumentation; it is the A/B that tells whether the remaining perf patches still matter.

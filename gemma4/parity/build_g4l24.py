@@ -76,6 +76,40 @@ if fix:
     raw = raw[:m.end()] + f"\n{m.group(1)}patch_newimg_fix.py: {json.dumps(fsrc)}" + raw[m.end():]
     m2 = re.search(r"^(\s*)python3 /workload/patches/patch_sampler_is\.py$", raw, re.M); assert m2
     raw = raw[:m2.end()] + f"\n{m2.group(1)}python3 /workload/patches/patch_newimg_fix.py" + raw[m2.end():]
+# CLEAN=1: drop the patches that FAIL or are SKIPPED on the latest image (their levers are upstreamed/native) and the
+# never-invoked ones; MINIMAL=1: additionally drop every applied perf patch, keeping only the parity patcher, the
+# KV-alias fix and the instrumentation (A/B: do the remaining perf patches still matter on this image?).
+NOOP = {"patch_cd_proper", "patch_rpa_blocks", "patch_async_detok", "patch_async_logprobs", "patch_dp_rr_routing",
+        "patch_stop_tokens", "patch_async_reward", "patch_jit_unroll", "patch_sync_keepkv", "patch_host_extract",
+        "patch_padding_bucket", "patch_textual_stop", "patch_packer_fast", "patch_packing_knob", "patch_profiler_fix",
+        "patch_flash_sa", "patch_sharded_sampling", "patch_perf_v2", "patch_fast_detok", "patch_gemma4_prs",
+        "patch_length_shape", "patch_reward_dump"}
+PERF = {"patch_vllm_sampler", "patch_cd_masking", "patch_cd_report", "patch_reward_parallel", "patch_gc_sync",
+        "patch_block_size", "patch_approx_topk", "patch_runner_eos", "patch_fast_extract", "patch_g4_format_guard",
+        "patch_cd_noglobal", "patch_verify_timeout"}
+KEEP = {"patch_sampler_is", "patch_newimg_fix", "patch_lendist", "patch_phasetime", "patch_log_stats"}
+mode = "MINIMAL" if os.environ.get("MINIMAL") == "1" else ("CLEAN" if os.environ.get("CLEAN") == "1" else None)
+if mode:
+    drop = NOOP | (PERF if mode == "MINIMAL" else set())
+    lines = []
+    for ln in raw.split("\n"):
+        m = re.match(r"^\s*(python3 /workload/patches/(patch_[a-z0-9_]+)\.py.*|echo \"(PATCH_[A-Z_]+|[A-Z-]+ PATCH): SKIPPED.*)$", ln)
+        if m and (m.group(2) in drop or (m.group(3) and m.group(3).replace(" PATCH", "").replace("-", "_").lower().replace("patch_", "") in {x.replace("patch_", "") for x in drop})):
+            continue
+        lines.append(ln)
+    raw = "\n".join(lines)
+    parts = re.split(r"(?m)^---\s*$", raw); out = []
+    for part in parts:
+        if "kind: ConfigMap" in part and "patch_sampler_is.py" in part:
+            d = yaml.safe_load(part)
+            for k in list(d["data"].keys()):
+                if k.replace(".py", "").replace(".diff", "") in drop or k == "gemma4_prs.diff":
+                    d["data"].pop(k)
+            part = "\n" + yaml.safe_dump(d, sort_keys=False, width=10**6)
+        out.append(part)
+    raw = "---".join(out)
+    if mode == "MINIMAL":
+        NAME = os.environ.get("NAME", NAME)
 open(f"{SP}/{NAME}.yaml", "w", encoding="utf-8").write(raw)
 docs = [d for d in yaml.safe_load_all(raw) if d]
 l = [d for d in docs if d["kind"] == "ConfigMap" and "launch-workload.sh" in d["data"]][0]["data"]["launch-workload.sh"]
