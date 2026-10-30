@@ -23,16 +23,24 @@
 [15:48:31] g4pt3 | EVAL-V2ACC total=1319 v2_acc=91.8878% mean_reward=0.9268
 [16:08:37] g4pt3 | EVAL-BREAKDOWN step=180 k=3 total=1319 acc=91.74%
 [16:08:37] g4pt3 | EVAL-V2ACC total=1319 v2_acc=91.7362% mean_reward=0.9255
+EXIT_CODE=0
+EXIT_CODE=1
 EXIT_CODE=143
-I1029 15:11:31.634390 135441113639808 checkpoint_manager.py:1820] Found 6 checkpoint steps in gs://ubench-logs/g4pt3/checkpoints/actor
-I1029 15:11:52.136169 135441113639808 checkpoint_manager.py:293] Restored params from step: 120 in 20.500 seconds
-I1029 15:15:21.130759 135441113639808 evaluate_rl.py:354] EVAL-BREAKDOWN step=120 k=0 total=1319 acc=92.04% boxed_wrong=7.66% nobox=0.30% mean_chars=1585 dump=gs://ubench-logs/g4pt3/evals/eval_120.jsonl
-I1029 15:15:21.130919 135441113639808 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.0394% mean_reward=0.9281
-I1029 15:32:37.451285 135441113639808 evaluate_rl.py:354] EVAL-BREAKDOWN step=140 k=1 total=1319 acc=92.34% boxed_wrong=7.66% nobox=0.00% mean_chars=1539 dump=gs://ubench-logs/g4pt3/evals/eval_140.jsonl
-I1029 15:32:37.451406 135441113639808 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.3427% mean_reward=0.9311
-I1029 15:48:30.656844 135441113639808 evaluate_rl.py:354] EVAL-BREAKDOWN step=160 k=2 total=1319 acc=91.89% boxed_wrong=7.96% nobox=0.15% mean_chars=1597 dump=gs://ubench-logs/g4pt3/evals/eval_160.jsonl
-I1029 15:48:30.656979 135441113639808 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.8878% mean_reward=0.9268
-I1029 16:04:48.410189 135441113639808 evaluate_rl.py:354] EVAL-BREAKDOWN step=180 k=3 total=1319 acc=91.74% boxed_wrong=8.11% nobox=0.15% mean_chars=1612 dump=gs://ubench-logs/g4pt3/evals/eval_180.jsonl
-I1029 16:04:48.410314 135441113639808 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.7362% mean_reward=0.9255
-RESUME-SYNC pushing restored actor weights (global_steps=120) to the rollout engine before the first generation
+I1029 12:50:22.629042 133403787524992 checkpoint_manager.py:1820] Found 0 checkpoint steps in gs://ubench-logs/g4pt3/checkpoints/actor
+I1029 12:54:11.959125 133403787524992 evaluate_rl.py:354] EVAL-BREAKDOWN step=0 k=0 total=1319 acc=80.44% boxed_wrong=7.51% nobox=12.05% mean_chars=1436 dump=gs://ubench-logs/g4pt3/evals/eval_000.jsonl
+I1029 12:54:11.959245 133403787524992 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=80.4397% mean_reward=0.8119
+I1030 04:30:48.931216 135063089978240 checkpoint_manager.py:1820] Found 9 checkpoint steps in gs://ubench-logs/g4pt3/checkpoints/actor
+I1030 04:31:04.868008 135063089978240 checkpoint_manager.py:293] Restored params from step: 180 in 15.935 seconds
+I1030 04:34:21.708534 135063089978240 evaluate_rl.py:354] EVAL-BREAKDOWN step=180 k=0 total=1319 acc=91.66% boxed_wrong=8.34% nobox=0.00% mean_chars=1603 dump=gs://ubench-logs/g4pt3/evals/eval_180.jsonl
+I1030 04:34:21.708673 135063089978240 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.6603% mean_reward=0.9249
+I1030 04:50:22.853583 135063089978240 evaluate_rl.py:354] EVAL-BREAKDOWN step=199 k=1 total=1319 acc=91.58% boxed_wrong=8.34% nobox=0.08% mean_chars=1606 dump=gs://ubench-logs/g4pt3/evals/eval_199.jsonl
+I1030 04:50:22.853745 135063089978240 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.5845% mean_reward=0.9242
+I1030 05:05:18.391999 135063089978240 evaluate_rl.py:354] EVAL-BREAKDOWN step=219 k=2 total=1319 acc=91.96% boxed_wrong=7.96% nobox=0.08% mean_chars=1587 dump=gs://ubench-logs/g4pt3/evals/eval_219.jsonl
+I1030 05:05:18.392120 135063089978240 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.9636% mean_reward=0.9276
+I1030 05:21:03.300049 135063089978240 evaluate_rl.py:354] EVAL-BREAKDOWN step=239 k=3 total=1319 acc=91.74% boxed_wrong=8.11% nobox=0.15% mean_chars=1583 dump=gs://ubench-logs/g4pt3/evals/eval_239.jsonl
+I1030 05:21:03.300156 135063089978240 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=91.7362% mean_reward=0.9255
+I1030 05:31:49.451092 135063089978240 evaluate_rl.py:354] EVAL-BREAKDOWN step=250 k=4 total=1319 acc=92.04% boxed_wrong=7.88% nobox=0.08% mean_chars=1583 dump=gs://ubench-logs/g4pt3/evals/eval_250.jsonl
+I1030 05:31:49.451195 135063089978240 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=92.0394% mean_reward=0.9283
+RESUME-SYNC pushing restored actor weights (global_steps=181) to the rollout engine before the first generation
 TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=3.0, return_logprobs=True, eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_manager RNG-free resumable ckpt; rl_learner
+W1030 05:31:49.452181 135063089978240 train_rl.py:818] Post RL Training: corr=1183, total=1319, accuracy=89.68915845337376%, partial_accuracy=90.5989385898408%, format_accuracy=0.0%, mean_reward=0.9283

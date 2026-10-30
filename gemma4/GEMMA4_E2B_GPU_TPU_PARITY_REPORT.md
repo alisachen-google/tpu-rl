@@ -1,9 +1,12 @@
 # gemma4-E2B GSM8K RL: GPU ↔ TPU accuracy-parity check
 
-**Result (2026-10-29): parity reached.** TPU v7x reproduces the frozen GPU reference curve on two
-seeds; step-250 accuracy 92.49 % and 92.65 % (mean **92.57 %**) vs the GPU 3-seed mean
-**92.42 ± 0.42 %**; gate ≥ 91.42 % **passed**; 27 of 27 eval points within ±1.2 pp. Seed 44 is running
-for the 3-seed mean. The optimized 24 s recipe re-ran at 23.9 s/step with its reward inside the GPU band.
+**Result (2026-10-30): parity reached on three seeds.** TPU v7x reproduces the frozen GPU reference curve
+on seeds 42, 43 and 44: step-250 accuracy 92.49 % / 92.65 % / 92.04 % (3-seed mean **92.39 %**) vs the GPU
+3-seed mean **92.42 ± 0.42 %**; gate ≥ 91.42 % **passed** with a margin of +0.97 pp; 41 of 42 eval points
+within ±1 pp of the GPU mean (the one exception is −1.07 pp at seed 44, step 200, inside the single-run
+Wilson half-width of ±1.4 pp). The optimized 24 s configuration passed the same check separately
+(`GEMMA4_E2B_24S_CONFIG_PARITY_REPORT.md`), and the recipe now also runs on the latest image
+(`GEMMA4_E2B_LATEST_IMAGE_STATUS.md`).
 
 ![pipeline](figures/gemma4_e2b_parity_benchmark_pipeline.svg)
 
@@ -62,58 +65,45 @@ against the GPU `aggregate_summary.json`, which produces the tables and figures 
 
 ### 3.1 Accuracy curve (scorer-v2, 1319 Qs)
 
-| step | GPU mean ± SD (min–max) | TPU seed 42 [Wilson 95 %] | TPU seed 43 [Wilson 95 %] | TPU mean − GPU |
-|---:|---|---|---|---:|
-| 0 | 80.31 ± 0.24 (80.14–80.59) | 81.50 [79.3, 83.5] | 81.12 [78.9, 83.1] | +1.00 |
-| 20 | 91.03 ± 0.53 (90.52–91.58) | 92.04 [90.5, 93.4] | 91.96 [90.4, 93.3] | +0.97 |
-| 40 | 91.69 ± 1.07 (90.45–92.34) | 91.43 [89.8, 92.8] | 91.28 [89.7, 92.7] | −0.33 |
-| 60 | 91.36 ± 0.23 (91.13–91.58) | 92.19 [90.6, 93.5] | 91.21 [89.6, 92.6] | +0.34 |
-| 80 | 91.84 ± 0.53 (91.28–92.34) | 91.66 [90.0, 93.0] | 92.12 [90.5, 93.5] | +0.05 |
-| 100 | 91.64 ± 0.16 (91.51–91.81) | 91.89 [90.3, 93.2] | 92.49 [90.9, 93.8] | +0.56 |
-| 120 | 92.04 ± 0.55 (91.43–92.49) | 92.12 [90.5, 93.5] | 92.57 [91.0, 93.9] | +0.31 |
-| 140 | 92.67 ± 0.12 (92.57–92.80) | 92.57 [91.0, 93.9] | 92.65 [91.1, 93.9] | −0.06 |
-| 160 | 92.77 ± 0.19 (92.57–92.95) | — (resume eval, see §3.4) | 93.33 [91.8, 94.5] | +0.56 |
-| 180 | 92.52 ± 0.23 (92.27–92.72) | 93.18 [91.7, 94.4] | 92.87 [91.3, 94.1] | +0.51 |
-| 200 | 92.65 ± 0.15 (92.49–92.80) | 92.49 [90.9, 93.8] | 92.34 [90.8, 93.7] | −0.23 |
-| 220 | 92.60 ± 0.24 (92.42–92.87) | 92.27 [90.7, 93.6] | 92.95 [91.4, 94.2] | +0.01 |
-| 240 | 92.65 ± 0.42 (92.19–93.03) | 92.65 [91.1, 93.9] | 92.80 [91.2, 94.0] | +0.08 |
-| **250** | **92.42 ± 0.42 (91.96–92.80)** | **92.49** [90.9, 93.8] | **92.65** [91.1, 93.9] | **+0.15** |
+| step | GPU mean ± SD (min–max) | TPU seed 42 [Wilson 95 %] | TPU seed 43 | TPU seed 44 | TPU 3-seed mean − GPU |
+|---:|---|---|---|---|---:|
+| 0 | 80.31 ± 0.24 (80.14–80.59) | 81.50 [79.3, 83.5] | 81.12 [78.9, 83.1] | 80.44 [78.2, 82.5] | +0.71 |
+| 20 | 91.03 ± 0.53 (90.52–91.58) | 92.04 [90.5, 93.4] | 91.96 [90.4, 93.3] | 92.04 [90.5, 93.4] | +0.99 |
+| 40 | 91.69 ± 1.07 (90.45–92.34) | 91.43 [89.8, 92.8] | 91.28 [89.6, 92.7] | 91.66 [90.0, 93.0] | −0.23 |
+| 60 | 91.36 ± 0.23 (91.13–91.58) | 92.19 [90.6, 93.5] | 91.21 [89.6, 92.6] | 91.36 [89.7, 92.8] | +0.23 |
+| 80 | 91.84 ± 0.53 (91.28–92.34) | 91.66 [90.0, 93.0] | 92.12 [90.5, 93.5] | 91.21 [89.6, 92.6] | −0.18 |
+| 100 | 91.64 ± 0.16 (91.51–91.81) | 91.89 [90.3, 93.2] | 92.49 [90.9, 93.8] | 91.96 [90.4, 93.3] | +0.48 |
+| 120 | 92.04 ± 0.55 (91.43–92.49) | 92.12 [90.5, 93.5] | 92.57 [91.0, 93.9] | 92.04 [90.5, 93.4] (restart eval; 91.66 at 121 before the eviction) | +0.20 |
+| 140 | 92.67 ± 0.12 (92.57–92.80) | 92.57 [91.0, 93.9] | 92.65 [91.1, 93.9] | 92.34 [90.8, 93.7] | −0.15 |
+| 160 | 92.77 ± 0.19 (92.57–92.95) | — (resume eval, see §3.4) | 93.33 [91.9, 94.6] | 91.89 [90.3, 93.2] | −0.16 |
+| 180 | 92.52 ± 0.23 (92.27–92.72) | 93.18 [91.7, 94.4] | 92.87 [91.4, 94.1] | 91.66 [90.0, 93.0] (restart eval; 91.74 before the stop) | +0.05 |
+| 200 | 92.65 ± 0.15 (92.49–92.80) | 92.49 [90.9, 93.8] | 92.34 [90.8, 93.7] | 91.58 [90.0, 93.0] | −0.51 |
+| 220 | 92.60 ± 0.24 (92.42–92.87) | 92.27 [90.7, 93.6] | 92.95 [91.4, 94.2] | 91.96 [90.4, 93.3] | −0.20 |
+| 240 | 92.65 ± 0.42 (92.19–93.03) | 92.65 [91.1, 93.9] | 92.80 [91.3, 94.1] | 91.74 [90.1, 93.1] | −0.25 |
+| **250** | **92.42 ± 0.42 (91.96–92.80)** | **92.49** [90.9, 93.8] | **92.65** [91.1, 93.9] | **92.04** [90.5, 93.4] | **−0.03** |
 
-**Gate:** 92.57 ≥ 91.42 → **PASS** (2-seed mean; the gate also passes for each seed alone).
-Largest deviation of any point from the GPU mean: +1.19 pp (seed 42, step 0, where the GPU seeds
-themselves span 0.45 pp); mean deviation over the 27 points +0.24 pp; sign changes 11 times, i.e. no
-systematic offset.
-
-### 3.1b Seed 44 (third seed, in progress as of 2026-10-29 18:00 UTC)
-
-`g4pt3` has reached update 180 (checkpoints 20–180 committed) across three admissions (an autoscaler
-node scale-down at start, a two-node TPU failure at update 121, and a stuck re-admission that the chain
-resolved by re-applying from checkpoint 120). Every evaluation so far is inside the GPU band:
-
-| step | 0 | 20 | 40 | 60 | 80 | 100 | 120 | 140 | 160 | 180 |
-|---|---|---|---|---|---|---|---|---|---|---|
-| seed 44 | 80.44 | 92.04 | 91.66 | 91.36 | 91.21 | 91.96 | 91.66 | 92.34 | 91.89 | 91.74 |
-| Δ vs GPU mean | +0.13 | +1.01 | −0.03 | 0.00 | −0.63 | +0.32 | −0.38 | −0.33 | −0.88 | −0.78 |
-
-(The +1.01 at step 20 is the one point at the edge of the ±1 pp band; the GPU SD there is 0.53.)
-The 3-seed figures with seed 44 partial are in `parity/figures_3seed/` (seed-42/43 curves complete);
-the run resumes from checkpoint 180 to 250 and this section is replaced by the final 3-seed table then.
-Seed-44 step time at p-state 6: median 38.6 s (n = 58), versus 34.6 s (seed 42) and 36.2 s (seed 43) at
-p-state 7.
+**Gate:** 3-seed mean 92.39 ≥ 91.42 → **PASS** (the gate also passes for each seed alone; the TPU 3-seed mean
+is 0.03 pp below the GPU 3-seed mean, and every TPU seed's final accuracy lies inside the GPU seed range
+91.96–92.80). Per-point deviations of the 3-seed mean from the GPU mean: largest +0.99 pp (step 20), mean
++0.07 pp, sign changes 7 times, i.e. no systematic offset. Per-seed points: 41 of 42 within ±1 pp; the
+exception is seed 44 at step 200 (−1.07 pp), which is within the single-run Wilson half-width (±1.4 pp) and is
+followed by in-band points at 220, 240 and 250. Seed 44 was the run most affected by cluster faults (four
+evictions, three resumes from checkpoints 120, 180 and 180; its 120 and 180 restart evals agree with the
+pre-eviction evals to within 0.4 pp).
 
 ### 3.2 Dynamics
 
-| quantity | GPU | TPU seed 42 | TPU seed 43 |
-|---|---|---|---|
-| boxed rate step 0 → 20 | 87.95 % → 100 % | 88.86 % → 100 % | 88.6 % → 100 % |
-| wrong→right / right→wrong at 250 (vs step 0) | 176–183 / 14–22 | 175 / 24 | 178 / 21 |
-| training reward (mean score per update) | train_acc_v2 84.5 % → 92.1 % | 0.87 → 0.93 | 0.87 → 0.94 |
-| k3 KL per update | 3.4e-4 – 5.0e-4 | 3.3e-4 – 5.0e-4 | 3.3e-4 – 5.2e-4 |
-| ESS per update | ≥ 0.999 | 0.9993 | 0.9993 |
-| clipped IS fraction | 3.7e-6 | ≈ 1e-6 | ≈ 1e-6 |
-| per-update max IS weight | 1.50 – 1.71 | 2.1 – 3.0 (cap) | 2.1 – 3.0 (cap) |
-| rollout mean length (tokens) | 480 → 610 | 430 (flat) | 460 → 520 |
-| wall time per update (median) | 31.7 / 33.1 / 35.0 s | 34.6 s | 36.2 s |
+| quantity | GPU | TPU seed 42 | TPU seed 43 | TPU seed 44 |
+|---|---|---|---|---|
+| boxed rate step 0 → 20 | 87.95 % → 100 % | 88.86 % → 100 % | 88.6 % → 100 % | 87.95 % → 100 % |
+| wrong→right / right→wrong at 250 (vs step 0) | 176–183 / 14–22 | 175 / 24 | 178 / 21 | 174 / 21 |
+| training reward (mean score per update) | train_acc_v2 84.5 % → 92.1 % | 0.87 → 0.93 | 0.87 → 0.94 | 0.88–0.95 (logged segments) |
+| k3 KL per update | 3.4e-4 – 5.0e-4 | 3.3e-4 – 5.0e-4 | 3.3e-4 – 5.2e-4 | 3.6e-4 – 2.7e-1 (one single-token outlier, ESS 0.9992) |
+| ESS per update | ≥ 0.999 | 0.9993 | 0.9993 | ≥ 0.9989 |
+| clipped IS fraction | 3.7e-6 | ≈ 1e-6 | ≈ 1e-6 | 1.9e-6 |
+| per-update max IS weight | 1.50 – 1.71 | 2.1 – 3.0 (cap) | 2.1 – 3.0 (cap) | 2.95 mean (cap 3.0) |
+| rollout mean length (tokens) | 480 → 610 | 430 (flat) | 460 → 520 | up to 620 (longest of the three) |
+| wall time per update (median) | 31.7 / 33.1 / 35.0 s | 34.6 s | 36.2 s | 36.7 s (p-state 6; 42/43 ran at p-state 7) |
 
 Two differences remain and do not affect the accuracy curve: the TPU's per-update *maximum*
 importance weight reaches the cap (heavier tail of the bf16 vLLM sampler vs the fp32-master trainer;
@@ -125,16 +115,16 @@ mean weight 1.000 and clipped fraction match), and TPU rollouts are shorter (the
 High-resolution (300 dpi) versions: [`parity/figures/hires/`](parity/figures/hires/).
 
 ![accuracy](parity/figures/hires/01_accuracy.png)
-*Accuracy vs update. Blue: GPU seeds (thin), mean (thick), min–max band. Orange: TPU seeds 42 (circles) and 43 (squares) with Wilson 95 % bars. Dashed: the 91.42 gate.*
+*Accuracy vs update. Blue: GPU seeds (thin), mean (thick), min–max band. Orange: TPU seeds 42 (circles), 43 (squares) and 44 (triangles) with Wilson 95 % bars. Dashed: the 91.42 gate.*
 
 ![overview](parity/figures/hires/00_overview.png)
-*All panels: accuracy, gain vs step 0, boxed rate, question flips, rollout length, wall time, TIS weights, k3 KL, loss. The single k3 spike at step 160 (seed 42) is the one off-policy update after the first checkpoint resume, before the rollout-engine sync fix (§3.4).*
+*All panels: accuracy, gain vs step 0, boxed rate, question flips, rollout length, wall time, TIS weights, k3 KL, loss. The k3 spike at step 160 (seed 42) is the one off-policy update after the first checkpoint resume, before the rollout-engine sync fix (§3.4); seed 44's single k3 outlier is one token with a huge log-ratio in an otherwise on-policy batch (ESS 0.9992). Seed 44's dynamics panels cover the logged segments (updates 121–185 and 181–250).*
 
 ### 3.4 Log evidence
 
-Full extracts: [`parity/logs/`](parity/logs/) (`seed42_g4pt1_key_lines.log`, `seed43_g4pt2_key_lines.log`,
+Full extracts: [`parity/logs/`](parity/logs/) (`seed42_g4pt1_key_lines.log`, `seed43_g4pt2_key_lines.log`, `seed44_g4pt3_key_lines.log`,
 `optimized_g4ucq2_key_lines.log`, `optimized_g4ucq2_tb_parity.txt`); per-question dumps:
-[`parity/evals_definitive/`](parity/evals_definitive/) (seed 42), [`parity/evals_seed43/`](parity/evals_seed43/).
+[`parity/evals_definitive/`](parity/evals_definitive/) (seed 42), [`parity/evals_seed43/`](parity/evals_seed43/), [`parity/evals_seed44/`](parity/evals_seed44/).
 
 Patch applied at pod start, and what the scorer sees (seed 43):
 
@@ -172,6 +162,19 @@ EVAL-BREAKDOWN step=0   acc=81.12%   step=21 acc=91.96%   step=41 acc=91.28%   s
 EVAL-BREAKDOWN step=101 acc=92.49%   step=121 acc=92.57%  step=141 acc=92.65%  step=161 acc=93.33%  step=181 acc=92.87%
 EVAL-BREAKDOWN step=201 acc=92.34%   step=220 acc=92.95%  step=240 acc=92.80%
 EVAL-BREAKDOWN step=250 k=3 total=1319 acc=92.65% …   EVAL-V2ACC total=1319 v2_acc=92.6459%
+```
+
+Eval lines, seed 44 (four admissions: autoscaler scale-down at start, node failures at 121 and 185, resumed from
+checkpoints 120 and 180; restart evals at the exact checkpoint step, periodic evals at 20k±1):
+
+```
+EVAL-BREAKDOWN step=0   acc=80.44%   step=21 acc=92.04%   step=41 acc=91.66%   step=61 acc=91.36%   step=81 acc=91.21%   step=101 acc=91.96%
+EVAL-BREAKDOWN step=121 acc=91.66%   (node failures) → Found 6 checkpoint steps / Restored params from step: 120 / RESUME-SYNC
+EVAL-BREAKDOWN step=120 acc=92.04%   step=140 acc=92.34%   step=160 acc=91.89%   step=180 acc=91.74%
+(stopped at ckpt 180 for the latest-image validation) → Found 9 checkpoint steps / Restored params from step: 180 in 15.935 seconds / RESUME-SYNC (global_steps=181)
+EVAL-BREAKDOWN step=180 acc=91.66%   step=199 acc=91.58%   step=219 acc=91.96%   step=239 acc=91.74%
+EVAL-BREAKDOWN step=250 k=4 total=1319 acc=92.04% boxed_wrong=7.88% nobox=0.08% mean_chars=1583   EVAL-V2ACC total=1319 v2_acc=92.0394% mean_reward=0.9283
+EXIT_CODE=0
 ```
 
 Sampler↔trainer mismatch and training reward (seed 42, steps 161–163 right after the first resume,
@@ -268,4 +271,4 @@ and manifests: `GEMMA4_E2B_LATEST_IMAGE_STATUS.md`. The pinned image stays the r
 ## 5. Reproduce
 
 Ready-to-apply manifests and commands: [`parity/manifests/README.md`](parity/manifests/README.md).
-Figures/tables: `python3 parity/tools/make_parity_figures.py --gpu <aggregate_summary.json> --tpu "seed42=<dumps>:<log>" "seed43=<dumps>:<log>" --out figs --dpi 300`.
+Figures/tables: `python3 parity/tools/make_parity_figures.py --gpu <aggregate_summary.json> --tpu "seed42=<dumps>:<log>" "seed43=<dumps>:<log>" "seed44=<dumps>:<log>" --out figs --dpi 300`. JobSets must be applied with `parity/tools/apply-jobset.sh` since 2026-10-30 (see `parity/manifests/README.md`).

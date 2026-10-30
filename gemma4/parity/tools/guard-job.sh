@@ -18,7 +18,7 @@ while :; do
     [ -z "$pend_since" ] && pend_since=$(date +%s)
     if [ $(( $(date +%s) - pend_since )) -gt 600 ]; then reapply "worker Pending >10 min with head Running"; continue; fi
   else pend_since=""; fi
-  last=$(grep -a "Train step [0-9]* training" "$SP/$name-raw.log" 2>/dev/null | tail -1); t_last=$(stat -c %Y "$SP/$name-raw.log" 2>/dev/null || echo 0)
+  last=$(grep -a "Train step [0-9]* training" "$SP/$name-raw.log" 2>/dev/null | tail -1); t_last=$(stat -L -c %Y "$SP/$name-raw.log" 2>/dev/null || date +%s)
   if [ "$head" = "Running" ] && [ "$npend" -eq 0 ] && [ $(( $(date +%s) - t_last )) -gt 1800 ]; then reapply "no log progress for 30 min"; continue; fi
   sleep 120
 done

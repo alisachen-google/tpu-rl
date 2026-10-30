@@ -145,7 +145,12 @@ def load_tpu(name, dumpdir, logs):
         # trained step (250, or earlier if the run ended early): if 20k overshoots it, snap to it.
         # dumps are named eval_<train_steps>.jsonl; the periodic eval fires after the step counter has
         # advanced (20 -> "021"), so snap to the eval grid (multiples of 20, or the final step 250)
-        step = k if (k % 20 == 0 or k == 250) else (k - 1 if ((k - 1) % 20 == 0 or k - 1 == 250) else k)
+        # periodic evals land at 20k+1 ("021"); after a checkpoint resume at step S+1 they land at 20k-1 ("199"):
+        # snap any step within +-2 of the 20-step grid (or of 250) to the grid point
+        step = k
+        for cand in (k, k - 1, k - 2, k + 1, k + 2):
+            if cand % 20 == 0 or cand == 250:
+                step = cand; break
         if k in SKIP_DUMPS:
             print(f"  [skip] {os.path.basename(fp)} (explicitly excluded)", file=sys.stderr)
             continue
@@ -380,6 +385,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gpu", required=True); ap.add_argument("--tpu", nargs="+", required=True); ap.add_argument("--out", required=True)
     ap.add_argument("--skip-dumps", default="", help="comma-separated dump indices to ignore, e.g. 160")
+    ap.add_argument("--dpi", type=int, default=150)
     a = ap.parse_args()
     SKIP_DUMPS.update(int(x) for x in a.skip_dumps.split(",") if x.strip())
     os.makedirs(a.out, exist_ok=True)
@@ -398,12 +404,12 @@ def main():
               ("07_tis_weights", fig_tis, (gpu, runs)), ("08_k3_kl", fig_k3_ess, (gpu, runs)), ("09_loss", fig_loss, (gpu, runs))]
     for name, fn, args in panels:
         fig, ax = plt.subplots(figsize=(9, 4.6)); fn(ax, *args); fig.tight_layout()
-        fig.savefig(os.path.join(a.out, name + ".png"), dpi=150); plt.close(fig)
+        fig.savefig(os.path.join(a.out, name + ".png"), dpi=a.dpi); plt.close(fig)
     fig, axes = plt.subplots(3, 3, figsize=(22, 14.5))
     for (name, fn, args), ax in zip(panels, axes.flat):
         fn(ax, *args)
     fig.suptitle("gemma4-E2B · GSM8K · GRPO+TIS · TPU v7x (MaxText+tunix) vs GPU reference", x=0.01, ha="left", fontsize=14, fontweight="bold", color=INK)
-    fig.tight_layout(rect=(0, 0, 1, 0.97)); fig.savefig(os.path.join(a.out, "00_overview.png"), dpi=110); plt.close(fig)
+    fig.tight_layout(rect=(0, 0, 1, 0.97)); fig.savefig(os.path.join(a.out, "00_overview.png"), dpi=max(110, a.dpi * 110 // 150)); plt.close(fig)
     summary_md(gpu, runs, gate, a.out)
     print("wrote", a.out)
 
