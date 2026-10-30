@@ -17,11 +17,25 @@ one line); the trainer's `None` local-attention splash fields are set explicitly
 | generation phase / training phase | ≈ 18.5 s / ≈ 7.5 s | ≈ 26 s / ≈ 4.5 s |
 | rollout length / truncation | 460–490 tokens, 0.05–0.9 % at the 2048 cap | same |
 
-The p-state-7 comparison (`g4l24f7`, 10 updates) is recorded in the table below when it completes.
+**p-state comparison on the latest image** (`g4l24f7`: identical run at `xla_tpu_dvfs_p_state=7`, 10 updates,
+user-requested; the recipe default stays p-state 6):
+
+| | p-state 6 (`g4l24f`) | p-state 7 (`g4l24f7`) |
+|---|---|---|
+| step-0 accuracy | 80.89 % | 80.89 % (bit-identical eval) |
+| accuracy after training | 91.66 % @20 (91.96 % post) | 91.21 % @10 |
+| timed updates (step ≥ 2) | 18 | 8 |
+| median / min | **28.9 s** / 27.8 s | **29.7 s** / 28.3 s |
+| median excluding the two deterministic outliers | 28.7 s | 28.6 s |
+| outliers (same batches in both runs) | step 5: 51.5 s (42 s generation, straggler rollout); step 6: 39.1 s (training-side recompile) | step 5: 52.0 s; step 6: 43.6 s |
+
+p-state 7 gives no measurable gain on this image (differences are within step-to-step noise), unlike the
++7.5 % seen on the pinned image (23.5 → 25.3 s). The generation phase (~18.5–19 s) dominates and is not
+clock-bound at this batch size; p-state 6 remains the recipe setting.
 Deploy: `parity/manifests/g4l24f-latest-image-24s-config-kvfix-20step.yaml` via `parity/tools/apply-jobset.sh`;
 rebuild with `FIX=patches/patch_kv_alias_dedupe.py STEPS=<n> python3 parity/build_g4l24.py` (`PSTATE=7` for the
-comparison variant). Logs: `parity/logs/latest_image/g4l24f_pstate6_key_lines.log`, step times
-`g4l24f_pstate6_steptimes.txt`.
+comparison variant). Logs: `parity/logs/latest_image/g4l24f_pstate6_key_lines.log`, `g4l24f7_pstate7_key_lines.log`, step times
+`g4l24f_pstate6_steptimes.txt`, `g4l24f7_pstate7_steptimes.txt`.
 
 ## Image under test
 
