@@ -63,3 +63,8 @@ is the 35 s recipe on the latest image (`2026-09-22-head`, 10 updates) for the p
 `g4pl10a/b/d-*` are its variants (legacy sync, re-converted checkpoint, native vLLM model). None of the four
 runs on that image: see `../../GEMMA4_E2B_LATEST_IMAGE_STATUS.md` (rollout weights gibberish, missing gemma4
 vLLM weight mapping, `local_sa_*` None crash).
+
+**2026-10-30:** the cluster's admission webhook now rejects any JobSet that sets `spec.coordinator`
+(`job for coordinator pod must be indexed completion mode, and completions number must be set`, even with an
+Indexed coordinator job). Nothing in the launcher uses the field, so every manifest here has it removed and the
+head job is `completionMode: Indexed`; `build_g4pt.py` does both.
