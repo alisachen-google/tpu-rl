@@ -7,7 +7,7 @@ Variants (env):
   EXTRA="k=v k=v" -> extra train_rl knobs appended (e.g. a weight-sync fix)
   FIX=<file> -> an extra patcher embedded as patch_newimg_fix.py and run after the parity patcher
 Always: new image + pathways tags, re-based parity patcher, sharded-sampling patch skipped, flash_sa patch skipped +
-explicit local_sa_* settings, maxRestarts 3. Apply with tools/apply-jobset.sh (ownerReference workaround). Fix for the gibberish: FIX=patches/patch_kv_alias_dedupe.py
+explicit local_sa_* settings, maxRestarts 3. Apply with apply-jobset.sh (ownerReference workaround).
 """
 import json, os, re, yaml
 SP = os.path.dirname(os.path.abspath(__file__))
@@ -17,6 +17,7 @@ OLD_IMG = "gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:f7c957d0b286e
 STEPS = int(os.environ.get("STEPS", "10")); NOPERF = os.environ.get("NOPERF") == "1"
 NAME = "g4l24n" if NOPERF else "g4l24"
 NAME = os.environ.get("NAME", NAME)
+if os.environ.get("PSTATE") == "7" and "NAME" not in os.environ: NAME += "7"
 
 def repl(old, new, n=1):
     global raw
@@ -26,6 +27,8 @@ def repl(old, new, n=1):
 repl(OLD_IMG, NEW_IMG)
 repl("20260730-jax_0.10.2", "20261028-jax_0.11.0", 3)
 assert "dvfs_p_state=6" in raw and "dvfs_p_state=7" not in raw
+if os.environ.get("PSTATE") == "7":   # user-requested comparison run (2026-10-30); p-state 6 is the default
+    raw = raw.replace("--xla_tpu_dvfs_p_state=6", "--xla_tpu_dvfs_p_state=7")
 LOCAL_SA = ("local_sa_block_q=512 local_sa_block_kv=512 local_sa_block_kv_compute=512 local_sa_block_q_dkv=512 "
             "local_sa_block_kv_dkv=512 local_sa_block_kv_dkv_compute=512 local_sa_block_q_dq=512 local_sa_block_kv_dq=512 "
             "local_sa_use_fused_bwd_kernel=false local_sa_q_layout=HEAD_DIM_MINOR local_sa_k_layout=HEAD_DIM_MINOR "

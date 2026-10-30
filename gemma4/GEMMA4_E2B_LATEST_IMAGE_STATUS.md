@@ -1,13 +1,27 @@
-# Gemma4-E2B RL recipe on the latest image (`2026-09-22-head`): status 2026-10-29
+# Gemma4-E2B RL recipe on the latest image (`2026-09-22-head`): status 2026-10-30
 
 **Request:** organize the 35 s recipe with the latest image for every library and verify there is no
 performance regression with a 10-update rerun (at `xla_tpu_dvfs_p_state=6`).
 
-**Update 2026-10-30: root cause found, one-line fix, validation run in flight.** The gibberish is a KV-cache
-aliasing bug in the new MaxText-in-vLLM adapter (§ "Root cause"), fixed by `parity/patches/patch_kv_alias_dedupe.py`.
-The 24 s configuration on the latest image with that fix (`g4l24f`, 20 updates) is queued; its step-0 accuracy and
-step time will be added here. Until then the pinned image (`maxtext-rl-ironwood@sha256:f7c957d0…`) remains the
-recipe image.
+**Result (2026-10-30): the 24 s configuration runs correctly on the latest image and is faster.** The gibberish was
+a KV-cache aliasing bug in the new MaxText-in-vLLM adapter (fixed by `parity/patches/patch_kv_alias_dedupe.py`,
+one line); the trainer's `None` local-attention splash fields are set explicitly. Validation run `g4l24f`
+(24 s configuration, latest image, p-state 6, 20 updates):
+
+| item | latest image (`2026-09-22-head`) | pinned image (same configuration, p-state 6) |
+|---|---|---|
+| step-0 accuracy (scorer-v2, 1319 Qs) | **80.89 %** | 81.27 % (GPU band 80.14–80.59) |
+| step-20 accuracy | **91.66 %** (periodic) / **91.96 %** (post-training) | 91.66 % (GPU step-20 mean 91.03 ± 0.53) |
+| sampler↔trainer k3 KL / ESS | 3.5–3.7e-4 / 0.9993 | 3.8e-4–2.0e-3 / 0.9991 |
+| step time, 18 timed updates | **median 28.9 s** (min 27.8, mean 30.8 with two transient outliers 51.5 / 39.1 s) | median 32.1 s |
+| generation phase / training phase | ≈ 18.5 s / ≈ 7.5 s | ≈ 26 s / ≈ 4.5 s |
+| rollout length / truncation | 460–490 tokens, 0.05–0.9 % at the 2048 cap | same |
+
+The p-state-7 comparison (`g4l24f7`, 10 updates) is recorded in the table below when it completes.
+Deploy: `parity/manifests/g4l24f-latest-image-24s-config-kvfix-20step.yaml` via `parity/tools/apply-jobset.sh`;
+rebuild with `FIX=patches/patch_kv_alias_dedupe.py STEPS=<n> python3 parity/build_g4l24.py` (`PSTATE=7` for the
+comparison variant). Logs: `parity/logs/latest_image/g4l24f_pstate6_key_lines.log`, step times
+`g4l24f_pstate6_steptimes.txt`.
 
 ## Image under test
 
