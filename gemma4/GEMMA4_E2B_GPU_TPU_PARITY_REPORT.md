@@ -237,7 +237,7 @@ The cost is a performance regression relative to the capped operating points, ac
 | 35 s parity recipe | pinned | 2560 | 34.6 / 36.2 / 36.7 s (seeds 42/43/44) | parity PASS (3 seeds) |
 | 24 s configuration | pinned | 2048 | 32.1 s | parity PASS |
 | 24 s configuration | latest | 2048 | 28.9 s | 20-update check |
-| **GPU-matching recipe** | latest | **8192** | **46.4 s** | parity run `g4lp8k` in progress (step 0 80.82 %, 21: 91.21 %, 41: 91.51 %, 61: 92.04 %) |
+| **GPU-matching recipe** | latest | **8192** | **46.4 s** (updates 2–19; 49.4 s over the whole run) | **parity PASS** (`g4lp8k`, seed 42: step-250 91.81 % ≥ 91.42; 12/14 points within ±1 pp, all within the Wilson width; `GEMMA4_E2B_OPTIMIZATION_REPORT_CAP8192.md` §4) |
 
 (GPU reference: 31.7 / 33.1 / 35.0 s per update on 128 GPUs at cap 8192.) The extra time is the uncapped
 rollout tail and trainer padding to 8704 tokens; the capped points remain valid production choices where a rare

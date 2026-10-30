@@ -14,6 +14,7 @@ step-time tables are under `parity/logs/latest_image/`.
 |---|---|---:|---|---|
 | `g4l24fc8k` (10-update check) | 2–9 | 49.0 s | 43.6 / 113.5 s | first cap-8192 run on the latest image |
 | **`g4lp8k` (250-update parity run) — banked number** | **2–19** | **46.4 s** | 37.23 / 69.01 s | update 20 (202.10 s) carries the eval and the checkpoint and is excluded |
+| `g4lp8k`, whole run | all 224 non-eval updates | 49.4 s | p90 55.3 s | completions lengthen over training (443 → 626 tokens), as on GPU |
 
 Truncation at the cap: **0 of 2048 completions on every update**; mean rollout length 442.7-533.3 tokens; step-0
 accuracy 80.82 %, step-21 accuracy 91.21 % (GPU step-20 mean 91.03 ± 0.53).
@@ -78,7 +79,46 @@ same recipe, same cap).
 
 ## 4. Accuracy parity at cap 8192 (run `g4lp8k`, seed 42, 250 updates)
 
-__PARITY_SECTION__
+**Result: PASS.** `g4lp8k` (latest image, cap 8192, p-state 6, seed 42) completed 250 updates on 2026-10-30
+(three admissions: the 120-minute limit at update 121 → resumed from checkpoint 120; a JobSet-level restart at
+update 193 after a worker-pod restart → resumed from checkpoint 180; exit 0 at 13:03 UTC).
+
+| step | GPU mean ± SD (min–max) | TPU cap 8192 [Wilson 95 %] | Δ vs GPU mean |
+|---:|---|---|---:|
+| 0 | 80.31 ± 0.24 (80.14–80.59) | 80.82 [78.6, 82.9] | +0.51 |
+| 20 | 91.03 ± 0.53 (90.52–91.58) | 91.21 [89.6, 92.6] | +0.18 |
+| 40 | 91.69 ± 1.07 (90.45–92.34) | 91.51 [89.9, 92.9] | −0.18 |
+| 60 | 91.36 ± 0.23 (91.13–91.58) | 92.04 [90.5, 93.4] | +0.68 |
+| 80 | 91.84 ± 0.53 (91.28–92.34) | 92.80 [91.3, 94.1] | +0.96 |
+| 100 | 91.64 ± 0.16 (91.51–91.81) | 92.72 [91.2, 94.0] | +1.08 |
+| 120 | 92.04 ± 0.55 (91.43–92.49) | 91.96 [90.4, 93.3] (restart eval; 92.42 at 121 before the pause) | −0.08 |
+| 140 | 92.67 ± 0.12 (92.57–92.80) | 92.27 [90.7, 93.6] | −0.40 |
+| 160 | 92.77 ± 0.19 (92.57–92.95) | 91.96 [90.4, 93.3] | −0.81 |
+| 180 | 92.52 ± 0.23 (92.27–92.72) | 92.19 [90.6, 93.5] (restart eval; 91.74 before the restart) | −0.33 |
+| 200 | 92.65 ± 0.15 (92.49–92.80) | 91.36 [89.7, 92.8] | −1.29 |
+| 220 | 92.60 ± 0.24 (92.42–92.87) | 92.04 [90.5, 93.4] | −0.56 |
+| 240 | 92.65 ± 0.42 (92.19–93.03) | 92.34 [90.8, 93.7] | −0.31 |
+| **250** | **92.42 ± 0.42 (91.96–92.80)** | **91.81** [90.2, 93.2] | **−0.61** |
+
+* **Gate:** 91.81 ≥ 91.42 → **PASS** (margin +0.39 pp). The final point is 0.61 pp below the GPU 3-seed mean
+  and 0.15 pp below the lowest GPU seed, inside the single-run Wilson half-width (±1.4 pp).
+* **Curve:** 12 of 14 points within ±1 pp of the GPU mean; the two exceptions (+1.08 at step 100, −1.29 at
+  step 200) are within the Wilson width and are followed by in-band points; mean deviation −0.08 pp, sign
+  changes 5 times, i.e. no systematic offset. The step-200 dip also appeared in seed 44 of the 35 s recipe.
+* **Dynamics:** boxed rate 99.8–100 % from step 20; truncation 0 % on 598 of 601 logged updates (one rollout
+  truncated at update 159); rollout mean length 443 → 626 tokens over training, i.e. the same growth the GPU
+  shows (480 → 610), which the capped runs could not reproduce; sampler↔trainer k3 KL median 4.1e-4,
+  ESS mean 0.9992 (three updates carry a single-token log-ratio outlier with ESS still ≥ 0.995);
+  clipped IS fraction 8e-7.
+* **Step time over the whole run:** median **49.4 s** (224 timed updates, p90 55.3 s), above the 46.4 s of
+  updates 2–19 because completions lengthen as training proceeds (the GPU reference shows the same drift).
+
+![accuracy](parity/figures_cap8192/hires/01_accuracy.png)
+*Accuracy vs update: GPU seeds (blue), TPU cap 8192 on the latest image (circles) with the earlier cap-2048 pinned-image run (squares) as overlay. All nine panels: `parity/figures_cap8192/hires/00_overview.png`; summary table `parity/figures_cap8192/parity_summary.md`.*
+
+Evidence: per-question dumps `parity/evals_cap8192/eval_{000,021,…,239,250}.jsonl`
+(`gs://ubench-logs/g4lp8k/evals/`); key log lines `parity/logs/latest_image/g4lp8k_cap8192_parity_key_lines.log`;
+step times `parity/logs/latest_image/g4lp8k_cap8192_steptimes_all.txt`.
 
 ## 5. Final state and what is left
 
