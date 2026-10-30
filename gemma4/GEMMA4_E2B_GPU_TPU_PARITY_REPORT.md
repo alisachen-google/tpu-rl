@@ -6,7 +6,8 @@ on seeds 42, 43 and 44: step-250 accuracy 92.49 % / 92.65 % / 92.04 % (3-seed me
 within ±1 pp of the GPU mean (the one exception is −1.07 pp at seed 44, step 200, inside the single-run
 Wilson half-width of ±1.4 pp). The optimized 24 s configuration passed the same check separately
 (`GEMMA4_E2B_24S_CONFIG_PARITY_REPORT.md`), and the recipe now also runs on the latest image
-(`GEMMA4_E2B_LATEST_IMAGE_STATUS.md`).
+(`GEMMA4_E2B_LATEST_IMAGE_STATUS.md`). The final recipe uses response cap 8192 to match the GPU side (§3.6),
+at 46.4 s per update, a deliberate performance regression for a like-for-like comparison.
 
 ![pipeline](figures/gemma4_e2b_parity_benchmark_pipeline.svg)
 
@@ -221,6 +222,26 @@ kl:            overall=0.000000 max=0.000000  (FLAT ~0)
 => SUSTAINED GPU PARITY
 PHASETIME step=94 engine_generate=19.63 compute_rewards=0.21 run_global_step=22.88
 ```
+
+### 3.6 Final recipe alignment: response cap 8192 (2026-10-30)
+
+The GPU reference trains with `max_response_length=8192` (verl launcher echo in
+`parity/logs/gpu_reference_verl_config.txt`), while the TPU parity runs above used 2560 (35 s recipe) and 2048
+(24 s configuration). Both TPU caps matched the GPU curve, but they are not the same training problem (0.05–2.2 %
+of rollouts truncated per update, none on GPU). The TPU recipe has therefore been moved to **cap 8192** on the
+latest image at p-state 6 (`GEMMA4_E2B_OPTIMIZATION_REPORT_CAP8192.md`), so the comparison is now like for like.
+The cost is a performance regression relative to the capped operating points, accepted for the comparison:
+
+| TPU operating point | image | cap | median step time | status |
+|---|---|---:|---:|---|
+| 35 s parity recipe | pinned | 2560 | 34.6 / 36.2 / 36.7 s (seeds 42/43/44) | parity PASS (3 seeds) |
+| 24 s configuration | pinned | 2048 | 32.1 s | parity PASS |
+| 24 s configuration | latest | 2048 | 28.9 s | 20-update check |
+| **GPU-matching recipe** | latest | **8192** | **46.4 s** | parity run `g4lp8k` in progress (step 0 80.82 %, 21: 91.21 %, 41: 91.51 %, 61: 92.04 %) |
+
+(GPU reference: 31.7 / 33.1 / 35.0 s per update on 128 GPUs at cap 8192.) The extra time is the uncapped
+rollout tail and trainer padding to 8704 tokens; the capped points remain valid production choices where a rare
+truncated tail is acceptable.
 
 ## 4. What we fixed to get here
 
