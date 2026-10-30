@@ -3,9 +3,11 @@
 **Request:** organize the 35 s recipe with the latest image for every library and verify there is no
 performance regression with a 10-update rerun (at `xla_tpu_dvfs_p_state=6`).
 
-**Result: not runnable on this image without code changes.** No valid step time could be measured.
-The pinned image (`maxtext-rl-ironwood@sha256:f7c957d0…`) remains the recipe image for both the
-35 s parity run and the 24 s optimized run.
+**Update 2026-10-30: root cause found, one-line fix, validation run in flight.** The gibberish is a KV-cache
+aliasing bug in the new MaxText-in-vLLM adapter (§ "Root cause"), fixed by `parity/patches/patch_kv_alias_dedupe.py`.
+The 24 s configuration on the latest image with that fix (`g4l24f`, 20 updates) is queued; its step-0 accuracy and
+step time will be added here. Until then the pinned image (`maxtext-rl-ironwood@sha256:f7c957d0…`) remains the
+recipe image.
 
 ## Image under test
 
@@ -64,3 +66,36 @@ Builder knobs: `WCONV=0` (legacy sync), `NEWCKPT=1` (re-converted checkpoint), `
 * RL config defaults for the `local_sa_*` / `eval_local_sa_*` fields (or the explicit settings above).
 * Re-run `NOFLASH=1 python3 build_g4pl10.py` once the rollout path is fixed; the parity patcher and
   the remaining 17 perf patches already apply.
+
+## Root cause of the gibberish (2026-10-30)
+
+tpu_inference allocates one KV cache per *non-shared* layer and maps every KV-shared layer to its donor's
+cache (`runner/kv_cache_manager.py`, `layer_name_to_kvcache_index`). gemma4-E2B has 35 layers, 20 of them
+KV-shared (donors: layer 13 for the sliding layers 15–33, layer 14 for the global layers 19/24/29/34), so there
+are 15 physical caches. MaxText's gemma4 decoder indexes `kv_caches` by compact slot 0..14
+(`gemma4_small.kv_cache_slot_map`, `nnx_decoders._apply_gemma4_small_layers`).
+
+The OLD adapter passed the 15-entry list straight through. The NEW adapter (`integration/vllm/hybrid_cache_utils.py`,
+`resolve_layer_kv_cache_indices` / `gather_layer_kv_caches` / `scatter_layer_kv_caches`) expands the list to one
+entry **per layer** (35 entries, 20 of them aliases of caches 13/14), hands it to MaxText, which updates only
+entries 0..14, and then scatters all 35 entries back; the untouched alias entries 15..34 (the stale pre-forward
+donor caches) overwrite the donors' updates ("highest-numbered layer wins"). Layers 13/14 and the 20 layers sharing
+them therefore never see any past K/V, and greedy decoding degenerates into repeated tokens. Weights are correct,
+which is why every weight-sync variant produced byte-identical gibberish.
+
+**Fix** (`patch_kv_alias_dedupe.py`, fail-loud, idempotent): present each physical cache once, in first-use layer
+order, which is exactly MaxText's slot order:
+
+```python
+physical_indices = [by_layer[lyr] for lyr in range(num_layers)]
+physical_indices = list(dict.fromkeys(physical_indices))   # _KV_ALIAS_DEDUPE
+```
+
+Models without KV sharing have unique indices already, so they are unaffected. The other blocker (trainer crash on
+`None` local-attention splash fields) is handled by the explicit `local_sa_*` settings in `parity/build_g4l24.py`.
+Diagnosis evidence: CPU simulation inside the new container with the real helpers reports physical caches whose
+update is lost = [13, 14] unpatched, [] patched.
+
+**Recipe on the latest image:** `parity/build_g4l24.py` (24 s configuration: cap 2048, async reward, round-robin DP
+routing native, `free_kv_cache_during_weight_sync=false`, `vllm_block_size=128`, p-state 6; 33 of the 36 perf
+patches still apply, sharded-sampling and flash-sa are native/skipped), applied with `parity/tools/apply-jobset.sh`.
