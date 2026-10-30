@@ -1,0 +1,60 @@
+# GPU reference recipe settings, extracted from gs://xiaotongyang-bucket/meta-rl/GKE_repro/meta-RL/logs/gemma4_e2b_gsm8k8k_16n64g_s250_seed1_1024_0157.log (verl launcher) and preflight.json
++ SAVE_FREQ=50
++ CKPT_STEPS=100,250
++ CKPT_CONTENTS='["model","optimizer","extra"]'
++ PROJECT_NAME=gemma4_gsm8k_8k
++ EXPERIMENT_NAME=gemma4_e2b_gsm8k8k_16n64g_s250_seed1_1024_0157
++ DUMP_DIR=/workspace/meta-RL/logs/gemma4_gsm8k/gemma4_e2b_gsm8k8k_16n64g_s250_seed1_1024_0157
++ GUARD_DIR=/workspace/meta-RL/logs/gemma4_guard/gemma4_e2b_gsm8k8k_16n64g_s250_seed1_1024_0157
++ train_batch_size=128
++ rollout_n=16
++ ppo_mini_batch_size=128
++ max_prompt_length=512
++ max_response_length=8192
++ actor_lr=2e-6
++ lr_warmup_steps=10
++ weight_decay=0.0
++ grad_clip=1.0
++ temperature=1.0
++ top_p=1.0
++ top_k=-1
++ IS_THRESHOLD=3.0
++ REWARD_FORMAT_SCORE=0.1
++ REWARD_PENALTY_SOURCES=
++ REWARD_MAX_RESP_LEN=8192
++ REWARD_OVERLONG_BUFFER=512
++ REWARD_OVERLONG_PENALTY=1.0
++ ppo_max_token_len_per_gpu=16384
++ rollout_gpu_mem_util=0.30
++ max_num_batched_tokens=32768
+
+# verl main_ppo command
+algorithm.norm_adv_by_std_in_grpo=True
+algorithm.use_kl_in_reward=False
+data.train_batch_size=128
+data.max_prompt_length=512
+data.max_response_length=8192
+actor_rollout_ref.actor.optim.lr=2e-6
+actor_rollout_ref.actor.optim.lr_warmup_steps=10
+actor_rollout_ref.actor.ppo_mini_batch_size=128
+actor_rollout_ref.actor.loss_agg_mode=token-mean
+actor_rollout_ref.actor.use_kl_loss=False
+actor_rollout_ref.actor.entropy_coeff=0
+actor_rollout_ref.actor.calculate_entropy=True
+actor_rollout_ref.rollout.name=vllm
+actor_rollout_ref.rollout.gpu_memory_utilization=0.30
+actor_rollout_ref.rollout.n=16
+actor_rollout_ref.rollout.temperature=1.0
+actor_rollout_ref.rollout.top_p=1.0
+actor_rollout_ref.rollout.top_k=-1
+actor_rollout_ref.rollout.max_num_batched_tokens=32768
+trainer.total_training_steps=250
+
+# per-step response_length/max over 250 updates: max observed
+      1 4756.0
+      1 4780.0
+      1 4822.0
+      1 8192.0
+# response_length/clip_ratio values
+    249 response_length/clip_ratio:0.0
+      1 response_length/clip_ratio:0.00048828125
