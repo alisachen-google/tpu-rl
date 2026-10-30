@@ -16,6 +16,7 @@ Accuracy parity against the GPU reference (GSM8K, scorer-v2) is a separate track
 | mechanical perf stack + fixed checkpoint | 34.5 s (20-step median 35.7) | 0.58 | g4r55 / g4r68 |
 | straggler campaign, full parity | ~27 s (26.9–27.6) | 0.547–0.600 (100 steps, KL = 0) | g4ucf / g4uco |
 | straggler campaign, parity floor | ~24.4 s | 0.512 (GPU band floor 0.50) | g4ucq |
+| **final recipe: response cap raised to 8192 to match the GPU reference** (latest image, p-state 6, GSM8K parity recipe) | **46.4 s** (updates 2–19) | accuracy parity run in progress | g4lp8k |
 
 175.6 → 27 s is 6.5× end to end; the last 34.5 → 27 s (−22 %) is the part that needed the
 roofline to find.
@@ -260,6 +261,15 @@ Roofline bookkeeping at the end: rollout ≈ 2560 × 5.4 ms ≈ 13.8 s is the de
 longest allowed completion; the measured ~25 s rollout includes the early mixed prefill/decode
 phase and per-window tails; trainer 3.7 s vs ~0.8 s roofline is the only other non-floor item and
 is small in absolute terms.
+
+**Final cap alignment (2026-10-30).** The GPU reference trains with `max_response_length=8192`
+(`parity/logs/gpu_reference_verl_config.txt`), so the deployed recipe was moved from the capped operating
+points (2048 / 2560) to **cap 8192** on the latest image at p-state 6. That is a deliberate performance
+regression: 28.9 s (latest image, cap 2048) → **46.4 s per update** at cap 8192, from the uncapped rollout tail
+and trainer padding to 8704 tokens; truncation goes from 0.05–2.2 % to 0 %, and the comparison with the GPU
+(31.7–35.0 s per update on 128 GPUs) is now like for like. Details and the recipe:
+`GEMMA4_E2B_OPTIMIZATION_REPORT_CAP8192.md`. The capped points above remain valid where a rare truncated tail is
+acceptable.
 
 Remaining paths, none autonomous:
 - **Training-objective change to shorten the straggler at the source** (format compliance 82 % vs
