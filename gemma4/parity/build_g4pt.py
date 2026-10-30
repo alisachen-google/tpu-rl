@@ -25,7 +25,7 @@ import sys
 
 SP = os.environ.get("PARITY_DIR", os.path.dirname(os.path.abspath(__file__)))
 SRC = f"{SP}/g4pf.yaml"
-PATCH = f"{SP}/patches/patch_sampler_is_new.py"
+PATCH = f"{SP}/patches/patch_sampler_is.py"
 IDX = sys.argv[1] if len(sys.argv) > 1 else "1"
 assert IDX in ("1", "2", "3"), IDX
 SEED = {"1": 42, "2": 43, "3": 44}[IDX]
@@ -44,7 +44,7 @@ assert raw.count("g4pf") > 0
 # ---- 1) swap ConfigMap patch values (single-line JSON-escaped scalars) ----
 #   patch_sampler_is.py -> the TIS config patcher (sampler_is=token + return_logprobs + eval 1319)
 #   patch_flash_sa.py   -> sa_block_kv 2048->1024 so splash divides the UNPACKED TIS recompute (3072)
-_flash = open(f"{SP}/g4patches/patch_flash_sa.py", encoding="utf-8").read()
+_flash = open(f"{SP}/patches/patch_flash_sa.py", encoding="utf-8").read()
 if CAP == "2048":
     # target 2560 = 2^9*5: the unpacked TIS recompute runs at q_seq_len=2560, which 1024 does not divide
     # ("q_block_size=1024 should divide q_seq_len=2560", g4pt1c2048p 2026-10-29). 512 divides 2560 and the
@@ -57,7 +57,7 @@ SWAPS = {
     # 2026-10-27: ndarray/bytes gold handling + REWARD-DEBUG line (training rewards were 0.1-capped:
     # tunix passes the batched `answer` column as a numpy array, the old helper replicated the whole
     # array as every completion's gold). Eval path was unaffected.
-    "reward_parity_boxed.py": open(f"{SP}/g4patches/reward_parity_boxed.py", encoding="utf-8").read(),
+    "reward_parity_boxed.py": open(f"{SP}/patches/reward_parity_boxed.py", encoding="utf-8").read(),
 }
 
 
@@ -92,11 +92,7 @@ if CAP != "2560":
 # ---- fail-fast on a persistent crash (e.g. cap OOM) instead of churning to deactivation.
 # g4ps1 (8192 cap) hit 23 JobSet restarts under maxRestarts=50 before Kueue deactivated it;
 # a low cap makes an OOM surface loudly within one window instead of silently churning.
-repl("    maxRestarts: 50", "    maxRestarts: 10")
-# 2026-10-30: the cluster rejects JobSets with spec.coordinator ("job for coordinator pod must be indexed completion mode"); nothing in the launcher uses it -> coordinator removed
-raw = re.sub(r"(?m)^  coordinator:\n    replicatedJob: pathways-head\n", "", raw, count=1)
-# JobSet webhook (2026-10-30) rejects a NonIndexed coordinator job: "job for coordinator pod must be indexed completion mode"
-raw = re.sub(r"(?m)^(\s*)completions: 1\n(\s*)parallelism: 1\n", lambda m: f"{m.group(1)}completionMode: Indexed\n{m.group(1)}completions: 1\n{m.group(2)}parallelism: 1\n", raw, count=1)  # 3 was exhausted by a transient head-pod proxy crashloop (2026-10-27 04:12); restarts resume from the last checkpoint now
+repl("    maxRestarts: 50", "    maxRestarts: 10")  # 3 was exhausted by a transient head-pod proxy crashloop (2026-10-27 04:12); restarts resume from the last checkpoint now
 
 # ---- NO mid-run checkpoints. g4pt1 (checkpoint_period=20) proved two things on this container:
 # (1) resume is BROKEN: every restart died in tunix maybe_restore ("Failed to restore from step 20"

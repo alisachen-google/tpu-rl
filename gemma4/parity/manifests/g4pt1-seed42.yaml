@@ -482,11 +482,13 @@ metadata:
 apiVersion: jobset.x-k8s.io/v1alpha2
 kind: JobSet
 metadata:
-  name: g4pt1
+  name: "g4pt1"
   namespace: ubench-regression-tests
   labels:
-    kueue.x-k8s.io/queue-name: multislice-queue
+    kueue.x-k8s.io/queue-name: "multislice-queue"
 spec:
+  coordinator:
+    replicatedJob: pathways-head
   network:
     enableDNSHostnames: true
     publishNotReadyAddresses: true
@@ -504,7 +506,7 @@ spec:
     template:
       metadata:
         labels:
-          kueue.x-k8s.io/queue-name: multislice-queue
+          kueue.x-k8s.io/queue-name: "multislice-queue"
       spec:
         parallelism: 1
         completions: 1
@@ -513,18 +515,18 @@ spec:
           metadata:
             labels:
               kueue.x-k8s.io/podset: pathways-head
-              kueue.x-k8s.io/queue-name: multislice-queue
+              kueue.x-k8s.io/queue-name: "multislice-queue"
             annotations:
               kubectl.kubernetes.io/default-container: jax-tpu
-              gke-gcsfuse/volumes: 'true'
+              gke-gcsfuse/volumes: "true"
           spec:
             restartPolicy: OnFailure
-            priorityClassName: medium
+            priorityClassName: "medium"
             hostNetwork: true
             hostIPC: true
             dnsPolicy: ClusterFirstWithHostNet
             nodeSelector:
-              cloud.google.com/gke-nodepool: cpu-np
+              cloud.google.com/gke-nodepool: "cpu-np"
             affinity:
               podAntiAffinity:
                 preferredDuringSchedulingIgnoredDuringExecution:
@@ -535,36 +537,48 @@ spec:
                       matchExpressions:
                       - key: jobset.sigs.k8s.io/replicatedjob-name
                         operator: In
-                        values:
-                        - pathways-head
+                        values: ["pathways-head"]
             containers:
             - name: jax-tpu
-              image: gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:f7c957d0b286e03966fdd6f9b15e7609fae8460a933a9da0b9fbab3e04723c94
+              image: "gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:f7c957d0b286e03966fdd6f9b15e7609fae8460a933a9da0b9fbab3e04723c94"
               command:
               - bash
               - -c
-              - "echo Pathways Helm Start: $(date);\n_sigterm() (kill -SIGTERM $! 2>/dev/null;);\ntrap _sigterm SIGTERM;\necho \"Executing payload from /workload/launcher/launch-workload.sh...\"\n( bash /workload/launcher/launch-workload.sh ) & PID=$!;\nwhile kill -0 $PID 2>/dev/null;\n    do sleep 5;\ndone;\nwait $PID;\nEXIT_CODE=$?;\necho Pathways Helm End: $(date);\necho EXIT_CODE=$EXIT_CODE;\nexit $EXIT_CODE\n"
+              - |
+                echo Pathways Helm Start: $(date);
+                _sigterm() (kill -SIGTERM $! 2>/dev/null;);
+                trap _sigterm SIGTERM;
+                echo "Executing payload from /workload/launcher/launch-workload.sh..."
+                ( bash /workload/launcher/launch-workload.sh ) & PID=$!;
+                while kill -0 $PID 2>/dev/null;
+                    do sleep 5;
+                done;
+                wait $PID;
+                EXIT_CODE=$?;
+                echo Pathways Helm End: $(date);
+                echo EXIT_CODE=$EXIT_CODE;
+                exit $EXIT_CODE
               env:
               - name: JAX_PLATFORMS
-                value: proxy,cpu
+                value: "proxy,cpu"
               - name: PATHWAYS_HEAD
-                value: g4pt1-pathways-head-0-0.g4pt1
+                value: "g4pt1-pathways-head-0-0.g4pt1"
               - name: JAX_BACKEND_TARGET
                 value: grpc://g4pt1-pathways-head-0-0.g4pt1:29140
               - name: JOB_IDENTIFIER
-                value: g4pt1
+                value: "g4pt1"
               - name: ARTIFACT_DIR
-                value: gs://ubench-logs
+                value: "gs://ubench-logs"
               - name: JAX_COMPILATION_CACHE_DIR
-                value: gs://ubench-logs/compilation_cache/qwen3-0.6b/rl_repro_jax_tpu7x_20260730
+                value: "gs://ubench-logs/compilation_cache/qwen3-0.6b/rl_repro_jax_tpu7x_20260730"
               - name: SKIP_JAX_PRECOMPILE
-                value: '1'
+                value: "1"
               resources:
                 requests:
-                  cpu: '28'
+                  cpu: "28"
                   memory: 130G
                 limits:
-                  cpu: '44'
+                  cpu: "44"
                   memory: 170G
               securityContext:
                 privileged: true
@@ -577,11 +591,11 @@ spec:
                 mountPath: /tmp
             initContainers:
             - name: pathways-rm
-              image: us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260730-jax_0.10.2
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260730-jax_0.10.2"
               restartPolicy: Always
               env:
               - name: HOST_ADDRESS
-                value: g4pt1-pathways-head-0-0.g4pt1
+                value: "g4pt1-pathways-head-0-0.g4pt1"
               args:
               - --server_port=29141
               - --node_type=resource_manager
@@ -590,20 +604,20 @@ spec:
               - --instance_type=tpu7x:4x4x4
               resources:
                 requests:
-                  cpu: '8'
+                  cpu: "8"
                   memory: 24G
                 limits:
-                  cpu: '16'
+                  cpu: "16"
                   memory: 64G
               volumeMounts:
               - name: shared-tmp
                 mountPath: /tmp
             - name: pathways-proxy
-              image: us-docker.pkg.dev/cloud-tpu-v2-images/pathways/proxy_server:20260730-jax_0.10.2
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/proxy_server:20260730-jax_0.10.2"
               restartPolicy: Always
               env:
               - name: PATHWAYS_HEAD
-                value: g4pt1-pathways-head-0-0.g4pt1
+                value: "g4pt1-pathways-head-0-0.g4pt1"
               args:
               - --server_port=29140
               - --resource_manager_address=g4pt1-pathways-head-0-0.g4pt1:29141
@@ -639,10 +653,10 @@ spec:
               - --xla_tpu_enable_3d_reduce_scatter_decomposer=false
               resources:
                 requests:
-                  cpu: '8'
+                  cpu: "8"
                   memory: 32G
                 limits:
-                  cpu: '16'
+                  cpu: "16"
                   memory: 64G
               volumeMounts:
               - name: shared-tmp
@@ -654,17 +668,16 @@ spec:
                 type: DirectoryOrCreate
             - name: workload-launcher
               configMap:
-                name: g4pt1-launcher
+                name: "g4pt1-launcher"
             - name: workload-patches
               configMap:
-                name: g4pt1-patches
-        completionMode: Indexed
+                name: "g4pt1-patches"
   - name: worker
     replicas: 1
     template:
       metadata:
         labels:
-          kueue.x-k8s.io/queue-name: multislice-queue
+          kueue.x-k8s.io/queue-name: "multislice-queue"
       spec:
         parallelism: 16
         completions: 16
@@ -674,26 +687,26 @@ spec:
           metadata:
             annotations:
               alpha.jobset.sigs.k8s.io/exclusive-topology: cloud.google.com/gke-nodepool
-              cloud.google.com/gke-tpu-slice-topology: 4x4x4
-              kueue.x-k8s.io/podset-unconstrained-topology: 'true'
+              cloud.google.com/gke-tpu-slice-topology: "4x4x4"
+              kueue.x-k8s.io/podset-unconstrained-topology: "true"
             labels:
               kueue.x-k8s.io/podset: worker
-              kueue.x-k8s.io/queue-name: multislice-queue
+              kueue.x-k8s.io/queue-name: "multislice-queue"
           spec:
             restartPolicy: OnFailure
-            priorityClassName: medium
+            priorityClassName: "medium"
             hostNetwork: true
             hostIPC: true
             dnsPolicy: ClusterFirstWithHostNet
             nodeSelector:
-              cloud.google.com/gke-tpu-topology: 4x4x4
+              cloud.google.com/gke-tpu-topology: "4x4x4"
               cloud.google.com/gke-tpu-accelerator: tpu7x
             containers:
             - name: pathways-worker
-              image: us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260730-jax_0.10.2
+              image: "us-docker.pkg.dev/cloud-tpu-v2-images/pathways/server:20260730-jax_0.10.2"
               env:
               - name: PATHWAYS_HEAD
-                value: g4pt1-pathways-head-0-0.g4pt1
+                value: "g4pt1-pathways-head-0-0.g4pt1"
               - name: MEGASCALE_SLICE_ID
                 valueFrom:
                   fieldRef:
@@ -707,9 +720,9 @@ spec:
                   fieldRef:
                     fieldPath: metadata.labels['jobset.sigs.k8s.io/jobset-name']
               - name: MEGASCALE_COORDINATOR_ADDRESS
-                value: g4pt1-pathways-head-0-0.g4pt1
+                value: "g4pt1-pathways-head-0-0.g4pt1"
               - name: TPU_SKIP_MDS_QUERY
-                value: 'true'
+                value: "true"
               args:
               - --server_port=29005
               - --resource_manager_address=g4pt1-pathways-head-0-0.g4pt1:29141
@@ -727,9 +740,9 @@ spec:
                 protocol: TCP
               resources:
                 limits:
-                  google.com/tpu: '4'
+                  google.com/tpu: "4"
                 requests:
-                  google.com/tpu: '4'
+                  google.com/tpu: "4"
               volumeMounts:
               - name: shared-tmp
                 mountPath: /tmp

@@ -64,7 +64,12 @@ is the 35 s recipe on the latest image (`2026-09-22-head`, 10 updates) for the p
 runs on that image: see `../../GEMMA4_E2B_LATEST_IMAGE_STATUS.md` (rollout weights gibberish, missing gemma4
 vLLM weight mapping, `local_sa_*` None crash).
 
-**2026-10-30:** the cluster's admission webhook now rejects any JobSet that sets `spec.coordinator`
-(`job for coordinator pod must be indexed completion mode, and completions number must be set`, even with an
-Indexed coordinator job). Nothing in the launcher uses the field, so every manifest here has it removed and the
-head job is `completionMode: Indexed`; `build_g4pt.py` does both.
+**2026-10-30 — apply through `../tools/apply-jobset.sh`:** a kyverno cluster policy added on 2026-10-29 16:43 UTC
+(`owner-only-exec-stamp-creator`, rule `stamp-creator-jobset-templates`) mutates every newly CREATED JobSet that has
+no `ownerReferences`; its strategic-merge patch replaces `spec.replicatedJobs` with a single stripped element
+(the head job without containers), so the JobSet webhook then rejects it (`job for coordinator pod must be indexed
+completion mode …`) or, with the coordinator removed, the controller fails with `spec.template.spec.containers:
+Required value`. The policy skips JobSets that carry an `ownerReference`. The helper applies the ConfigMaps first,
+reads the `<name>-launcher` ConfigMap's uid, injects `metadata.ownerReferences` pointing at it, and applies the
+JobSet (a plain `kubectl apply` of these manifests no longer works). Deleting that ConfigMap garbage-collects the
+JobSet, so the chain's SSA re-apply (update, same uid) is safe.
