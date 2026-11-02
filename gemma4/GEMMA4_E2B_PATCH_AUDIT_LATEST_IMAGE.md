@@ -89,5 +89,13 @@ Logs of every audit run: `parity/logs/patch_audit/` (per-run key lines and the e
 | fix(vllm): don't let untouched KV-sharing aliases overwrite the donor cache | `fix/vllm-kv-shared-alias-scatter` | `upstream_prs/maxtext_kv_shared_alias_scatter.md` |
 | fix(rl): make the exact-format regex immune to catastrophic backtracking | `fix/rl-format-regex-backtracking` | `upstream_prs/maxtext_format_regex_backtracking.md` |
 
+| Add gemma4-e2b GRPO RL recipe for TPU v7x (script + tutorial) | `feat/rl-gemma4-e2b-recipe` | `upstream_prs/maxtext_gemma4_e2b_rl_recipe.md` |
+
+The recipe PR was validated with the upstream data template and the official `google/gemma-4-E2B-it` conversion
+(`parity/manifests/g4e2bup-validation-upstream-templates-it-ckpt-8step.yaml`). Updates 2–7 took
+54.4 / 54.5 / 56.5 / 56.2 / 67.4 / 58.2 s, for a median of 56.4 s, with coherent rollouts and exit 0.
+
+Tunix has only a small LoRA GSM8K config for gemma4-e2b; the full-model recipe belongs in MaxText next to E4B/26B.
+
 No tunix or tpu-inference PR is needed: every patch for those repos was either upstream already, replaced by a native
 setting, or made no difference.

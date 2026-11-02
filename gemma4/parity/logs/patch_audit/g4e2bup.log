@@ -1,0 +1,10 @@
+EXIT_CODE=0
+I1102 06:52:32.768311 137397490101120 peft_trainer.py:762] Train step 1 training loss: -0.000000  - training perplexity: 1.000000
+I1102 06:53:27.207193 137397490101120 peft_trainer.py:762] Train step 2 training loss: -0.000000  - training perplexity: 1.000000
+I1102 06:54:21.756205 137397490101120 peft_trainer.py:762] Train step 3 training loss: -0.000000  - training perplexity: 1.000000
+I1102 06:55:18.297409 137397490101120 peft_trainer.py:762] Train step 4 training loss: -0.000000  - training perplexity: 1.000000
+I1102 06:56:14.477537 137397490101120 peft_trainer.py:762] Train step 5 training loss: -0.000000  - training perplexity: 1.000000
+I1102 06:57:21.857787 137397490101120 peft_trainer.py:762] Train step 6 training loss: -0.000000  - training perplexity: 1.000000
+I1102 06:58:20.079938 137397490101120 peft_trainer.py:762] Train step 7 training loss: -0.000000  - training perplexity: 1.000000
+I1102 06:58:22.369604 137397490101120 peft_trainer.py:762] Train step 8 training loss: -0.000000  - training perplexity: 1.000000
+KV-SCATTER-PR: APPLIED

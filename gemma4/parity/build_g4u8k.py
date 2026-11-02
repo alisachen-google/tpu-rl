@@ -67,7 +67,8 @@ if os.environ.get("NOLOG") == "1":
     for v in ("VLLM_BLOCK_SIZE", "APPROX_TOPK_K", "VLLM_PREFIX_CACHING", "DP_ROUTING", "EXTRA_STOP_TOKEN_IDS", "FAST_EXTRACT",
               "ASYNC_REWARD", "ASYNC_LOGPROBS", "MAX_SEQ_TOKEN_PER_TPU", "TEXTUAL_STOP", "VERIFY_ITEM_TIMEOUT", "REWARD_DUMP_N",
               "LENGTH_SHAPE", "LENGTH_SHAPE_LAMBDA", "LENGTH_SHAPE_TARGET", "LENGTH_SHAPE_SCALE"):
-        raw = re.sub(rf"(?m)^(\s*)export {v}=[^\n;]*;?\s*", r"\1", raw)
+        raw = raw.replace(f"export {v}=on; ", "")                       # ASYNC_REWARD shares a line with DP_SCHED_ROUTING
+        raw = re.sub(rf"(?m)^[ \t]*export {v}=.*\n", "", raw)            # every other one: drop the whole line
 # DROP=<patch_name>: leave-one-out -- remove a single patch from the full set
 if os.environ.get("DROP"): NOOP = NOOP | set(os.environ["DROP"].split(","))
 lines = []
