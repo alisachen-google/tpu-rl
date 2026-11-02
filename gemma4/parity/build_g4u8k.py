@@ -35,7 +35,8 @@ NOOP = {"patch_cd_proper", "patch_rpa_blocks", "patch_async_detok", "patch_async
 lines = []
 for ln in raw.split("\n"):
     mm = re.match(r"^\s*python3 /workload/patches/(patch_[a-z0-9_]+)\.py.*$", ln)
-    if mm and mm.group(1) in NOOP: continue
+    if mm and mm.group(1) in NOOP:
+        ind = re.match(r"^(\s*)", ln).group(1); lines.append(f"{ind}: # {mm.group(1)} removed (no-op on the latest image)"); continue
     lines.append(ln)
 raw = "\n".join(lines)
 m = re.search(r"^(\s*)python3 /workload/patches/patch_lendist\.py.*$", raw, re.M); assert m

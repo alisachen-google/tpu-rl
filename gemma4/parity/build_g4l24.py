@@ -95,7 +95,7 @@ if mode:
     for ln in raw.split("\n"):
         m = re.match(r"^\s*(python3 /workload/patches/(patch_[a-z0-9_]+)\.py.*|echo \"(PATCH_[A-Z_]+|[A-Z-]+ PATCH): SKIPPED.*)$", ln)
         if m and (m.group(2) in drop or (m.group(3) and m.group(3).replace(" PATCH", "").replace("-", "_").lower().replace("patch_", "") in {x.replace("patch_", "") for x in drop})):
-            continue
+            lines.append(re.match(r"^(\s*)", ln).group(1) + ": # removed (no-op on the latest image)"); continue
         lines.append(ln)
     raw = "\n".join(lines)
     parts = re.split(r"(?m)^---\s*$", raw); out = []
