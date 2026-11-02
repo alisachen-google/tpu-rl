@@ -54,6 +54,20 @@ if os.environ.get("NOLOG") == "1":
     NOOP = NOOP | {"patch_lendist", "patch_phasetime"}
     # the inherited launcher also seds qwen3.py (mrope default) -- irrelevant to gemma4; drop it
     raw = re.sub(r"(?m)^(\s*)sed -i 's/mrope_section=config\.mrope_section/[^\n]*$", r"\1: # qwen3 mrope sed removed (not used by gemma4)", raw)
+# UPSTREAM_DATA=1: MaxText's built-in data/chat templates (as in the gemma4-e4b RL recipe) instead of the custom
+# dataset processor, and the official google/gemma-4-E2B-it conversion instead of the raw2 checkpoint.
+if os.environ.get("UPSTREAM_DATA") == "1":
+    assert raw.count("dataset_processor_path=/workload/patches/gemma_data.py") == 1
+    raw = raw.replace("dataset_processor_path=/workload/patches/gemma_data.py",
+                      "data_template_path=/deps/src/maxtext/examples/chat_templates/openmathinstruct2_rl.json \\\n"
+                      "        chat_template_path=/deps/src/maxtext/examples/chat_templates/gemma-3-27b-chat_template.json")
+    raw = raw.replace("gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-raw2/0/items", "gs://ubench-logs/alisachen-tpu7x/ckpt/gemma4-e2b-it-fresh/0/items")
+# NOLOG: also strip environment variables that only the removed patches read (inert, but misleading)
+if os.environ.get("NOLOG") == "1":
+    for v in ("VLLM_BLOCK_SIZE", "APPROX_TOPK_K", "VLLM_PREFIX_CACHING", "DP_ROUTING", "EXTRA_STOP_TOKEN_IDS", "FAST_EXTRACT",
+              "ASYNC_REWARD", "ASYNC_LOGPROBS", "MAX_SEQ_TOKEN_PER_TPU", "TEXTUAL_STOP", "VERIFY_ITEM_TIMEOUT", "REWARD_DUMP_N",
+              "LENGTH_SHAPE", "LENGTH_SHAPE_LAMBDA", "LENGTH_SHAPE_TARGET", "LENGTH_SHAPE_SCALE"):
+        raw = re.sub(rf"(?m)^(\s*)export {v}=[^\n;]*;?\s*", r"\1", raw)
 # DROP=<patch_name>: leave-one-out -- remove a single patch from the full set
 if os.environ.get("DROP"): NOOP = NOOP | set(os.environ["DROP"].split(","))
 lines = []
