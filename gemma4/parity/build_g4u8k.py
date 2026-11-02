@@ -23,7 +23,16 @@ LOCAL_SA = ("local_sa_block_q=512 local_sa_block_kv=512 local_sa_block_kv_comput
             "local_sa_v_layout=HEAD_DIM_MINOR local_sa_fuse_reciprocal=true local_sa_use_base2_exp=true "
             "eval_local_sa_block_q=512 eval_local_sa_block_kv=512 eval_local_sa_block_kv_compute=512 "
             "eval_local_sa_q_layout=HEAD_DIM_MINOR eval_local_sa_k_layout=HEAD_DIM_MINOR eval_local_sa_v_layout=HEAD_DIM_MINOR")
-extra = LOCAL_SA.split() + [f"num_batches={STEPS}", "free_kv_cache_during_weight_sync=false", "vllm_block_size=128"]
+# native sequence packing for the trainer (replaces patch_packing_knob / patch_packer_fast): rows of T tokens,
+# pack size aligned to the data/fsdp mesh (an unpacked micro-batch of 8 prompts x 8 samples = 64 rows does not
+# shard over 128 devices: "query.shape[0]=64/devices_in_data_fsdp=128")
+extra = LOCAL_SA.split() + [f"num_batches={STEPS}", "free_kv_cache_during_weight_sync=false", "vllm_block_size=128",
+                            f"max_seq_token_per_tpu={T}"]
+# NATIVE_REWARD=1 (default): tunix's own reward pool (reward_num_workers) replaces patch_reward_parallel, whose
+# pool cannot fork inside the trainer's daemonic process on this image ("daemonic processes are not allowed to
+# have children" -> serial scoring, ~60 s per update on OpenMathInstruct)
+if os.environ.get("NATIVE_REWARD", "1") == "1":
+    extra.append("reward_num_workers=" + os.environ.get("REWARD_WORKERS", "64"))
 m = re.search(r"^(\s*)num_batches=100 \\$", raw, re.M); assert m, "num_batches anchor"
 ind = m.group(1); raw = raw[:m.start()] + "\n".join(f"{ind}{kv} \\" for kv in extra) + raw[m.end():]
 raw = raw.replace("export ASYNC_REWARD=on", "export ASYNC_REWARD=on; export DP_SCHED_ROUTING=round_robin")
@@ -32,6 +41,7 @@ NOOP = {"patch_cd_proper", "patch_rpa_blocks", "patch_async_detok", "patch_async
         "patch_padding_bucket", "patch_textual_stop", "patch_packer_fast", "patch_packing_knob", "patch_profiler_fix",
         "patch_flash_sa", "patch_sharded_sampling", "patch_perf_v2", "patch_fast_detok", "patch_gemma4_prs",
         "patch_length_shape", "patch_reward_dump"}
+if os.environ.get("NATIVE_REWARD", "1") == "1": NOOP = NOOP | {"patch_reward_parallel"}
 lines = []
 for ln in raw.split("\n"):
     mm = re.match(r"^\s*python3 /workload/patches/(patch_[a-z0-9_]+)\.py.*$", ln)

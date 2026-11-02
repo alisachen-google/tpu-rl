@@ -86,3 +86,11 @@ performance recipe: latest image, cap 8192, p-state 6, 20 updates, and only the 
 Build: `CAP=8192 FIX=patches/patch_kv_alias_dedupe.py STEPS=20 CLEAN=1 python3 ../build_g4l24.py`.
 `g4m8k-latest-image-cap8192-minimal-patches-20step.yaml` (`MINIMAL=1`) keeps only the parity patcher, the KV-alias fix and
 the instrumentation; it is the A/B that tells whether the remaining perf patches still matter.
+
+**OpenMathInstruct-2 recipe at response cap 8192 (2026-11-02):** `g4u8kr-latest-image-openmathinstruct-cap8192-20step.yaml`
+is the 24 s recipe (`g4ucq3`: OpenMathInstruct-2, 256 prompts × 8 samples, prefill 4096, continue-decode 1024, EOS interval
+32, approx top-k, round-robin DP routing, p-state 6) on the latest image with the cap raised to 8192
+(`max_target_length=12288`), the KV-alias fix, native trainer packing (`max_seq_token_per_tpu=12288`; an unpacked
+micro-batch of 64 rows does not shard over 128 devices) and the native reward pool (`reward_num_workers=64`;
+`patch_reward_parallel` cannot fork inside the trainer's daemonic process on this image). 20 updates.
+`g4u8k-…` is the same without the native reward pool (`NATIVE_REWARD=0`). Build: `[NAME=…] [STEPS=20] python3 ../build_g4u8k.py`.
