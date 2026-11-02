@@ -6,6 +6,8 @@ On **gemma4-e2b** (35 layers; layers 15–34 share the caches of layers 13 and 1
 
 **Fix:** skip entries that are still the gathered input object (`layer_kv_caches[lyr] is kv_caches[idx]`): the decoder did not touch that cache through this layer, so there is nothing to write back. Among entries the decoder *did* replace, the highest-numbered layer still wins, so behaviour for models without KV sharing — and the existing `test_shared_physical_cache_is_visible_to_every_sharing_layer` semantics — are unchanged. The check is a Python identity test on the traced list, so it costs nothing at runtime.
 
+The same applies to **gemma4-e4b** (18 KV-sharing layers), which has an RL tutorial in this repo (`docs/tutorials/posttraining/rl_gemma4_e4b.md`): its rollouts go through the same scatter-back.
+
 Why here rather than in the gemma4 decoder: the adapter's contract is a layer-ordered view (`kv_caches[lyr]`), and the write-back is the only place that knows several layers alias one physical cache. Fixing it there also protects any future model with KV sharing.
 
 # Tests
