@@ -42,6 +42,20 @@ NOOP = {"patch_cd_proper", "patch_rpa_blocks", "patch_async_detok", "patch_async
         "patch_flash_sa", "patch_sharded_sampling", "patch_perf_v2", "patch_fast_detok", "patch_gemma4_prs",
         "patch_length_shape", "patch_reward_dump"}
 if os.environ.get("NATIVE_REWARD", "1") == "1": NOOP = NOOP | {"patch_reward_parallel"}
+# MINIMAL=1: no functional patches at all -- only the KV fix (FIXFILE) and the two log-only patches that produce the
+# per-update step-time / length lines (lendist, phasetime). Answers: does the recipe still need any perf/stop patch?
+if os.environ.get("MINIMAL") == "1":
+    NOOP = NOOP | {"patch_vllm_sampler", "patch_cd_masking", "patch_cd_report", "patch_gc_sync", "patch_block_size",
+                   "patch_approx_topk", "patch_runner_eos", "patch_fast_extract", "patch_g4_format_guard",
+                   "patch_cd_noglobal", "patch_log_stats", "patch_verify_timeout", "patch_reward_parallel"}
+# NOLOG=1: also drop the two log-only patches (lendist, phasetime): the published recipe carries no patch code
+# except the KV fix that is pending upstream (step time from the trainer's own "Train step" timestamps)
+if os.environ.get("NOLOG") == "1":
+    NOOP = NOOP | {"patch_lendist", "patch_phasetime"}
+    # the inherited launcher also seds qwen3.py (mrope default) -- irrelevant to gemma4; drop it
+    raw = re.sub(r"(?m)^(\s*)sed -i 's/mrope_section=config\.mrope_section/[^\n]*$", r"\1: # qwen3 mrope sed removed (not used by gemma4)", raw)
+# DROP=<patch_name>: leave-one-out -- remove a single patch from the full set
+if os.environ.get("DROP"): NOOP = NOOP | set(os.environ["DROP"].split(","))
 lines = []
 for ln in raw.split("\n"):
     mm = re.match(r"^\s*python3 /workload/patches/(patch_[a-z0-9_]+)\.py.*$", ln)
@@ -49,10 +63,13 @@ for ln in raw.split("\n"):
         ind = re.match(r"^(\s*)", ln).group(1); lines.append(f"{ind}: # {mm.group(1)} removed (no-op on the latest image)"); continue
     lines.append(ln)
 raw = "\n".join(lines)
-m = re.search(r"^(\s*)python3 /workload/patches/patch_lendist\.py.*$", raw, re.M); assert m
-raw = raw[:m.start()] + f"{m.group(1)}python3 /workload/patches/patch_newimg_fix.py\n" + raw[m.start():]
+m = re.search(r"^(\s*)if \[ -f /workload/patches/patch_lendist\.py \]; then$", raw, re.M); assert m, "lendist block anchor"
+raw = raw[:m.start()] + f"{m.group(1)}python3 /workload/patches/patch_newimg_fix.py   # KV-sharing scatter fix (MaxText PR pending)\n" + raw[m.start():]
+if os.environ.get("EOS_INTERVAL") is not None:   # native continue-decode window semantics (<=0: run to depth)
+    assert raw.count('CONTINUE_DECODE_EOS_CHECK_INTERVAL="32"') == 1
+    raw = raw.replace('CONTINUE_DECODE_EOS_CHECK_INTERVAL="32"', f'CONTINUE_DECODE_EOS_CHECK_INTERVAL="{os.environ["EOS_INTERVAL"]}"')
 # KV-alias fix: add the patcher to the patches ConfigMap (re-dumped last, since it also holds the launcher)
-fix = open(f"{SP}/patches/patch_kv_alias_dedupe.py", encoding="utf-8").read()
+fix = open(f"{SP}/patches/" + os.environ.get("FIXFILE", "patch_kv_scatter_pr.py"), encoding="utf-8").read()
 parts = re.split(r"(?m)^---\s*$", raw); out = []
 for part in parts:
     if "kind: ConfigMap" in part and "patch_lendist.py" in part:
@@ -68,7 +85,7 @@ raw = raw.replace("g4ucq3", NAME)
 open(f"{SP}/{NAME}.yaml", "w", encoding="utf-8").write(raw)
 docs = [d for d in yaml.safe_load_all(raw) if d]
 l = [d for d in docs if d["kind"] == "ConfigMap" and "launch-workload.sh" in d["data"]][0]["data"]["launch-workload.sh"]
-cm = [d for d in docs if d["kind"] == "ConfigMap" and "patch_lendist.py" in d["data"]][0]
+cm = [d for d in docs if d["kind"] == "ConfigMap" and "patch_newimg_fix.py" in d["data"]][0]
 inv = re.findall(r"python3 /workload/patches/(patch_[a-z0-9_]+)\.py", l)
 assert all(p + ".py" in cm["data"] for p in inv), [p for p in inv if p + ".py" not in cm["data"]]
 for k in (f"num_batches={STEPS}", f"max_target_length={T}", "local_sa_block_q=512", "DP_SCHED_ROUTING=round_robin", "nvidia/OpenMathInstruct-2"):

@@ -1,0 +1,23 @@
+APPROX-TOPK PATCH: APPLIED
+BLOCK-SIZE PATCH: APPLIED
+CD-MASK2 PATCH: APPLIED
+CD-NOGLOBAL PATCH: APPLIED
+EXIT_CODE=0
+FAST-EXTRACT PATCH: APPLIED
+G4-FORMAT-GUARD PATCH: APPLIED
+KV-SCATTER-PR: APPLIED
+LENDIST PATCH: APPLIED
+LENDIST step=0 n=2048 cap=8192 truncated=1 (0.05%) eos_at_cap=0 osl_mean=1460.4 isl_mean=151.0 first_think=0/2048
+LENDIST step=1 n=2048 cap=8192 truncated=4 (0.20%) eos_at_cap=0 osl_mean=1466.1 isl_mean=147.5 first_think=0/2048
+LENDIST step=2 n=2048 cap=8192 truncated=2 (0.10%) eos_at_cap=0 osl_mean=1400.6 isl_mean=143.0 first_think=0/2048
+LENDIST step=3 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=1461.2 isl_mean=147.8 first_think=0/2048
+LENDIST step=4 n=2048 cap=8192 truncated=5 (0.24%) eos_at_cap=0 osl_mean=1559.0 isl_mean=149.4 first_think=0/2048
+LOG-STATS PATCH: APPLIED
+PHASETIME step=0 compute_rewards=102.08 engine_generate=91.21 generate_and_advantage=194.02 micro_batch_steps=224.08 prepare_data=194.84 run_global_step=224.08
+PHASETIME step=1 compute_rewards=2.34 engine_generate=46.90 generate_and_advantage=49.53 micro_batch_steps=53.73 prepare_data=49.81 run_global_step=53.73
+PHASETIME step=2 compute_rewards=2.12 engine_generate=56.49 generate_and_advantage=58.91 micro_batch_steps=62.99 prepare_data=59.20 run_global_step=63.00
+PHASETIME step=3 compute_rewards=1.76 engine_generate=41.88 generate_and_advantage=43.91 micro_batch_steps=47.91 prepare_data=44.09 run_global_step=47.91
+PHASETIME step=4 compute_rewards=1.61 engine_generate=47.62 generate_and_advantage=49.55 micro_batch_steps=53.50 prepare_data=49.68 run_global_step=53.50
+PHASETIME2 PATCH: APPLIED
+RUNNER-EOS PATCH: APPLIED
+VERIFY-TIMEOUT PATCH: APPLIED (VERIFY_ITEM_TIMEOUT=5(default))

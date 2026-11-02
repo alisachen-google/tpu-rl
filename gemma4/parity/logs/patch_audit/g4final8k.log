@@ -1,0 +1,19 @@
+KV-SCATTER-PR: APPLIED
+LENDIST PATCH: APPLIED
+LENDIST step=0 n=2048 cap=8192 truncated=1 (0.05%) eos_at_cap=0 osl_mean=1460.4 isl_mean=151.0 first_think=0/2048
+LENDIST step=1 n=2048 cap=8192 truncated=4 (0.20%) eos_at_cap=0 osl_mean=1466.1 isl_mean=147.5 first_think=0/2048
+LENDIST step=2 n=2048 cap=8192 truncated=1 (0.05%) eos_at_cap=0 osl_mean=1406.6 isl_mean=143.0 first_think=0/2048
+LENDIST step=3 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=1451.9 isl_mean=147.8 first_think=0/2048
+LENDIST step=4 n=2048 cap=8192 truncated=4 (0.20%) eos_at_cap=0 osl_mean=1554.0 isl_mean=149.4 first_think=0/2048
+LENDIST step=5 n=2048 cap=8192 truncated=5 (0.24%) eos_at_cap=0 osl_mean=1593.2 isl_mean=141.3 first_think=0/2048
+LENDIST step=6 n=2048 cap=8192 truncated=1 (0.05%) eos_at_cap=0 osl_mean=1430.2 isl_mean=152.0 first_think=0/2048
+LENDIST step=7 n=2048 cap=8192 truncated=3 (0.15%) eos_at_cap=0 osl_mean=1480.4 isl_mean=156.3 first_think=0/2048
+PHASETIME step=0 compute_rewards=61.85 engine_generate=163.22 generate_and_advantage=226.04 micro_batch_steps=255.90 prepare_data=226.82 run_global_step=255.90
+PHASETIME step=1 compute_rewards=2.01 engine_generate=45.85 generate_and_advantage=48.14 micro_batch_steps=52.22 prepare_data=48.43 run_global_step=52.23
+PHASETIME step=2 compute_rewards=1.84 engine_generate=69.26 generate_and_advantage=71.39 micro_batch_steps=75.40 prepare_data=71.67 run_global_step=75.40
+PHASETIME step=3 compute_rewards=1.42 engine_generate=41.44 generate_and_advantage=43.16 micro_batch_steps=47.20 prepare_data=43.45 run_global_step=47.20
+PHASETIME step=4 compute_rewards=1.45 engine_generate=46.95 generate_and_advantage=48.70 micro_batch_steps=53.09 prepare_data=49.01 run_global_step=53.10
+PHASETIME step=5 compute_rewards=2.05 engine_generate=46.81 generate_and_advantage=49.16 micro_batch_steps=53.71 prepare_data=49.51 run_global_step=53.71
+PHASETIME step=6 compute_rewards=2.55 engine_generate=58.44 generate_and_advantage=61.30 micro_batch_steps=67.20 prepare_data=61.51 run_global_step=67.20
+PHASETIME step=7 compute_rewards=1.84 engine_generate=46.38 generate_and_advantage=48.53 micro_batch_steps=53.13 prepare_data=48.84 run_global_step=53.13
+PHASETIME2 PATCH: APPLIED

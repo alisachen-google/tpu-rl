@@ -1,0 +1,15 @@
+APPROX-TOPK PATCH: APPLIED
+BLOCK-SIZE PATCH: APPLIED
+EXIT_CODE=143
+FAST-EXTRACT PATCH: APPLIED
+G4-FORMAT-GUARD PATCH: APPLIED
+KV-SCATTER-PR: APPLIED
+LENDIST PATCH: APPLIED
+LENDIST step=0 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=1447.6 isl_mean=151.0 first_think=0/2048
+LENDIST step=1 n=2048 cap=8192 truncated=1 (0.05%) eos_at_cap=0 osl_mean=1466.3 isl_mean=147.5 first_think=0/2048
+LOG-STATS PATCH: APPLIED
+PHASETIME step=0 compute_rewards=98.20 engine_generate=194.48 generate_and_advantage=293.55 micro_batch_steps=322.71 prepare_data=294.36 run_global_step=322.71
+PHASETIME step=1 compute_rewards=2.18 engine_generate=68.28 generate_and_advantage=70.72 micro_batch_steps=74.73 prepare_data=70.98 run_global_step=74.73
+PHASETIME2 PATCH: APPLIED
+RUNNER-EOS PATCH: APPLIED
+VERIFY-TIMEOUT PATCH: APPLIED (VERIFY_ITEM_TIMEOUT=5(default))

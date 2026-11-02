@@ -8,9 +8,10 @@ log "queue-runner: $* (waiting for working credentials)"
 until $K get jobsets >/dev/null 2>&1; do sleep 60; done
 log "queue-runner: credentials OK"
 for name in "$@"; do
-  while $K get jobsets 2>/dev/null | grep -qE "^(g4pt|g4l|g4m|g4u|g4p)[a-z0-9]* "; do sleep 60; done   # one of ours at a time
+  while $K get jobsets 2>/dev/null | grep -E "^g4[a-z0-9]* " | grep -vqE " (Completed|Failed) "; do sleep 60; done   # one live job of ours at a time
   log "queue-runner: launching $name"; bash "$SP/apply-jobset.sh" "$SP/$name.yaml" >> "$SP/run-after.log" 2>&1
   (nohup bash "$SP/follow-job.sh" "$name" > /dev/null 2>&1 < /dev/null &); (nohup bash "$SP/guard-job.sh" "$name" "$name.yaml" > /dev/null 2>&1 < /dev/null &)
+  [ -n "$BASELINE" ] && (nohup bash "$SP/early-stop.sh" "$name" "$BASELINE" > /dev/null 2>&1 < /dev/null &)
   t0=$(date +%s)
   while :; do
     js=$($K get jobset "$name" -o jsonpath='{range .status.conditions[*]}{.type}={.status};{end}' 2>/dev/null)

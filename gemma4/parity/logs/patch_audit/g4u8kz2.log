@@ -1,0 +1,8 @@
+EXIT_CODE=143
+KV-SCATTER-PR: APPLIED
+LENDIST PATCH: APPLIED
+LENDIST step=0 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=1447.6 isl_mean=151.0 first_think=0/2048
+LENDIST step=1 n=2048 cap=8192 truncated=1 (0.05%) eos_at_cap=0 osl_mean=1466.3 isl_mean=147.5 first_think=0/2048
+PHASETIME step=0 compute_rewards=106.22 engine_generate=143.62 generate_and_advantage=250.75 micro_batch_steps=281.56 prepare_data=251.73 run_global_step=281.56
+PHASETIME step=1 compute_rewards=2.38 engine_generate=68.17 generate_and_advantage=70.84 micro_batch_steps=74.89 prepare_data=71.13 run_global_step=74.89
+PHASETIME2 PATCH: APPLIED

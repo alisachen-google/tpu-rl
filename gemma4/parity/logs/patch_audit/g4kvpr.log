@@ -1,0 +1,24 @@
+APPROX-TOPK PATCH: APPLIED
+BLOCK-SIZE PATCH: APPLIED
+CD-MASK2 PATCH: APPLIED
+CD-NOGLOBAL PATCH: APPLIED
+CD-REPORT PATCH: APPLIED
+EXIT_CODE=0
+FAST-EXTRACT PATCH: APPLIED
+G4-FORMAT-GUARD PATCH: APPLIED
+I1102 01:38:36.506584 139378636491648 evaluate_rl.py:354] EVAL-BREAKDOWN step=0 k=0 total=1319 acc=80.82% boxed_wrong=6.90% nobox=12.28% mean_chars=1424 dump=gs://ubench-logs/g4kvpr/evals/eval_000.jsonl
+I1102 01:38:36.506749 139378636491648 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=80.8188% mean_reward=0.8151
+I1102 01:44:38.216248 139378636491648 evaluate_rl.py:354] EVAL-BREAKDOWN step=2 k=1 total=1319 acc=81.35% boxed_wrong=7.35% nobox=11.30% mean_chars=1420 dump=gs://ubench-logs/g4kvpr/evals/eval_002.jsonl
+I1102 01:44:38.216386 139378636491648 evaluate_rl.py:357] EVAL-V2ACC total=1319 v2_acc=81.3495% mean_reward=0.8208
+KV-SCATTER-PR: APPLIED
+LENDIST PATCH: APPLIED
+LENDIST step=0 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=464.3 isl_mean=93.2 first_think=0/2048
+LENDIST step=1 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=505.2 isl_mean=98.1 first_think=0/2048
+LOG-STATS PATCH: APPLIED
+PHASETIME step=0 compute_rewards=2.95 engine_generate=61.20 generate_and_advantage=76.93 micro_batch_steps=111.33 prepare_data=78.35 run_global_step=111.33
+PHASETIME step=1 compute_rewards=0.08 engine_generate=32.28 generate_and_advantage=35.39 micro_batch_steps=47.74 prepare_data=36.01 run_global_step=47.75
+PHASETIME2 PATCH: APPLIED
+REWARD-PAR PATCH: APPLIED
+RUNNER-EOS PATCH: APPLIED
+TIS-PARITY PATCH: APPLIED (train_rl: sampler_is=token thr=3.0, return_logprobs=True, eval full-coverage drop_remainder=False, rollout bf16, RLMETRIC stdout mirror; grpo_learner TIS-ACTIVE(+k3/ess) stdout; evaluate_rl EVAL-V2ACC step-named dumps; checkpoint_man
+VERIFY-TIMEOUT PATCH: APPLIED (VERIFY_ITEM_TIMEOUT=5(default))

@@ -1,0 +1,14 @@
+EXIT_CODE=143
+KV-SCATTER-PR: APPLIED
+LENDIST PATCH: APPLIED
+LENDIST step=0 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=1447.6 isl_mean=151.0 first_think=0/2048
+LENDIST step=1 n=2048 cap=8192 truncated=1 (0.05%) eos_at_cap=0 osl_mean=1466.3 isl_mean=147.5 first_think=0/2048
+LENDIST step=2 n=2048 cap=8192 truncated=0 (0.00%) eos_at_cap=0 osl_mean=1399.6 isl_mean=143.0 first_think=0/2048
+LENDIST step=3 n=2048 cap=8192 truncated=1 (0.05%) eos_at_cap=0 osl_mean=1424.3 isl_mean=147.8 first_think=0/2048
+LENDIST step=4 n=2048 cap=8192 truncated=2 (0.10%) eos_at_cap=0 osl_mean=1536.5 isl_mean=149.4 first_think=0/2048
+PHASETIME step=0 compute_rewards=106.64 engine_generate=216.08 generate_and_advantage=323.66 micro_batch_steps=354.12 prepare_data=324.44 run_global_step=354.12
+PHASETIME step=1 compute_rewards=2.24 engine_generate=68.39 generate_and_advantage=70.94 micro_batch_steps=75.07 prepare_data=71.23 run_global_step=75.07
+PHASETIME step=2 compute_rewards=1.87 engine_generate=59.88 generate_and_advantage=62.05 micro_batch_steps=65.95 prepare_data=62.33 run_global_step=65.95
+PHASETIME step=3 compute_rewards=1.91 engine_generate=70.49 generate_and_advantage=72.70 micro_batch_steps=76.77 prepare_data=72.98 run_global_step=76.77
+PHASETIME step=4 compute_rewards=1.91 engine_generate=71.61 generate_and_advantage=73.82 micro_batch_steps=78.00 prepare_data=74.11 run_global_step=78.00
+PHASETIME2 PATCH: APPLIED

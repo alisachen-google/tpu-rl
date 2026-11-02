@@ -1,0 +1,24 @@
+[09:30:55] g4ucq3 steady step times (run_global_step, step>=2): n=98 median=25.28 min=23.05 max=124.21
+[00:12:57] g4m8k steady step times (updates >= 2): 
+[01:46:02] g4kvpr steady step times (updates >= 2): 
+[02:12:29] g4u8kr steady step times (updates >= 2): n=6 median=54.50 min=48.56 max=67.69
+[02:28:14] early-stop g4u8kz: STOP: perf regression: median of 3 timed updates 76.77s > 54.5s x1.15
+[02:52:38] early-stop g4locdmaskin: completed normally
+[02:53:18] g4locdmaskin steady step times (updates >= 2): n=3 median=53.59 min=47.48 max=77.62
+[03:08:50] early-stop g4locdreport: completed normally
+[03:09:37] g4locdreport steady step times (updates >= 2): n=3 median=53.50 min=47.91 max=63.00
+[03:22:04] early-stop g4locdnoglob: jobset gone -> exit
+[03:38:05] g4locdnoglob steady step times (updates >= 2): n=3 median=53.81 min=47.10 max=77.12
+[03:53:05] early-stop g4loapproxto: completed normally
+[03:54:24] g4loapproxto steady step times (updates >= 2): n=3 median=53.31 min=47.21 max=76.52
+[04:09:56] early-stop g4lorunnereo: completed normally
+[04:10:44] g4lorunnereo steady step times (updates >= 2): n=3 median=53.26 min=47.55 max=76.90
+[04:27:18] early-stop g4lovllmsamp: completed normally
+[04:28:03] g4lovllmsamp steady step times (updates >= 2): n=3 median=53.52 min=47.66 max=62.78
+[04:44:16] early-stop g4u8kz2: jobset gone -> exit
+[05:00:23] early-stop g4grpcd: jobset gone -> exit
+[05:14:04] early-stop g4cdmaskonly: completed normally
+[05:37:03] early-stop g4grpsamp: completed normally
+[05:38:16] g4grpsamp steady step times (updates >= 2): n=3 median=53.51 min=47.35 max=75.54
+[05:52:44] early-stop g4cdnative: completed normally
+[05:53:34] g4cdnative steady step times (updates >= 2): n=3 median=53.20 min=46.91 max=74.81
