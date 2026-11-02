@@ -99,3 +99,13 @@ Tunix has only a small LoRA GSM8K config for gemma4-e2b; the full-model recipe b
 
 No tunix or tpu-inference PR is needed: every patch for those repos was either upstream already, replaced by a native
 setting, or made no difference.
+
+## 5. Review of the three PRs (2026-11-02)
+
+All three branches rebased onto MaxText main `5eccd1a05` (no conflicts; main did not touch these files) and re-checked:
+
+| PR | code review | tests | lint (repo pre-commit) | change made |
+|---|---|---|---|---|
+| #6081 KV-sharing scatter fix | identity check is correct: gathered entries are the same Python objects as the physical list, decoder replaces donor entries only; donor pattern in the test (sliding→13, global→14, global every 5th layer) matches `gemma4_small.GEMMA4_E2B_ATTENTION_PATTERN` and `kv_donor_layer_idx` | 17 passed with fix; the 2 new tests fail on upstream code | pylint, pyink, codespell pass | none |
+| #6082 format-regex atomic groups | equivalence argument holds (if `(.+?)D` fails after the first `C` it fails after any later `C`; same for `B`); Python ≥ 3.11 feature, repo requires 3.12 | 48 passed; equivalence test passes on upstream too (so it tests equivalence, not the fix); pathological test is killed by a 30 s timeout on upstream, 0.7 s with fix | pass | none |
+| #6083 gemma4-e2b recipe | `chat_template_path` was a no-op: MaxText uses it only when the tokenizer has no chat template, and `gemma-4-E2B-it` ships one (the validated run's prompts show gemma4's `<\|turn>` markers); XLA-flags comment said "tuned for v6e"; all 76 config keys exist in `base.yml`/`rl.yml`; settings the validated run set explicitly but the script omits equal their defaults | validated run g4e2bup (8 updates, exit 0) | mdformat reformatted the two tables; codespell passes | dropped `chat_template_path`, rewrote the tutorial's chat-template section, fixed the comment |

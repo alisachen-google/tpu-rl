@@ -10,7 +10,7 @@ The recipe trains `google/gemma-4-E2B-it` on OpenMathInstruct-2: 256 prompts × 
 - trainer and vLLM rollout share the slice (`rollout_data_parallelism=128`, `rollout_tensor_parallelism=1`); native trainer packing (`max_seq_token_per_tpu=12288`)
 - continue-decode with `max_decode_steps=1024` and `CONTINUE_DECODE_EOS_CHECK_INTERVAL=0`, which runs each decode window on device to full depth; about 30 % faster per update than the default on this workload (74.7 s → 53 s per update in our A/B)
 - `DP_SCHED_ROUTING=round_robin` and `APPROX_TOPK=1` for the 128-rank vLLM scheduler
-- the bundled `openmathinstruct2_rl.json` data template and Gemma chat template, as in the e4b recipe
+- the bundled `openmathinstruct2_rl.json` data template; turn markers come from the chat template shipped with the `google/gemma-4-E2B-it` tokenizer (no `chat_template_path` needed)
 
 **Depends on #6081** (KV-sharing scatter fix). Without it, gemma4-e2b rollouts through `MaxTextForCausalLM` on vLLM-TPU degenerate into repeated tokens; the tutorial says so.
 
@@ -18,7 +18,7 @@ FIXES: b/123456
 
 # Tests
 
-- `bash -n` passes; the expanded `MAXTEXT_COMMAND` matches the validated run's arguments.
+- `bash -n` passes; the expanded `MAXTEXT_COMMAND` matches the validated run's arguments (settings the run set explicitly that the script omits are at their config defaults). Repo pre-commit hooks (codespell, mdformat) pass.
 - End to end on TPU v7x 4x4x4 (Pathways `jax_0.11.0`, MaxText image of 2026-09-22 plus #6081, `google/gemma-4-E2B-it` checkpoint, 8 GRPO updates, 2026-11-02): coherent rollouts, exit 0.
 
 | update | 2 | 3 | 4 | 5 | 6 | 7 |

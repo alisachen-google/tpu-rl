@@ -18,6 +18,7 @@ FIXES: b/123456
 PYTHONPATH=src:. python3 -m pytest -q tests/post_training/unit/vllm_hybrid_cache_test.py -k LayerOrderedKvCachesTest
 9 passed
 ```
+Repo pre-commit hooks (pylint, pyink, codespell) pass.
 
 **End to end**, TPU v7x 4x4x4 (64 chips, Pathways), `train_rl` GRPO, gemma4-e2b-it, GSM8K, image `maxtext-rl-ironwood:2026-09-22-head` with only this change applied:
 

@@ -24,6 +24,7 @@ python3 -m pytest -q tests/post_training/unit/rl_utils_test.py tests/post_traini
 ```
 
 End to end: the fixed regex ran in every gemma4-e2b GRPO run of our TPU v7x parity work (3-seed GSM8K 92.39 % vs 92.42 % on GPU), so reward scoring behaviour is unchanged in practice.
+Repo pre-commit hooks (pylint, pyink, codespell) pass.
 
 # Checklist
 
