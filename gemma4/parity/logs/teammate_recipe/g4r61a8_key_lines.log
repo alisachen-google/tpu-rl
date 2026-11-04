@@ -1,0 +1,20 @@
+EXIT_CODE=0
+I1104 08:31:01.484965 140345377893248 pyconfig.py:585] Config param hbm_utilization_vllm: 0.3
+I1104 08:31:01.485993 140345377893248 pyconfig.py:585] Config param kv_cache_buffer: 256
+I1104 08:31:01.487106 140345377893248 pyconfig.py:585] Config param max_prefill_predict_length: 512
+I1104 08:31:01.487134 140345377893248 pyconfig.py:585] Config param max_target_length: 8704
+I1104 08:31:01.492119 140345377893248 pyconfig.py:585] Config param train_micro_batch_size: 8
+I1104 08:44:59.576125 140345377893248 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 8704,  pack_size: 128
+I1104 08:59:02.857458 140345377893248 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 8704,  pack_size: 128
+I1104 08:59:59.096091 140345377893248 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 8704,  pack_size: 128
+I1104 09:00:26.457956 140345377893248 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 8704,  pack_size: 128
+I1104 09:00:50.664106 140345377893248 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 8704,  pack_size: 128
+I1104 09:01:16.386126 140345377893248 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 8704,  pack_size: 128
+I1104 09:02:05.650791 140345377893248 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 8704,  pack_size: 128
+I1104 09:02:31.497380 140345377893248 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 8704,  pack_size: 128
+PATCH ROSTER GATE: PASSED (29/29 REQUIRED patches applied)
+PR16-GSM8K-RECIPE PATCH: APPLIED (RECIPE_MODE=gsm8k-pr16 active)
+RECIPE_MODE=gsm8k-pr16 SEED=1 SCHEDULE_HORIZON_STEPS=250 STOP_AFTER_STEPS=8
+STOP-TOKENS PATCH: APPLIED
+STOP-TOKENS ids=[1, 50, 106]
+patch_stop_tokens.py         | REQUIRED | APPLIED      | STOP-TOKENS PATCH: APPLIED
