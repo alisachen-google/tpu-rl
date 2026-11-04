@@ -7,10 +7,11 @@ checkpoint updates). GPU reference: verl + vLLM on 64 GPUs, same recipe, cap 819
 update (3 seeds).
 
 **Result.** The recipe that is like for like with the GPU reference (cap 8192, nothing truncated) runs at
-**46.4 s per update** (`g4lp8k`, updates 2–19; 49.4 s over the whole 250-update run as completions lengthen) on
-the latest image at p-state 6, with accuracy parity PASS
-([`GEMMA4_E2B_CAP8192_PARITY_REPORT.md`](GEMMA4_E2B_CAP8192_PARITY_REPORT.md)). The capped operating points are
-faster (28.9–36.7 s) but are a different training problem (§2).
+**32.2 s per update** (`g4lp8kpk`, 2026-11-04, median of updates 2–7) on the latest image at p-state 6, inside the GPU band
+of 31.7–35.0 s. It is the accuracy-parity configuration of `g4lp8k` (46.4 s; parity PASS,
+[`GEMMA4_E2B_CAP8192_PARITY_REPORT.md`](GEMMA4_E2B_CAP8192_PARITY_REPORT.md)) plus one config line,
+`max_seq_token_per_tpu=8704`, which packs the trainer's sequences instead of padding each one to the cap (§1.1). The capped
+operating points are faster still (28.9–36.7 s) but are a different training problem (§2).
 
 ## 1. How the step time moved
 
@@ -21,6 +22,7 @@ faster (28.9–36.7 s) but are a different training problem (§2).
 | 3. 24 s configuration, latest image | `2026-09-22-head` | 2048 | p6 | **28.9 s** | newer jax 0.11.0 / libtpu 0.0.44 / vLLM 0.28.1rc1; 13 of 36 perf patches now native (round-robin routing, KV kept across sync, 128-token blocks, async detok/logprobs, …); KV-sharing fix and explicit `local_sa_*` needed to run at all | [`GEMMA4_E2B_LATEST_IMAGE_STATUS.md`](GEMMA4_E2B_LATEST_IMAGE_STATUS.md), `parity/logs/latest_image/g4l24f_*` |
 | 4. cap 8192, first check | latest | 8192 | p6 | 49.0 s | `max_target_length=8704`, `kv_cache_buffer=8704`, splash blocks 512; truncation 0 % | `parity/logs/latest_image/g4l24fc8k_*` |
 | **5. cap 8192, parity run** | latest | 8192 | p6 | **46.4 s** (49.4 s whole run) | same as 4, 250 updates, 3 admissions; accuracy parity PASS | `parity/logs/latest_image/g4lp8k_*`, [`parity/configs/g4lp8k_cap8192_parity_full_config.md`](parity/configs/g4lp8k_cap8192_parity_full_config.md) |
+| **6. cap 8192, packed trainer** | latest | 8192 | p6 | **32.2 s** | stage 5 + `max_seq_token_per_tpu=8704`: the trainer packs ~15 sequences per 8704-token row instead of one padded sequence per row; 16 micro-batches → 2–3; the native MaxText knob replaces the dead `patch_packing_knob` | `parity/logs/latest_image/g4lp8kpk_*`, [`parity/manifests/g4lp8kpk-latest-image-cap8192-packed-trainer-8step.yaml`](parity/manifests/g4lp8kpk-latest-image-cap8192-packed-trainer-8step.yaml) |
 | GPU reference | verl, 64 GPUs | 8192 | — | 31.7 / 33.1 / 35.0 s | | `parity/logs/gpu_reference_verl_config.txt` |
 
 p-state 7 was used in stages 1–2 before the team setting was fixed at 6; on the latest image p-state 7 gives no
@@ -28,14 +30,14 @@ measurable gain (29.7 vs 28.9 s), so all later numbers are p-state 6.
 
 ### Where the time goes (phase medians, seconds)
 
-| phase | 1. cap 2560 pinned (`g4pt1`) | 3. cap 2048 latest (`g4l24f`) | 4. cap 8192 latest (`g4l24fc8k`) | 5. cap 8192 parity (`g4lp8k`) |
-|---|---:|---:|---:|---:|
-| `engine_generate` (2048 completions, 128 DP ranks) | 29.5 | 19.0 | 31.6 | 27.1 |
-| reward scoring (async, off the critical path) | 0.2 | 0.1 | 0.1 | 0.1 |
-| advantage + data prep | 2.0 | 2.2 | 3.2 | 3.1 |
-| trainer (IS recompute + 16 micro-batches of 8) + weight sync | 2.4 | 7.7 | 14.2 | 13.2 |
-| **`run_global_step`** | **33.9** | **28.9** | **49.0** | **46.4** |
-| mean completion length (tokens) | 432 | 486 | 489 | 443 → 626 over training |
+| phase | 1. cap 2560 pinned (`g4pt1`) | 3. cap 2048 latest (`g4l24f`) | 4. cap 8192 latest (`g4l24fc8k`) | 5. cap 8192 parity (`g4lp8k`) | 6. cap 8192 packed (`g4lp8kpk`) |
+|---|---:|---:|---:|---:|---:|
+| `engine_generate` (2048 completions, 128 DP ranks) | 29.5 | 19.0 | 31.6 | 27.1 | 25.9 |
+| reward scoring (async, off the critical path) | 0.2 | 0.1 | 0.1 | 0.1 | 0.1 |
+| advantage + data prep | 2.0 | 2.2 | 3.2 | 3.1 | 3.7 |
+| trainer (IS recompute + micro-batches) | 2.4 | 7.7 | 14.2 | 13.2 (16 padded micro-batches) | **2.3** (2–3 packed) |
+| **`run_global_step`** | **33.9** | **28.9** | **49.0** | **46.4** | **32.2** |
+| mean completion length (tokens) | 432 | 486 | 489 | 443 → 626 over training | 468–526 (8 updates) |
 
 Reading the table:
 
@@ -49,10 +51,36 @@ Reading the table:
      on most updates). Generation goes from 19.0 to 27.1 s although the *mean* completion is unchanged (~490
      tokens). Updates whose batch holds one very long completion stand out (69 s and 113 s at update 2) and are
      deterministic for the seed; the GPU reference has the same property.
-  2. *The trainer pads to the cap.* IS recompute and micro-batches run on sequences padded to 8704 tokens for
-     ~500 real tokens: 7.7 → 13.2 s. This is the largest recoverable item.
+  2. *The trainer pads to the cap.* With `max_seq_token_per_tpu=0` (the default) every sequence is one row padded to
+     8704 tokens for ~570 real tokens, so the 16 micro-batches of 128 rows run >90 % padding: 7.7 → 13.2 s.
+- **Stage 5 → 6 (−14.2 s): packing the trainer.** `max_seq_token_per_tpu=8704` makes tunix concatenate sequences into
+  8704-token rows (segment-masked attention, per-sequence positions; a cap-length sequence still fits in one row, which
+  is why the knob must be ≥ `max_target_length`). 2048 sequences become ~140 rows and 2–3 micro-batches of ~0.7 s; the
+  trainer phase falls 13.2 → 2.3 s with identical real tokens and gradients. The OpenMathInstruct recipe (§4) and the
+  teammate's GSM8K recipe (§1.1) had this on all along; the GSM8K parity manifests lost it when `patch_packing_knob`
+  stopped applying on the latest image ("anchor not found", silently skipped) and the native knob was not set.
 - **Stage 4 → 5 (−2.6 s):** same configuration; the difference is the batch mix (update 2 of the first check was
   the 113 s outlier) and the longer sample of updates.
+
+### 1.1 Cross-check against the teammate's GSM8K cap-8192 recipe (`g4r61a8`, 2026-11-04)
+
+The PR-16 "frozen" recipe (`verl/examples/grpo_trainer/my_scripts_GKE_gemma4/TPU/gemma4-e2b-g4r61-base.yaml`, pinned image
+`f7c957d0…`, Pathways `20260730-jax_0.10.2`, 33-patch fail-closed roster, continue-decode window 512, EOS-check interval 8,
+`kv_cache_buffer=256`, `MAX_SEQ_TOKEN_PER_TPU=8704`) was run unchanged except run name, 8 updates and p-state 6
+([`parity/manifests/g4r61a8-teammate-pr16-recipe-cap8192-8step.yaml`](parity/manifests/g4r61a8-teammate-pr16-recipe-cap8192-8step.yaml)):
+
+| recipe (cap 8192, 2048 completions/update, median of updates 2–7) | generate | advantage + prep | trainer | total |
+|---|---:|---:|---:|---:|
+| teammate `g4r61a8`, pinned image, p6 | 21.4 | 0.4 | 2.0 | **24.5** |
+| ours `g4lp8kpk`, latest image, p6 | 25.9 | 3.7 | 2.3 | **32.2** |
+| ours `g4lp8k`, latest image, p6, unpacked | 27.1 | 3.8 | 13.2 | 46.4 |
+
+Both packed runs land the trainer at ~2 s, so the remaining 7.7 s gap is elsewhere: 4.5 s in generation and 3.3 s in the
+`generate_and_advantage` window after decode (reward/advantage bookkeeping). Neither is attributed yet; the recipe
+differences that could explain them are the continue-decode window (512 vs our 1024) with EOS check every 8 steps, prefix
+caching off, the older vLLM/jax stack, and their `patch_async_logprobs` overlap. These are the next ablations on the latest
+image. Update 5 is the long-tail update in both runs (44.8 s / 59.0 s), the deterministic seed property noted above.
+Evidence: `parity/logs/teammate_recipe/g4r61a8_*`.
 
 ## 2. Why the GPU comparison has to use cap 8192
 
@@ -61,7 +89,7 @@ The GPU reference was trained with `max_response_length=8192`, `max_prompt_lengt
 0.05–2.2 % of rollouts on every update, each truncated completion scores 0 (cut before `\boxed{}`), and the GPU's
 long completions cannot exist. The capped checks matched the GPU curve because the mean rollout is ~500 tokens and
 the truncated tail is rare, but that is agreement despite a recipe difference. At cap 8192, truncation is 0 % on
-both sides and the rollout-length trajectory matches the GPU's (443 → 626 vs 480 → 610 tokens), so **46.4 s is the
+both sides and the rollout-length trajectory matches the GPU's (443 → 626 vs 480 → 610 tokens), so **32.2 s (46.4 s unpacked) is the
 TPU number that pairs with the GPU's 31.7–35.0 s**.
 
 ## 3. What it took to run cap 8192 on the latest image
@@ -74,6 +102,7 @@ TPU number that pairs with the GPU's 31.7–35.0 s**.
 | 4 | **cap 8192**: `max_target_length=8704`, `kv_cache_buffer=8704`, splash blocks 512 | match the GPU; vLLM HBM fraction 0.3 still holds the KV cache for 256 sequences × 8704 tokens | config |
 | 5 | reward-regex guard | one degenerate completion stalled reward scoring for minutes (793 s / 32 items in an earlier run) | now MaxText PR [#6082](https://github.com/AI-Hypercomputer/maxtext/pull/6082) |
 | 6 | checkpoint every 20 updates, resumable checkpoints, `tools/chain-seeds4.sh`, JobSets with an ownerReference | 120-minute admission limit, node evictions, kyverno policy stripping ownerless JobSets | ops |
+| 7 | **trainer packing**: `max_seq_token_per_tpu=8704` | 16 padded micro-batches → 2–3 packed; trainer 13.2 → 2.3 s, step 46.4 → 32.2 s | config (native MaxText knob; `patch_packing_knob` is dead on the latest image and should be dropped) |
 
 Not used: p-state 7 (team setting is 6); OSL-tail levers (they change the training problem).
 
@@ -93,13 +122,15 @@ was being truncated); without continue-decode-to-depth the cap-8192 recipe runs 
 
 | item | GSM8K parity recipe | OpenMathInstruct recipe |
 |---|---|---|
-| step time at cap 8192 | **46.4 s** (49.4 s whole run) | **53.4 s** |
-| manifest | `parity/manifests/g4lp8k-latest-image-cap8192-seed42-parity-250.yaml` | `parity/manifests/g4e2bcap8k-FINAL-latest-image-openmathinstruct-cap8192-20step.yaml` |
+| step time at cap 8192 | **32.2 s** packed (`g4lp8kpk`, 8 updates); 46.4 s unpacked (`g4lp8k`, 49.4 s whole 250-update run) | **53.4 s** (packed at 12288) |
+| manifest | `parity/manifests/g4lp8kpk-latest-image-cap8192-packed-trainer-8step.yaml` (parity run: `g4lp8k-latest-image-cap8192-seed42-parity-250.yaml`) | `parity/manifests/g4e2bcap8k-FINAL-latest-image-openmathinstruct-cap8192-20step.yaml` |
 | full configuration | `parity/configs/g4lp8k_cap8192_parity_full_config.md` | section 3 of the patch-audit report |
 | truncation | 0 % | < 0.1 % |
 
-Headroom at cap 8192, in order of size, none of which changes the accuracy curve: (1) trainer padding to the cap
-on the GSM8K recipe (IS recompute and micro-batches at 8704 tokens for ~500 real tokens, ~13 s): packing or length
-bucketing the trainer, as the OpenMathInstruct recipe already does with `max_seq_token_per_tpu`; (2) the rollout
-tail (one longest completion per rank), which only training-objective changes shorten, so it stays for a GPU
-comparison; (3) the one-off compile at update 0 and the deterministic recompile at update 6.
+Headroom at cap 8192 after packing, in order of size, none of which changes the accuracy curve: (1) generation
+(25.9 s vs the teammate recipe's 21.4 s on the old image: continue-decode window / EOS-check interval / prefix-caching
+ablation on the latest image); (2) advantage + data prep (3.7 s: host-side TIS logprob handling, overlappable with the
+decode tail); (3) the rollout tail (one longest completion per rank), which only training-objective changes shorten, so
+it stays for a GPU comparison; (4) the one-off compile at update 0 (584 s with packing) and the recompile at update 1.
+The 250-update accuracy-parity run has not been repeated with packing; packing changes no real token or gradient, but a
+confirming run is the remaining step before quoting 32.2 s as the parity number.
