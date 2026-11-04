@@ -1,33 +1,43 @@
 # Description
 
-Adds a GRPO reinforcement-learning recipe for **gemma4-e2b** on **TPU v7x (Ironwood)**, next to the existing gemma4-e4b and gemma4-26b recipes:
+## 1. Summary
+
+Adds a GRPO reinforcement-learning recipe for gemma4-e2b on TPU v7x (Ironwood), alongside the existing gemma4-e4b and gemma4-26b recipes:
 
 - `src/maxtext/trainers/post_train/rl/scripts/run_gemma4_e2b_rl.sh`: Cluster Toolkit / Pathways launch script for a `tpu7x` 4x4x4 slice (64 chips).
-- `docs/tutorials/posttraining/rl_gemma4_e2b.md`: tutorial (setup, checkpoint conversion, what each setting does, reference performance), plus entries in `docs/tutorials/post_training_index.md`.
+- `docs/tutorials/posttraining/rl_gemma4_e2b.md` + two index entries: setup, checkpoint conversion, what each setting does, reference performance.
 
-The recipe trains `google/gemma-4-E2B-it` on OpenMathInstruct-2: 256 prompts × 8 samples per update, prompts up to 4096 tokens, responses up to 8192 tokens. It uses existing config knobs only:
+Training: `google/gemma-4-E2B-it` on OpenMathInstruct-2, 256 prompts × 8 samples per update, prompts ≤ 4096 and responses ≤ 8192 tokens. Configuration only, no code changes. **Depends on #6081.**
 
-- trainer and vLLM rollout share the slice (`rollout_data_parallelism=128`, `rollout_tensor_parallelism=1`); native trainer packing (`max_seq_token_per_tpu=12288`)
-- continue-decode with `max_decode_steps=1024` and `CONTINUE_DECODE_EOS_CHECK_INTERVAL=0`, which runs each decode window on device to full depth; about 30 % faster per update than the default on this workload (74.7 s → 53 s per update in our A/B)
-- `DP_SCHED_ROUTING=round_robin` and `APPROX_TOPK=1` for the 128-rank vLLM scheduler
-- the bundled `openmathinstruct2_rl.json` data template; turn markers come from the chat template shipped with the `google/gemma-4-E2B-it` tokenizer (no `chat_template_path` needed)
+## 2. Why this PR
 
-**Depends on #6081** (KV-sharing scatter fix). Without it, gemma4-e2b rollouts through `MaxTextForCausalLM` on vLLM-TPU degenerate into repeated tokens; the tutorial says so.
+- MaxText has RL recipes for gemma4-e4b (v6e) and gemma4-26b but none for gemma4-e2b, and none for TPU v7x. Users who tried had to discover the working settings themselves.
+- Three settings matter and are not obvious:
+  - `max_seq_token_per_tpu=12288` (native trainer packing). Without it an unpacked 64-row micro-batch does not shard over 128 devices (`query.shape[0]=64 … devices_in_data_fsdp=128`).
+  - continue-decode with `max_decode_steps=1024` and `CONTINUE_DECODE_EOS_CHECK_INTERVAL=0`: each 1024-step decode window runs on device to full depth instead of returning to the host whenever a sequence ends. ~30 % faster per update, identical rollouts.
+  - `DP_SCHED_ROUTING=round_robin`: the default scheduler probes all 128 vLLM data-parallel ranks per request.
+- Without #6081, gemma4-e2b rollouts through `MaxTextForCausalLM` are repeated tokens; the tutorial says so.
+- The script passes `hf_access_token=${HF_TOKEN}` because the `-it` tokenizer is a gated repository; its own chat template provides the turn markers, so no `chat_template_path` is needed.
+
+## 3. Live validation: before vs after
+
+All runs: TPU v7x 4x4x4, Pathways `jax_0.11.0`, MaxText image of 2026-09-22 plus #6081, OpenMathInstruct-2, 2048 completions per update, responses ≤ 8192 tokens, same seed.
+
+| configuration | seconds per GRPO update (median, updates 2+) | rollouts |
+|---|---:|---|
+| **before**: same settings without continue-decode / round-robin (default scheduling) | 74.7–76.8 | reference |
+| **after**: this script's settings (run `g4e2bup`, official `-it` conversion, 8 updates, exit 0) | **56.4** (54.4 / 54.5 / 56.5 / 56.2 / 67.4 / 58.2) | coherent, identical to the tuned internal recipe |
+| same workload, verl on 64 GPUs | 31.7–35.0 | |
+
+Accuracy of this model and stack: 3-seed GSM8K 92.39 % on TPU vs 92.42 % with verl on GPU. First update includes compilation; update time varies with completion length (one straggler batch per run at 65–78 s).
 
 FIXES: b/123456
 
 # Tests
 
-- `bash -n` passes; the expanded `MAXTEXT_COMMAND` matches the validated run's arguments (settings the run set explicitly that the script omits are at their config defaults). Repo pre-commit hooks (codespell, mdformat) pass.
-- End to end on TPU v7x 4x4x4 (Pathways `jax_0.11.0`, MaxText image of 2026-09-22 plus #6081, `google/gemma-4-E2B-it` checkpoint, 8 GRPO updates, 2026-11-02): coherent rollouts, exit 0.
-
-| update | 2 | 3 | 4 | 5 | 6 | 7 |
-|---|---|---|---|---|---|---|
-| seconds | 54.4 | 54.5 | 56.5 | 56.2 | 67.4 | 58.2 |
-
-Median ≈ 56 s per update (2048 completions, responses up to 8192 tokens). For reference, the same workload with verl on 64 GPUs runs at 31.7–35.0 s per step.
-
-- Accuracy of the same model and stack: 3-seed GSM8K 92.39 % on TPU vs 92.42 % on GPU (verl).
+- `bash -n` passes; the expanded `MAXTEXT_COMMAND` equals the validated run's arguments (every setting exists in `base.yml` / `rl.yml`; settings the run set explicitly that the script omits are at their defaults).
+- End-to-end run above (`g4e2bup`, 2026-11-02).
+- Repo pre-commit hooks (codespell, mdformat) pass.
 
 # Checklist
 
