@@ -1,0 +1,22 @@
+update   1:   52.2 s
+update   2:   50.4 s
+update   3:   53.1 s
+update   4:   54.4 s
+update   5:   65.7 s
+update   6:   53.7 s
+update   7:   53.7 s
+update   8:   53.0 s
+update   9:   54.9 s
+update  10:   55.0 s
+update  11:   54.5 s
+update  12:   48.1 s
+update  13:   54.8 s
+update  14:   52.2 s
+update  15:   52.9 s
+update  16:   44.2 s
+update  17:   54.3 s
+update  18:   53.6 s
+update  19:    2.1 s
+median(update>=2, n=18): 53.6 s   min 2.1  max 65.7
+
+NOTE: "update 19: 2.1 s" is the final Train-step flush, not an update; median over updates 2-18 (n=17) = 53.7 s (min 44.2, max 65.7, mean 53.4).

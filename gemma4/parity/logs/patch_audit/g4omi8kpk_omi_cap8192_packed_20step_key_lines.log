@@ -1,0 +1,50 @@
+EXIT_CODE=0
+I1104 09:44:42.191419 135626650278784 pyconfig.py:591] Config param batch_size: 256
+I1104 09:44:42.204277 135626650278784 pyconfig.py:591] Config param kv_cache_buffer: 12288
+I1104 09:44:42.207647 135626650278784 pyconfig.py:591] Config param max_prefill_predict_length: 4096
+I1104 09:44:42.207738 135626650278784 pyconfig.py:591] Config param max_seq_token_per_tpu: 12288
+I1104 09:44:42.207799 135626650278784 pyconfig.py:591] Config param max_target_length: 12288
+I1104 09:44:42.210451 135626650278784 pyconfig.py:591] Config param num_generations: 2
+I1104 09:44:42.219794 135626650278784 pyconfig.py:591] Config param train_micro_batch_size: 8
+I1104 09:48:14.944526 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 09:51:20.003080 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 09:52:11.927247 135626650278784 peft_trainer.py:762] Train step 1 training loss: -0.000000  - training perplexity: 1.000000
+I1104 09:52:13.184902 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 09:53:04.123145 135626650278784 peft_trainer.py:762] Train step 2 training loss: -0.000000  - training perplexity: 1.000000
+I1104 09:53:05.481581 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 09:53:54.566521 135626650278784 peft_trainer.py:762] Train step 3 training loss: -0.000000  - training perplexity: 1.000000
+I1104 09:53:55.956236 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 09:54:47.660751 135626650278784 peft_trainer.py:762] Train step 4 training loss: -0.000000  - training perplexity: 1.000000
+I1104 09:54:49.034736 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 09:55:42.049926 135626650278784 peft_trainer.py:762] Train step 5 training loss: -0.000000  - training perplexity: 1.000000
+I1104 09:55:43.454862 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 09:56:47.711721 135626650278784 peft_trainer.py:762] Train step 6 training loss: -0.000000  - training perplexity: 1.000000
+I1104 09:56:50.163157 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 09:57:41.421725 135626650278784 peft_trainer.py:762] Train step 7 training loss: -0.000000  - training perplexity: 1.000000
+I1104 09:57:43.025808 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 09:58:35.087577 135626650278784 peft_trainer.py:762] Train step 8 training loss: -0.000000  - training perplexity: 1.000000
+I1104 09:58:36.600069 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 09:59:28.045796 135626650278784 peft_trainer.py:762] Train step 9 training loss: -0.000000  - training perplexity: 1.000000
+I1104 09:59:29.508130 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 10:00:22.994153 135626650278784 peft_trainer.py:762] Train step 10 training loss: -0.000000  - training perplexity: 1.000000
+I1104 10:00:24.619612 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 10:01:18.004391 135626650278784 peft_trainer.py:762] Train step 11 training loss: -0.000000  - training perplexity: 1.000000
+I1104 10:01:19.531005 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 10:02:12.514343 135626650278784 peft_trainer.py:762] Train step 12 training loss: -0.000000  - training perplexity: 1.000000
+I1104 10:02:14.023477 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 10:03:00.615443 135626650278784 peft_trainer.py:762] Train step 13 training loss: -0.000000  - training perplexity: 1.000000
+I1104 10:03:02.133049 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 10:03:55.388187 135626650278784 peft_trainer.py:762] Train step 14 training loss: -0.000000  - training perplexity: 1.000000
+I1104 10:03:56.881948 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 10:04:47.586434 135626650278784 peft_trainer.py:762] Train step 15 training loss: -0.000000  - training perplexity: 1.000000
+I1104 10:04:49.055118 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 10:05:40.444744 135626650278784 peft_trainer.py:762] Train step 16 training loss: -0.000000  - training perplexity: 1.000000
+I1104 10:05:41.984343 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 10:06:24.609647 135626650278784 peft_trainer.py:762] Train step 17 training loss: -0.000000  - training perplexity: 1.000000
+I1104 10:06:26.135077 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 10:07:18.926650 135626650278784 peft_trainer.py:762] Train step 18 training loss: -0.000000  - training perplexity: 1.000000
+I1104 10:07:20.677983 135626650278784 rl_learner.py:755] Using sequence packing with max_seq_token_per_tpu: 12288,  pack_size: 128
+I1104 10:08:12.528305 135626650278784 peft_trainer.py:762] Train step 19 training loss: -0.000000  - training perplexity: 1.000000
+I1104 10:08:14.625031 135626650278784 peft_trainer.py:762] Train step 20 training loss: -0.000000  - training perplexity: 1.000000
+KV-SCATTER-PR: APPLIED
+MaxText Job Ended at: Wed Nov  4 10:09:29 UTC 2026 with exit code 0

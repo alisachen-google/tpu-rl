@@ -113,6 +113,7 @@ Not used: p-state 7 (team setting is 6); OSL-tail levers (they change the traini
 | 2048 | pinned, p7 / p6 | 23.5 / 25.3 s | the "24 s recipe"; completions ~1255 tokens mean, 0.05–2.2 % truncated |
 | 8192 | latest, p6, full patch set | 54.7 s | first cap-8192 runs (`g4u8k`, `g4u8kr`) |
 | 8192 | latest, p6, **no patches except the KV fix** | **53.4 s** | after the patch audit: native `CONTINUE_DECODE_EOS_CHECK_INTERVAL=0`, `max_seq_token_per_tpu=12288` packing; rollouts identical to the patched run ([`GEMMA4_E2B_PATCH_AUDIT_LATEST_IMAGE.md`](GEMMA4_E2B_PATCH_AUDIT_LATEST_IMAGE.md)) |
+| 8192 | latest, p6, no patches except the KV fix, **re-run 2026-11-04, 20 updates** (`g4omi8kpk`) | **53.7 s** | median of updates 2–18 (min 44.2, max 65.7); step time from consecutive `Train step` timestamps (this manifest carries no PHASETIME patch); `parity/logs/patch_audit/g4omi8kpk_*` |
 | 8192 | latest, p6, upstream recipe (MaxText PR [#6083](https://github.com/AI-Hypercomputer/maxtext/pull/6083)) | 56.4 s | official `-it` conversion, MaxText data templates, 8 updates |
 
 Here the cap costs ~2× because this recipe's completions are long (mean ~1255 tokens at cap 2048, so a large tail
@@ -122,7 +123,7 @@ was being truncated); without continue-decode-to-depth the cap-8192 recipe runs 
 
 | item | GSM8K parity recipe | OpenMathInstruct recipe |
 |---|---|---|
-| step time at cap 8192 | **32.2 s** packed (`g4lp8kpk`, 8 updates); 46.4 s unpacked (`g4lp8k`, 49.4 s whole 250-update run) | **53.4 s** (packed at 12288) |
+| step time at cap 8192 | **32.2 s** packed (`g4lp8kpk`, 8 updates); 46.4 s unpacked (`g4lp8k`, 49.4 s whole 250-update run) | **53.4 s** / **53.7 s** (packed at 12288; 8-update and 20-update runs) |
 | manifest | `parity/manifests/g4lp8kpk-latest-image-cap8192-packed-trainer-8step.yaml` (parity run: `g4lp8k-latest-image-cap8192-seed42-parity-250.yaml`) | `parity/manifests/g4e2bcap8k-FINAL-latest-image-openmathinstruct-cap8192-20step.yaml` |
 | full configuration | `parity/configs/g4lp8k_cap8192_parity_full_config.md` | section 3 of the patch-audit report |
 | truncation | 0 % | < 0.1 % |
