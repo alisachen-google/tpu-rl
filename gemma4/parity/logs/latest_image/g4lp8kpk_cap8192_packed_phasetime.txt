@@ -1,0 +1,8 @@
+PHASETIME step=0 compute_rewards=2.73 engine_generate=103.39 generate_and_advantage=119.26 micro_batch_steps=583.87 prepare_data=120.65 run_global_step=583.87
+PHASETIME step=1 compute_rewards=0.08 engine_generate=25.59 generate_and_advantage=28.71 micro_batch_steps=31.65 prepare_data=29.31 run_global_step=31.65
+PHASETIME step=2 compute_rewards=0.08 engine_generate=26.02 generate_and_advantage=29.08 micro_batch_steps=31.95 prepare_data=29.66 run_global_step=31.95
+PHASETIME step=3 compute_rewards=0.07 engine_generate=25.77 generate_and_advantage=28.87 micro_batch_steps=32.42 prepare_data=29.45 run_global_step=32.42
+PHASETIME step=4 compute_rewards=0.07 engine_generate=25.14 generate_and_advantage=28.26 micro_batch_steps=31.05 prepare_data=28.85 run_global_step=31.06
+PHASETIME step=5 compute_rewards=0.08 engine_generate=58.95 generate_and_advantage=62.05 micro_batch_steps=64.91 prepare_data=62.64 run_global_step=64.91
+PHASETIME step=6 compute_rewards=0.08 engine_generate=28.65 generate_and_advantage=32.01 micro_batch_steps=34.88 prepare_data=32.61 run_global_step=34.88
+PHASETIME step=7 compute_rewards=0.07 engine_generate=24.59 generate_and_advantage=28.52 micro_batch_steps=31.42 prepare_data=29.18 run_global_step=31.43
