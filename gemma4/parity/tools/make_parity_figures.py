@@ -157,7 +157,11 @@ def load_tpu(name, dumpdir, logs):
         if step in evals:
             # two dumps for one step (a first pass and a resumed re-run): keep the one from the LATER file
             # name is not meaningful, so prefer the re-run = the dump written last (mtime)
-            if os.path.getmtime(fp) < evals[step].get("mtime", 0):
+            # near-equal mtimes (dumps re-downloaded together): the re-run after a checkpoint resume is the dump
+            # named exactly on the grid (eval_120 vs the first pass's eval_121), so keep the on-grid one
+            mt, pmt = os.path.getmtime(fp), evals[step].get("mtime", 0)
+            tie = abs(mt - pmt) < 300  # same download batch
+            if (not tie and mt < pmt) or (tie and evals[step].get("k") == step and k != step):
                 print(f"  [skip] {os.path.basename(fp)}: older duplicate of step {step}", file=sys.stderr)
                 continue
             print(f"  [replace] step {step}: {os.path.basename(fp)} supersedes the earlier dump", file=sys.stderr)
@@ -309,20 +313,27 @@ def fig_step_time(ax, gpu, tpu_runs):
 
 
 def fig_tis(ax, gpu, tpu_runs):
+    # Like-for-like: share of tokens whose importance ratio exceeds the TIS cap (TPU frac_clipped == GPU
+    # rollout_is_ratio_fraction_high). The per-update weight max is NOT comparable: TPU logs the true max over
+    # ~1e6 tokens (reads 3.0 whenever one token is clipped), the GPU logs a max averaged over its 64 workers
+    # (1.5-1.7 even in updates that report clipped tokens).
+    capped = []; top = 0.0
     for i, r in enumerate(tpu_runs):
         xs = sorted(s for s, rec in r["steps"].items() if "tis" in rec)
         if not xs: continue
-        ax.plot(xs, [r["steps"][s]["tis"]["wmax"] for s in xs], color=TPU_C, lw=1.2, marker=MARKERS[i % len(MARKERS)], ms=3)
-        ax.plot(xs, [r["steps"][s]["tis"]["wmin"] for s in xs], color=TPU_C, lw=1.2, ls="--")
-        ax.plot(xs, [r["steps"][s]["tis"]["wmean"] for s in xs], color=TPU_C, lw=1.2, ls=":")
-    lo = min(gpu["train"][sd]["is_max_range"][0] for sd in gpu["seeds"] if "is_max_range" in gpu["train"].get(sd, {}))
-    hi = max(gpu["train"][sd]["is_max_range"][1] for sd in gpu["seeds"] if "is_max_range" in gpu["train"].get(sd, {}))
+        ys = [r["steps"][s]["tis"]["clip"] * 1e6 for s in xs]
+        top = max(top, max(ys))
+        ax.plot(xs, ys, color=TPU_C, lw=0, marker=MARKERS[i % len(MARKERS)], ms=3.5, alpha=0.8)
+        wm = [r["steps"][s]["tis"]["wmean"] for s in xs]
+        capped.append(f"{r['name']}: median {np.median(ys):.1f} ppm, mean weight {np.mean(wm):.4f}")
+    gs = [sd for sd in gpu["seeds"] if "is_fraction_high_range" in gpu["train"].get(sd, {})]
+    lo = min(gpu["train"][sd]["is_fraction_high_range"][0] for sd in gs) * 1e6
+    hi = max(gpu["train"][sd]["is_fraction_high_range"][1] for sd in gs) * 1e6
     ax.axhspan(lo, hi, color=GPU_C, alpha=0.15, lw=0)
-    ax.annotate(f"GPU per-step max IS weight range {lo:.2f}–{hi:.2f}", (2, hi), xytext=(4, 3), textcoords="offset points", color=GPU_C, fontsize=8)
-    ax.axhline(3.0, color=INK2, lw=1, ls=(0, (4, 3))); ax.annotate("TIS cap 3.0", (250, 3.0), xytext=(-4, 3), textcoords="offset points", ha="right", color=INK2, fontsize=8)
-    ax.axhline(1.0, color=GRID, lw=1)
-    style_ax(ax, "TIS weights per step: TPU max (solid) / min (dashed) / mean (dotted)", ylabel="weight")
-    ax.set_ylim(0, 3.3)
+    ax.annotate(f"GPU range {lo:.1f}–{hi:.1f} ppm (all updates, {len(gs)} seeds)", (2, hi), xytext=(4, 3), textcoords="offset points", color=GPU_C, fontsize=8)
+    ax.text(0.99, 0.97, "\n".join(["TPU " + c for c in capped]), transform=ax.transAxes, ha="right", va="top", color=TPU_C, fontsize=8)
+    style_ax(ax, "Tokens clipped at the TIS cap 3.0 per update (per million tokens)", ylabel="clipped tokens (ppm)")
+    ax.set_ylim(-0.3, max(8.0, hi * 1.6, top + 1.5))
 
 
 def fig_k3_ess(ax, gpu, tpu_runs):
