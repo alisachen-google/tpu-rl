@@ -18,7 +18,7 @@
 | 250 | 92.42 ± 0.42 (91.96–92.80) | 91.81 [90.2, 93.2] | -0.61 |
 
 Gate: step-250 TPU mean ≥ 91.42 (GPU step-250 mean 92.42 − 1 pp).
-TPU step-250: 91.81 → mean **91.81** → **PASS** (1 of 3 seeds).
+TPU step-250: 91.81 → mean **91.81** → **PASS** (1 TPU run vs 3 GPU seeds).
 
 ## Step time (non-eval updates)
 
@@ -27,4 +27,4 @@ TPU step-250: 91.81 → mean **91.81** → **PASS** (1 of 3 seeds).
 | GPU seed1 | 31.7 | 33.1 | 41.2 | 218 |
 | GPU seed2 | 33.1 | 34.9 | 44.5 | 218 |
 | GPU seed3 | 35.0 | 35.4 | 42.3 | 218 |
-| TPU cap8192_latest | 49.4 | 50.9 | 55.3 | 224 |
+| TPU cap8192_latest | 49.3 | 49.6 | 55.1 | 221 |

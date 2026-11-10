@@ -89,6 +89,11 @@ def parse_logs(logs):
                         rec["t"] = ((dd * 24 + hh) * 60 + mi) * 60 + ss + us / 1e6
                     last_step = s
                     continue
+                if "EVAL-BREAKDOWN" in line or "EVAL-V2ACC" in line:
+                    t = TS_RE.match(line)
+                    if t:
+                        mo, dd, hh, mi, ss, us = (int(x) for x in t.groups())
+                        steps.setdefault("_eval_ts", []).append(((dd * 24 + hh) * 60 + mi) * 60 + ss + us / 1e6)
                 m = EVAL_RE.search(line)
                 if m:
                     s = int(m.group(1)) if m.group(1) else 0
@@ -109,7 +114,8 @@ def parse_logs(logs):
                     g = m.groups()
                     steps.setdefault(last_step, {})["tis"] = dict(
                         wmean=float(g[0]), wmin=float(g[1]), wmax=float(g[2]), clip=float(g[3]),
-                        k3=float(g[4]) if g[4] else None, ess=float(g[5]) if g[5] else None)
+                        k3=float(g[4]) if g[4] else None, ess=float(g[5]) if g[5] else None,
+                        lrm=float(g[6]) if g[6] else None)
                     continue
                 m = PHASE_RE.search(line)
                 if m:
@@ -134,10 +140,12 @@ def load_tpu(name, dumpdir, logs):
     if not files:
         raise SystemExit(f"no eval dumps in {dumpdir}")
     steps_log, eval_steps = parse_logs(logs)
+    eval_ts = steps_log.pop("_eval_ts", [])
     trained = sorted(s for s, r in steps_log.items() if "loss" in r)
     last_step = trained[-1] if trained else None
     evals = OrderedDict()
     prev = None
+    dups = []  # (step, acc) of a second evaluation of the same checkpoint (first pass vs re-run after a resume)
     for fp in files:
         k = int(re.search(r"eval_(\d{3})\.jsonl$", fp).group(1))  # file name = RL update step
         rows = [json.loads(l) for l in open(fp) if l.strip()]
@@ -163,8 +171,10 @@ def load_tpu(name, dumpdir, logs):
             tie = abs(mt - pmt) < 300  # same download batch
             if (not tie and mt < pmt) or (tie and evals[step].get("k") == step and k != step):
                 print(f"  [skip] {os.path.basename(fp)}: older duplicate of step {step}", file=sys.stderr)
+                dups.append((step, float(np.mean([float(r["acc"]) for r in rows]))))
                 continue
             print(f"  [replace] step {step}: {os.path.basename(fp)} supersedes the earlier dump", file=sys.stderr)
+            dups.append((step, evals[step]["acc"]))
         n = len(rows)
         accs = np.array([float(r["acc"]) for r in rows])
         acc = accs.mean()
@@ -188,9 +198,10 @@ def load_tpu(name, dumpdir, logs):
         if b == a + 1 and "t" in steps_log[a] and "t" in steps_log[b]:
             dt = steps_log[b]["t"] - steps_log[a]["t"]
             # drop sub-5s artifacts (duplicate step lines across restarts) and eval-adjacent steps
-            if 5 < dt < 300 and not steps_log[a].get("eval") and not steps_log[b].get("eval"):  # >300 s = a restart/resume gap, not a step
+            has_eval = any(steps_log[a]["t"] < e <= steps_log[b]["t"] for e in eval_ts)
+            if 10 < dt < 300 and not has_eval and not steps_log[a].get("eval") and not steps_log[b].get("eval"):  # >300 s = a restart/resume gap, not a step
                 times[b] = dt
-    return dict(name=name, evals=evals, steps=steps_log, times=times, trained=trained)
+    return dict(name=name, evals=evals, steps=steps_log, times=times, trained=trained, dups=dups)
 
 
 # ---------------------------------------------------------------- figures
@@ -225,14 +236,16 @@ def fig_accuracy(ax, gpu, tpu_runs, gate):
         xs = list(r["evals"].keys()); ys = [r["evals"][s]["acc"] * 100 for s in xs]
         err = np.array([[ (r["evals"][s]["acc"] - r["evals"][s]["wilson"][0]) * 100, (r["evals"][s]["wilson"][1] - r["evals"][s]["acc"]) * 100] for s in xs]).T
         ax.errorbar(xs, ys, yerr=err, color=TPU_C, marker=MARKERS[i % len(MARKERS)], ms=7, lw=2, capsize=2.5, elinewidth=0.9, alpha=0.95)
-        ax.annotate(f"{r['name']} {ys[-1]:.2f}", (xs[-1], ys[-1]), xytext=(6, -10 - 10 * i), textcoords="offset points", color=TPU_C, fontsize=8.5)
+        ax.annotate(f"{r['name']} {ys[-1]:.2f}", (xs[-1], ys[-1]), xytext=(6, -16 - 10 * i), textcoords="offset points", color=TPU_C, fontsize=8.5)
+        if r.get("dups"):
+            ax.plot([d[0] for d in r["dups"]], [d[1] * 100 for d in r["dups"]], ls="none", marker=MARKERS[i % len(MARKERS)], ms=8, mfc="none", mec=TPU_C, mew=1.4, zorder=5)
     if gate:
         ax.axhline(gate, color=INK2, lw=1, ls=(0, (4, 3)))
         ax.annotate(f"gate {gate:.2f} (GPU step-250 mean − 1 pp)", (125, gate), xytext=(0, -11), textcoords="offset points", color=INK2, fontsize=8, ha="center")
     ax.set_xlim(-5, 262); ax.set_ylim(78, 95)
     style_ax(ax, "GSM8K test accuracy (scorer-v2, 1319 Qs, greedy)", ylabel="accuracy (%)")
     legend_platforms(ax, gpu["seeds"], tpu_runs)
-    ax.text(0.01, 0.02, "TPU error bars: Wilson 95% (single run, n=1319); GPU band: min–max of 3 seeds",
+    ax.text(0.01, 0.02, "TPU bars: Wilson 95% (n=1319); hollow: same checkpoint re-evaluated; GPU band: 3-seed min–max",
             transform=ax.transAxes, fontsize=7.5, color=INK2)
 
 
@@ -275,7 +288,7 @@ def fig_transitions(ax, gpu, tpu_runs):
         ax.plot(xs, [r["evals"][s]["w2r"] for s in xs], color=TPU_C, marker=MARKERS[i % len(MARKERS)], ms=7)
         ax.plot(xs, [-r["evals"][s]["r2w"] for s in xs], color=TPU_C, marker=MARKERS[i % len(MARKERS)], ms=7, ls="--")
     ax.axhline(0, color=GRID, lw=1)
-    style_ax(ax, "Questions changed vs step 0: wrong→right (solid, +) / right→wrong (dashed, −)", ylabel="questions")
+    style_ax(ax, "Questions flipped vs step 0 (solid: fixed, dashed: broken)", ylabel="questions")
 
 
 def fig_train_len(ax, gpu, tpu_runs):
@@ -332,32 +345,35 @@ def fig_tis(ax, gpu, tpu_runs):
     ax.axhspan(lo, hi, color=GPU_C, alpha=0.15, lw=0)
     ax.annotate(f"GPU range {lo:.1f}–{hi:.1f} ppm (all updates, {len(gs)} seeds)", (2, hi), xytext=(4, 3), textcoords="offset points", color=GPU_C, fontsize=8)
     ax.text(0.99, 0.97, "\n".join(["TPU " + c for c in capped]), transform=ax.transAxes, ha="right", va="top", color=TPU_C, fontsize=8)
-    style_ax(ax, "Tokens clipped at the TIS cap 3.0 per update (per million tokens)", ylabel="clipped tokens (ppm)")
+    style_ax(ax, "Tokens clipped at the TIS cap 3.0 per update (ppm)", ylabel="clipped tokens (ppm)")
     ax.set_ylim(-0.3, max(8.0, hi * 1.6, top + 1.5))
 
 
 def fig_k3_ess(ax, gpu, tpu_runs):
+    # Direct estimator KL(pi_rollout || pi_trainer) = mean(log pi_rollout - log pi_trainer): verl "rollout_corr/kl",
+    # TPU -logratio_mean. Identical definition on both sides. (The TPU "k3_kl" log field was computed in the reverse
+    # direction from verl, exp(-x)+x-1 instead of exp(x)-x-1, so one token at the -20 log-ratio clamp read as e^20;
+    # it is not plotted.)
     have = False
     for i, r in enumerate(tpu_runs):
-        xs = sorted(s for s, rec in r["steps"].items() if rec.get("tis", {}).get("k3") is not None)
+        xs = sorted(s for s, rec in r["steps"].items() if rec.get("tis", {}).get("lrm") is not None)
         if not xs: continue
         have = True
-        ax.plot(xs, [r["steps"][s]["tis"]["k3"] for s in xs], color=TPU_C, lw=1.2, marker=MARKERS[i % len(MARKERS)], ms=3)
-    lo = min(gpu["train"][sd]["k3_kl_range"][0] for sd in gpu["seeds"]); hi = max(gpu["train"][sd]["k3_kl_range"][1] for sd in gpu["seeds"])
+        ax.plot(xs, [-r["steps"][s]["tis"]["lrm"] * 1e4 for s in xs], color=TPU_C, lw=1.2, marker=MARKERS[i % len(MARKERS)], ms=3)
+    lo = min(gpu["train"][sd]["kl_range"][0] for sd in gpu["seeds"]) * 1e4; hi = max(gpu["train"][sd]["kl_range"][1] for sd in gpu["seeds"]) * 1e4
     ax.axhspan(lo, hi, color=GPU_C, alpha=0.15, lw=0)
-    ax.annotate(f"GPU k3 KL range {lo:.1e}–{hi:.1e}", (2, hi), xytext=(4, 3), textcoords="offset points", color=GPU_C, fontsize=8)
-    style_ax(ax, "Sampler↔trainer k3 KL per step (token mean)", ylabel="k3 KL")
-    ax.set_xlim(-5, 262)
+    ax.annotate(f"GPU range {lo:.1f}–{hi:.1f} (all updates, {len(gpu['seeds'])} seeds)", (2, hi), xytext=(4, 3), textcoords="offset points", color=GPU_C, fontsize=8)
+    style_ax(ax, "KL(rollout‖trainer) per update (×1e-4)", ylabel="KL ×1e-4")
+    ax.set_xlim(-5, 262); ax.set_ylim(bottom=0)
     if not have:
-        ax.text(0.5, 0.5, "TPU k3/ESS logging added for seeds 43/44", ha="center", transform=ax.transAxes, color=INK2)
-    ax.set_yscale("log")
+        ax.text(0.5, 0.5, "no TPU log-ratio logging in this run", ha="center", transform=ax.transAxes, color=INK2)
 
 
 def fig_loss(ax, gpu, tpu_runs):
     for i, r in enumerate(tpu_runs):
         xs = sorted(s for s, rec in r["steps"].items() if "loss" in rec)
         ax.plot(xs, [r["steps"][s]["loss"] for s in xs], color=TPU_C, lw=1, marker=MARKERS[i % len(MARKERS)], ms=3)
-    style_ax(ax, "TPU training loss per update (−A·w·logπ, token mean)", ylabel="loss")
+    style_ax(ax, "TPU training loss per update (−A·w·logπ; TPU only, verl logs a different surrogate)", ylabel="loss")
 
 
 def summary_md(gpu, tpu_runs, gate, out):
@@ -378,7 +394,7 @@ def summary_md(gpu, tpu_runs, gate, out):
     fin = [r["evals"][250]["acc"] for r in tpu_runs if 250 in r["evals"]]
     if fin:
         m = np.mean(fin) * 100
-        L.append(f"TPU step-250: {', '.join(f'{v*100:.2f}' for v in fin)} → mean **{m:.2f}** → **{'PASS' if m >= gate else 'FAIL'}** ({len(fin)} of 3 seeds).")
+        L.append(f"TPU step-250: {', '.join(f'{v*100:.2f}' for v in fin)} → mean **{m:.2f}** → **{'PASS' if m >= gate else 'FAIL'}** ({len(fin)} TPU run{'s' if len(fin) != 1 else ''} vs 3 GPU seeds).")
     else:
         L.append("TPU step-250: not yet available.")
     L += ["", "## Step time (non-eval updates)", "", "| run | median s | mean s | p90 s | n |", "|---|---:|---:|---:|---:|"]
@@ -412,11 +428,12 @@ def main():
     panels = [("01_accuracy", fig_accuracy, (gpu, runs, gate)), ("02_delta", fig_delta, (gpu, runs)),
               ("03_boxed", fig_boxed, (gpu, runs)), ("04_transitions", fig_transitions, (gpu, runs)),
               ("05_train_len", fig_train_len, (gpu, runs)), ("06_step_time", fig_step_time, (gpu, runs)),
-              ("07_tis_weights", fig_tis, (gpu, runs)), ("08_k3_kl", fig_k3_ess, (gpu, runs)), ("09_loss", fig_loss, (gpu, runs))]
+              ("07_tis_weights", fig_tis, (gpu, runs)), ("08_k3_kl", fig_k3_ess, (gpu, runs))]
+    # the TPU loss panel is not a parity plot (verl logs a different surrogate) and is no longer drawn
     for name, fn, args in panels:
         fig, ax = plt.subplots(figsize=(9, 4.6)); fn(ax, *args); fig.tight_layout()
         fig.savefig(os.path.join(a.out, name + ".png"), dpi=a.dpi); plt.close(fig)
-    fig, axes = plt.subplots(3, 3, figsize=(22, 14.5))
+    fig, axes = plt.subplots(2, 4, figsize=(30, 10.5))
     for (name, fn, args), ax in zip(panels, axes.flat):
         fn(ax, *args)
     fig.suptitle("gemma4-E2B · GSM8K · GRPO+TIS · TPU v7x (MaxText+tunix) vs GPU reference", x=0.01, ha="left", fontsize=14, fontweight="bold", color=INK)

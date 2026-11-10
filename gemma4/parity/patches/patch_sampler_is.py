@@ -216,7 +216,7 @@ else:
         '      _tis_wmin = float(jnp.min(jnp.where(asst_mask_f > 0, sampler_is_weights, 1.0)))  # _TIS_STDOUT\n'
         '      _tis_w = jnp.exp(log_ratio) * asst_mask_f  # unclipped token weights (GPU ESS / k3 definitions)\n'
         '      _tis_ess = float(_tis_w.sum() ** 2 / jnp.maximum((_tis_w ** 2).sum() * mask_sum, 1e-12))\n'
-        '      _tis_d = -log_ratio  # log(pi_sampler) - log(pi_trainer)\n'
+        '      _tis_d = log_ratio  # log(pi_trainer) - log(pi_sampler): verl k3 direction, E[r - log r - 1], r = pi_trainer/pi_sampler\n'
         '      _tis_k3 = float(((jnp.exp(_tis_d) - _tis_d - 1.0) * asst_mask_f).sum() / mask_sum)\n'
         '      _tis_lrm = float((log_ratio * asst_mask_f).sum() / mask_sum)\n'
         '      _tis_lra = float((jnp.abs(log_ratio) * asst_mask_f).sum() / mask_sum)\n'
