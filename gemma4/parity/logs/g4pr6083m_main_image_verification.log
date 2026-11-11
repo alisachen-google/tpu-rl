@@ -59,3 +59,19 @@ median(update>=2, n=5): 699.8 s   min 656.3  max 774.5
  Train loop finished in: 0.8483 seconds
  Train loop finished in: 1.4820 seconds
 # run stopped by the 8 h wait limit after update 7 (pod restarts after 08:45Z); guard re-applied the jobset once at 06:40Z (no log progress for 30 min during startup)
+
+# A/B g4pr6083o: same MaxText main f0a860d52 + previous pins (tpu-inference c2289ee4, vLLM 51da0ca66c), image ...:2026-11-11-main-f0a860d52-pins0921 (sha256:cbb7dd8d...), 3 updates, exit 0
+MAINIMG-CHECK google-tunix                             0.1.8
+MAINIMG-CHECK jax                                      0.11.0
+MAINIMG-CHECK jaxlib                                   0.11.0
+MAINIMG-CHECK libtpu                                   0.0.44
+MAINIMG-CHECK tpu_inference                            0.0.0
+MAINIMG-CHECK vllm                                     0.28.1rc1.dev500+g51da0ca66c.tpu
+# rollout bars (first includes compile):
+Processed prompts: 100%|██████████| 2048/2048 [00:44<00:00, 45.89it/s]
+Processed prompts: 100%|██████████| 2048/2048 [00:45<00:00, 45.11it/s]
+Processed prompts: 100%|██████████| 2048/2048 [02:32<00:00, 13.44it/s]
+update   1:   53.5 s
+update   2:    1.8 s
+median(update>=2, n=1): 1.8 s   min 1.8  max 1.8
+# => rollout is 44-45 s with the previous pins on main's code; the ~11 min rollout comes from the tpu-inference 73d7342da / vLLM 5df63a72 pins
