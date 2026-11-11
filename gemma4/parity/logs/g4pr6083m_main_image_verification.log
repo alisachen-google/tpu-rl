@@ -1,0 +1,61 @@
+# g4pr6083m: PR 6083 command (chips_per_vm=8) on image maxtext-rl-ironwood:2026-11-11-main-f0a860d52 (sha256:bc5de731...), 2026-11-11
+# image = MaxText main f0a860d52 (has PR 6081 + 6082) built with main's pins: tpu-inference 73d7342da, vLLM 5df63a72, tunix 385551df
+MAINIMG-CHECK google-tunix                             0.1.8
+MAINIMG-CHECK jax                                      0.11.0
+MAINIMG-CHECK jaxlib                                   0.11.0
+MAINIMG-CHECK libtpu                                   0.0.44
+MAINIMG-CHECK tpu_inference                            0.0.0
+MAINIMG-CHECK vllm                                     0.32.0+tpu
+# rollout (vLLM 'Processed prompts' bars), 2048 completions per update:
+Processed prompts: 100%|██████████| 2048/2048 [10:20<00:00,  3.30it/s]
+Processed prompts: 100%|██████████| 2048/2048 [10:47<00:00,  3.16it/s]
+Processed prompts: 100%|██████████| 2048/2048 [11:24<00:00,  2.99it/s]
+Processed prompts: 100%|██████████| 2048/2048 [11:29<00:00,  2.97it/s]
+Processed prompts: 100%|██████████| 2048/2048 [11:32<00:00,  2.96it/s]
+Processed prompts: 100%|██████████| 2048/2048 [11:37<00:00,  2.94it/s]
+Processed prompts: 100%|██████████| 2048/2048 [12:45<00:00,  2.68it/s]
+Processed prompts: 100%|██████████| 2048/2048 [14:07<00:00,  2.42it/s]
+Processed prompts: 100%|█████████▉| 2041/2048 [11:32<00:02,  2.75it/s]
+Processed prompts: 100%|█████████▉| 2042/2048 [10:20<00:01,  3.45it/s]
+Processed prompts: 100%|█████████▉| 2042/2048 [11:24<00:01,  3.20it/s]
+Processed prompts: 100%|█████████▉| 2044/2048 [11:29<00:01,  3.13it/s]
+Processed prompts: 100%|█████████▉| 2044/2048 [11:37<00:01,  2.79it/s]
+# same on the 2026-09-22 image (g4pr6083):
+Processed prompts: 100%|██████████| 2048/2048 [00:43<00:00, 46.73it/s]
+Processed prompts: 100%|██████████| 2048/2048 [00:44<00:00, 45.55it/s]
+Processed prompts: 100%|██████████| 2048/2048 [00:44<00:00, 45.70it/s]
+Processed prompts: 100%|██████████| 2048/2048 [00:44<00:00, 46.10it/s]
+# train-step timestamps:
+update   1:  629.3 s
+update   2:  656.3 s
+update   3:  774.5 s
+update   4:  693.4 s
+update   5:  699.8 s
+update   6:  704.0 s
+median(update>=2, n=5): 699.8 s   min 656.3  max 774.5
+# trainer loop:
+ Train loop finished in: 448.1005 seconds
+ Train loop finished in: 1.0568 seconds
+ Train loop finished in: 0.8378 seconds
+ Train loop finished in: 0.8101 seconds
+ Train loop finished in: 0.8226 seconds
+ Train loop finished in: 1.0086 seconds
+ Train loop finished in: 0.8084 seconds
+ Train loop finished in: 0.8189 seconds
+ Train loop finished in: 0.9742 seconds
+ Train loop finished in: 0.8181 seconds
+ Train loop finished in: 0.8108 seconds
+ Train loop finished in: 0.9794 seconds
+ Train loop finished in: 0.8223 seconds
+ Train loop finished in: 0.8183 seconds
+ Train loop finished in: 0.9651 seconds
+ Train loop finished in: 0.8260 seconds
+ Train loop finished in: 0.8269 seconds
+ Train loop finished in: 1.2201 seconds
+ Train loop finished in: 0.8278 seconds
+ Train loop finished in: 0.8460 seconds
+ Train loop finished in: 2.0928 seconds
+ Train loop finished in: 0.8379 seconds
+ Train loop finished in: 0.8483 seconds
+ Train loop finished in: 1.4820 seconds
+# run stopped by the 8 h wait limit after update 7 (pod restarts after 08:45Z); guard re-applied the jobset once at 06:40Z (no log progress for 30 min during startup)
