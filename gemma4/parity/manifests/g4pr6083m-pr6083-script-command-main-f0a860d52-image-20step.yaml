@@ -76,7 +76,7 @@ spec:
                         - pathways-head
             containers:
             - name: jax-tpu
-              image: gcr.io/supercomputer-testing/maxtext-rl-ironwood@IMAGE_DIGEST_PLACEHOLDER
+              image: gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:bc5de73197a2faf32121f3d94890e717abdbdcfdac667e242fb2a95309456443
               command:
               - bash
               - -c
