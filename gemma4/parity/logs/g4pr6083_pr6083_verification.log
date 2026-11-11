@@ -1,0 +1,30 @@
+# g4pr6083: PR 6083 run_gemma4_e2b_rl.sh command on image 2026-09-22-head, 64 chips, 20 updates (2026-11-11)
+# attempt 1 (script command verbatim): rollout OK, first trainer update crashed:
+[rank0]:              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/enum.py", line 813, in __getitem__
+[rank0]:     return cls._member_map_[name]
+[rank0]:            ~~~~~~~~~~~~~~~~^^^^^^
+[rank0]: KeyError: None
+# attempt 2 (+ local_sa_{q,k,v}_layout, eval_local_sa_{q,k,v}_layout=HEAD_DIM_MINOR, local_sa_use_fused_bwd_kernel=false, local_sa_fuse_reciprocal=true, local_sa_use_base2_exp=true): EXIT_CODE=0
+update   1:   54.0 s
+update   2:   53.6 s
+update   3:   55.6 s
+update   4:   55.1 s
+update   5:  106.7 s
+update   6:   56.8 s
+update   7:   56.4 s
+update   8:   55.7 s
+update   9:   56.4 s
+update  10:   54.2 s
+update  11:   55.7 s
+update  12:   55.3 s
+update  13:   59.3 s
+update  14:   53.9 s
+update  15:   55.5 s
+update  16:   54.9 s
+update  17:   55.1 s
+update  18:   54.4 s
+update  19:    2.1 s
+median(update>=2, n=18): 55.4 s   min 2.1  max 106.7
+# reference g4omi8kpk (optimized cap-8192 manifest), same summary script:
+median(update>=2, n=18): 53.6 s   min 2.1  max 65.7

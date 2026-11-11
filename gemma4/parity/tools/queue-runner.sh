@@ -17,7 +17,7 @@ for name in "$@"; do
     js=$($K get jobset "$name" -o jsonpath='{range .status.conditions[*]}{.type}={.status};{end}' 2>/dev/null)
     echo "$js" | grep -qE '(^|[|;])(Completed|Failed)=True' && { log "$name terminal: $js"; break; }
     grep -aq "EXIT_CODE=0" "$SP/$name-raw.log" 2>/dev/null && { log "$name exited 0 (log)"; sleep 60; break; }
-    [ $(( $(date +%s) - t0 )) -gt 7200 ] && { log "$name exceeded 120 min -> stop waiting"; break; }
+    [ $(( $(date +%s) - t0 )) -gt ${MAX_WAIT:-7200} ] && { log "$name exceeded ${MAX_WAIT:-7200} s -> stop waiting"; break; }
     sleep 60
   done
   pkill -f "^bash guard-job.sh $name " 2>/dev/null; pkill -f "^bash follow-job.sh $name" 2>/dev/null
