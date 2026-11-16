@@ -1,0 +1,25 @@
+g4pr6083h - PR 6083 head 65cb62c44 MAXTEXT_COMMAND verbatim, 20 updates, 2026-11-16
+image: gcr.io/supercomputer-testing/maxtext-rl-ironwood@sha256:cbb7dd8dabe5cdaa524c5970948a272ced3ccb213757ea1000f5352dd0220740 (main f0a860d52 incl. #6081/#6082 + tpu-inference c2289ee4 + vLLM 51da0ca66c), p-state 6, tpu7x 4x4x4
+manifest: manifests/g4pr6083h-pr6083-head-65cb62c44-pins0921-image-20step.yaml
+result: EXIT_CODE=0
+update   1:   58.8 s
+update   2:   57.9 s
+update   3:   58.3 s
+update   4:   59.8 s
+update   5:  135.4 s
+update   6:   64.5 s
+update   7:   61.8 s
+update   8:   59.9 s
+update   9:   61.9 s
+update  10:   60.7 s
+update  11:   60.5 s
+update  12:   58.0 s
+update  13:   63.6 s
+update  14:   59.4 s
+update  15:   58.9 s
+update  16:   55.2 s
+update  17:   55.4 s
+update  18:   55.6 s
+update  19:    2.0 s
+median(update>=2, n=18): 59.6 s   min 2.0  max 135.4
+final median (updates 2-18, last line is a flush artifact): 59.6 s; steady rollouts 46-48 s; first rollout 5:09 (compile), second 1:28
