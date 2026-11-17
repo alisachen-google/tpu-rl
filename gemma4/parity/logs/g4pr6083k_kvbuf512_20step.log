@@ -1,0 +1,24 @@
+g4pr6083k - PR 6083 command with kv_cache_buffer=512 (else identical to g4pr6083h), 20 updates, 2026-11-17, exit 0
+image sha256:cbb7dd8d... (main f0a860d52 + tpu-inference c2289ee4 + vLLM 51da0ca66c), p-state 6
+read_step_time.py (TB global_step_time, steps 3..20): g4pr6083h 59.45 s (12288) vs g4pr6083k 52.84 s (512)
+rollout_time median 50.85 -> 45.99 s; weight_sync 2.07 -> 1.39 s; mean completion length 1896 -> 1885; rewards/train/mean 0.224 -> 0.224
+update   1:   83.3 s
+update   2:   50.2 s
+update   3:   53.2 s
+update   4:   51.7 s
+update   5:  110.1 s
+update   6:   54.9 s
+update   7:   55.2 s
+update   8:   51.8 s
+update   9:   53.8 s
+update  10:   52.6 s
+update  11:   52.5 s
+update  12:   52.5 s
+update  13:   54.8 s
+update  14:   52.5 s
+update  15:   53.0 s
+update  16:   49.0 s
+update  17:   52.7 s
+update  18:   52.9 s
+update  19:    2.6 s
+median(update>=2, n=18): 52.6 s   min 2.6  max 110.1
